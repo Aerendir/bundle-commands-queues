@@ -1,0 +1,4 @@
+services:
+    queues:
+        class: SerendipityHQ\Bundle\QueuesBundle\Service\QueuesManager
+        arguments: ["@queues.entity_manager"]

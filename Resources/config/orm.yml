@@ -1,0 +1,5 @@
+services:
+    queues.entity_manager:
+        class: Doctrine\ORM\EntityManager
+        factory: ["@doctrine", getManager]
+        arguments: ["%queues.model_manager_name%"]

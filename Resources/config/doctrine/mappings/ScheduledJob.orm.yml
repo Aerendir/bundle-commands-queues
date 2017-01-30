@@ -1,0 +1,8 @@
+SerendipityHQ\Bundle\QueuesBundle\Model\ScheduledJob:
+    type: entity
+    table: queues_scheduled_jobs
+    id:
+        id:
+            type: integer
+            generator:
+                strategy: AUTO

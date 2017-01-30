@@ -18,6 +18,7 @@
     },
     "require-dev": {
         "codeclimate/php-test-reporter": "dev-master",
+        "doctrine/doctrine-bundle": "*",
         "phpunit/phpunit": "*",
         "symfony/var-dumper": "*"
     },
