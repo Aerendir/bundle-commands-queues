@@ -18,9 +18,9 @@ script:
     - phpenv config-rm xdebug.ini || return 0
 
 after_script:
-  - CODECLIMATE_REPO_TOKEN="fea3e138b23e228447da791f4028ff6d7374d6217012718156578ce890036be2" vendor/bin/test-reporter --stdout > codeclimate.json
+  - CODECLIMATE_REPO_TOKEN="43a95c87684011727ab09e4c5f838c39a7815a82e2405eeae42b1602fea90dcc" vendor/bin/test-reporter --stdout > codeclimate.json
   - "curl -X POST -d @codeclimate.json -H 'Content-Type: application/json' -H 'User-Agent: Code Climate (PHP Test Reporter v0.1.1)' https://codeclimate.com/test_reports"
 
 addons:
   code_climate:
-    repo_token: fea3e138b23e228447da791f4028ff6d7374d6217012718156578ce890036be2
+    repo_token: 43a95c87684011727ab09e4c5f838c39a7815a82e2405eeae42b1602fea90dcc
