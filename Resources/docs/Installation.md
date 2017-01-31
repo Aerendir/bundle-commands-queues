@@ -8,10 +8,10 @@ Open a command console, enter your project directory and execute the
 following command to download the latest stable version of this bundle:
 
 ```bash
-$ composer require serendipity_hq/queues-bundle "^0@dev"
+$ composer require serendipity_hq/queues-bundle "dev-master"
 ```
 
-Note: Add `@dev` to get the last development version. This version may not be stable.
+_Note: Use the version you like. Add `@dev` to get the last development version. This version may not be stable._
 
 This command requires you to have Composer installed globally, as explained
 in the [installation chapter](https://getcomposer.org/doc/00-intro.md)

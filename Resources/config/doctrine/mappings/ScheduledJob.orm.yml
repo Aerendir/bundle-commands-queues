@@ -6,3 +6,16 @@ SerendipityHQ\Bundle\QueuesBundle\Model\ScheduledJob:
             type: integer
             generator:
                 strategy: AUTO
+    fields:
+        command:
+            type: string
+            nullable: false
+        arguments:
+            type: array
+            nullable: false
+        priority:
+            type: smallint
+            nullable: false
+        queue:
+            type: string
+            nullable: false
