@@ -3,7 +3,6 @@
 namespace SerendipityHQ\Bundle\QueuesBundle\Service;
 
 use Doctrine\ORM\EntityManager;
-use SerendipityHQ\Bundle\QueuesBundle\Model\JobInterface;
 use SerendipityHQ\Bundle\QueuesBundle\Model\ScheduledJob;
 
 /**
@@ -14,6 +13,9 @@ class QueuesManager
     /** @var  EntityManager */
     private $entityManager;
 
+    /**
+     * @param EntityManager $entityManager
+     */
     public function __construct(EntityManager $entityManager)
     {
         $this->entityManager = $entityManager;
@@ -22,13 +24,11 @@ class QueuesManager
     /**
      * Schedules a job.
      *
-     * @param JobInterface $job
+     * @param ScheduledJob $job
      */
-    public function schedule(JobInterface $job)
+    public function schedule(ScheduledJob $job)
     {
-        $scheduledJob = new ScheduledJob($job);
-        $this->entityManager->persist($scheduledJob);
+        $this->entityManager->persist($job);
         $this->entityManager->flush();
-        die(dump('job scheduled', $scheduledJob));
     }
 }
