@@ -19,3 +19,18 @@ SerendipityHQ\Bundle\QueuesBundle\Model\ScheduledJob:
         queue:
             type: string
             nullable: false
+        status:
+            type: string
+            nullable: false
+        createdAt:
+            name: created_at
+            type: datetime
+            nullable: false
+        startedAt:
+            name: started_at
+            type: datetime
+            nullable: true
+        closedAt:
+            name: closed_at
+            type: datetime
+            nullable: true

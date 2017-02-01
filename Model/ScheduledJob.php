@@ -7,6 +7,15 @@ namespace SerendipityHQ\Bundle\QueuesBundle\Model;
  */
 class ScheduledJob
 {
+    /** The job is just inserted. It is not already started. */
+    const STATE_NEW = 'new';
+
+    /** The job is currently running. */
+    const STATE_RUNNING = 'running';
+
+    /** The job was processed and finished with success. */
+    const STATE_FINISHED = 'finished';
+
     /** @var  int $id The ID of the Job */
     private $id;
 
@@ -22,16 +31,43 @@ class ScheduledJob
     /** @var  string $queue */
     private $queue;
 
+    /** @var  string $status */
+    private $status;
+
+    /** @var  \DateTime $createdAt */
+    private $createdAt;
+
+    /** @var  \DateTime $startedAt */
+    private $startedAt;
+
+    /** @var  \DateTime $closedAt When the Job is marked as Finished, Failed or Terminated. */
+    private $closedAt;
+
     /**
      * @param string $command
-     * @param array $arguments
+     * @param array|string $arguments
      */
-    public function __construct(string $command, array $arguments = [])
+    public function __construct(string $command, $arguments = [])
     {
+        if (false === is_string($arguments) && false === is_array($arguments)) {
+            throw new \InvalidArgumentException('Second parameter $arguments can be only an array or a string.');
+        }
+
+        // If is a String...
+        if (is_string($arguments)) {
+            // Transform into an array
+            $arguments = explode(' ', $arguments);
+
+            // And remove leading and trailing spaces
+            $arguments = array_map(function($value) {return trim($value);}, $arguments);
+        }
+
         $this->command = $command;
         $this->arguments = $arguments;
-        $this->queue = 'default';
         $this->priority = 1;
+        $this->queue = 'default';
+        $this->status = self::STATE_NEW;
+        $this->createdAt = new \DateTime();
     }
 
     /**
@@ -72,6 +108,30 @@ class ScheduledJob
     public function getQueue() : string
     {
         return $this->queue;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getCreatedAt() : \DateTime
+    {
+        return $this->createdAt;
+    }
+
+    /**
+     * @return \DateTime|null
+     */
+    public function getStartedAt()
+    {
+        return $this->startedAt;
+    }
+
+    /**
+     * @return \DateTime|null
+     */
+    public function getClosedAt()
+    {
+        return $this->closedAt;
     }
 
     /**
