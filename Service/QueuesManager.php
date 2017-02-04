@@ -3,7 +3,7 @@
 namespace SerendipityHQ\Bundle\QueuesBundle\Service;
 
 use Doctrine\ORM\EntityManager;
-use SerendipityHQ\Bundle\QueuesBundle\Model\ScheduledJob;
+use SerendipityHQ\Bundle\QueuesBundle\Model\Job;
 
 /**
  * Manages the queues.
@@ -24,9 +24,9 @@ class QueuesManager
     /**
      * Schedules a job.
      *
-     * @param ScheduledJob $job
+     * @param Job $job
      */
-    public function schedule(ScheduledJob $job)
+    public function schedule(Job $job)
     {
         $this->entityManager->persist($job);
         $this->entityManager->flush();

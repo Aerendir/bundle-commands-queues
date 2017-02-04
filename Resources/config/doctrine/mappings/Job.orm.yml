@@ -1,4 +1,4 @@
-SerendipityHQ\Bundle\QueuesBundle\Model\ScheduledJob:
+SerendipityHQ\Bundle\QueuesBundle\Model\Job:
     type: entity
     table: queues_scheduled_jobs
     id:
@@ -13,15 +13,6 @@ SerendipityHQ\Bundle\QueuesBundle\Model\ScheduledJob:
         arguments:
             type: array
             nullable: false
-        priority:
-            type: smallint
-            nullable: false
-        queue:
-            type: string
-            nullable: false
-        status:
-            type: string
-            nullable: false
         createdAt:
             name: created_at
             type: datetime
@@ -33,4 +24,23 @@ SerendipityHQ\Bundle\QueuesBundle\Model\ScheduledJob:
         closedAt:
             name: closed_at
             type: datetime
+            nullable: true
+        debug:
+            name: debug
+            type: array
+            nullable: true
+        priority:
+            type: smallint
+            nullable: false
+        queue:
+            type: string
+            nullable: false
+        status:
+            type: string
+            nullable: false
+        output:
+            type: text
+            nullable: true
+        exitCode:
+            type: integer
             nullable: true
