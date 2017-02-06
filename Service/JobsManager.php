@@ -8,6 +8,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Process\ProcessBuilder;
+use Symfony\Component\VarDumper\VarDumper;
 
 /**
  * Manages the Jobs.
@@ -89,8 +90,10 @@ class JobsManager
         // Environment to use
         $arguments[] = '--env=' . $this->env;
 
-        // Verbosity level
-        $arguments[] = $this->guessVerbosityLevel();
+        // Verbosity level (only if not normal = agument verbosity not set in command)
+        if (OutputInterface::VERBOSITY_NORMAL !== $this->verbosity) {
+            $arguments[] = $this->guessVerbosityLevel();
+        }
 
         // The arguments of the command
         $arguments = array_merge($arguments, $job->getArguments());
@@ -141,7 +144,7 @@ class JobsManager
             case OutputInterface::VERBOSITY_NORMAL:
             default:
                 // This WILL NEVER be reached as default
-                return '';
+                return null;
         }
     }
 }
