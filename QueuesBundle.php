@@ -3,6 +3,7 @@
 namespace SerendipityHQ\Bundle\QueuesBundle;
 
 use Doctrine\Bundle\DoctrineBundle\DependencyInjection\Compiler\DoctrineOrmMappingsPass;
+use SerendipityHQ\Bundle\QueuesBundle\DependencyInjection\CompilerPass\DaemonDependenciesPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
@@ -29,6 +30,8 @@ class QueuesBundle extends Bundle
                 $this->getYamlMappingDriver($mappings)
             );
         }
+
+        $container->addCompilerPass(new DaemonDependenciesPass());
     }
 
     /**

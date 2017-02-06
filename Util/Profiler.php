@@ -10,8 +10,12 @@ class Profiler
     private $lastMicrotime;
     private $lastMemoryUsage;
     private $highestMemoryPeak;
+    private $iterations = 0;
 
-    public function __construct()
+    /**
+     * Start the profiler.
+     */
+    public function start()
     {
         $this->lastMicrotime = microtime(true);
         $this->lastMemoryUsage = memory_get_usage(true);
@@ -49,6 +53,22 @@ class Profiler
         $this->highestMemoryPeak = $this->highestMemoryPeak < $currentMemoryPeak ? $currentMemoryPeak : $this->highestMemoryPeak;
 
         return $return;
+    }
+
+    /**
+     * Increment the number of iterations by 1.
+     */
+    public function hitIteration()
+    {
+        $this->iterations++;
+    }
+
+    /**
+     * @return int
+     */
+    public function getCurrentIteration() : int
+    {
+        return $this->iterations;
     }
 
     /**

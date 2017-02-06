@@ -6,7 +6,7 @@ use Doctrine\ORM\EntityManager;
 use SerendipityHQ\Bundle\QueuesBundle\Model\Job;
 
 /**
- * Manages the queues.
+ * Manages the Queues.
  */
 class QueuesManager
 {

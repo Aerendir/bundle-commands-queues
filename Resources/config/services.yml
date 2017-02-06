@@ -2,3 +2,7 @@ services:
     queues:
         class: SerendipityHQ\Bundle\QueuesBundle\Service\QueuesManager
         arguments: ["@queues.entity_manager"]
+#This service is meant to be privately used by QueuesRunCommand
+    queues.do_not_use.daemon:
+        class: SerendipityHQ\Bundle\QueuesBundle\Service\QueuesDaemon
+        arguments: ["@queues.entity_manager"]
