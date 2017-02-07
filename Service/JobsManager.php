@@ -2,7 +2,6 @@
 
 namespace SerendipityHQ\Bundle\QueuesBundle\Service;
 
-use Doctrine\ORM\EntityManager;
 use SerendipityHQ\Bundle\QueuesBundle\Model\Job;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -24,7 +23,7 @@ class JobsManager
     private $verbosity;
 
     /**
-     * @param string        $kernelRootDir
+     * @param string $kernelRootDir
      */
     public function __construct(string $kernelRootDir)
     {
