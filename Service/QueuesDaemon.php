@@ -5,6 +5,7 @@ namespace SerendipityHQ\Bundle\QueuesBundle\Service;
 use Doctrine\ORM\EntityManager;
 use SerendipityHQ\Bundle\ConsoleStyles\Console\Formatter\SerendipityHQOutputFormatter;
 use SerendipityHQ\Bundle\ConsoleStyles\Console\Style\SerendipityHQStyle;
+use SerendipityHQ\Bundle\QueuesBundle\Entity\Daemon;
 use SerendipityHQ\Bundle\QueuesBundle\Entity\Job;
 use SerendipityHQ\Bundle\QueuesBundle\Util\JobsMarker;
 use SerendipityHQ\Bundle\QueuesBundle\Util\Profiler;
@@ -12,13 +13,15 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Process\Process;
-use Symfony\Component\VarDumper\VarDumper;
 
 /**
  * The Daemon that listens for new jobs to process.
  */
 class QueuesDaemon
 {
+    /** @var  Daemon $me Is the Daemon object */
+    private $me;
+
     /** @var array $config */
     private $config;
 
@@ -69,18 +72,25 @@ class QueuesDaemon
      */
     public function initialize(InputInterface $input, OutputInterface $output)
     {
-        // Start the profiler
-        $this->profiler->start($this->config['max_runtime']);
-
-        // initialize the JobsManager
-        $this->jobsManager->initialize($input, $output);
-
         // Create the Input/Output writer
         $this->ioWriter = new SerendipityHQStyle($input, $output);
         $this->ioWriter->setFormatter(new SerendipityHQOutputFormatter(true));
-
-        // Set the verbosity
         $this->verbosity = $output->getVerbosity();
+
+        $this->say('SerendipityHQ Queue Bundle Daemon', 'title');
+        $this->say('Starting the Daemon...', 'infoLineNoBg');
+
+        // Save the Daemon to the Database
+        $this->me = new Daemon(gethostname(), getmypid(), $this->config);
+        $this->entityManager->persist($this->me);
+        $this->entityManager->flush();
+        $this->say(sprintf('I\'m Daemon "%s@%s".', $this->me->getPid(), $this->me->getHost()), 'successLineNoBg');
+
+        // Start the profiler
+        $this->profiler->start($this->config['max_runtime']);
+
+        // Initialize the JobsManager
+        $this->jobsManager->initialize($input, $output);
 
         // Disable logging in Doctrine
         $this->entityManager->getConfiguration()->setSQLLogger(null);
@@ -90,6 +100,18 @@ class QueuesDaemon
 
         // Setup pcntl signals so it is possible to manage process
         $this->setupPcntlSignals();
+    }
+
+    /**
+     * Sets the Daemon as died.
+     *
+     * Requiescant In Pace (May it Rest In Pace).
+     */
+    public function requiescantInPace()
+    {
+        $this->me->requiescatInPace();
+        $this->entityManager->persist($this->me);
+        $this->entityManager->flush();
     }
 
     /**
@@ -124,6 +146,10 @@ class QueuesDaemon
             return false;
         }
 
+        if ($this->profiler->getCurrentIteration() %10000 === 0) {
+            $this->sayProfilingInfo();
+        }
+
         return true;
     }
 
@@ -137,6 +163,7 @@ class QueuesDaemon
             return;
         }
 
+        // Get the next job to process
         $job = $this->entityManager->getRepository(Job::class)->findNextJob();
 
         // If no more jobs exists in the queue
@@ -146,6 +173,7 @@ class QueuesDaemon
             return;
         }
 
+        // Start processing the Job
         $now = new \DateTime();
         $info = [
             'started_at' => $now,
@@ -168,7 +196,7 @@ class QueuesDaemon
             $info['output'] = 'Failing start the process.';
             $info['output_error'] = $e;
 
-            $this->jobsMarker->markJobAsAborted($job, $info);
+            $this->jobsMarker->markJobAsAborted($job, $info, $this->me);
             if ($this->verbosity >= SymfonyStyle::VERBOSITY_NORMAL) {
                 $this->ioWriter->infoLineNoBg(sprintf(
                     '[%s] Job "%s" on Queue "%s": The process didn\'t started due to some errors. See them in the'
@@ -180,7 +208,7 @@ class QueuesDaemon
         }
 
         // Now start processing the job
-        $this->jobsMarker->markJobAsPending($job, $info);
+        $this->jobsMarker->markJobAsPending($job, $info, $this->me);
 
         // Now add the process to the runningJobs list to keep track of it later
         $info['job'] = $job;
@@ -277,6 +305,9 @@ class QueuesDaemon
 //        VarDumper::dump($process->hasBeenSignaled());
 //        VarDumper::dump($process->hasBeenStopped());
 
+        // Remove the Job from the Entity Manager
+        $this->entityManager->detach($job);
+
         // First set to false, then unset to free up memory ASAP
         $now =
         $process =
@@ -297,9 +328,6 @@ class QueuesDaemon
         if ($this->profiler->getCurrentIteration() % 10000 === 0) {
             // Force the garbage collection after a command is closed
             gc_collect_cycles();
-
-            // Clear the entity manager to avoid unuseful consumption of memory
-            $this->entityManager->clear();
         }
     }
 

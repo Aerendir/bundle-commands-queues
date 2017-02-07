@@ -85,6 +85,9 @@ class Job
     /** @var int $priority */
     private $priority;
 
+    /** @var  Daemon $processedBy The daemon that processed the Job. */
+    private $processedBy;
+
     /** @var string $queue */
     private $queue;
 
@@ -199,6 +202,14 @@ class Job
     }
 
     /**
+     * @return Daemon
+     */
+    public function getProcessedBy() : Daemon
+    {
+        return $this->processedBy;
+    }
+
+    /**
      * @return string
      */
     public function getQueue() : string
@@ -249,6 +260,17 @@ class Job
     public function setPriority(int $priority) : self
     {
         $this->priority = $priority;
+
+        return $this;
+    }
+
+    /**
+     * @param Daemon $daemon
+     * @return Job
+     */
+    public function setProcessedBy(Daemon $daemon) : self
+    {
+        $this->processedBy = $daemon;
 
         return $this;
     }
