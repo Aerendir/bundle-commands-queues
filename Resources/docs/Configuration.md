@@ -56,4 +56,4 @@ To secure the route, you can add a rule to your `security.yml` file like this:
         access_control:
             - { path: ^/_queues, role: ROLE_SUPER_ADMIN }
 
-([Go back to index](Index.md)) | Next step: [Use the bundle](Use-the-ShQQueuesBundle.md)
+([Go back to index](Index.md)) | Next step: [Use the bundle](Use-the-ShqQueuesBundle.md)

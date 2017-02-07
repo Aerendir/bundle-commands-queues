@@ -5,13 +5,14 @@ namespace SerendipityHQ\Bundle\QueuesBundle\Service;
 use Doctrine\ORM\EntityManager;
 use SerendipityHQ\Bundle\ConsoleStyles\Console\Formatter\SerendipityHQOutputFormatter;
 use SerendipityHQ\Bundle\ConsoleStyles\Console\Style\SerendipityHQStyle;
-use SerendipityHQ\Bundle\QueuesBundle\Model\Job;
+use SerendipityHQ\Bundle\QueuesBundle\Entity\Job;
 use SerendipityHQ\Bundle\QueuesBundle\Util\JobsMarker;
 use SerendipityHQ\Bundle\QueuesBundle\Util\Profiler;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Process\Process;
+use Symfony\Component\VarDumper\VarDumper;
 
 /**
  * The Daemon that listens for new jobs to process.
@@ -115,7 +116,9 @@ class QueuesDaemon
         // The max_runtime is reached
         if ($this->profiler->isMaxRuntimeReached()) {
             if ($this->verbosity >= SymfonyStyle::VERBOSITY_NORMAL) {
-                $this->ioWriter->successLineNoBg(sprintf('Max runtime of "%s" seconds reached.', $this->config['max_runtime']));
+                $this->ioWriter->successLineNoBg(
+                    sprintf('Max runtime of "%s" seconds reached.', $this->config['max_runtime'])
+                );
             }
 
             return false;
@@ -134,14 +137,10 @@ class QueuesDaemon
             return;
         }
 
-        $job = $this->entityManager->getRepository(Job::class)->findOneBy(['status' => Job::STATUS_NEW, 'createdAt' => 'ASC']);
+        $job = $this->entityManager->getRepository(Job::class)->findNextJob();
 
         // If no more jobs exists in the queue
         if (null === $job) {
-            // Wait the configured idle_time and then return
-            if ($this->verbosity >= SymfonyStyle::VERBOSITY_NORMAL) {
-                $this->ioWriter->infoLineNoBg(sprintf('No more jobs: idling for %s seconds.', $this->config['idle_time']));
-            }
             sleep($this->config['idle_time']);
 
             return;
@@ -152,7 +151,10 @@ class QueuesDaemon
             'started_at' => $now,
         ];
         if ($this->verbosity >= SymfonyStyle::VERBOSITY_NORMAL) {
-            $this->ioWriter->infoLineNoBg(sprintf('[%s] Job "%s" on Queue "%s": Initializing the process.', $now->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue()));
+            $this->ioWriter->infoLineNoBg(sprintf(
+                    '[%s] Job "%s" on Queue "%s": Initializing the process.',
+                    $now->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue()
+                ));
         }
 
         // Create the process for the scheduled job
@@ -168,7 +170,10 @@ class QueuesDaemon
 
             $this->jobsMarker->markJobAsAborted($job, $info);
             if ($this->verbosity >= SymfonyStyle::VERBOSITY_NORMAL) {
-                $this->ioWriter->infoLineNoBg(sprintf('[%s] Job "%s" on Queue "%s": The process didn\'t started due to some errors. See them in the logs of the Job.', $now->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue()));
+                $this->ioWriter->infoLineNoBg(sprintf(
+                    '[%s] Job "%s" on Queue "%s": The process didn\'t started due to some errors. See them in the'
+                    . ' logs of the Job.', $now->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue()
+                ));
             }
 
             return;
@@ -186,6 +191,7 @@ class QueuesDaemon
         // Save the just created new Job into the running jobs queue
         $this->runningJobs[] = $info;
 
+        // Wait some millisedonds to permit Doctrine to finish writings (sometimes it is slower than the Daemon)
         $this->wait();
     }
 
@@ -243,7 +249,10 @@ class QueuesDaemon
 
             // And print its PID (available only if the process is already running)
             if ($this->verbosity >= SymfonyStyle::VERBOSITY_NORMAL) {
-                $this->ioWriter->infoLineNoBg(sprintf('[%s] Job "%s" on Queue "%s": Process is currently running with PID "%s".', $now->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue(), $process->getPid()));
+                $this->ioWriter->infoLineNoBg(sprintf(
+                    '[%s] Job "%s" on Queue "%s": Process is currently running with PID "%s".',
+                    $now->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue(), $process->getPid())
+                );
             }
         }
 
@@ -291,8 +300,6 @@ class QueuesDaemon
 
             // Clear the entity manager to avoid unuseful consumption of memory
             $this->entityManager->clear();
-
-            $this->sayProfilingInfo();
         }
     }
 
@@ -356,7 +363,10 @@ class QueuesDaemon
     {
         $info = $this->jobsManager->buildDefaultInfo($process);
         $this->jobsMarker->markJobAsFailed($job, $info);
-        $this->ioWriter->errorLineNoBg(sprintf('[%s] Job "%s" on Queue "%s": Process failed.', $job->getClosedAt()->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue()));
+        $this->ioWriter->errorLineNoBg(sprintf(
+            '[%s] Job "%s" on Queue "%s": Process failed.',
+            $job->getClosedAt()->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue())
+        );
     }
 
     /**
@@ -367,7 +377,9 @@ class QueuesDaemon
     {
         $info = $this->jobsManager->buildDefaultInfo($process);
         $this->jobsMarker->markJobAsFinished($job, $info);
-        $this->ioWriter->successLineNoBg(sprintf('[%s] Job "%s" on Queue "%s": Process succeded.', $job->getClosedAt()->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue()));
+        $this->ioWriter->successLineNoBg(sprintf(
+            '[%s] Job "%s" on Queue "%s": Process succeded.',
+            $job->getClosedAt()->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue()));
     }
 
     /**

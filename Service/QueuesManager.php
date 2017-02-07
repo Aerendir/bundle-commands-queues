@@ -3,7 +3,7 @@
 namespace SerendipityHQ\Bundle\QueuesBundle\Service;
 
 use Doctrine\ORM\EntityManager;
-use SerendipityHQ\Bundle\QueuesBundle\Model\Job;
+use SerendipityHQ\Bundle\QueuesBundle\Entity\Job;
 
 /**
  * Manages the Queues.

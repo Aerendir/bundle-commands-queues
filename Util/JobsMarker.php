@@ -3,7 +3,7 @@
 namespace SerendipityHQ\Bundle\QueuesBundle\Util;
 
 use Doctrine\ORM\EntityManager;
-use SerendipityHQ\Bundle\QueuesBundle\Model\Job;
+use SerendipityHQ\Bundle\QueuesBundle\Entity\Job;
 
 /**
  * Changes the status of Jobs during their execution attaching to them execution info.

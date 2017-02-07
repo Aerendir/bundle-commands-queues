@@ -4,7 +4,7 @@ namespace SerendipityHQ\Bundle\QueuesBundle\Controller;
 
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
-use SerendipityHQ\Bundle\QueuesBundle\Model\Job;
+use SerendipityHQ\Bundle\QueuesBundle\Entity\Job;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 
 /**
@@ -35,6 +35,16 @@ class QueuesController extends Controller
             // First: we create a Job to push to the queue
             $arguments = '--id='.$i;
             $scheduledJob = new Job('queues:test', $arguments);
+
+            // Decide if this will be executed in the future
+            $condition = rand(0,10);
+            if (7 <= $condition) {
+                $days = rand(1,10);
+                $future = new \DateTime();
+                $future->modify('+' . $days . ' day');
+                $scheduledJob->setExecuteAfterTime($future);
+            }
+
             $this->get('queues')->schedule($scheduledJob);
         }
 

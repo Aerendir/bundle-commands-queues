@@ -8,3 +8,4 @@ These are the steps required to get up and running with the Serendipity HQ Queue
 
 1. [Install and activate the bundle](Installation.md)
 2. [Configure the bundle](Configuration.md)
+3. [How to use SHQQueuesBundle](Use-the-ShqQueuesBundle.md)
