@@ -348,7 +348,7 @@ class QueuesDaemon
     public function sayProfilingInfo()
     {
         $this->ioWriter->table(
-            ['Profiling info'],
+            ['', 'Profiling info'],
             $this->profiler->profile()
         );
     }

@@ -54,14 +54,24 @@ class Profiler
         $memoryPeakDifference = 0 !== $memoryPeakDifference ? round($memoryPeakDifference / $this->highestMemoryPeak * 100, 2) : 0;
 
         $return = [
-            ['microtime', $this->formatTime($currentMicrotime)],
-            ['last_microtime', $this->formatTime($this->lastMicrotime)],
-            ['memory_usage', $this->formatMemory($currentMemoryUsage)],
-            ['memory_peak', $this->formatMemory($currentMemoryPeak)],
+            ['', 'microtime', $this->formatTime($currentMicrotime)],
+            ['', 'last_microtime', $this->formatTime($this->lastMicrotime)],
+            ['', 'memory_usage', $this->formatMemory($currentMemoryUsage)],
+            ['', 'memory_peak', $this->formatMemory($currentMemoryPeak)],
+            ['', 'elapsed_time', $currentMicrotime - $this->lastMicrotime],
             // If the difference is negative, then this is an increase in memory consumption
-            ['memory_usage_difference', ($memoryDifference <= 0 ? '+' : '-').abs($memoryDifference).'%'],
-            ['memory_peak_difference', ($memoryPeakDifference <= 0 ? '+' : '-').abs($memoryPeakDifference).'%'],
-            ['elapsed_time', $currentMicrotime - $this->lastMicrotime],
+            [
+                $memoryDifference <= 0
+                    ? sprintf('<%s>%s</>', 'success-nobg', "\xE2\x9C\x94")
+                    : sprintf('<%s>%s</>', 'error-nobg', "\xE2\x9C\x96"),
+                'memory_usage_difference',
+                ($memoryDifference <= 0 ? '+' : '-').abs($memoryDifference).'%'],
+            [
+                $memoryDifference <= 0
+                    ? sprintf('<%s>%s</>', 'success-nobg', "\xE2\x9C\x94")
+                    : sprintf('<%s>%s</>', 'error-nobg', "\xE2\x9C\x96"),
+                'memory_peak_difference',
+                ($memoryPeakDifference <= 0 ? '+' : '-').abs($memoryPeakDifference).'%'],
         ];
 
         $this->lastMicrotime = $currentMicrotime;
