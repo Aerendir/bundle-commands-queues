@@ -33,7 +33,7 @@ class TestCommand extends ContainerAwareCommand
     protected function configure()
     {
         $this
-            ->setName('queue:test')
+            ->setName('queues:test')
             ->setDescription('A test command to test SHQQueuesBundle.')
             ->setDefinition(
                 new InputDefinition([
