@@ -1,25 +1,42 @@
 <?php
 
 namespace SerendipityHQ\Bundle\QueuesBundle\Util;
+use Symfony\Component\VarDumper\VarDumper;
 
 /**
  * A class to profile the Daemon during the execution.
  */
 class Profiler
 {
+    /** @var  float $startTime */
+    private $startTime;
+
+    /** @var  float $lastMicrotime The last time the self::profile() method was called */
     private $lastMicrotime;
+
+    /** @var int $lastMemoryUsage  */
     private $lastMemoryUsage;
+
+    /** @var  int $highestMemoryPeak */
     private $highestMemoryPeak;
+
+    /** @var int $iterations How many times Daemon::mustRun() was called in the "while(Daemon::mustRun())" */
     private $iterations = 0;
+
+    /** @var  float $maxRuntime After this amount of time the Daemon MUST die */
+    private $maxRuntime;
 
     /**
      * Start the profiler.
+     *
+     * @param float $maxRuntime After this amount of time the Daemon MUST die.
      */
-    public function start()
+    public function start(float $maxRuntime)
     {
-        $this->lastMicrotime = microtime(true);
+        $this->startTime = $this->lastMicrotime = microtime(true);
         $this->lastMemoryUsage = memory_get_usage(true);
         $this->highestMemoryPeak = memory_get_peak_usage(true);
+        $this->maxRuntime = $maxRuntime;
     }
 
     /**
@@ -56,6 +73,14 @@ class Profiler
     }
 
     /**
+     * @return int
+     */
+    public function getCurrentIteration() : int
+    {
+        return $this->iterations;
+    }
+
+    /**
      * Increment the number of iterations by 1.
      */
     public function hitIteration()
@@ -64,11 +89,11 @@ class Profiler
     }
 
     /**
-     * @return int
+     * @return bool
      */
-    public function getCurrentIteration() : int
+    public function isMaxRuntimeReached() : bool
     {
-        return $this->iterations;
+        return microtime(true) - $this->startTime > $this->maxRuntime;
     }
 
     /**

@@ -18,6 +18,9 @@ use Symfony\Component\Process\Process;
  */
 class QueuesDaemon
 {
+    /** @var  array $config */
+    private $config;
+
     /** @var  EntityManager $entityManager */
     private $entityManager;
 
@@ -66,13 +69,16 @@ class QueuesDaemon
     public function initialize(InputInterface $input, OutputInterface $output)
     {
         // Start the profiler
-        $this->profiler->start();
+        $this->profiler->start($this->config['max_runtime']);
 
+        // initialize the JobsManager
         $this->jobsManager->initialize($input, $output);
 
+        // Create the Input/Output writer
         $this->ioWriter = new SerendipityHQStyle($input, $output);
         $this->ioWriter->setFormatter(new SerendipityHQOutputFormatter(true));
 
+        // Set the verbosity
         $this->verbosity = $output->getVerbosity();
 
         // Disable logging in Doctrine
@@ -92,7 +98,7 @@ class QueuesDaemon
      *
      * @return bool
      */
-    public function mustRun() : bool
+    public function isAlive() : bool
     {
         // Increment the iterations counter
         $this->profiler->hitIteration();
@@ -101,7 +107,16 @@ class QueuesDaemon
             pcntl_signal_dispatch();
         }
 
+        // This is true if a SIGTERM or a SIGINT signal is received
         if (true === $this->stop) {
+            return false;
+        }
+
+        // The max_runtime is reached
+        if ($this->profiler->isMaxRuntimeReached()) {
+            if ($this->verbosity >= SymfonyStyle::VERBOSITY_NORMAL) {
+                $this->ioWriter->successLineNoBg(sprintf('Max runtime of "%s" seconds reached.', $this->config['max_runtime']));
+            }
             return false;
         }
 
@@ -109,15 +124,83 @@ class QueuesDaemon
     }
 
     /**
-     * Processes the ScheduledJobs in the queue.
+     * Processes the next Job in the queue.
      */
-    public function processJobs()
+    public function processNextJob()
     {
-        $jobs = $this->entityManager->getRepository(Job::class)->findBy(['status' => Job::STATUS_NEW]);
-
-        foreach ($jobs as $job) {
-            $this->processJob($job);
+        // If the max_concurrent_jobs number is reached, don't process one more job
+        if ($this->countRunningJobs() >= $this->config['max_concurrent_jobs']) {
+            return;
         }
+
+        $job = $this->entityManager->getRepository(Job::class)->findOneBy(['status' => Job::STATUS_NEW, 'createdAt' => 'ASC']);
+
+        // If no more jobs exists in the queue
+        if (null === $job) {
+            // Wait the configured idle_time and then return
+            if ($this->verbosity >= SymfonyStyle::VERBOSITY_NORMAL) {
+                $this->ioWriter->infoLineNoBg(sprintf('No more jobs: idling for %s seconds.', $this->config['idle_time']));
+            }
+            sleep($this->config['idle_time']);
+            return;
+        }
+
+        $now = new \DateTime();
+        $info = [
+            'started_at' => $now
+        ];
+        if ($this->verbosity >= SymfonyStyle::VERBOSITY_NORMAL) {
+            $this->ioWriter->infoLineNoBg(sprintf('[%s] Job "%s" on Queue "%s": Initializing the process.', $now->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue()));
+        }
+
+        // Create the process for the scheduled job
+        $process = $this->jobsManager->createJobProcess($job);
+
+        // Try to start the process
+        try {
+            $process->start();
+        } catch (\Exception $e) {
+            // Something went wrong starting the process: close it as failed
+            $info['output'] = 'Failing start the process.';
+            $info['output_error'] = $e;
+
+            $this->jobsMarker->markJobAsAborted($job, $info);
+            if ($this->verbosity >= SymfonyStyle::VERBOSITY_NORMAL) {
+                $this->ioWriter->infoLineNoBg(sprintf('[%s] Job "%s" on Queue "%s": The process didn\'t started due to some errors. See them in the logs of the Job.', $now->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue()));
+            }
+            return;
+        }
+
+        // Now start processing the job
+        $this->jobsMarker->markJobAsPending($job, $info);
+
+        // Now add the process to the runningJobs list to keep track of it later
+        $info['job'] = $job;
+        $info['process'] = $process;
+        // This info is already in the Job itself, so we don't need it anymore
+        unset($info['started_at']);
+
+        // Save the just created new Job into the running jobs queue
+        $this->runningJobs[] = $info;
+
+        $this->wait();
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasRunningJobs() : bool
+    {
+        return $this->countRunningJobs() > 0 ? true : false;
+    }
+
+    /**
+     * Returns the number of currently running Jobs.
+     * @return int
+     */
+    public function countRunningJobs() : int
+    {
+        return count($this->runningJobs);
     }
 
     /**
@@ -132,47 +215,6 @@ class QueuesDaemon
                 unset($this->runningJobs[$index]);
             }
         }
-    }
-
-    /**
-     * @param Job $job
-     */
-    private function processJob(Job $job)
-    {
-        $now = new \DateTime();
-        $info = [
-            'started_at' => $now
-        ];
-
-        $this->say(sprintf('[%s] Job "%s" on Queue "%s": Initializing the process.', $now->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue()), 'infoLineNoBg');
-
-        // Create the process for the scheduled job
-        $process = $this->jobsManager->createJobProcess($job);
-
-        // Try to start the process
-        try {
-            $process->start();
-        } catch (\Exception $e) {
-            // Something went wrong starting the process: close it as failed
-            $info['output'] = 'Failing start the process.';
-            $info['output_error'] = $e;
-
-            $this->jobsMarker->markJobAsAborted($job, $info);
-            $this->say(sprintf('[%s] Job "%s" on Queue "%s": The process didn\'t started due to some errors. See them in the logs of the Job.', $now->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue()), 'infoLineNoBg');
-            return;
-        }
-
-        // Now start processing the job
-        $this->jobsMarker->markJobAsPending($job, $info);
-
-        // Now add the process to the runningJobs list to keep track of it later
-        $info['job'] = $job;
-        $info['process'] = $process;
-        // This info is already in the Job itself, so we don't need it anymore
-        unset($info['started_at']);
-        $this->runningJobs[] = $info;
-
-        $this->wait();
     }
 
     /**
@@ -196,7 +238,9 @@ class QueuesDaemon
             $this->jobsMarker->markJobAsRunning($job);
 
             // And print its PID (available only if the process is already running)
-            $this->say(sprintf('[%s] Job "%s" on Queue "%s": Process is currently running with PID "%s".', $now->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue(), $process->getPid()), 'infoLineNoBg');
+            if ($this->verbosity >= SymfonyStyle::VERBOSITY_NORMAL) {
+                $this->ioWriter->infoLineNoBg(sprintf('[%s] Job "%s" on Queue "%s": Process is currently running with PID "%s".', $now->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue(), $process->getPid()));
+            }
         }
 
         if (false === $process->isTerminated()) {
@@ -232,27 +276,8 @@ class QueuesDaemon
     }
 
     /**
-     * @param Job $job
-     * @param Process $process
+     * Optimizes the usage of memory.
      */
-    protected final function handleFailedJob(Job $job, Process $process)
-    {
-        $info = $this->jobsManager->buildDefaultInfo($process);
-        $this->jobsMarker->markJobAsFailed($job, $info);
-        $this->say(sprintf('[%s] Job "%s" on Queue "%s": Process failed.', $job->getClosedAt()->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue()), 'errorLineNoBg');
-    }
-
-    /**
-     * @param Job $job
-     * @param Process $process
-     */
-    protected final function handleSuccessfulJob(Job $job, Process $process)
-    {
-        $info = $this->jobsManager->buildDefaultInfo($process);
-        $this->jobsMarker->markJobAsFinished($job, $info);
-        $this->say(sprintf('[%s] Job "%s" on Queue "%s": Process succeded.', $job->getClosedAt()->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue()), 'successLineNoBg');
-    }
-
     public function optimize()
     {
         // Free some memory if this is the %n iteration
@@ -304,17 +329,41 @@ class QueuesDaemon
     }
 
     /**
+     * @param array $config
      * @param EntityManager $entityManager
      * @param JobsManager $jobsManager
      * @param JobsMarker $jobsMarker
      * @param Profiler $profiler
      */
-    public function setDependencies(EntityManager $entityManager, JobsManager $jobsManager, JobsMarker $jobsMarker, Profiler $profiler)
+    public function setDependencies(array $config, EntityManager $entityManager, JobsManager $jobsManager, JobsMarker $jobsMarker, Profiler $profiler)
     {
+        $this->config = $config;
         $this->entityManager = $entityManager;
         $this->jobsManager = $jobsManager;
         $this->jobsMarker = $jobsMarker;
         $this->profiler = $profiler;
+    }
+
+    /**
+     * @param Job $job
+     * @param Process $process
+     */
+    protected final function handleFailedJob(Job $job, Process $process)
+    {
+        $info = $this->jobsManager->buildDefaultInfo($process);
+        $this->jobsMarker->markJobAsFailed($job, $info);
+        $this->ioWriter->errorLineNoBg(sprintf('[%s] Job "%s" on Queue "%s": Process failed.', $job->getClosedAt()->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue()));
+    }
+
+    /**
+     * @param Job $job
+     * @param Process $process
+     */
+    protected final function handleSuccessfulJob(Job $job, Process $process)
+    {
+        $info = $this->jobsManager->buildDefaultInfo($process);
+        $this->jobsMarker->markJobAsFinished($job, $info);
+        $this->ioWriter->successLineNoBg(sprintf('[%s] Job "%s" on Queue "%s": Process succeded.', $job->getClosedAt()->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue()));
     }
 
     /**
@@ -346,7 +395,9 @@ class QueuesDaemon
 
         // If the PCNTL extension is not loded ...
         if (false === $this->pcntlLoaded) {
-            $this->ioWriter->note('PCNTL extension is not loaded. Signals cannot be processd.');
+            if ($this->verbosity >= SymfonyStyle::VERBOSITY_NORMAL) {
+                $this->ioWriter->note('PCNTL extension is not loaded. Signals cannot be processd.');
+            }
             return;
         }
 

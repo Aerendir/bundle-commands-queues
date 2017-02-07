@@ -51,7 +51,11 @@ class Configuration implements ConfigurationInterface
                     ->defaultValue('orm')
                     ->cannotBeEmpty()
                 ->end()
-                ->scalarNode('model_manager_name')->defaultNull()->end();
+                ->scalarNode('model_manager_name')->defaultNull()->end()
+                ->integerNode('max_runtime')->defaultValue(100)->end()
+                ->integerNode('max_concurrent_jobs')->defaultValue(1)->end()
+                ->integerNode('idle_time')->defaultValue(10)->end()
+                ->scalarNode('worker_name')->defaultValue('DefaultWorker')->end();
 
         return $treeBuilder;
     }

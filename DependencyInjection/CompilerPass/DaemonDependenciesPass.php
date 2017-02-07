@@ -8,6 +8,7 @@ use SerendipityHQ\Bundle\QueuesBundle\Util\Profiler;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
+use Symfony\Component\VarDumper\VarDumper;
 
 /**
  * Sets the Daemon's dependencies.
@@ -35,7 +36,11 @@ class DaemonDependenciesPass implements CompilerPassInterface
         // The Daemon
         $daemonDefinition = $container->findDefinition('queues.do_not_use.daemon');
         $daemonDefinition->addMethodCall('setDependencies', [
-            $container->findDefinition('queues.entity_manager'), $jobsManagerDefinition, $jobsMarkerDefinition, $profilerDefinition
+            $container->getParameter('queues.config'),
+            $container->findDefinition('queues.entity_manager'),
+            $jobsManagerDefinition,
+            $jobsMarkerDefinition,
+            $profilerDefinition
         ]);
     }
 }
