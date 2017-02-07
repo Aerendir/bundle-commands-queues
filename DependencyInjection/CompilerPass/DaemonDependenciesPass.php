@@ -8,7 +8,6 @@ use SerendipityHQ\Bundle\QueuesBundle\Util\Profiler;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
-use Symfony\Component\VarDumper\VarDumper;
 
 /**
  * Sets the Daemon's dependencies.
@@ -22,12 +21,12 @@ class DaemonDependenciesPass implements CompilerPassInterface
     {
         // The Jobs Manager
         $jobsManagerDefinition = new Definition(JobsManager::class, [
-            $container->getParameter('kernel.root_dir'), $container->findDefinition('queues.entity_manager')
+            $container->getParameter('kernel.root_dir'), $container->findDefinition('queues.entity_manager'),
         ]);
 
         // The Jobs Marker
         $jobsMarkerDefinition = new Definition(JobsMarker::class, [
-            $container->findDefinition('queues.entity_manager')
+            $container->findDefinition('queues.entity_manager'),
         ]);
 
         // The Profiler
@@ -40,7 +39,7 @@ class DaemonDependenciesPass implements CompilerPassInterface
             $container->findDefinition('queues.entity_manager'),
             $jobsManagerDefinition,
             $jobsMarkerDefinition,
-            $profilerDefinition
+            $profilerDefinition,
         ]);
     }
 }

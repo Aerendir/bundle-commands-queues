@@ -18,38 +18,38 @@ use Symfony\Component\Process\Process;
  */
 class QueuesDaemon
 {
-    /** @var  array $config */
+    /** @var array $config */
     private $config;
 
-    /** @var  EntityManager $entityManager */
+    /** @var EntityManager $entityManager */
     private $entityManager;
 
-    /** @var  JobsManager $jobsManager */
+    /** @var JobsManager $jobsManager */
     private $jobsManager;
 
-    /** @var  JobsMarker $processMarker Used to change the status of Jobs during their execution */
+    /** @var JobsMarker $processMarker Used to change the status of Jobs during their execution */
     private $jobsMarker;
 
-    /** @var  SerendipityHQStyle $ioWriter */
+    /** @var SerendipityHQStyle $ioWriter */
     private $ioWriter;
 
     /**
-     * @var  bool $stop If this is true, mustRun returns false and the Daemon dies.
-     *                  This will be true when a PCNTL SIGTERM signal is intercepted or when the max runtime execution
-     *                  is reached.
+     * @var bool If this is true, mustRun returns false and the Daemon dies.
+     *           This will be true when a PCNTL SIGTERM signal is intercepted or when the max runtime execution
+     *           is reached.
      */
     private $stop;
 
-    /** @var  bool $pcntlLoaded */
+    /** @var bool $pcntlLoaded */
     private $pcntlLoaded;
 
-    /** @var  Profiler $profiler */
+    /** @var Profiler $profiler */
     private $profiler;
 
     /** @var array $runningJobs Keeps track of the started jobs in the queue. */
     private $runningJobs = [];
 
-    /** @var  bool $verbosity */
+    /** @var bool $verbosity */
     private $verbosity;
 
     /**
@@ -63,7 +63,7 @@ class QueuesDaemon
     /**
      * Initializes the Daemon.
      *
-     * @param InputInterface $input
+     * @param InputInterface  $input
      * @param OutputInterface $output
      */
     public function initialize(InputInterface $input, OutputInterface $output)
@@ -117,6 +117,7 @@ class QueuesDaemon
             if ($this->verbosity >= SymfonyStyle::VERBOSITY_NORMAL) {
                 $this->ioWriter->successLineNoBg(sprintf('Max runtime of "%s" seconds reached.', $this->config['max_runtime']));
             }
+
             return false;
         }
 
@@ -142,12 +143,13 @@ class QueuesDaemon
                 $this->ioWriter->infoLineNoBg(sprintf('No more jobs: idling for %s seconds.', $this->config['idle_time']));
             }
             sleep($this->config['idle_time']);
+
             return;
         }
 
         $now = new \DateTime();
         $info = [
-            'started_at' => $now
+            'started_at' => $now,
         ];
         if ($this->verbosity >= SymfonyStyle::VERBOSITY_NORMAL) {
             $this->ioWriter->infoLineNoBg(sprintf('[%s] Job "%s" on Queue "%s": Initializing the process.', $now->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue()));
@@ -168,6 +170,7 @@ class QueuesDaemon
             if ($this->verbosity >= SymfonyStyle::VERBOSITY_NORMAL) {
                 $this->ioWriter->infoLineNoBg(sprintf('[%s] Job "%s" on Queue "%s": The process didn\'t started due to some errors. See them in the logs of the Job.', $now->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue()));
             }
+
             return;
         }
 
@@ -196,6 +199,7 @@ class QueuesDaemon
 
     /**
      * Returns the number of currently running Jobs.
+     *
      * @return int
      */
     public function countRunningJobs() : int
@@ -281,7 +285,7 @@ class QueuesDaemon
     public function optimize()
     {
         // Free some memory if this is the %n iteration
-        if ($this->profiler->getCurrentIteration() %10000 === 0) {
+        if ($this->profiler->getCurrentIteration() % 10000 === 0) {
             // Force the garbage collection after a command is closed
             gc_collect_cycles();
 
@@ -329,11 +333,11 @@ class QueuesDaemon
     }
 
     /**
-     * @param array $config
+     * @param array         $config
      * @param EntityManager $entityManager
-     * @param JobsManager $jobsManager
-     * @param JobsMarker $jobsMarker
-     * @param Profiler $profiler
+     * @param JobsManager   $jobsManager
+     * @param JobsMarker    $jobsMarker
+     * @param Profiler      $profiler
      */
     public function setDependencies(array $config, EntityManager $entityManager, JobsManager $jobsManager, JobsMarker $jobsMarker, Profiler $profiler)
     {
@@ -345,10 +349,10 @@ class QueuesDaemon
     }
 
     /**
-     * @param Job $job
+     * @param Job     $job
      * @param Process $process
      */
-    protected final function handleFailedJob(Job $job, Process $process)
+    final protected function handleFailedJob(Job $job, Process $process)
     {
         $info = $this->jobsManager->buildDefaultInfo($process);
         $this->jobsMarker->markJobAsFailed($job, $info);
@@ -356,10 +360,10 @@ class QueuesDaemon
     }
 
     /**
-     * @param Job $job
+     * @param Job     $job
      * @param Process $process
      */
-    protected final function handleSuccessfulJob(Job $job, Process $process)
+    final protected function handleSuccessfulJob(Job $job, Process $process)
     {
         $info = $this->jobsManager->buildDefaultInfo($process);
         $this->jobsMarker->markJobAsFinished($job, $info);
@@ -372,7 +376,7 @@ class QueuesDaemon
     private function setupPcntlSignals()
     {
         // The callback to use as signal handler
-        $signalHandler = function($signo) {
+        $signalHandler = function ($signo) {
             switch ($signo) {
                 case SIGTERM:
                     $signal = 'SIGTERM';
@@ -383,7 +387,7 @@ class QueuesDaemon
                     $this->stop = true;
                     break;
                 default:
-                    $signal = 'Unknown ' . $signo;
+                    $signal = 'Unknown '.$signo;
             }
 
             if ($this->verbosity >= SymfonyStyle::VERBOSITY_NORMAL) {
@@ -398,6 +402,7 @@ class QueuesDaemon
             if ($this->verbosity >= SymfonyStyle::VERBOSITY_NORMAL) {
                 $this->ioWriter->note('PCNTL extension is not loaded. Signals cannot be processd.');
             }
+
             return;
         }
 
@@ -408,7 +413,5 @@ class QueuesDaemon
         if ($this->verbosity >= SymfonyStyle::VERBOSITY_NORMAL) {
             $this->ioWriter->successLineNoBg('PCNTL is available: signals will be processed.');
         }
-
-        return;
     }
 }

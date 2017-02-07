@@ -58,7 +58,7 @@ class Job
     /** The job failed for some reasons. */
     const STATUS_FAILED = 'failed';
 
-    /** @var  int $id The ID of the Job */
+    /** @var int $id The ID of the Job */
     private $id;
 
     /** @var string $command */
@@ -67,35 +67,35 @@ class Job
     /** @var array $arguments */
     private $arguments;
 
-    /** @var  \DateTime $createdAt */
+    /** @var \DateTime $createdAt */
     private $createdAt;
 
-    /** @var  \DateTime $startedAt */
+    /** @var \DateTime $startedAt */
     private $startedAt;
 
-    /** @var  \DateTime $closedAt When the Job is marked as Finished, Failed or Terminated. */
+    /** @var \DateTime $closedAt When the Job is marked as Finished, Failed or Terminated. */
     private $closedAt;
 
-    /** @var  array $debug The error produced by the job (usually an exception) */
+    /** @var array $debug The error produced by the job (usually an exception) */
     private $debug = [];
 
-    /** @var  int $priority */
+    /** @var int $priority */
     private $priority;
 
-    /** @var  string $queue */
+    /** @var string $queue */
     private $queue;
 
-    /** @var  string $status */
+    /** @var string $status */
     private $status;
 
-    /** @var  string $output The output produced by the job */
+    /** @var string $output The output produced by the job */
     private $output;
 
-    /** @var  int $exitCode The code with which the process exited */
+    /** @var int $exitCode The code with which the process exited */
     private $exitCode;
 
     /**
-     * @param string $command
+     * @param string       $command
      * @param array|string $arguments
      */
     public function __construct(string $command, $arguments = [])
@@ -110,7 +110,9 @@ class Job
             $arguments = explode(' ', $arguments);
 
             // And remove leading and trailing spaces
-            $arguments = array_map(function($value) {return trim($value);}, $arguments);
+            $arguments = array_map(function ($value) {
+                return trim($value);
+            }, $arguments);
         }
 
         $this->command = $command;
@@ -219,6 +221,7 @@ class Job
 
     /**
      * @param int $priority
+     *
      * @return Job
      */
     public function setPriority(int $priority) : self
@@ -230,6 +233,7 @@ class Job
 
     /**
      * @param string $queue
+     *
      * @return Job
      */
     public function setQueue(string $queue) : self

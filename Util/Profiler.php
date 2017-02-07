@@ -1,29 +1,28 @@
 <?php
 
 namespace SerendipityHQ\Bundle\QueuesBundle\Util;
-use Symfony\Component\VarDumper\VarDumper;
 
 /**
  * A class to profile the Daemon during the execution.
  */
 class Profiler
 {
-    /** @var  float $startTime */
+    /** @var float $startTime */
     private $startTime;
 
-    /** @var  float $lastMicrotime The last time the self::profile() method was called */
+    /** @var float $lastMicrotime The last time the self::profile() method was called */
     private $lastMicrotime;
 
-    /** @var int $lastMemoryUsage  */
+    /** @var int $lastMemoryUsage */
     private $lastMemoryUsage;
 
-    /** @var  int $highestMemoryPeak */
+    /** @var int $highestMemoryPeak */
     private $highestMemoryPeak;
 
     /** @var int $iterations How many times Daemon::mustRun() was called in the "while(Daemon::mustRun())" */
     private $iterations = 0;
 
-    /** @var  float $maxRuntime After this amount of time the Daemon MUST die */
+    /** @var float $maxRuntime After this amount of time the Daemon MUST die */
     private $maxRuntime;
 
     /**
@@ -60,9 +59,9 @@ class Profiler
             ['memory_usage', $this->formatMemory($currentMemoryUsage)],
             ['memory_peak', $this->formatMemory($currentMemoryPeak)],
             // If the difference is negative, then this is an increase in memory consumption
-            ['memory_usage_difference', ($memoryDifference <= 0 ? '+' : '-') . abs($memoryDifference) . '%'],
-            ['memory_peak_difference', ($memoryPeakDifference <= 0 ? '+' : '-') . abs($memoryPeakDifference) . '%'],
-            ['elapsed_time', $currentMicrotime - $this->lastMicrotime]
+            ['memory_usage_difference', ($memoryDifference <= 0 ? '+' : '-').abs($memoryDifference).'%'],
+            ['memory_peak_difference', ($memoryPeakDifference <= 0 ? '+' : '-').abs($memoryPeakDifference).'%'],
+            ['elapsed_time', $currentMicrotime - $this->lastMicrotime],
         ];
 
         $this->lastMicrotime = $currentMicrotime;
@@ -127,11 +126,13 @@ class Profiler
 
     /**
      * @param float $time
+     *
      * @return string
      */
     private function formatTime(float $time)
     {
         $date = \DateTime::createFromFormat('U.u', number_format($time, 6, '.', ''));
+
         return $date->format('Y-m-d H:i:s.u');
     }
 }
