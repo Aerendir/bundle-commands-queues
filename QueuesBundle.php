@@ -6,7 +6,6 @@ use Doctrine\Bundle\DoctrineBundle\DependencyInjection\Compiler\DoctrineOrmMappi
 use SerendipityHQ\Bundle\QueuesBundle\DependencyInjection\CompilerPass\DaemonDependenciesPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
-use Symfony\Component\VarDumper\VarDumper;
 
 /**
  * {@inheritdoc}
@@ -20,7 +19,7 @@ class QueuesBundle extends Bundle
     {
         parent::build($container);
 
-        $modelDir = $this->getPath() . '/Resources/config/doctrine/mappings';
+        $modelDir = $this->getPath().'/Resources/config/doctrine/mappings';
         $mappings = [
             $modelDir => 'SerendipityHQ\Bundle\QueuesBundle\Model',
         ];

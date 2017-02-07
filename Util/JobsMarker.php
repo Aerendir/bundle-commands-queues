@@ -22,7 +22,7 @@ class JobsMarker
     }
 
     /**
-     * @param Job $job
+     * @param Job   $job
      * @param array $info
      */
     public function markJobAsAborted(Job $job, array $info)
@@ -31,7 +31,7 @@ class JobsMarker
     }
 
     /**
-     * @param Job $job
+     * @param Job   $job
      * @param array $info
      */
     public function markJobAsFailed(Job $job, array $info)
@@ -40,7 +40,7 @@ class JobsMarker
     }
 
     /**
-     * @param Job $job
+     * @param Job   $job
      * @param array $info
      */
     public function markJobAsFinished(Job $job, array $info)
@@ -49,7 +49,7 @@ class JobsMarker
     }
 
     /**
-     * @param Job $job
+     * @param Job   $job
      * @param array $info
      */
     public function markJobAsPending(Job $job, array $info)
@@ -66,9 +66,9 @@ class JobsMarker
     }
 
     /**
-     * @param Job $job
+     * @param Job    $job
      * @param string $status
-     * @param array $info
+     * @param array  $info
      */
     private function markJobAsClosed(Job $job, string $status, array $info)
     {
@@ -77,9 +77,9 @@ class JobsMarker
     }
 
     /**
-     * @param Job $job
+     * @param Job    $job
      * @param string $status
-     * @param array $info
+     * @param array  $info
      */
     private function markJob(Job $job, string $status, array $info = [])
     {

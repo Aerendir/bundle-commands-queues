@@ -13,7 +13,7 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class QueuesRunCommand extends ContainerAwareCommand
 {
-    /** @var  QueuesDaemon $daemon */
+    /** @var QueuesDaemon $daemon */
     private $daemon;
 
     /**
@@ -35,7 +35,7 @@ class QueuesRunCommand extends ContainerAwareCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $this->daemon = $this->getContainer()->get('queues.do_not_use.daemon');
-        
+
         // Do the initializing operations
         $this->daemon->initialize($input, $output);
 
@@ -47,7 +47,7 @@ class QueuesRunCommand extends ContainerAwareCommand
         $this->daemon->say('To quit the Queues Daemon use CONTROL-C.', 'commentLineNoBg');
 
         // Run the Daemon
-        while($this->daemon->isAlive()) {
+        while ($this->daemon->isAlive()) {
             // Start processing the next in the queue
             $this->daemon->processNextJob();
 
@@ -62,7 +62,7 @@ class QueuesRunCommand extends ContainerAwareCommand
 
         // Wait for the currently running jobs to finish
         $remainedJobs = $this->daemon->countRunningJobs();
-        while($this->daemon->hasRunningJobs()) {
+        while ($this->daemon->hasRunningJobs()) {
             // Create a progress bar to display the remaining jobs to process
             $progress = null;
             if (null !== $progress) {

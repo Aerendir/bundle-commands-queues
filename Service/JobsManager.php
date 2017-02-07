@@ -8,7 +8,6 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Process\ProcessBuilder;
-use Symfony\Component\VarDumper\VarDumper;
 
 /**
  * Manages the Jobs.
@@ -18,17 +17,17 @@ class JobsManager
     /** @var string $env */
     private $env;
 
-    /** @var  string $kernelRootDir */
+    /** @var string $kernelRootDir */
     private $kernelRootDir;
 
-    /** @var  string $verbosity */
+    /** @var string $verbosity */
     private $verbosity;
 
-    /** @var  EntityManager $entityManager */
+    /** @var EntityManager $entityManager */
     private $entityManager;
 
     /**
-     * @param string $kernelRootDir
+     * @param string        $kernelRootDir
      * @param EntityManager $entityManager
      */
     public function __construct(string $kernelRootDir, EntityManager $entityManager)
@@ -38,7 +37,7 @@ class JobsManager
     }
 
     /**
-     * @param InputInterface $input
+     * @param InputInterface  $input
      * @param OutputInterface $output
      */
     public function initialize(InputInterface $input, OutputInterface $output)
@@ -49,28 +48,30 @@ class JobsManager
 
     /**
      * @param Process $process
+     *
      * @return array
      */
     public function buildDefaultInfo(Process $process)
     {
         return [
-            'output' => $process->getOutput() . $process->getErrorOutput(),
+            'output'    => $process->getOutput().$process->getErrorOutput(),
             'exit_code' => $process->getExitCode(),
-            'debug' => [
-                'exit_code_text' => $process->getExitCodeText(),
-                'complete_command' => $process->getCommandLine(),
-                'input' => $process->getInput(),
-                'options' => $process->getOptions(),
-                'env' => $process->getEnv(),
-                'working_directory' => $process->getWorkingDirectory(),
+            'debug'     => [
+                'exit_code_text'                  => $process->getExitCodeText(),
+                'complete_command'                => $process->getCommandLine(),
+                'input'                           => $process->getInput(),
+                'options'                         => $process->getOptions(),
+                'env'                             => $process->getEnv(),
+                'working_directory'               => $process->getWorkingDirectory(),
                 'enhanced_sigchild_compatibility' => $process->getEnhanceSigchildCompatibility(),
-                'enhanced_windows_compatibility' => $process->getEnhanceWindowsCompatibility()
-            ]
+                'enhanced_windows_compatibility'  => $process->getEnhanceWindowsCompatibility(),
+            ],
         ];
     }
 
     /**
      * @param Job $job
+     *
      * @return \Symfony\Component\Process\Process
      */
     public function createJobProcess(Job $job)
@@ -88,7 +89,7 @@ class JobsManager
         $arguments[] = $job->getCommand();
 
         // Environment to use
-        $arguments[] = '--env=' . $this->env;
+        $arguments[] = '--env='.$this->env;
 
         // Verbosity level (only if not normal = agument verbosity not set in command)
         if (OutputInterface::VERBOSITY_NORMAL !== $this->verbosity) {
@@ -107,8 +108,9 @@ class JobsManager
     /**
      * Finds the path to the console file.
      *
-     * @return string
      * @throws \RuntimeException If the console file cannot be found.
+     *
+     * @return string
      */
     private function findConsole() : string
     {
@@ -144,7 +146,7 @@ class JobsManager
             case OutputInterface::VERBOSITY_NORMAL:
             default:
                 // This WILL NEVER be reached as default
-                return null;
+                return;
         }
     }
 }

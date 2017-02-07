@@ -10,7 +10,7 @@ use SerendipityHQ\Bundle\QueuesBundle\Model\Job;
  */
 class QueuesManager
 {
-    /** @var  EntityManager */
+    /** @var EntityManager */
     private $entityManager;
 
     /**
