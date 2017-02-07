@@ -4,6 +4,7 @@ namespace SerendipityHQ\Bundle\QueuesBundle\Controller;
 
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
+use SerendipityHQ\Bundle\QueuesBundle\Entity\Daemon;
 use SerendipityHQ\Bundle\QueuesBundle\Entity\Job;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 
@@ -17,6 +18,19 @@ class QueuesController extends Controller
      * @Template()
      */
     public function indexAction()
+    {
+        $jobs = $this->getDoctrine()->getRepository(Daemon::class)->findAll();
+
+        return [
+            'daemons' => $jobs
+        ];
+    }
+
+    /**
+     * @Route("/jobs", name="queues_jobs")
+     * @Template()
+     */
+    public function jobsAction()
     {
         $jobs = $this->getDoctrine()->getRepository(Job::class)->findBy([], ['createdAt' => 'DESC']);
 

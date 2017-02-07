@@ -3,6 +3,7 @@
 namespace SerendipityHQ\Bundle\QueuesBundle\Util;
 
 use Doctrine\ORM\EntityManager;
+use SerendipityHQ\Bundle\QueuesBundle\Entity\Daemon;
 use SerendipityHQ\Bundle\QueuesBundle\Entity\Job;
 
 /**
@@ -22,12 +23,13 @@ class JobsMarker
     }
 
     /**
-     * @param Job   $job
+     * @param Job $job
      * @param array $info
+     * @param Daemon $daemon
      */
-    public function markJobAsAborted(Job $job, array $info)
+    public function markJobAsAborted(Job $job, array $info, Daemon $daemon)
     {
-        $this->markJobAsClosed($job, Job::STATUS_ABORTED, $info);
+        $this->markJobAsClosed($job, Job::STATUS_ABORTED, $info, $daemon);
     }
 
     /**
@@ -49,12 +51,13 @@ class JobsMarker
     }
 
     /**
-     * @param Job   $job
+     * @param Job $job
      * @param array $info
+     * @param Daemon $daemon
      */
-    public function markJobAsPending(Job $job, array $info)
+    public function markJobAsPending(Job $job, array $info, Daemon $daemon)
     {
-        $this->markJob($job, Job::STATUS_PENDING, $info);
+        $this->markJob($job, Job::STATUS_PENDING, $info, $daemon);
     }
 
     /**
@@ -66,22 +69,24 @@ class JobsMarker
     }
 
     /**
-     * @param Job    $job
+     * @param Job $job
      * @param string $status
-     * @param array  $info
+     * @param array $info
+     * @param Daemon|null $daemon
      */
-    private function markJobAsClosed(Job $job, string $status, array $info)
+    private function markJobAsClosed(Job $job, string $status, array $info, Daemon $daemon = null)
     {
         $info['closed_at'] = new \DateTime();
-        $this->markJob($job, $status, $info);
+        $this->markJob($job, $status, $info, $daemon);
     }
 
     /**
-     * @param Job    $job
+     * @param Job $job
      * @param string $status
-     * @param array  $info
+     * @param array $info
+     * @param Daemon|null $daemon
      */
-    private function markJob(Job $job, string $status, array $info = [])
+    private function markJob(Job $job, string $status, array $info = [], Daemon $daemon = null)
     {
         $reflectedClass = new \ReflectionClass($job);
 
@@ -89,6 +94,15 @@ class JobsMarker
         $reflectedProperty = $reflectedClass->getProperty('status');
         $reflectedProperty->setAccessible(true);
         $reflectedProperty->setValue($job, $status);
+
+        // Then set the processing Daemon
+        if (null !== $daemon) {
+            $reflectedProperty = $reflectedClass->getProperty('processedBy');
+            $reflectedProperty->setAccessible(true);
+            $reflectedProperty->setValue($job, $daemon);
+
+            $this->entityManager->persist($daemon);
+        }
 
         // Now set the other info
         foreach ($info as $property => $value) {
@@ -109,7 +123,10 @@ class JobsMarker
                     $reflectedProperty = $reflectedClass->getProperty('startedAt');
                     break;
                 default:
-                    throw new \RuntimeException(sprintf('The property %s is not managed. Manage it or verify its spelling is correct.', $property));
+                    throw new \RuntimeException(sprintf(
+                            'The property %s is not managed. Manage it or verify its spelling is correct.',
+                            $property
+                        ));
             }
 
             // Set the property as accessible
@@ -119,6 +136,7 @@ class JobsMarker
 
         // Persist the entity again (just to be sure it is managed)
         $this->entityManager->persist($job);
+        // Then set the processing Daemon
         $this->entityManager->flush();
 
         // Now first set to null and then unset to save memory ASAP

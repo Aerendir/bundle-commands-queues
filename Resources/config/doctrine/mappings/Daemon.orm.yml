@@ -1,0 +1,30 @@
+SerendipityHQ\Bundle\QueuesBundle\Entity\Daemon:
+    type: entity
+    table: queues_daemons
+    id:
+        id:
+            type: integer
+            generator:
+                strategy: AUTO
+    fields:
+        config:
+            type: array
+            nullable: false
+        host:
+            type: string
+            nullable: false
+        pid:
+            type: integer
+            nullable: false
+        bornOn:
+            type: datetime
+            column: born_on
+            nullable: false
+        diedOn:
+            type: datetime
+            column: died_on
+            nullable: true
+    oneToMany:
+        processedJobs:
+            targetEntity: SerendipityHQ\Bundle\QueuesBundle\Entity\Job
+            mappedBy: processedBy

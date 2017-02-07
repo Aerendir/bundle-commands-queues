@@ -49,3 +49,10 @@ SerendipityHQ\Bundle\QueuesBundle\Entity\Job:
         exitCode:
             type: integer
             nullable: true
+    manyToOne:
+        processedBy:
+            targetEntity: SerendipityHQ\Bundle\QueuesBundle\Entity\Daemon
+            inversedBy: jobs
+            joinColumn:
+                name: processedBy
+                referencedColumnName: id

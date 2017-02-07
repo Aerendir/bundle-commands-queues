@@ -39,10 +39,7 @@ class QueuesRunCommand extends ContainerAwareCommand
         // Do the initializing operations
         $this->daemon->initialize($input, $output);
 
-        $this->daemon->say('SerendipityHQ Queue Bundle Daemon', 'title');
-        $this->daemon->say('Starting the Daemon...', 'infoLineNoBg');
         $this->daemon->sayProfilingInfo();
-        $this->daemon->say(sprintf('My PID is "%s".', getmygid()), 'infoLineNoBg');
         $this->daemon->say('Waiting for new ScheduledJobs to process...', 'success');
         $this->daemon->say('To quit the Queues Daemon use CONTROL-C.', 'commentLineNoBg');
 
@@ -56,6 +53,8 @@ class QueuesRunCommand extends ContainerAwareCommand
 
             // Optimize memory usage
             $this->daemon->optimize();
+
+            
         }
 
         $this->daemon->say('Entering shutdown sequence.', 'note');
@@ -78,6 +77,9 @@ class QueuesRunCommand extends ContainerAwareCommand
             // And wait a bit to give them the time to finish
             $this->daemon->wait();
         }
+
+        // Set the daemon as died
+        $this->daemon->requiescantInPace();
 
         $this->daemon->say('All done: Queue Daemon ended running. No more ScheduledJobs will be processed.', 'success');
 

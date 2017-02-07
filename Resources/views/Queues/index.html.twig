@@ -4,45 +4,25 @@
 {% block metaDescription %}TrustBack.me ti permette di conoscere la reputazione di un commerciante prima di comprare.{% endblock %}
 
 {% block body %}
-    <h1>Scheduled Jobs in the Queue</h1>
-    <p><small><a href="{{ url('queues_test') }}">Generate 100 random jobs.</a></small></p>
+    <h1>Created Queues Daemons</h1>
 
     <table class="table">
         <thead>
             <th>ID</th>
-            <th>Command</th>
-            <th>Priority</th>
-            <th>Queue</th>
-            <th>Status</th>
-            <th>Created at</th>
-            <th>Started at</th>
-            <th>Closed at</th>
-            <th>Exit code</th>
-            <th>Output</th>
-            <th>Debug</th>
+            <th>host</th>
+            <th>pid</th>
+            <th>Born on</th>
+            <th>Died on</th>
+            <th>Config</th>
         </thead>
-    {% for job in jobs %}
+    {% for daemon in daemons %}
         <tr>
-            <td>{{ job.id }}</td>
-            <td>
-                {{ job.command }}
-                {% if job.arguments %}
-                {{ job.arguments|join(' ') }}
-                {% endif %}
-            </td>
-            <td>{{ job.priority }}</td>
-            <td>{{ job.queue }}</td>
-            <td>{{ job.status }}</td>
-            <td>{% if job.createdAt %}{{ job.createdAt|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }}{% endif %}</td>
-            <td>{% if job.startedAt %}{{ job.startedAt|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }}{% endif %}</td>
-            <td>{% if job.closedAt %}{{ job.closedAt|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }}{% endif %}</td>
-            <td>{{ job.exitCode }}</td>
-        </tr>
-        <tr>
-            <td colspan="11"><pre>{{ job.output }}</pre></td>
-        </tr>
-        <tr>
-            <td colspan="11">{{ dump(job.debug) }}</td>
+            <td>{{ daemon.id }}</td>
+            <td>{{ daemon.host }}</td>
+            <td>{{ daemon.pid }}</td>
+            <td>{% if daemon.bornOn %}{{ daemon.bornOn|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }}{% endif %}</td>
+            <td>{% if daemon.diedOn %}{{ daemon.diedOn|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }}{% endif %}</td>
+            <td>{{ dump(daemon.config) }}</td>
         </tr>
     {% endfor %}
     </table>
