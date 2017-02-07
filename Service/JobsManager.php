@@ -23,17 +23,12 @@ class JobsManager
     /** @var string $verbosity */
     private $verbosity;
 
-    /** @var EntityManager $entityManager */
-    private $entityManager;
-
     /**
      * @param string        $kernelRootDir
-     * @param EntityManager $entityManager
      */
-    public function __construct(string $kernelRootDir, EntityManager $entityManager)
+    public function __construct(string $kernelRootDir)
     {
         $this->kernelRootDir = $kernelRootDir;
-        $this->entityManager = $entityManager;
     }
 
     /**
