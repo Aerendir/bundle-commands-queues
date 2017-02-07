@@ -21,7 +21,7 @@ class DaemonDependenciesPass implements CompilerPassInterface
     {
         // The Jobs Manager
         $jobsManagerDefinition = new Definition(JobsManager::class, [
-            $container->getParameter('kernel.root_dir')
+            $container->getParameter('kernel.root_dir'),
         ]);
 
         // The Jobs Marker
