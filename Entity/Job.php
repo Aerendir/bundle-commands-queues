@@ -1,6 +1,6 @@
 <?php
 
-namespace SerendipityHQ\Bundle\QueuesBundle\Model;
+namespace SerendipityHQ\Bundle\QueuesBundle\Entity;
 
 /**
  * Basic properties and methods o a Job.
@@ -66,6 +66,9 @@ class Job
 
     /** @var array $arguments */
     private $arguments;
+
+    /** @var  \DateTime $executeAfterTime */
+    private $executeAfterTime;
 
     /** @var \DateTime $createdAt */
     private $createdAt;
@@ -180,6 +183,14 @@ class Job
     }
 
     /**
+     * @return \DateTime|null
+     */
+    public function getExcuteAfterTime()
+    {
+        return $this->executeAfterTime;
+    }
+
+    /**
      * @return int
      */
     public function getPriority() : int
@@ -217,6 +228,17 @@ class Job
     public function getExitCode()
     {
         return $this->exitCode;
+    }
+
+    /**
+     * @param \DateTime $executeAfter
+     * @return Job
+     */
+    public function setExecuteAfterTime(\DateTime $executeAfter) : self
+    {
+        $this->executeAfterTime = $executeAfter;
+
+        return $this;
     }
 
     /**

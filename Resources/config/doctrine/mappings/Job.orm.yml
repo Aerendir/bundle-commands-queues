@@ -1,6 +1,7 @@
-SerendipityHQ\Bundle\QueuesBundle\Model\Job:
+SerendipityHQ\Bundle\QueuesBundle\Entity\Job:
     type: entity
     table: queues_scheduled_jobs
+    repositoryClass: SerendipityHQ\Bundle\QueuesBundle\Repository\JobRepository
     id:
         id:
             type: integer
@@ -14,19 +15,23 @@ SerendipityHQ\Bundle\QueuesBundle\Model\Job:
             type: array
             nullable: false
         createdAt:
-            name: created_at
+            column: created_at
             type: datetime
             nullable: false
         startedAt:
-            name: started_at
+            column: started_at
             type: datetime
             nullable: true
         closedAt:
-            name: closed_at
+            column: closed_at
+            type: datetime
+            nullable: true
+        executeAfterTime:
+            column: execute_after_time
             type: datetime
             nullable: true
         debug:
-            name: debug
+            column: debug
             type: array
             nullable: true
         priority:

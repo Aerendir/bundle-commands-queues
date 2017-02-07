@@ -21,7 +21,7 @@ class QueuesBundle extends Bundle
 
         $modelDir = $this->getPath().'/Resources/config/doctrine/mappings';
         $mappings = [
-            $modelDir => 'SerendipityHQ\Bundle\QueuesBundle\Model',
+            $modelDir => 'SerendipityHQ\Bundle\QueuesBundle\Entity',
         ];
 
         $ormCompilerClass = DoctrineOrmMappingsPass::class;
@@ -45,7 +45,7 @@ class QueuesBundle extends Bundle
             $mappings,
             ['queues.model_manager_name'],
             'queues.backend_orm',
-            ['QueuesBundle' => 'SerendipityHQ\Bundle\QueuesBundle\Model']
+            ['QueuesBundle' => 'SerendipityHQ\Bundle\QueuesBundle\Entity']
         );
     }
 }

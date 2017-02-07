@@ -2,7 +2,7 @@
 
 namespace SerendipityHQ\Bundle\QueuesBundle\Service;
 
-use SerendipityHQ\Bundle\QueuesBundle\Model\Job;
+use SerendipityHQ\Bundle\QueuesBundle\Entity\Job;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\Process;
