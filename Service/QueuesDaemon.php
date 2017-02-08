@@ -3,13 +3,11 @@
 namespace SerendipityHQ\Bundle\QueuesBundle\Service;
 
 use Doctrine\ORM\EntityManager;
-use SerendipityHQ\Bundle\ConsoleStyles\Console\Formatter\SerendipityHQOutputFormatter;
 use SerendipityHQ\Bundle\ConsoleStyles\Console\Style\SerendipityHQStyle;
 use SerendipityHQ\Bundle\QueuesBundle\Entity\Daemon;
 use SerendipityHQ\Bundle\QueuesBundle\Entity\Job;
 use SerendipityHQ\Bundle\QueuesBundle\Util\JobsMarker;
 use SerendipityHQ\Bundle\QueuesBundle\Util\Profiler;
-use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Process\Process;
@@ -19,7 +17,7 @@ use Symfony\Component\Process\Process;
  */
 class QueuesDaemon
 {
-    /** @var  Daemon $me Is the Daemon object */
+    /** @var Daemon $me Is the Daemon object */
     private $me;
 
     /** @var array $config */
@@ -198,7 +196,7 @@ class QueuesDaemon
             if ($this->verbosity >= SymfonyStyle::VERBOSITY_NORMAL) {
                 $this->ioWriter->infoLineNoBg(sprintf(
                     '[%s] Job "%s" on Queue "%s": The process didn\'t started due to some errors. See them in the'
-                    . ' logs of the Job.', $now->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue()
+                    .' logs of the Job.', $now->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue()
                 ));
             }
 
