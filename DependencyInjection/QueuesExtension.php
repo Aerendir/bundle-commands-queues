@@ -24,6 +24,10 @@ class QueuesExtension extends Extension
         $container->setParameter('queues.db_driver', $config['db_driver']);
         $container->setParameter(sprintf('queues.backend_%s', $config['db_driver']), true);
         $container->setParameter('queues.model_manager_name', $config['model_manager_name']);
+        $container->setParameter('queues.alive_daemons_check_interval', $config['alive_daemons_check_interval']);
+        $container->setParameter('queues.optimization_interval', $config['optimization_interval']);
+        $container->setParameter('queues.running_jobs_check_interval', $config['running_jobs_check_interval']);
+        $container->setParameter('queues.print_profiling_info_interval', $config['print_profiling_info_interval']);
         $container->setParameter('queues.config', [
             'max_runtime'         => $config['max_runtime'],
             'max_concurrent_jobs' => $config['max_concurrent_jobs'],

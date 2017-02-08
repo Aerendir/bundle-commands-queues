@@ -26,7 +26,7 @@ class DaemonDependenciesPass implements CompilerPassInterface
 
         // The Jobs Marker
         $jobsMarkerDefinition = new Definition(JobsMarker::class, [
-            $container->findDefinition('queues.entity_manager'),
+            $container->findDefinition('queues.do_not_use.entity_manager'),
         ]);
 
         // The Profiler
@@ -36,7 +36,7 @@ class DaemonDependenciesPass implements CompilerPassInterface
         $daemonDefinition = $container->findDefinition('queues.do_not_use.daemon');
         $daemonDefinition->addMethodCall('setDependencies', [
             $container->getParameter('queues.config'),
-            $container->findDefinition('queues.entity_manager'),
+            $container->findDefinition('queues.do_not_use.entity_manager'),
             $jobsManagerDefinition,
             $jobsMarkerDefinition,
             $profilerDefinition,

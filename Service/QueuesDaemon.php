@@ -67,30 +67,27 @@ class QueuesDaemon
     /**
      * Initializes the Daemon.
      *
-     * @param InputInterface  $input
-     * @param OutputInterface $output
+     * @param SerendipityHQStyle $ioWriter
      */
-    public function initialize(InputInterface $input, OutputInterface $output)
+    public function initialize(SerendipityHQStyle $ioWriter)
     {
-        // Create the Input/Output writer
-        $this->ioWriter = new SerendipityHQStyle($input, $output);
-        $this->ioWriter->setFormatter(new SerendipityHQOutputFormatter(true));
-        $this->verbosity = $output->getVerbosity();
+        $this->ioWriter = $ioWriter;
+        $this->verbosity = $this->ioWriter->getVerbosity();
 
-        $this->say('SerendipityHQ Queue Bundle Daemon', 'title');
-        $this->say('Starting the Daemon...', 'infoLineNoBg');
+        $this->ioWriter->title('SerendipityHQ Queue Bundle Daemon');
+        $ioWriter->infoLineNoBg('Starting the Daemon...');
 
         // Save the Daemon to the Database
         $this->me = new Daemon(gethostname(), getmypid(), $this->config);
         $this->entityManager->persist($this->me);
         $this->entityManager->flush();
-        $this->say(sprintf('I\'m Daemon "%s@%s".', $this->me->getPid(), $this->me->getHost()), 'successLineNoBg');
+        $ioWriter->successLineNoBg(sprintf('I\'m Daemon "%s@%s".', $this->me->getPid(), $this->me->getHost()));
 
         // Start the profiler
         $this->profiler->start($this->config['max_runtime']);
 
         // Initialize the JobsManager
-        $this->jobsManager->initialize($input, $output);
+        $this->jobsManager->initialize($ioWriter);
 
         // Disable logging in Doctrine
         $this->entityManager->getConfiguration()->setSQLLogger(null);
@@ -146,10 +143,6 @@ class QueuesDaemon
             return false;
         }
 
-        if ($this->profiler->getCurrentIteration() %10000 === 0) {
-            $this->sayProfilingInfo();
-        }
-
         return true;
     }
 
@@ -168,6 +161,11 @@ class QueuesDaemon
 
         // If no more jobs exists in the queue
         if (null === $job) {
+            if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
+                $this->ioWriter->infoLineNoBg(
+                    sprintf('No jobs to process. Idling fo %s seconds...', $this->config['idle_time'])
+                );
+            }
             sleep($this->config['idle_time']);
 
             return;
@@ -244,7 +242,7 @@ class QueuesDaemon
     /**
      * Processes the Jobs already running.
      */
-    public function processRunningJobs()
+    public function checkRunningJobs()
     {
         foreach ($this->runningJobs as $index => $runningJob) {
             // If the running job is porcessed correctly...
@@ -324,28 +322,14 @@ class QueuesDaemon
      */
     public function optimize()
     {
-        // Free some memory if this is the %n iteration
-        if ($this->profiler->getCurrentIteration() % 10000 === 0) {
-            // Force the garbage collection after a command is closed
-            gc_collect_cycles();
-        }
-    }
-
-    /**
-     * @param $message
-     * @param string $method
-     */
-    public function say($message, string $method)
-    {
-        if ($this->verbosity >= SymfonyStyle::VERBOSITY_NORMAL) {
-            $this->ioWriter->$method($message);
-        }
+        // Force the garbage collection after a command is closed
+        gc_collect_cycles();
     }
 
     /**
      * Prints the current profiling info.
      */
-    public function sayProfilingInfo()
+    public function printProfilingInfo()
     {
         $this->ioWriter->table(
             ['', 'Profiling info'],
@@ -381,6 +365,22 @@ class QueuesDaemon
         $this->jobsManager = $jobsManager;
         $this->jobsMarker = $jobsMarker;
         $this->profiler = $profiler;
+    }
+
+    /**
+     * @return Daemon
+     */
+    public function getIdentity() : Daemon
+    {
+        return $this->me;
+    }
+
+    /**
+     * @return Profiler
+     */
+    public function getProfiler() : Profiler
+    {
+        return $this->profiler;
     }
 
     /**

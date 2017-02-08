@@ -62,6 +62,6 @@ class QueuesController extends Controller
             $this->get('queues')->schedule($scheduledJob);
         }
 
-        return $this->redirectToRoute('queues_index');
+        return $this->redirectToRoute('queues_jobs');
     }
 }

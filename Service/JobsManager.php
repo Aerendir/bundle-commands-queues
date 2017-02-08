@@ -2,6 +2,7 @@
 
 namespace SerendipityHQ\Bundle\QueuesBundle\Service;
 
+use SerendipityHQ\Bundle\ConsoleStyles\Console\Style\SerendipityHQStyle;
 use SerendipityHQ\Bundle\QueuesBundle\Entity\Job;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -31,13 +32,12 @@ class JobsManager
     }
 
     /**
-     * @param InputInterface  $input
-     * @param OutputInterface $output
+     * @param SerendipityHQStyle $ioWriter
      */
-    public function initialize(InputInterface $input, OutputInterface $output)
+    public function initialize(SerendipityHQStyle $ioWriter)
     {
-        $this->env = $input->getOption('env');
-        $this->verbosity = $output->getVerbosity();
+        $this->env = $ioWriter->getInput()->getOption('env');
+        $this->verbosity = $ioWriter->getVerbosity();
     }
 
     /**

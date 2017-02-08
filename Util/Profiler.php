@@ -54,23 +54,24 @@ class Profiler
         $memoryPeakDifference = 0 !== $memoryPeakDifference ? round($memoryPeakDifference / $this->highestMemoryPeak * 100, 2) : 0;
 
         $return = [
-            ['', 'microtime', $this->formatTime($currentMicrotime)],
-            ['', 'last_microtime', $this->formatTime($this->lastMicrotime)],
-            ['', 'memory_usage', $this->formatMemory($currentMemoryUsage)],
-            ['', 'memory_peak', $this->formatMemory($currentMemoryPeak)],
-            ['', 'elapsed_time', $currentMicrotime - $this->lastMicrotime],
+            ['', 'Microtime', $this->formatTime($currentMicrotime)],
+            ['', 'Last Microtime', $this->formatTime($this->lastMicrotime)],
+            ['', 'Memory Usage (real)', $this->formatMemory($currentMemoryUsage)],
+            ['', 'Memory Peak (real)', $this->formatMemory($currentMemoryPeak)],
+            ['', 'Current Iteration', $this->getCurrentIteration()],
+            ['', 'Elapsed Time', $currentMicrotime - $this->lastMicrotime],
             // If the difference is negative, then this is an increase in memory consumption
             [
-                $memoryDifference <= 0
+                $memoryDifference >= 0
                     ? sprintf('<%s>%s</>', 'success-nobg', "\xE2\x9C\x94")
                     : sprintf('<%s>%s</>', 'error-nobg', "\xE2\x9C\x96"),
-                'memory_usage_difference',
+                'Memory Usage Difference (real)',
                 ($memoryDifference <= 0 ? '+' : '-').abs($memoryDifference).'%'],
             [
-                $memoryDifference <= 0
+                $memoryDifference >= 0
                     ? sprintf('<%s>%s</>', 'success-nobg', "\xE2\x9C\x94")
                     : sprintf('<%s>%s</>', 'error-nobg', "\xE2\x9C\x96"),
-                'memory_peak_difference',
+                'Memory Peak Difference (real)',
                 ($memoryPeakDifference <= 0 ? '+' : '-').abs($memoryPeakDifference).'%'],
         ];
 
@@ -87,6 +88,14 @@ class Profiler
     public function getCurrentIteration() : int
     {
         return $this->iterations;
+    }
+
+    /**
+     * @return float
+     */
+    public function getLastMicrotime(): float
+    {
+        return $this->lastMicrotime;
     }
 
     /**
