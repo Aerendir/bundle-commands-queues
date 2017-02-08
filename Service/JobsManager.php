@@ -4,7 +4,6 @@ namespace SerendipityHQ\Bundle\QueuesBundle\Service;
 
 use SerendipityHQ\Bundle\ConsoleStyles\Console\Style\SerendipityHQStyle;
 use SerendipityHQ\Bundle\QueuesBundle\Entity\Job;
-use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Process\ProcessBuilder;

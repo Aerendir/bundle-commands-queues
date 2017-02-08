@@ -67,7 +67,7 @@ class Job
     /** @var array $arguments */
     private $arguments;
 
-    /** @var  \DateTime $executeAfterTime */
+    /** @var \DateTime $executeAfterTime */
     private $executeAfterTime;
 
     /** @var \DateTime $createdAt */
@@ -85,7 +85,7 @@ class Job
     /** @var int $priority */
     private $priority;
 
-    /** @var  Daemon $processedBy The daemon that processed the Job. */
+    /** @var Daemon $processedBy The daemon that processed the Job. */
     private $processedBy;
 
     /** @var string $queue */
@@ -243,6 +243,7 @@ class Job
 
     /**
      * @param \DateTime $executeAfter
+     *
      * @return Job
      */
     public function setExecuteAfterTime(\DateTime $executeAfter) : self
@@ -266,6 +267,7 @@ class Job
 
     /**
      * @param Daemon $daemon
+     *
      * @return Job
      */
     public function setProcessedBy(Daemon $daemon) : self

@@ -66,13 +66,13 @@ class Profiler
                     ? sprintf('<%s>%s</>', 'success-nobg', "\xE2\x9C\x94")
                     : sprintf('<%s>%s</>', 'error-nobg', "\xE2\x9C\x96"),
                 'Memory Usage Difference (real)',
-                ($memoryDifference <= 0 ? '+' : '-').abs($memoryDifference).'%'],
+                ($memoryDifference <= 0 ? '+' : '-').abs($memoryDifference).'%', ],
             [
                 $memoryDifference >= 0
                     ? sprintf('<%s>%s</>', 'success-nobg', "\xE2\x9C\x94")
                     : sprintf('<%s>%s</>', 'error-nobg', "\xE2\x9C\x96"),
                 'Memory Peak Difference (real)',
-                ($memoryPeakDifference <= 0 ? '+' : '-').abs($memoryPeakDifference).'%'],
+                ($memoryPeakDifference <= 0 ? '+' : '-').abs($memoryPeakDifference).'%', ],
         ];
 
         $this->lastMicrotime = $currentMicrotime;

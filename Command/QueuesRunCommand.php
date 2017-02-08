@@ -136,10 +136,9 @@ class QueuesRunCommand extends ContainerAwareCommand
     private function checkAliveDaemons(SerendipityHQStyle $ioWriter)
     {
         $strugglers = [];
-        while(null !== $daemon = $this->getContainer()->get('queues.do_not_use.entity_manager')
+        while (null !== $daemon = $this->getContainer()->get('queues.do_not_use.entity_manager')
                 ->getRepository('QueuesBundle:Daemon')->findNextAlive($this->daemon->getIdentity())) {
-
-            if(false === $this->isDaemonStillRunning($daemon)) {
+            if (false === $this->isDaemonStillRunning($daemon)) {
                 $daemon->requiescatInPace(Daemon::MORTIS_STRAGGLER);
                 $this->getContainer()->get('queues.do_not_use.entity_manager')->flush();
                 $this->getContainer()->get('queues.do_not_use.entity_manager')->detach($daemon);
@@ -165,7 +164,7 @@ class QueuesRunCommand extends ContainerAwareCommand
                     $strugglerDaemon->getHost(),
                     $strugglerDaemon->getBornOn()->format('Y-m-d H:i:s'),
                     $strugglerDaemon->getDiedOn()->format('Y-m-d H:i:s'),
-                    $strugglerDaemon->getMortisCausa()
+                    $strugglerDaemon->getMortisCausa(),
                 ];
             }
             $ioWriter->table(
@@ -179,6 +178,7 @@ class QueuesRunCommand extends ContainerAwareCommand
      * Checks a Daemon is still running checking its process still exists.
      *
      * @param Daemon $daemon
+     *
      * @return bool
      */
     private function isDaemonStillRunning(Daemon $daemon)
@@ -187,8 +187,8 @@ class QueuesRunCommand extends ContainerAwareCommand
         exec(sprintf('ps -ef | grep %s', $daemon->getPid()), $lines);
 
         // Search the line with this command name: this indicates the process is still running
-        foreach($lines as $line) {
-            if(false !== strpos($line, $this->getName())) {
+        foreach ($lines as $line) {
+            if (false !== strpos($line, $this->getName())) {
                 return true;
             }
         }

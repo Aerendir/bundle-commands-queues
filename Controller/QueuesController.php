@@ -22,7 +22,7 @@ class QueuesController extends Controller
         $jobs = $this->getDoctrine()->getRepository(Daemon::class)->findAll();
 
         return [
-            'daemons' => $jobs
+            'daemons' => $jobs,
         ];
     }
 
@@ -35,7 +35,7 @@ class QueuesController extends Controller
         $jobs = $this->getDoctrine()->getRepository(Job::class)->findBy([], ['createdAt' => 'DESC']);
 
         return [
-            'jobs' => $jobs
+            'jobs' => $jobs,
         ];
     }
 
@@ -51,11 +51,11 @@ class QueuesController extends Controller
             $scheduledJob = new Job('queues:test', $arguments);
 
             // Decide if this will be executed in the future
-            $condition = rand(0,10);
+            $condition = rand(0, 10);
             if (7 <= $condition) {
-                $days = rand(1,10);
+                $days = rand(1, 10);
                 $future = new \DateTime();
-                $future->modify('+' . $days . ' day');
+                $future->modify('+'.$days.' day');
                 $scheduledJob->setExecuteAfterTime($future);
             }
 

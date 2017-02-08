@@ -1,6 +1,7 @@
 <?php
 
 namespace SerendipityHQ\Bundle\QueuesBundle\Entity;
+
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 
@@ -15,34 +16,34 @@ class Daemon
     /** Used when a Daemon is not found anymore during the check of queues:run checkAliveDamons */
     const MORTIS_STRAGGLER = 'straggler';
 
-    /** @var  int $id */
+    /** @var int $id */
     private $id;
 
-    /** @var  array $config */
+    /** @var array $config */
     private $config = [];
 
     /** @var string $host */
     private $host;
 
-    /** @var  int $pid */
+    /** @var int $pid */
     private $pid;
 
-    /** @var  \DateTime $bornOn */
+    /** @var \DateTime $bornOn */
     private $bornOn;
 
-    /** @var  \DateTime $diedOn */
+    /** @var \DateTime $diedOn */
     private $diedOn;
 
-    /** @var  string $mortisCausa */
+    /** @var string $mortisCausa */
     private $mortisCausa;
 
-    /** @var  Collection $processedJobs */
+    /** @var Collection $processedJobs */
     private $processedJobs;
 
     /**
      * @param string $host
-     * @param int $pid
-     * @param array $config
+     * @param int    $pid
+     * @param array  $config
      */
     public function __construct(string $host, int $pid, array $config = [])
     {
