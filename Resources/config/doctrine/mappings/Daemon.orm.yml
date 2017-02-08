@@ -1,6 +1,7 @@
 SerendipityHQ\Bundle\QueuesBundle\Entity\Daemon:
     type: entity
     table: queues_daemons
+    repositoryClass: SerendipityHQ\Bundle\QueuesBundle\Repository\DaemonRepository
     id:
         id:
             type: integer
@@ -23,6 +24,10 @@ SerendipityHQ\Bundle\QueuesBundle\Entity\Daemon:
         diedOn:
             type: datetime
             column: died_on
+            nullable: true
+        mortisCausa:
+            type: string
+            column: mortis_causa
             nullable: true
     oneToMany:
         processedJobs:

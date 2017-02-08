@@ -9,6 +9,12 @@ use Doctrine\Common\Collections\Collection;
  */
 class Daemon
 {
+    /** Used when a Daemon is killed due to a PCNTL signal */
+    const MORTIS_SIGNAL = 'signal';
+
+    /** Used when a Daemon is not found anymore during the check of queues:run checkAliveDamons */
+    const MORTIS_STRAGGLER = 'straggler';
+
     /** @var  int $id */
     private $id;
 
@@ -26,6 +32,9 @@ class Daemon
 
     /** @var  \DateTime $diedOn */
     private $diedOn;
+
+    /** @var  string $mortisCausa */
+    private $mortisCausa;
 
     /** @var  Collection $processedJobs */
     private $processedJobs;
@@ -79,6 +88,14 @@ class Daemon
     /**
      * @return string
      */
+    public function getMortisCausa()
+    {
+        return $this->mortisCausa;
+    }
+
+    /**
+     * @return string
+     */
     public function getHost() : string
     {
         return $this->host;
@@ -104,10 +121,13 @@ class Daemon
      * Sets the date on which the daemon died.
      *
      * Requiescat In Pace (I'm Resting In Pace).
+     *
+     * @param string $mortisCausa
      */
-    public function requiescatInPace()
+    public function requiescatInPace(string $mortisCausa = self::MORTIS_SIGNAL)
     {
         $this->diedOn = new \DateTime();
+        $this->mortisCausa = $mortisCausa;
     }
 
     /**

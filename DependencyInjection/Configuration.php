@@ -40,20 +40,24 @@ class Configuration implements ConfigurationInterface
 
         $rootNode
             ->children()
-                ->scalarNode('db_driver')
-                    ->validate()
-                        ->ifNotInArray(self::getSupportedDrivers())
-                        ->thenInvalid('The driver %s is not supported. Please choose one of '.json_encode(self::getSupportedDrivers()))
-                    ->end()
-                    ->cannotBeOverwritten()
-                    ->defaultValue('orm')
-                    ->cannotBeEmpty()
-                ->end()
-                ->scalarNode('model_manager_name')->defaultNull()->end()
-                ->integerNode('max_runtime')->defaultValue(100)->end()
-                ->integerNode('max_concurrent_jobs')->defaultValue(1)->end()
-                ->integerNode('idle_time')->defaultValue(10)->end()
-                ->scalarNode('worker_name')->defaultValue('DefaultWorker')->end();
+            ->scalarNode('db_driver')
+            ->validate()
+            ->ifNotInArray(self::getSupportedDrivers())
+            ->thenInvalid('The driver %s is not supported. Please choose one of '.json_encode(self::getSupportedDrivers()))
+            ->end()
+            ->cannotBeOverwritten()
+            ->defaultValue('orm')
+            ->cannotBeEmpty()
+            ->end()
+            ->scalarNode('model_manager_name')->defaultNull()->end()
+            ->integerNode('max_runtime')->defaultValue(100)->end()
+            ->integerNode('max_concurrent_jobs')->defaultValue(1)->end()
+            ->integerNode('idle_time')->defaultValue(10)->end()
+            ->scalarNode('worker_name')->defaultValue('DefaultWorker')->end()
+            ->integerNode('print_profiling_info_interval')->defaultValue(350)->end()
+            ->integerNode('alive_daemons_check_interval')->defaultValue(100000)->end()
+            ->integerNode('optimization_interval')->defaultValue(100)->end()
+            ->integerNode('running_jobs_check_interval')->defaultValue(10)->end();
 
         return $treeBuilder;
     }
