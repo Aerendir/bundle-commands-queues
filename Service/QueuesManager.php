@@ -1,12 +1,12 @@
 <?php
 
-namespace SerendipityHQ\Bundle\QueuesBundle\Service;
+namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Service;
 
 use Doctrine\ORM\EntityManager;
-use SerendipityHQ\Bundle\QueuesBundle\Entity\Job;
+use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
 
 /**
- * Manages the Queues.
+ * Manages the commands_queues.
  */
 class QueuesManager
 {

@@ -1,5 +1,5 @@
 services:
-    queues.do_not_use.entity_manager:
+    commands_queues.do_not_use.entity_manager:
         class: Doctrine\ORM\EntityManager
         factory: ["@doctrine", getManager]
-        arguments: ["%queues.model_manager_name%"]
+        arguments: ["%commands_queues.model_manager_name%"]

@@ -1,7 +1,7 @@
-SerendipityHQ\Bundle\QueuesBundle\Entity\Job:
+SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job:
     type: entity
     table: queues_scheduled_jobs
-    repositoryClass: SerendipityHQ\Bundle\QueuesBundle\Repository\JobRepository
+    repositoryClass: SerendipityHQ\Bundle\CommandsQueuesBundle\Repository\JobRepository
     id:
         id:
             type: integer
@@ -51,14 +51,14 @@ SerendipityHQ\Bundle\QueuesBundle\Entity\Job:
             nullable: true
     manyToOne:
         processedBy:
-            targetEntity: SerendipityHQ\Bundle\QueuesBundle\Entity\Daemon
+            targetEntity: SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Daemon
             inversedBy: jobs
             joinColumn:
                 name: processedBy
                 referencedColumnName: id
     manyToMany:
         parentDependencies:
-            targetEntity: SerendipityHQ\Bundle\QueuesBundle\Entity\Job
+            targetEntity: SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job
             inversedBy: childDependencies
             joinTable:
                 name: queues_jobs_chains
@@ -69,6 +69,6 @@ SerendipityHQ\Bundle\QueuesBundle\Entity\Job:
                     parent_job:
                         referencedColumnName: id
         childDependencies:
-            targetEntity: SerendipityHQ\Bundle\QueuesBundle\Entity\Job
+            targetEntity: SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job
             mappedBy: parentDependencies
 

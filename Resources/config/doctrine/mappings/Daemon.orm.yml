@@ -1,7 +1,7 @@
-SerendipityHQ\Bundle\QueuesBundle\Entity\Daemon:
+SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Daemon:
     type: entity
     table: queues_daemons
-    repositoryClass: SerendipityHQ\Bundle\QueuesBundle\Repository\DaemonRepository
+    repositoryClass: SerendipityHQ\Bundle\CommandsQueuesBundle\Repository\DaemonRepository
     id:
         id:
             type: integer
@@ -31,5 +31,5 @@ SerendipityHQ\Bundle\QueuesBundle\Entity\Daemon:
             nullable: true
     oneToMany:
         processedJobs:
-            targetEntity: SerendipityHQ\Bundle\QueuesBundle\Entity\Job
+            targetEntity: SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job
             mappedBy: processedBy

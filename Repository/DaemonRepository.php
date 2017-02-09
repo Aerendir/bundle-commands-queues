@@ -1,10 +1,10 @@
 <?php
 
-namespace SerendipityHQ\Bundle\QueuesBundle\Repository;
+namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Repository;
 
 use Doctrine\ORM\EntityRepository;
-use SerendipityHQ\Bundle\QueuesBundle\Entity\Daemon;
-use SerendipityHQ\Bundle\QueuesBundle\Entity\Job;
+use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Daemon;
+use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
 
 /**
  * {@inheritdoc}

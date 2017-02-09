@@ -1,6 +1,6 @@
 <?php
 
-namespace SerendipityHQ\Bundle\QueuesBundle\Util;
+namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Util;
 
 /**
  * A class to profile the Daemon during the execution.

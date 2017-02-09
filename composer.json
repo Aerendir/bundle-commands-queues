@@ -1,6 +1,6 @@
 {
-    "name": "serendipity_hq/queues-bundle",
-    "description": "Manage queues and processes them in your Symfony app.",
+    "name": "serendipity_hq/commands-queues-bundle",
+    "description": "Manage queues of commands and processes them in your Symfony app.",
     "type": "symfony-bundle",
     "keywords": [],
     "license": "MIT",
@@ -26,7 +26,7 @@
     },
     "autoload": {
         "psr-4": {
-            "SerendipityHQ\\Bundle\\QueuesBundle\\": ""
+            "SerendipityHQ\\Bundle\\CommandsQueuesBundle\\": ""
         }
     }
 }

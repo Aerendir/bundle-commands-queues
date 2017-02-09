@@ -14,7 +14,7 @@
  *            could disclose this text.
  */
 
-namespace SerendipityHQ\Bundle\QueuesBundle\Command;
+namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Command;
 
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputDefinition;
@@ -34,7 +34,7 @@ class TestCommand extends ContainerAwareCommand
     {
         $this
             ->setName('queues:test')
-            ->setDescription('A test command to test SHQQueuesBundle.')
+            ->setDescription('A test command to test SHQCommandsQueuesBundle.')
             ->setDefinition(
                 new InputDefinition([
                     new InputOption('id', 'id', InputOption::VALUE_REQUIRED),

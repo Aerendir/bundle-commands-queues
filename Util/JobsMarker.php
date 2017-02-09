@@ -1,10 +1,10 @@
 <?php
 
-namespace SerendipityHQ\Bundle\QueuesBundle\Util;
+namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Util;
 
 use Doctrine\ORM\EntityManager;
-use SerendipityHQ\Bundle\QueuesBundle\Entity\Daemon;
-use SerendipityHQ\Bundle\QueuesBundle\Entity\Job;
+use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Daemon;
+use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
 
 /**
  * Changes the status of Jobs during their execution attaching to them execution info.

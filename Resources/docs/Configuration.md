@@ -44,7 +44,7 @@ The control panel will show you some useful information, as, for example, the ex
 To configure the routes, import them in your `routing.yml`  file:
 
     queues_bundle:
-        resource: '@QueuesBundle/Controller'
+        resource: '@SHQCommandsQueuesBundle/Controller'
         type:     annotation
         prefix: /_queues
 
@@ -60,4 +60,4 @@ To secure the route, you can add a rule to your `security.yml` file like this:
         access_control:
             - { path: ^/_queues, role: ROLE_SUPER_ADMIN }
 
-([Go back to index](Index.md)) | Next step: [Use the bundle](Use-the-ShqQueuesBundle.md)
+([Go back to index](Index.md)) | Next step: [Use the bundle](Use-the-SHQCommandsQueuesBundle.md)

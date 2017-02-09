@@ -1,7 +1,7 @@
 How to use Serendipity HQ Quesus Bundle
 =======================================
 
-To use ShqQueuesBundle you have to do basiclly two things:
+To use SHQCommandsQueuesBundle you have to do basiclly two things:
 
 1. Start the daemon that listens for new `Job`s to process;
 2. Create new `Job`s to process.

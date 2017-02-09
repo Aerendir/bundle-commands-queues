@@ -8,7 +8,7 @@ Open a command console, enter your project directory and execute the
 following command to download the latest stable version of this bundle:
 
 ```bash
-$ composer require serendipity_hq/queues-bundle "dev-master"
+$ composer require serendipity_hq/commands-queues-bundle "dev-master"
 ```
 
 _Note: Use the version you like. Add `@dev` to get the last development version. This version may not be stable._
@@ -35,7 +35,7 @@ class AppKernel extends Kernel
         $bundles = array(
             // ...
 
-            new SerendipityHQ\Bundle\QueuesBundle\QueuesBundle(),
+            new SerendipityHQ\Bundle\CommandsQueuesBundle\SHQCommandsQueuesBundle(),
         );
 
         // ...

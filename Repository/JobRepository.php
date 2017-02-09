@@ -1,10 +1,10 @@
 <?php
 
-namespace SerendipityHQ\Bundle\QueuesBundle\Repository;
+namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Repository;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityRepository;
-use SerendipityHQ\Bundle\QueuesBundle\Entity\Job;
+use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
 
 /**
  * {@inheritdoc}
@@ -13,6 +13,7 @@ class JobRepository extends EntityRepository
 {
     /**
      * @param int $id
+     *
      * @return null|object|Job
      */
     public function findOneById(int $id)
@@ -46,8 +47,6 @@ class JobRepository extends EntityRepository
             // Remove it from the Entity Manager to free some memory
             $this->_em->detach($job);
         }
-
-        return null;
     }
 
     /**

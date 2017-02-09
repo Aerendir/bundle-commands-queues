@@ -6,7 +6,7 @@
         <ini name="error_reporting" value="-16385"/>
     </php>
     <testsuites>
-        <testsuite name="QueuesBundle for the Symfony Framework.">
+        <testsuite name="SHQCommandsQueuesBundle for the Symfony Framework.">
             <directory>./Tests</directory>
         </testsuite>
     </testsuites>
@@ -21,7 +21,7 @@
         </whitelist>
     </filter>
     <logging>
-        <log type="coverage-html" target="./build/coverage" title="QueuesBundle for the Symfony Framework" charset="UTF-8" yui="true" highlight="true"
+        <log type="coverage-html" target="./build/coverage" title="SHQCommandsQueuesBundle for the Symfony Framework" charset="UTF-8" yui="true" highlight="true"
              lowUpperBound="35" highLowerBound="70" />
         <log type="coverage-clover" target="build/logs/clover.xml"/>
     </logging>

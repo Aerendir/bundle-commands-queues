@@ -1,12 +1,12 @@
 <?php
 
-namespace SerendipityHQ\Bundle\QueuesBundle\Controller;
+namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Controller;
 
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
-use SerendipityHQ\Bundle\QueuesBundle\Entity\Daemon;
-use SerendipityHQ\Bundle\QueuesBundle\Entity\Job;
+use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Daemon;
+use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 
 /**
@@ -43,7 +43,7 @@ class QueuesController extends Controller
     /**
      * @Route("/job/{id}", name="queues_job")
      * @Template()
-     * @ParamConverter("job", class="QueuesBundle:Job", options={
+     * @ParamConverter("job", class="SHQCommandsQueuesBundle:Job", options={
      *     "repository_method" = "findOneById",
      *     "mapping": {"id": "id"},
      *     "map_method_signature" = true

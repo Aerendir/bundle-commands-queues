@@ -1,8 +1,8 @@
 services:
     queues:
-        class: SerendipityHQ\Bundle\QueuesBundle\Service\QueuesManager
-        arguments: ["@queues.do_not_use.entity_manager"]
+        class: SerendipityHQ\Bundle\CommandsQueuesBundle\Service\QueuesManager
+        arguments: ["@commands_queues.do_not_use.entity_manager"]
 #This service is meant to be privately used by QueuesRunCommand
-    queues.do_not_use.daemon:
-        class: SerendipityHQ\Bundle\QueuesBundle\Service\QueuesDaemon
-        arguments: ["@queues.do_not_use.entity_manager"]
+    commands_queues.do_not_use.daemon:
+        class: SerendipityHQ\Bundle\CommandsQueuesBundle\Service\QueuesDaemon
+        arguments: ["@commands_queues.do_not_use.entity_manager"]

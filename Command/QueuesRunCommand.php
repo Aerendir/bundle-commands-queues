@@ -1,11 +1,11 @@
 <?php
 
-namespace SerendipityHQ\Bundle\QueuesBundle\Command;
+namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Command;
 
 use SerendipityHQ\Bundle\ConsoleStyles\Console\Formatter\SerendipityHQOutputFormatter;
 use SerendipityHQ\Bundle\ConsoleStyles\Console\Style\SerendipityHQStyle;
-use SerendipityHQ\Bundle\QueuesBundle\Entity\Daemon;
-use SerendipityHQ\Bundle\QueuesBundle\Service\QueuesDaemon;
+use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Daemon;
+use SerendipityHQ\Bundle\CommandsQueuesBundle\Service\QueuesDaemon;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputInterface;
@@ -42,7 +42,7 @@ class QueuesRunCommand extends ContainerAwareCommand
         $ioWriter->setFormatter(new SerendipityHQOutputFormatter(true));
 
         // Do the initializing operations
-        $this->daemon = $this->getContainer()->get('queues.do_not_use.daemon');
+        $this->daemon = $this->getContainer()->get('commands_queues.do_not_use.daemon');
         $this->daemon->initialize($ioWriter);
         $this->daemon->printProfilingInfo();
 
@@ -58,7 +58,7 @@ class QueuesRunCommand extends ContainerAwareCommand
             $this->daemon->processNextJob();
 
             // Then process jobs already running
-            $runningJobsCheckInterval = $this->getContainer()->getParameter('queues.running_jobs_check_interval');
+            $runningJobsCheckInterval = $this->getContainer()->getParameter('commands_queues.running_jobs_check_interval');
             if ($this->daemon->getProfiler()->getCurrentIteration() % $runningJobsCheckInterval === 0) {
                 if ($ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
                     $ioWriter->infoLineNoBg('Checking running jobs...');
@@ -67,7 +67,7 @@ class QueuesRunCommand extends ContainerAwareCommand
             }
 
             // Check alive daemons
-            $aliveDaemonsCheckInterval = $this->getContainer()->getParameter('queues.alive_daemons_check_interval');
+            $aliveDaemonsCheckInterval = $this->getContainer()->getParameter('commands_queues.alive_daemons_check_interval');
             if ($this->daemon->getProfiler()->getCurrentIteration() % $aliveDaemonsCheckInterval === 0) {
                 if ($ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
                     $ioWriter->infoLineNoBg('Checking alive Daemons...');
@@ -76,7 +76,7 @@ class QueuesRunCommand extends ContainerAwareCommand
             }
 
             // Free some memory
-            $optimizationInterval = $this->getContainer()->getParameter('queues.optimization_interval');
+            $optimizationInterval = $this->getContainer()->getParameter('commands_queues.optimization_interval');
             if ($this->daemon->getProfiler()->getCurrentIteration() % $optimizationInterval === 0) {
                 if ($ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
                     $ioWriter->infoLineNoBg('Optimizing the Daemons...');
@@ -85,7 +85,7 @@ class QueuesRunCommand extends ContainerAwareCommand
             }
 
             // Print profiling info
-            $printProfilingInfoInterval = $this->getContainer()->getParameter('queues.print_profiling_info_interval');
+            $printProfilingInfoInterval = $this->getContainer()->getParameter('commands_queues.print_profiling_info_interval');
             if (
                 (microtime(true) - $this->daemon->getProfiler()->getLastMicrotime()) >= $printProfilingInfoInterval
                 && $ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE
@@ -136,12 +136,12 @@ class QueuesRunCommand extends ContainerAwareCommand
     private function checkAliveDaemons(SerendipityHQStyle $ioWriter)
     {
         $strugglers = [];
-        while (null !== $daemon = $this->getContainer()->get('queues.do_not_use.entity_manager')
+        while (null !== $daemon = $this->getContainer()->get('commands_queues.do_not_use.entity_manager')
                 ->getRepository('QueuesBundle:Daemon')->findNextAlive($this->daemon->getIdentity())) {
             if (false === $this->isDaemonStillRunning($daemon)) {
                 $daemon->requiescatInPace(Daemon::MORTIS_STRAGGLER);
-                $this->getContainer()->get('queues.do_not_use.entity_manager')->flush();
-                $this->getContainer()->get('queues.do_not_use.entity_manager')->detach($daemon);
+                $this->getContainer()->get('commands_queues.do_not_use.entity_manager')->flush();
+                $this->getContainer()->get('commands_queues.do_not_use.entity_manager')->detach($daemon);
                 $strugglers[] = $daemon;
             }
         }

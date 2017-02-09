@@ -1,13 +1,13 @@
 <?php
 
-namespace SerendipityHQ\Bundle\QueuesBundle\Service;
+namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Service;
 
 use Doctrine\ORM\EntityManager;
 use SerendipityHQ\Bundle\ConsoleStyles\Console\Style\SerendipityHQStyle;
-use SerendipityHQ\Bundle\QueuesBundle\Entity\Daemon;
-use SerendipityHQ\Bundle\QueuesBundle\Entity\Job;
-use SerendipityHQ\Bundle\QueuesBundle\Util\JobsMarker;
-use SerendipityHQ\Bundle\QueuesBundle\Util\Profiler;
+use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Daemon;
+use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
+use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\JobsMarker;
+use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\Profiler;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Process\Process;
