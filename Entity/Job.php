@@ -1,6 +1,8 @@
 <?php
 
 namespace SerendipityHQ\Bundle\QueuesBundle\Entity;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 
 /**
  * Basic properties and methods o a Job.
@@ -100,6 +102,12 @@ class Job
     /** @var int $exitCode The code with which the process exited */
     private $exitCode;
 
+    /** @var  Collection $childDependencies */
+    private $childDependencies;
+
+    /** @var  Collection $parentDependencies */
+    private $parentDependencies;
+
     /**
      * @param string       $command
      * @param array|string $arguments
@@ -127,6 +135,82 @@ class Job
         $this->queue = 'default';
         $this->status = self::STATUS_NEW;
         $this->createdAt = new \DateTime();
+        $this->childDependencies = new ArrayCollection();
+        $this->parentDependencies = new ArrayCollection();
+    }
+
+    /**
+     * @param Job $job
+     * @return Job
+     */
+    public function addChildDependency(Job $job) : self
+    {
+        if ($this === $job) {
+            throw new \LogicException(
+                'You cannot add as dependency the object itself.'
+                . ' Check your addParentDependency() and addChildDependency() method.'
+            );
+        }
+
+        if ($this->parentDependencies->contains($job)) {
+            throw new \LogicException(
+                'You cannot add a child dependecy that is already a parent dependency.'
+                . ' This will create an unresolvable circular reference.'
+            );
+        }
+
+        if (false === $this->childDependencies->contains($job)) {
+            $this->childDependencies->add($job);
+            $job->addParentDependency($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param Job $job
+     * @return Job
+     */
+    public function addParentDependency(Job $job) : self
+    {
+        if ($this === $job) {
+            throw new \LogicException(
+                'You cannot add as dependency the object itself.'
+                . ' Check your addParentDependency() and addChildDependency() method.'
+            );
+        }
+
+        // This Job is already started...
+        if (self::STATUS_NEW !== $this->getStatus()) {
+            throw new \LogicException(
+                sprintf(
+                    'The Job %s has already started. You cannot add a parent dependency.',
+                    $this->getId()
+                )
+            );
+        }
+
+        if (true === $this->childDependencies->contains($job)) {
+            throw new \LogicException(
+                'You cannot add a parent dependecy that is already a child dependency.'
+                . ' This will create an unresolvable circular reference.'
+            );
+        }
+
+        if (false === $this->parentDependencies->contains($job)) {
+            $this->parentDependencies->add($job);
+            $job->addChildDependency($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function dependsOnOtherJobs() : bool
+    {
+        return $this->getParentDependencies()->count() > 0;
     }
 
     /**
@@ -188,7 +272,7 @@ class Job
     /**
      * @return \DateTime|null
      */
-    public function getExcuteAfterTime()
+    public function getExecuteAfterTime()
     {
         return $this->executeAfterTime;
     }
@@ -239,6 +323,72 @@ class Job
     public function getExitCode()
     {
         return $this->exitCode;
+    }
+
+    /**
+     * @return Collection
+     */
+    public function getChildDependencies(): Collection
+    {
+        return $this->childDependencies;
+    }
+
+    /**
+     * @return Collection
+     */
+    public function getParentDependencies(): Collection
+    {
+        return $this->parentDependencies;
+    }
+
+    /**
+     * Checks each parent Job to see if they are finished or not.
+     *
+     * If they are all finished, return false. If also only one parent Job isn't finished, returns true.
+     *
+     * @return bool
+     */
+    public function hasNotFinishedParentJobs() : bool
+    {
+        /** @var Job $parentJob */
+        foreach ($this->getParentDependencies() as $parentJob) {
+            // Check if the status is not finished and if it isn't...
+            if (self::STATUS_FINISHED !== $parentJob->getStatus()) {
+                // Return false as at least one parent Job is not finished
+                return true;
+            }
+        }
+
+        // All parent Jobs were finished
+        return false;
+    }
+
+    /**
+     * @param Job $job
+     * @return Job
+     */
+    public function removeChildDependency(Job $job) : self
+    {
+        if ($this->childDependencies->contains($job)) {
+            $this->childDependencies->removeElement($job);
+            $job->removeParentDependency($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param Job $job
+     * @return Job
+     */
+    public function removeParentDependency(Job $job) : self
+    {
+        if ($this->parentDependencies->contains($job)) {
+            $this->parentDependencies->removeElement($job);
+            $job->removeChildDependency($this);
+        }
+
+        return $this;
     }
 
     /**
