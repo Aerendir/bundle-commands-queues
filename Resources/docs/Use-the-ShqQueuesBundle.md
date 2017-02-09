@@ -49,4 +49,25 @@ So, as you can see, the basic way to create a `Job` in your code is this:
     // Save it to the database using the `queues` service
     $this->get('queues')->schedule($scheduledJob);
 
-**Avoid using your own entity manager to flush the jobs to the database but ever use the provided `queues` service.**
+## 3. How to execute a `Job` after a defined `datetime`
+
+It is possible to set the `Job`  to be executed after a given period of time.
+
+So, for example, you want to create the `Job` today, but you want it will be executed tomorrow at the same time.
+
+It is really easy to do this:
+
+    $job = new Job('queues:test', $arguments = '--id=the_job_id');
+    
+    // Get the NOW time
+    $tomorrow = new \DateTime();
+    $tomorrow->modify('+1 days');
+    
+    // Set the Job to be executed tomorrow
+    $job->setExecuteAfterTime($tomorrow);
+    
+    // Save it to the database using the `queues` service
+    $this->get('queues')->schedule($scheduledJob);
+
+This setting doesn't guarantee that the `Job` will be executed exactly at the specified time BUT only that it will be
+ considered as processable ONLY after the set `datetime`.

@@ -2,6 +2,7 @@
 
 namespace SerendipityHQ\Bundle\QueuesBundle\Controller;
 
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use SerendipityHQ\Bundle\QueuesBundle\Entity\Daemon;
@@ -32,10 +33,26 @@ class QueuesController extends Controller
      */
     public function jobsAction()
     {
-        $jobs = $this->getDoctrine()->getRepository(Job::class)->findBy([], ['createdAt' => 'DESC']);
+        $jobs = $this->getDoctrine()->getRepository(Job::class)->findBy([], ['createdAt' => 'ASC', 'id' => 'ASC']);
 
         return [
             'jobs' => $jobs,
+        ];
+    }
+
+    /**
+     * @Route("/job/{id}", name="queues_job")
+     * @Template()
+     * @ParamConverter("job", class="QueuesBundle:Job", options={
+     *     "repository_method" = "findOneById",
+     *     "mapping": {"id": "id"},
+     *     "map_method_signature" = true
+     * })
+     */
+    public function jobAction(Job $job)
+    {
+        return [
+            'job' => $job,
         ];
     }
 
@@ -45,7 +62,8 @@ class QueuesController extends Controller
      */
     public function testAction()
     {
-        for ($i = 0; $i <= 10; $i++) {
+        $jobs = [];
+        for ($i = 0; $i <= 100; $i++) {
             // First: we create a Job to push to the queue
             $arguments = '--id='.$i;
             $scheduledJob = new Job('queues:test', $arguments);
@@ -59,9 +77,40 @@ class QueuesController extends Controller
                 $scheduledJob->setExecuteAfterTime($future);
             }
 
+            // Decide if this has a dependency on another job
+            $condition = rand(0, 10);
+            // Be sure there is at least one already created Job!!!
+            if (7 <= $condition && 0 < count($jobs)) {
+                // Decide how many dependencies it has
+                $howMany = rand(1, count($jobs) - 1);
+
+                for ($ii = 0; $ii <= $howMany; $ii++) {
+                    $parentJob = rand(0, count($jobs) - 1);
+                    $scheduledJob->addParentDependency($jobs[$parentJob]);
+                }
+            }
+
             $this->get('queues')->schedule($scheduledJob);
+            $jobs[] = $scheduledJob;
         }
 
         return $this->redirectToRoute('queues_jobs');
+
+        /*
+        $jobOne = new Job('queues:test', '--id=job_one');
+        $jobTwo = new Job('queues:test', '--id=job_two');
+
+        $jobTwo->addParentDependency($jobOne);
+
+        dump('Job One', 'Child deps', $jobOne->getChildDependencies(), 'Parent deps', $jobOne->getParentDependencies());
+        dump('Job Two', 'Child deps', $jobTwo->getChildDependencies(), 'Parent deps', $jobTwo->getParentDependencies());
+
+        $this->getDoctrine()->getManager()->persist($jobOne);
+        $this->getDoctrine()->getManager()->persist($jobTwo);
+        $this->getDoctrine()->getManager()->flush();
+
+        dump('Job One', 'Child deps', $jobOne->getChildDependencies(), 'Parent deps', $jobOne->getParentDependencies());
+        dump('Job Two', 'Child deps', $jobTwo->getChildDependencies(), 'Parent deps', $jobTwo->getParentDependencies());
+        */
     }
 }

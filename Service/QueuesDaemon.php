@@ -155,7 +155,7 @@ class QueuesDaemon
         }
 
         // Get the next job to process
-        $job = $this->entityManager->getRepository(Job::class)->findNextJob();
+        $job = $this->entityManager->getRepository(Job::class)->findNextRunnableJob();
 
         // If no more jobs exists in the queue
         if (null === $job) {

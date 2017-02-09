@@ -56,3 +56,19 @@ SerendipityHQ\Bundle\QueuesBundle\Entity\Job:
             joinColumn:
                 name: processedBy
                 referencedColumnName: id
+    manyToMany:
+        parentDependencies:
+            targetEntity: SerendipityHQ\Bundle\QueuesBundle\Entity\Job
+            inversedBy: childDependencies
+            joinTable:
+                name: queues_jobs_chains
+                joinColumns:
+                    child_job:
+                        referencedColumnName: id
+                inverseJoinColumns:
+                    parent_job:
+                        referencedColumnName: id
+        childDependencies:
+            targetEntity: SerendipityHQ\Bundle\QueuesBundle\Entity\Job
+            mappedBy: parentDependencies
+

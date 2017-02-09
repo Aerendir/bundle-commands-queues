@@ -14,35 +14,41 @@
             <th>Priority</th>
             <th>Queue</th>
             <th>Status</th>
+            <th>Depends on other Jobs</th>
             <th>Created at</th>
+            <th>Execute after time</th>
             <th>Started at</th>
             <th>Closed at</th>
             <th>Exit code</th>
-            <th>Output</th>
-            <th>Debug</th>
         </thead>
     {% for job in jobs %}
         <tr>
-            <td>{{ job.id }}</td>
+            <td id="{{ job.id }}"><a href="{{ path('queues_job', {id: job.id}) }}">{{ job.id }}</a></td>
             <td>
                 {{ job.command }}
                 {% if job.arguments %}
-                {{ job.arguments|join(' ') }}
+                    <span class="text-muted">{{ job.arguments|join(' ') }}</span>
                 {% endif %}
             </td>
             <td>{{ job.priority }}</td>
             <td>{{ job.queue }}</td>
             <td>{{ job.status }}</td>
+            <td>
+                {% if false == job.dependsOnOtherJobs %}
+                No
+                {% else %}
+                    <ul>
+                    {% for parentJob in job.parentDependencies %}
+                        <li><a href="#{{ parentJob.id }}">{{ parentJob.id }}</a> ({{ parentJob.status }})</li>
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+            </td>
             <td>{% if job.createdAt %}{{ job.createdAt|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }}{% endif %}</td>
+            <td>{% if job.executeAfterTime %}{{ job.createdAt|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }}{% endif %}</td>
             <td>{% if job.startedAt %}{{ job.startedAt|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }}{% endif %}</td>
             <td>{% if job.closedAt %}{{ job.closedAt|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }}{% endif %}</td>
             <td>{{ job.exitCode }}</td>
-        </tr>
-        <tr>
-            <td colspan="11"><pre>{{ job.output }}</pre></td>
-        </tr>
-        <tr>
-            <td colspan="11">{{ dump(job.debug) }}</td>
         </tr>
     {% endfor %}
     </table>

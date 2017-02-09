@@ -1,0 +1,39 @@
+{% extends '::App/base.html.twig' %}
+
+{% block title %}Ti senti sicuro ad acquistare on-line?{% endblock %}
+{% block metaDescription %}TrustBack.me ti permette di conoscere la reputazione di un commerciante prima di comprare.{% endblock %}
+
+{% block body %}
+    <h1>Scheduled Jobs in the Queue</h1>
+    <p><small><a href="{{ url('queues_test') }}">Generate 100 random jobs.</a></small></p>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <pre>>: {{ job.command }}{% if job.arguments %} {{ job.arguments|join(' ') }}{% endif %}</pre>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-4">
+                        <p>Queue: {{ job.queue }}</p>
+                        <p>Priority: {{ job.priority }}</p>
+                        <p>Status: {{ job.status }}</p>
+                        <p>Created At: {% if job.createdAt %}{{ job.createdAt|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }}{% endif %}</p>
+                        <p>Started At: {% if job.startedAt %}{{ job.startedAt|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }}{% endif %}</p>
+                        <p>Closed at: {% if job.closedAt %}{{ job.closedAt|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }}{% endif %}</p>
+                        <p>Exit code: {{ job.exitCode }}</p>
+                        <p>
+                            Config:<br />
+                            {{ dump(job.debug) }}
+                        </p>
+                    </div>
+                    <div class="col-lg-8">
+                        <pre>{{ job.output }}</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
