@@ -1,6 +1,7 @@
 <?php
 
 namespace SerendipityHQ\Bundle\QueuesBundle\Entity;
+
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 
@@ -102,10 +103,10 @@ class Job
     /** @var int $exitCode The code with which the process exited */
     private $exitCode;
 
-    /** @var  Collection $childDependencies */
+    /** @var Collection $childDependencies */
     private $childDependencies;
 
-    /** @var  Collection $parentDependencies */
+    /** @var Collection $parentDependencies */
     private $parentDependencies;
 
     /**
@@ -141,6 +142,7 @@ class Job
 
     /**
      * @param Job $job
+     *
      * @return Job
      */
     public function addChildDependency(Job $job) : self
@@ -148,14 +150,14 @@ class Job
         if ($this === $job) {
             throw new \LogicException(
                 'You cannot add as dependency the object itself.'
-                . ' Check your addParentDependency() and addChildDependency() method.'
+                .' Check your addParentDependency() and addChildDependency() method.'
             );
         }
 
         if ($this->parentDependencies->contains($job)) {
             throw new \LogicException(
                 'You cannot add a child dependecy that is already a parent dependency.'
-                . ' This will create an unresolvable circular reference.'
+                .' This will create an unresolvable circular reference.'
             );
         }
 
@@ -169,6 +171,7 @@ class Job
 
     /**
      * @param Job $job
+     *
      * @return Job
      */
     public function addParentDependency(Job $job) : self
@@ -176,7 +179,7 @@ class Job
         if ($this === $job) {
             throw new \LogicException(
                 'You cannot add as dependency the object itself.'
-                . ' Check your addParentDependency() and addChildDependency() method.'
+                .' Check your addParentDependency() and addChildDependency() method.'
             );
         }
 
@@ -193,7 +196,7 @@ class Job
         if (true === $this->childDependencies->contains($job)) {
             throw new \LogicException(
                 'You cannot add a parent dependecy that is already a child dependency.'
-                . ' This will create an unresolvable circular reference.'
+                .' This will create an unresolvable circular reference.'
             );
         }
 
@@ -365,6 +368,7 @@ class Job
 
     /**
      * @param Job $job
+     *
      * @return Job
      */
     public function removeChildDependency(Job $job) : self
@@ -379,6 +383,7 @@ class Job
 
     /**
      * @param Job $job
+     *
      * @return Job
      */
     public function removeParentDependency(Job $job) : self

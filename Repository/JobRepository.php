@@ -13,6 +13,7 @@ class JobRepository extends EntityRepository
 {
     /**
      * @param int $id
+     *
      * @return null|object|Job
      */
     public function findOneById(int $id)
@@ -46,8 +47,6 @@ class JobRepository extends EntityRepository
             // Remove it from the Entity Manager to free some memory
             $this->_em->detach($job);
         }
-
-        return null;
     }
 
     /**
