@@ -4,9 +4,16 @@ namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\Mapping as ORM;
+use SerendipityHQ\Component\ThenWhen\Strategy\LiveStrategy;
+use SerendipityHQ\Component\ThenWhen\Strategy\NeverRetryStrategy;
+use SerendipityHQ\Component\ThenWhen\Strategy\StrategyInterface;
 
 /**
  * Basic properties and methods o a Job.
+ *
+ * @ORM\Entity(repositoryClass="SerendipityHQ\Bundle\CommandsQueuesBundle\Repository\JobRepository")
+ * @ORM\Table(name="queues_scheduled_jobs")
  */
 class Job
 {
@@ -38,6 +45,11 @@ class Job
     const STATUS_PENDING = 'pending';
 
     /**
+     * If the Job fails for some reasons and can be retried, its status is RETRIED.
+     */
+    const STATUS_RETRIED = 'retried';
+
+    /**
      * The job is currently running.
      *
      * Are in this state the Jobs for which a Process is actually started and running.
@@ -61,53 +73,172 @@ class Job
     /** The job failed for some reasons. */
     const STATUS_FAILED = 'failed';
 
-    /** @var int $id The ID of the Job */
+    /** The parent job (on which this one depends) failed. */
+    const STATUS_CANCELLED = 'cancelled';
+
+    /**
+     * @var int $id The ID of the Job
+     *
+     * @ORM\Column(name="id", type="integer", nullable=false)
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="IDENTITY")
+     */
     private $id;
 
-    /** @var string $command */
+    /**
+     * @var string $command
+     *
+     * @ORM\Column(name="command", type="string", length=255, nullable=false)
+     */
     private $command;
 
-    /** @var array $arguments */
+    /**
+     * @var array $arguments
+     *
+     * @ORM\Column(name="arguments", type="array", nullable=false)
+     */
     private $arguments;
 
-    /** @var \DateTime $executeAfterTime */
+    /**
+     * @var \DateTime $executeAfterTime
+     *
+     * @ORM\Column(name="execute_after_time", type="datetime", nullable=true)
+     */
     private $executeAfterTime;
 
-    /** @var \DateTime $createdAt */
+    /**
+     * @var \DateTime $createdAt
+     *
+     * @ORM\Column(name="created_at", type="datetime", nullable=false)
+     */
     private $createdAt;
 
-    /** @var \DateTime $startedAt */
+    /**
+     * @var \DateTime $startedAt
+     *
+     * @ORM\Column(name="started_at", type="datetime", nullable=true)
+     */
     private $startedAt;
 
-    /** @var \DateTime $closedAt When the Job is marked as Finished, Failed or Terminated. */
+    /**
+     * @var \DateTime $closedAt When the Job is marked as Finished, Failed or Terminated.
+     *
+     * @ORM\Column(name="closed_at", type="datetime", nullable=true)
+     */
     private $closedAt;
 
-    /** @var array $debug The error produced by the job (usually an exception) */
+    /**
+     * @var array $debug The error produced by the job (usually an exception)
+     *
+     * @ORM\Column(name="debug", type="array", nullable=true)
+     */
     private $debug = [];
 
-    /** @var int $priority */
+    /**
+     * @var int $priority
+     *
+     * @ORM\Column(name="priority", type="smallint", nullable=false)
+     */
     private $priority;
 
-    /** @var Daemon $processedBy The daemon that processed the Job. */
+    /**
+     * @var Daemon $processedBy The daemon that processed the Job.
+     *
+     * @ORM\Column(name="processed_by", type="integer", nullable=true)
+     * @ORM\ManyToOne(targetEntity="SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Daemon", inversedBy="processedJobs")
+     * @ORM\JoinColumn(name="id", referencedColumnName="id")
+     */
     private $processedBy;
 
-    /** @var string $queue */
+    /**
+     * @var string $queue
+     *
+     * @ORM\Column(name="queue", type="string", length=255, nullable=false)
+     */
     private $queue;
 
-    /** @var string $status */
+    /**
+     * @var string $status
+     *
+     * @ORM\Column(name="status", type="string", length=255, nullable=false)
+     */
     private $status;
 
-    /** @var string $output The output produced by the job */
+    /**
+     * @var  string $cancellationReason If the status is self::STATUS_CANCELLED this property tells the why
+     *
+     * @ORM\Column(name="cancellation_reason", type="string", length=255, nullable=true)
+     */
+    private $cancellationReason;
+
+    /**
+     * @var string $output The output produced by the job
+     *
+     * @ORM\Column(name="output", type="text", nullable=true)
+     */
     private $output;
 
-    /** @var int $exitCode The code with which the process exited */
+    /**
+     * @var int $exitCode The code with which the process exited
+     *
+     * @ORM\Column(name="exit_code", type="integer", nullable=true)
+     */
     private $exitCode;
 
-    /** @var Collection $childDependencies */
+    /**
+     * @var Collection $childDependencies
+     *
+     * @ORM\ManyToMany(targetEntity="SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job", inversedBy="parentDependencies")
+     * @ORM\JoinTable(name="queues_jobs_dependencies",
+     *     joinColumns={@ORM\JoinColumn(name="parent_job", referencedColumnName="id")},
+     *     inverseJoinColumns={@ORM\JoinColumn(name="child_job", referencedColumnName="id")}
+     *     )
+     */
     private $childDependencies;
 
-    /** @var Collection $parentDependencies */
+    /**
+     * @var Collection $parentDependencies
+     *
+     * @ORM\ManyToMany(targetEntity="SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job", mappedBy="childDependencies")
+     */
     private $parentDependencies;
+
+    /**
+     * @var  StrategyInterface $retryStrategy
+     *
+     * @ORM\Column(name="retry_strategy", type="array", nullable=false)
+     */
+    private $retryStrategy;
+
+    /**
+     * @var  Job $retryOf If this Job is a retry of another job, here there is the Job of which this is the retry
+     *
+     * @ORM\OneToOne(targetEntity="SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job", inversedBy="retriedBy")
+     * @ORM\JoinColumn(name="retry_of", referencedColumnName="id")
+     */
+    private $retryOf;
+
+    /**
+     * @var  Job $retriedBy
+     *
+     * @ORM\OneToOne(targetEntity="SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job", mappedBy="retryOf")
+     */
+    private $retriedBy;
+
+    /**
+     * @var  Job $firstRetriedJob If this Job is a retry of another retried job, here there is the first retried Job
+     *
+     * @ORM\ManyToOne(targetEntity="SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job", inversedBy="retriedJobs")
+     * @ORM\JoinColumn(name="first_retried_job", referencedColumnName="id")
+     */
+    private $firstRetriedJob;
+
+    /**
+     * @var Collection $retriedJobs The Jobs used to retry this one
+     *
+     * @ORM\OneToMany(targetEntity="SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job", mappedBy="firstRetriedJob")
+     */
+    private $retriedJobs;
 
     /**
      * @param string       $command
@@ -138,6 +269,8 @@ class Job
         $this->createdAt = new \DateTime();
         $this->childDependencies = new ArrayCollection();
         $this->parentDependencies = new ArrayCollection();
+        $this->retryStrategy = new NeverRetryStrategy();
+        $this->retriedJobs = new ArrayCollection();
     }
 
     /**
@@ -184,7 +317,7 @@ class Job
         }
 
         // This Job is already started...
-        if (self::STATUS_NEW !== $this->getStatus()) {
+        if (self::STATUS_PENDING === $this->getStatus() || self::STATUS_RUNNING === $this->getStatus()) {
             throw new \LogicException(
                 sprintf(
                     'The Job %s has already started. You cannot add a parent dependency.',
@@ -209,9 +342,56 @@ class Job
     }
 
     /**
+     * @return Job
+     */
+    public function createCancelChildsJob() : Job
+    {
+        // If the Job as child Jobs, create a process to mark them as cancelled
+        $markChildsAsCancelledJob = (new Job('queues:internal:mark-as-cancelled', [sprintf('--id=%s', $this->getId())]))
+            ->setQueue($this->getQueue())
+            // This Job has to be successful!
+            ->setRetryStrategy(new LiveStrategy(100000))
+            ->setPriority(-1)
+            ->setQueue($this->getQueue());
+
+        return $markChildsAsCancelledJob;
+    }
+
+    /**
+     * @return Job
+     */
+    public function createRetryJob() : Job
+    {
+        // Create a new Job that will retry the original one
+        $retryJob = (new Job($this->getCommand(), $this->getArguments()))
+            // First get the retry date
+            ->setExecuteAfterTime($this->getRetryStrategy()->retryOn())
+            // Then we can increment the current number of attempts setting also the RetryStrategy
+            ->setRetryStrategy($this->getRetryStrategy()->newAttempt())
+            ->setPriority(-1)
+            ->setQueue($this->getQueue())
+            ->setRetryOf($this);
+
+        // Set the first retried Job
+        $firstRetriedJob = $this->getFirstRetriedJob() ?? $this;
+
+        $retryJob->setFirstRetriedJob($firstRetriedJob);
+
+        return $retryJob;
+    }
+
+    /**
      * @return bool
      */
-    public function dependsOnOtherJobs() : bool
+    public function hasChildDependencies() : bool
+    {
+        return $this->getChildDependencies()->count() > 0;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasParentDependencies() : bool
     {
         return $this->getParentDependencies()->count() > 0;
     }
@@ -265,7 +445,7 @@ class Job
     }
 
     /**
-     * @return string|null Null if the process finished with success
+     * @return array|null Null if the process finished with success
      */
     public function getDebug()
     {
@@ -313,6 +493,14 @@ class Job
     }
 
     /**
+     * @return string
+     */
+    public function getCancellationReason() : string
+    {
+        return $this->cancellationReason;
+    }
+
+    /**
      * @return string|null Null if no output were produced by the process
      */
     public function getOutput()
@@ -345,6 +533,46 @@ class Job
     }
 
     /**
+     * @return Collection
+     */
+    public function getRetriedJobs() : Collection
+    {
+        return $this->retriedJobs;
+    }
+
+    /**
+     * @return StrategyInterface
+     */
+    public function getRetryStrategy(): StrategyInterface
+    {
+        return $this->retryStrategy;
+    }
+
+    /**
+     * @return Job|null
+     */
+    public function getRetryOf()
+    {
+        return $this->retryOf;
+    }
+
+    /**
+     * @return Job
+     */
+    public function getRetriedBy()
+    {
+        return $this->retriedBy;
+    }
+
+    /**
+     * @return Job|null
+     */
+    public function getFirstRetriedJob()
+    {
+        return $this->firstRetriedJob;
+    }
+
+    /**
      * Checks each parent Job to see if they are finished or not.
      *
      * If they are all finished, return false. If also only one parent Job isn't finished, returns true.
@@ -364,6 +592,26 @@ class Job
 
         // All parent Jobs were finished
         return false;
+    }
+
+    /**
+     * If this Job is a retry of another job this will return true.
+     *
+     * @return bool
+     */
+    public function isRetry() : bool
+    {
+        return null !== $this->getRetryOf();
+    }
+
+    /**
+     * If this Job has a retried job.
+     *
+     * @return bool
+     */
+    public function isRetried() : bool
+    {
+        return null !== $this->getRetriedBy();
     }
 
     /**
@@ -421,18 +669,6 @@ class Job
     }
 
     /**
-     * @param Daemon $daemon
-     *
-     * @return Job
-     */
-    public function setProcessedBy(Daemon $daemon) : self
-    {
-        $this->processedBy = $daemon;
-
-        return $this;
-    }
-
-    /**
      * @param string $queue
      *
      * @return Job
@@ -442,5 +678,50 @@ class Job
         $this->queue = $queue;
 
         return $this;
+    }
+
+    /**
+     * @param StrategyInterface $retryStrategy
+     * @return Job
+     */
+    public function setRetryStrategy(StrategyInterface $retryStrategy) : self
+    {
+        $this->retryStrategy = $retryStrategy;
+
+        return $this;
+    }
+
+    /**
+     * Sets this Job as a retry of another Job.
+     *
+     * Maintain this method private! It is used through reflection by Job#createRetryJob().
+     *
+     * @param Job $retriedJob
+     *
+     * @return Job
+     */
+    public function setRetryOf(Job $retriedJob)
+    {
+        // This is a retry Job for another job
+        $this->retryOf = $retriedJob;
+        $retriedJob->setRetriedBy($this);
+
+        return $this;
+    }
+
+    /**
+     * @param Job $retryingJob
+     */
+    public function setRetriedBy(Job $retryingJob)
+    {
+        $this->retriedBy = $retryingJob;
+    }
+
+    /**
+     * @param Job $firstRetriedJob
+     */
+    public function setFirstRetriedJob(Job $firstRetriedJob)
+    {
+        $this->firstRetriedJob = $firstRetriedJob;
     }
 }

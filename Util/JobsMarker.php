@@ -36,6 +36,15 @@ class JobsMarker
      * @param Job   $job
      * @param array $info
      */
+    public function markJobAsCancelled(Job $job, array $info)
+    {
+        $this->markJobAsClosed($job, Job::STATUS_CANCELLED, $info);
+    }
+
+    /**
+     * @param Job   $job
+     * @param array $info
+     */
     public function markJobAsFailed(Job $job, array $info)
     {
         $this->markJobAsClosed($job, Job::STATUS_FAILED, $info);
@@ -58,6 +67,26 @@ class JobsMarker
     public function markJobAsPending(Job $job, array $info, Daemon $daemon)
     {
         $this->markJob($job, Job::STATUS_PENDING, $info, $daemon);
+    }
+
+    /**
+     * @param Job $job
+     * @param array $info
+     *
+     * @return Job The created retry Job.
+     */
+    public function markJobAsRetried(Job $job, array $info)
+    {
+        // Create a new retry Job
+        $retryJob = $job->createRetryJob();
+
+        $this->updateChildDependencies($retryJob);
+
+        $this->entityManager->persist($retryJob);
+
+        $this->markJobAsClosed($job, Job::STATUS_RETRIED, $info);
+
+        return $retryJob;
     }
 
     /**
@@ -95,6 +124,13 @@ class JobsMarker
         $reflectedProperty->setAccessible(true);
         $reflectedProperty->setValue($job, $status);
 
+        // If the Job is cancelled, set the reason
+        if (Job::STATUS_CANCELLED === $status) {
+            $reflectedProperty = $reflectedClass->getProperty('cancellationReason');
+            $reflectedProperty->setAccessible(true);
+            $reflectedProperty->setValue($job, $info['debug']['cancellation_reason']);
+        }
+
         // Then set the processing Daemon
         if (null !== $daemon) {
             $reflectedProperty = $reflectedClass->getProperty('processedBy');
@@ -122,6 +158,9 @@ class JobsMarker
                 case 'started_at':
                     $reflectedProperty = $reflectedClass->getProperty('startedAt');
                     break;
+                case 'cancellation_reason':
+                    $reflectedProperty = $reflectedClass->getProperty('cancellationReason');
+                    break;
                 default:
                     throw new \RuntimeException(sprintf(
                             'The property %s is not managed. Manage it or verify its spelling is correct.',
@@ -136,8 +175,19 @@ class JobsMarker
 
         // Persist the entity again (just to be sure it is managed)
         $this->entityManager->persist($job);
-        // Then set the processing Daemon
-        $this->entityManager->flush();
+
+        /*
+         * Flush now to be sure editings aren't cleared during optimizations.
+         *
+         * We flush the single Jobs to don't affect the others that may be still processing.
+         */
+        if ($job->isRetried()) {
+            // Flush the new retrying Job
+            $this->entityManager->flush($job->getRetriedBy());
+        }
+
+        // Flush the original Job
+        $this->entityManager->flush($job);
 
         // Now first set to null and then unset to save memory ASAP
         $reflectedClass =
@@ -145,5 +195,25 @@ class JobsMarker
         $property =
         $value = null;
         unset($reflectedClass, $reflectedProperty, $property, $value);
+    }
+
+    /**
+     * @param Job $retryJob
+     */
+    private function updateChildDependencies(Job $retryJob)
+    {
+        /** @var Job $childDependency Set the retried Job as parent dependency of the child dependencies of this retrying Job */
+        foreach ($retryJob->getRetryOf()->getChildDependencies() as $childDependency) {
+            // First remove the Child dependency as it may be not managed by the Entity Manager
+            //$retryJob->getRetryOf()->removeChildDependency($childDependency);
+
+            /** @var Job $managedChildDependency Make the Entity Manager manage the child dep */
+            //$managedChildDependency = $this->entityManager->merge($childDependency);
+
+            // Add again the parent dependencies
+            //$managedChildDependency->addParentDependency($retryJob->getRetryOf());
+            $retryJob->addChildDependency($childDependency);
+            //$this->entityManager->persist($childDependency);
+        }
     }
 }

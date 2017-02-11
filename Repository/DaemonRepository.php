@@ -21,7 +21,7 @@ class DaemonRepository extends EntityRepository
     public function findNextAlive(Daemon $currentDaemon)
     {
         $queryBuilder = $this->_em->createQueryBuilder();
-        $queryBuilder->select('d')->from('QueuesBundle:Daemon', 'd')
+        $queryBuilder->select('d')->from('SHQCommandsQueuesBundle:Daemon', 'd')
             ->where($queryBuilder->expr()->andX(
                 $queryBuilder->expr()->isNull('d.diedOn'),
                 $queryBuilder->expr()->neq('d.pid', $currentDaemon->getPid())
