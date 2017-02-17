@@ -50,14 +50,15 @@ class Configuration implements ConfigurationInterface
             ->cannotBeEmpty()
             ->end()
             ->scalarNode('model_manager_name')->defaultNull()->end()
-            ->integerNode('max_runtime')->defaultValue(100)->end()
-            ->integerNode('max_concurrent_jobs')->defaultValue(1)->end()
-            ->integerNode('idle_time')->defaultValue(10)->end()
-            ->scalarNode('worker_name')->defaultValue('DefaultWorker')->end()
-            ->integerNode('print_profiling_info_interval')->defaultValue(350)->end()
-            ->integerNode('alive_daemons_check_interval')->defaultValue(100000)->end()
-            ->integerNode('optimization_interval')->defaultValue(100)->end()
-            ->integerNode('running_jobs_check_interval')->defaultValue(10)->end();
+                ->integerNode('max_runtime')->defaultValue(100)->end()
+                ->integerNode('max_concurrent_jobs')->defaultValue(1)->end()
+                ->integerNode('idle_time')->defaultValue(10)->end()
+                ->scalarNode('worker_name')->defaultValue('DefaultWorker')->end()
+                ->integerNode('print_profiling_info_interval')->defaultValue(350)->end()
+                ->integerNode('alive_daemons_check_interval')->defaultValue(10000)->end()
+                ->integerNode('optimization_interval')->defaultValue(1000)->end()
+                ->integerNode('running_jobs_check_interval')->defaultValue(1000)->end()
+                ->scalarNode('retry_stale_jobs')->defaultTrue()->end();
 
         return $treeBuilder;
     }

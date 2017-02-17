@@ -360,7 +360,7 @@ class Job
     /**
      * @return Job
      */
-    public function createRetryJob() : Job
+    public function createRetryForFailed() : Job
     {
         // Create a new Job that will retry the original one
         $retryJob = (new Job($this->getCommand(), $this->getArguments()))
@@ -372,6 +372,29 @@ class Job
             ->setQueue($this->getQueue())
             ->setRetryOf($this)
             ->setFirstRetriedJob($this->getFirstRetriedJob() ?? $this);
+
+        return $retryJob;
+    }
+
+    /**
+     * @return Job
+     */
+    public function createRetryForStale() : Job
+    {
+        // Create a new Job that will retry the original one
+        $retryJob = (new Job($this->getCommand(), $this->getArguments()))
+            // Then we can increment the current number of attempts setting also the RetryStrategy
+            ->setRetryStrategy($this->getRetryStrategy())
+            ->setPriority($this->getPriority())
+            ->setQueue($this->getQueue())
+            ->setRetryOf($this)
+            ->setFirstRetriedJob($this->getFirstRetriedJob() ?? $this);
+
+        // If the retried Job had an execute after time...
+        if (null !== $this->getExecuteAfterTime()) {
+            // ... set it in the retrying Job
+            $retryJob->setExecuteAfterTime($this->getExecuteAfterTime());
+        }
 
         return $retryJob;
     }

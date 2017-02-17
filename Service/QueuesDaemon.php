@@ -75,8 +75,9 @@ class QueuesDaemon
      * Initializes the Daemon.
      *
      * @param SerendipityHQStyle $ioWriter
+     * @param OutputInterface $output
      */
-    public function initialize(SerendipityHQStyle $ioWriter)
+    public function initialize(SerendipityHQStyle $ioWriter, OutputInterface $output)
     {
         $this->ioWriter = $ioWriter;
         $this->verbosity = $this->ioWriter->getVerbosity();
@@ -104,6 +105,8 @@ class QueuesDaemon
 
         // Setup pcntl signals so it is possible to manage process
         $this->setupPcntlSignals();
+
+        $this->checkStaleJobs($output, $this->config['retry_stale_jobs']);
     }
 
     /**
@@ -188,7 +191,7 @@ class QueuesDaemon
                 ));
 
             if (false !== strpos($job->getCommand(), 'mark-as-cancelled')) {
-                $this->ioWriter->noteLineNoBg(sprintf(
+                $this->ioWriter->warningLineNoBg(sprintf(
                     '[%s] Job "%s" on Queue "%s": This will mark as CANCELLED childs of #%s.',
                     $now->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue(), $job->getArguments()[0]
                 ));
@@ -196,7 +199,7 @@ class QueuesDaemon
 
             if ($job->isRetry()) {
                 $this->ioWriter->noteLineNoBg(sprintf(
-                    '[%s] Job "%s" on Queue "%s": this is a retry of original process #%s.',
+                    '[%s] Job "%s" on Queue "%s": This is a retry of original process #%s.',
                     $now->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue(), $job->getRetryOf()->getId()
                 ));
             }
@@ -213,8 +216,8 @@ class QueuesDaemon
             $info['output'] = 'Failing start the process.';
             $info['output_error'] = $e;
 
-            // Check if it can be retried
-            if (true === $this->retryJob($job, $info, 'Job didn\'t started as its process were aborted.')) {
+            // Check if it can be retried and if the retry were successful
+            if ($job->getRetryStrategy()->canRetry() && true === $this->retryFailedJob($job, $info, 'Job didn\'t started as its process were aborted.')) {
                 // Exit
                 return;
             }
@@ -276,7 +279,7 @@ class QueuesDaemon
     }
 
     /**
-     * Processes the Jobs already running.
+     * Processes the Jobs already running or pending.
      */
     public function checkRunningJobs(ProgressBar $progressBar = null)
     {
@@ -434,7 +437,7 @@ class QueuesDaemon
         $info = $this->jobsManager->buildDefaultInfo($process);
 
         // Check if it can be retried
-        if (true === $this->retryJob($job, $info, 'Job failed')) {
+        if ($job->getRetryStrategy()->canRetry() && true === $this->retryFailedJob($job, $info, 'Process failed but can be retried.')) {
             // Exit
             return;
         }
@@ -445,18 +448,7 @@ class QueuesDaemon
                 $job->getClosedAt()->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue()
             ));
 
-        if ($job->getChildDependencies()->count() > 0) {
-            $this->ioWriter->noteLineNoBg(sprintf(
-                '[%s] Job "%s" on Queue "%s": Creating a Job to mark childs as as CANCELLED.',
-                $job->getClosedAt()->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue()
-            ));
-
-            $cancelChildsJobs = $job->createCancelChildsJob();
-            $this->entityManager->persist($cancelChildsJobs);
-
-            // Flush it immediately to start the process as soon as possible
-            $this->entityManager->flush($cancelChildsJobs);
-        }
+        $this->handleChildsOfFailedJob($job);
     }
 
     /**
@@ -470,6 +462,25 @@ class QueuesDaemon
         $this->ioWriter->successLineNoBg(sprintf(
             '[%s] Job "%s" on Queue "%s": Process succeded.',
             $job->getClosedAt()->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue()));
+    }
+
+    /**
+     * @param Job $job
+     */
+    final protected function handleChildsOfFailedJob(Job $job)
+    {
+        if ($job->getChildDependencies()->count() > 0) {
+            $this->ioWriter->noteLineNoBg(sprintf(
+                '[%s] Job "%s" on Queue "%s": Creating a Job to mark childs as as CANCELLED.',
+                $job->getClosedAt()->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue()
+            ));
+
+            $cancelChildsJobs = $job->createCancelChildsJob();
+            $this->entityManager->persist($cancelChildsJobs);
+
+            // Flush it immediately to start the process as soon as possible
+            $this->entityManager->flush($cancelChildsJobs);
+        }
     }
 
     /**
@@ -523,21 +534,99 @@ class QueuesDaemon
      * @param string $retryReason
      * @return bool
      */
-    private function retryJob(Job $job, array $info, string $retryReason)
+    private function retryFailedJob(Job $job, array $info, string $retryReason)
     {
-        // Check if it can be retried
-        if (false === $job->getRetryStrategy()->canRetry()) {
-            return false;
-        }
-
-        $retryJob = $this->jobsMarker->markJobAsRetried($job, $info);
-        $this->ioWriter->errorLineNoBg(sprintf(
+        $retryJob = $this->jobsMarker->markFailedJobAsRetried($job, $info);
+        $this->ioWriter->warningLineNoBg(sprintf(
                 '[%s] Job "%s" on Queue "%s": %s.',
                 $job->getClosedAt()->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue(), $retryReason)
         );
         $this->ioWriter->noteLineNoBg(sprintf(
                 '[%s] Job "%s" on Queue "%s": Retry with Job "%s" (Attempt #%s/%s).',
                 $job->getClosedAt()->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue(), $retryJob->getId(), $retryJob->getRetryStrategy()->getAttempts(), $retryJob->getRetryStrategy()->getMaxAttempts())
+        );
+
+        return true;
+    }
+
+    /**
+     * @param OutputInterface $output
+     * @param bool $retryStaleJobs
+     */
+    private function checkStaleJobs(OutputInterface $output, bool $retryStaleJobs)
+    {
+        if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
+            $this->ioWriter->infoLineNoBg('Checking stale jobs...');
+            $this->ioWriter->commentLineNoBg('Jobs are "stale" if their status is already RUNNING when the queue is started.');
+        }
+
+        $staleJobsCount = $this->entityManager->getRepository('SHQCommandsQueuesBundle:Job')->countRunningJobs();
+
+        // No stale Jobs
+        if (0 >= $staleJobsCount && $this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
+            $this->ioWriter->infoLineNoBg('No stale Jobs found.');
+            return;
+        }
+
+        $progressBar = new ProgressBar($output, $staleJobsCount);
+        $progressBar->setFormat('<info-nobg>[>] Processing job %current%/%max% (%percent:3s%% )</info-nobg><comment-nobg> %elapsed:6s%/%estimated:-6s%</comment-nobg>');
+
+        // There are stale Jobs
+        if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
+            $this->ioWriter->infoLineNoBg(sprintf('Found %s stale Jobs: start processing them.', $staleJobsCount));
+
+            $message = 'They WILL NOT BE retried';
+            if (true === $retryStaleJobs) {
+                $message = 'They WILL BE retried.';
+            }
+
+            $this->ioWriter->commentLineNoBg($message);
+        }
+
+        $stales = [];
+        /** @var Job $job */
+        while (null !== $job = $this->entityManager->getRepository('SHQCommandsQueuesBundle:Job')->findNextStaleJob($stales)) {
+            $stales[] = $job->getId();
+
+            if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE && isset($progressBar)) {
+                $progressBar->advance();
+                $this->ioWriter->writeln('');
+            }
+
+            // Something went wrong starting the process: close it as failed
+            $info['output'] = 'Job were stale.';
+
+            if ($retryStaleJobs) {
+                $this->retryStaleJob($job, $info, 'Job were stale.');
+                continue;
+            }
+
+            $this->jobsMarker->markJobAsFailed($job, $info);
+            $this->ioWriter->errorLineNoBg(sprintf(
+                '[%s] Job "%s" on Queue "%s": Process were stale so it were marked as FAILED.',
+                $job->getClosedAt()->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue()
+            ));
+
+            $this->handleChildsOfFailedJob($job);
+        }
+    }
+
+    /**
+     * @param Job $job
+     * @param array $info
+     * @param string $retryReason
+     * @return bool
+     */
+    private function retryStaleJob(Job $job, array $info, string $retryReason)
+    {
+        $retryingJob = $this->jobsMarker->markStaleJobAsRetried($job, $info);
+        $this->ioWriter->warningLineNoBg(sprintf(
+                '[%s] Job "%s" on Queue "%s": %s.',
+                $job->getClosedAt()->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue(), $retryReason)
+        );
+        $this->ioWriter->noteLineNoBg(sprintf(
+                '[%s] Job "%s" on Queue "%s": This will be retried with Job "%s".',
+                $job->getClosedAt()->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue(), $retryingJob->getId(), $retryingJob->getRetryStrategy()->getAttempts(), $retryingJob->getRetryStrategy()->getMaxAttempts())
         );
 
         return true;

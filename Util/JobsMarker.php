@@ -70,23 +70,31 @@ class JobsMarker
     }
 
     /**
-     * @param Job $job
+     * @param Job $failedJob
      * @param array $info
      *
      * @return Job The created retry Job.
      */
-    public function markJobAsRetried(Job $job, array $info)
+    public function markFailedJobAsRetried(Job $failedJob, array $info)
     {
         // Create a new retry Job
-        $retryJob = $job->createRetryJob();
+        $retryingJob = $failedJob->createRetryForFailed();
 
-        $this->updateChildDependencies($retryJob);
+        return $this->markJobAsRetried($failedJob, $retryingJob, $info);
+    }
 
-        $this->entityManager->persist($retryJob);
+    /**
+     * @param Job $staleJob
+     * @param array $info
+     *
+     * @return Job The created retry Job.
+     */
+    public function markStaleJobAsRetried(Job $staleJob, array $info)
+    {
+        // Create a new retry Job
+        $retryingJob = $staleJob->createRetryForStale();
 
-        $this->markJobAsClosed($job, Job::STATUS_RETRIED, $info);
-
-        return $retryJob;
+        return $this->markJobAsRetried($staleJob, $retryingJob, $info);
     }
 
     /**
@@ -107,6 +115,23 @@ class JobsMarker
     {
         $info['closed_at'] = new \DateTime();
         $this->markJob($job, $status, $info, $daemon);
+    }
+
+    /**
+     * @param Job $retriedJob
+     * @param Job $retryingJob
+     * @param array $info
+     * @return Job
+     */
+    private function markJobAsRetried(Job $retriedJob, Job $retryingJob, array $info)
+    {
+        $this->updateChildDependencies($retryingJob);
+
+        $this->entityManager->persist($retryingJob);
+
+        $this->markJobAsClosed($retriedJob, Job::STATUS_RETRIED, $info);
+
+        return $retryingJob ;
     }
 
     /**
