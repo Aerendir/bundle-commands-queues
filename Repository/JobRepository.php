@@ -50,6 +50,53 @@ class JobRepository extends EntityRepository
     }
 
     /**
+     * @return int
+     */
+    public function countRunningJobs()
+    {
+        $queryBuilder = $this->getEntityManager()->createQueryBuilder();
+
+        return (int) $queryBuilder->select('COUNT(j)')->from('SHQCommandsQueuesBundle:Job', 'j')
+            ->where(
+                $queryBuilder->expr()->orX(
+                    $queryBuilder->expr()->eq('j.status', ':running'),
+                    $queryBuilder->expr()->eq('j.status', ':pending')
+                )
+            )
+            ->setParameter('running', Job::STATUS_PENDING)->setParameter('pending', Job::STATUS_RUNNING)
+            ->getQuery()
+            ->getOneOrNullResult()['1'];
+    }
+
+    /**
+     * @param array $knownAsStale
+     * @return Job
+     */
+    public function findNextStaleJob(array $knownAsStale)
+    {
+        $queryBuilder = $this->getEntityManager()->createQueryBuilder();
+        $queryBuilder->select('j')->from('SHQCommandsQueuesBundle:Job', 'j')
+            // The status MUST be NEW
+            ->where(
+                $queryBuilder->expr()->orX(
+                    $queryBuilder->expr()->eq('j.status', ':running'),
+                    $queryBuilder->expr()->eq('j.status', ':pending')
+                )
+            )
+            ->setParameter('running', Job::STATUS_PENDING)->setParameter('pending', Job::STATUS_RUNNING);
+
+        // If there are already known stale Jobs...
+        if (false === empty($knownAsStale)) {
+            // The ID hasn't to be one of them
+            $queryBuilder->andWhere(
+                $queryBuilder->expr()->notIn('j.id', ':knownAsStale')
+            )->setParameter('knownAsStale', $knownAsStale, Connection::PARAM_INT_ARRAY);
+        }
+
+        return $queryBuilder->getQuery()->setMaxResults(1)->getOneOrNullResult();
+    }
+
+    /**
      * Finds the next Job to process.
      *
      * @param array $excludedJobs The Jobs that have to be excluded from the SELECT

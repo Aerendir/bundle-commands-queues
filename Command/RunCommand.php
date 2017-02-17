@@ -38,11 +38,11 @@ class RunCommand extends AbstractQueuesCommand
 
         // Do the initializing operations
         $this->daemon = $this->getContainer()->get('commands_queues.do_not_use.daemon');
-        $this->daemon->initialize($this->getIoWriter());
-        $this->daemon->printProfilingInfo();
+        $this->daemon->initialize($this->getIoWriter(), $output);
 
         // Check that the Daemons in the database that are still running are really still running
         $this->checkAliveDaemons();
+        $this->daemon->printProfilingInfo();
 
         $this->getIoWriter()->success('Waiting for new ScheduledJobs to process...');
         $this->getIoWriter()->commentLineNoBg('To quit the Queues Daemon use CONTROL-C.');
@@ -117,6 +117,11 @@ class RunCommand extends AbstractQueuesCommand
      */
     private function checkAliveDaemons()
     {
+        if ($this->getIoWriter()->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
+            $this->getIoWriter()->infoLineNoBg('Checking struggler Daemons...');
+            $this->getIoWriter()->commentLineNoBg('Daemons are "struggler" if they are not running anymore.');
+        }
+
         $strugglers = [];
         /** @var Daemon $daemon */
         while (null !== $daemon = $this->getEntityManager()->getRepository('SHQCommandsQueuesBundle:Daemon')
@@ -129,34 +134,33 @@ class RunCommand extends AbstractQueuesCommand
             }
         }
 
-        if (false === empty($strugglers) && $this->getIoWriter()->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
-            $this->getIoWriter()->infoLineNoBg(
-                sprintf(
-                    'Found %s struggler Daemon(s).',
-                    count($strugglers)
-                )
-            );
-            $this->getIoWriter()->commentLineNoBg('Daemons are "struggler" if they are not running anymore.');
-            $this->getIoWriter()->noteLineNoBg('Their "diedOn" date is set to NOW and mortisCausa is "struggler".');
-            $table = [];
-            /** @var Daemon $strugglerDaemon */
-            foreach ($strugglers as $strugglerDaemon) {
-                $age = $strugglerDaemon->getDiedOn()->diff($strugglerDaemon->getBornOn());
-                $table[] = [
-                    sprintf('<%s>%s</>', 'success-nobg', "\xE2\x9C\x94"),
-                    $strugglerDaemon->getPid(),
-                    $strugglerDaemon->getHost(),
-                    $strugglerDaemon->getBornOn()->format('Y-m-d H:i:s'),
-                    $strugglerDaemon->getDiedOn()->format('Y-m-d H:i:s'),
-                    $age->format('%h hours, %i minutes and %s seconds.'),
-                    $strugglerDaemon->getMortisCausa(),
-                ];
-            }
-            $this->getIoWriter()->table(
-                ['', 'PID', 'Host', 'Born on', 'Died On', 'Age', 'Mortis Causa'],
-                $table
-            );
+        if (empty($strugglers) && $this->getIoWriter()->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
+            $this->getIoWriter()->infoLineNoBg('No Struggler Daemons found.');
+
+            return;
         }
+
+        $this->getIoWriter()->infoLineNoBg(sprintf('Found %s struggler Daemon(s).', count($strugglers)));
+
+        $table = [];
+        /** @var Daemon $strugglerDaemon */
+        foreach ($strugglers as $strugglerDaemon) {
+            $age = $strugglerDaemon->getDiedOn()->diff($strugglerDaemon->getBornOn());
+            $table[] = [
+                sprintf('<%s>%s</>', 'success-nobg', "\xE2\x9C\x94"),
+                $strugglerDaemon->getPid(),
+                $strugglerDaemon->getHost(),
+                $strugglerDaemon->getBornOn()->format('Y-m-d H:i:s'),
+                $strugglerDaemon->getDiedOn()->format('Y-m-d H:i:s'),
+                $age->format('%h hours, %i minutes and %s seconds.'),
+                $strugglerDaemon->getMortisCausa(),
+            ];
+        }
+        $this->getIoWriter()->table(
+            ['', 'PID', 'Host', 'Born on', 'Died On', 'Age', 'Mortis Causa'],
+            $table
+        );
+        $this->getIoWriter()->commentLineNoBg('Their "diedOn" date is set to NOW and mortisCausa is "struggler".');
     }
 
     /**

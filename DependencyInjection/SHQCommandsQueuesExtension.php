@@ -33,6 +33,7 @@ class SHQCommandsQueuesExtension extends Extension
             'max_concurrent_jobs' => $config['max_concurrent_jobs'],
             'idle_time'           => $config['idle_time'],
             'worker_name'         => $config['worker_name'],
+            'retry_stale_jobs'    => $config['retry_stale_jobs'],
         ]);
 
         $loader = new YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
