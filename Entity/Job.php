@@ -696,7 +696,7 @@ class Job
      *
      * @return Job
      */
-    private function setRetryOf(Job $retriedJob) : Job
+    protected function setRetryOf(Job $retriedJob) : Job
     {
         // This is a retry Job for another job
         $this->retryOf = $retriedJob;
@@ -710,7 +710,7 @@ class Job
      *
      * @return Job
      */
-    private function setRetriedBy(Job $retryingJob) : Job
+    protected function setRetriedBy(Job $retryingJob) : Job
     {
         $this->retriedBy = $retryingJob;
 
@@ -722,7 +722,7 @@ class Job
      *
      * @return Job
      */
-    private function setFirstRetriedJob(Job $firstRetriedJob) : Job
+    protected function setFirstRetriedJob(Job $firstRetriedJob) : Job
     {
         $this->firstRetriedJob = $firstRetriedJob;
 
