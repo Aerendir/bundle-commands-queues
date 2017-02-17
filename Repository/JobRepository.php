@@ -47,8 +47,6 @@ class JobRepository extends EntityRepository
             // Remove it from the Entity Manager to free some memory
             // $this->getEntityManager()->detach($job);
         }
-
-        return null;
     }
 
     /**

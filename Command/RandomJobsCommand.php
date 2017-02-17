@@ -36,7 +36,7 @@ class RandomJobsCommand extends AbstractQueuesCommand
                     new InputOption('batch', null, InputOption::VALUE_OPTIONAL, 'The number of Jobs in a batch.', 100),
                     new InputOption('no-future-jobs', null),
                     new InputOption('retry-strategies', null, InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, 'The allowed retry strategies.', ['constant', 'exponential', 'linear', 'live', 'never_retry', 'time_fixed']),
-                    new InputOption('time-units', null, InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, 'The allowed time units.', StrategyInterface::TIME_UNITS)
+                    new InputOption('time-units', null, InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, 'The allowed time units.', StrategyInterface::TIME_UNITS),
                 ])
             );
     }
@@ -70,7 +70,7 @@ class RandomJobsCommand extends AbstractQueuesCommand
         $jobs = [];
         for ($i = 0; $i < $howManyJobs; $i++) {
             // First: we create a Job to push to the queue
-            $arguments = '--id='.($i+1);
+            $arguments = '--id='.($i + 1);
             $scheduledJob = new Job('queues:test', $arguments);
 
             // Set a random retry strategy
@@ -84,7 +84,7 @@ class RandomJobsCommand extends AbstractQueuesCommand
                 if (7 <= $condition) {
                     $days = rand(1, 10);
                     $future = new \DateTime();
-                    $future->modify('+' . $days . ' day');
+                    $future->modify('+'.$days.' day');
                     $scheduledJob->setExecuteAfterTime($future);
                 }
             }
@@ -133,8 +133,8 @@ class RandomJobsCommand extends AbstractQueuesCommand
     {
         // Pick a random strategy
         $strategy = $strategies[rand(0, count($strategies) - 1)];
-        $maxAttempts = rand(1,3);
-        $incrementBy = rand(1,10);
+        $maxAttempts = rand(1, 3);
+        $incrementBy = rand(1, 10);
         $timeUnit = $this->getRandomTimeUnit($timeUnits);
 
         switch ($strategy) {
@@ -142,7 +142,8 @@ class RandomJobsCommand extends AbstractQueuesCommand
                 return new ConstantStrategy($maxAttempts, $incrementBy, $timeUnit);
                 break;
             case 'exponential':
-                $exponentialBase = rand(2,5);
+                $exponentialBase = rand(2, 5);
+
                 return new ExponentialStrategy($maxAttempts, $incrementBy, $timeUnit, $exponentialBase);
                 break;
             case 'linear':
@@ -164,6 +165,7 @@ class RandomJobsCommand extends AbstractQueuesCommand
 
     /**
      * @param array $timeUnits
+     *
      * @return string
      */
     private function getRandomTimeUnit(array $timeUnits)
