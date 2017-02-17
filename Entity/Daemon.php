@@ -4,9 +4,13 @@ namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\Mapping as ORM;
 
 /**
  * Represents a Daemon.
+ *
+ * @ORM\Entity(repositoryClass="SerendipityHQ\Bundle\CommandsQueuesBundle\Repository\DaemonRepository")
+ * @ORM\Table(name="queues_daemons")
  */
 class Daemon
 {
@@ -16,28 +20,62 @@ class Daemon
     /** Used when a Daemon is not found anymore during the check of queues:run checkAliveDamons */
     const MORTIS_STRAGGLER = 'straggler';
 
-    /** @var int $id */
+    /**
+     * @var int $id
+     *
+     * @ORM\Column(name="id", type="integer", nullable=false)
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="IDENTITY")
+     */
     private $id;
 
-    /** @var array $config */
+    /**
+     * @var array $config
+     *
+     * @ORM\Column(name="config", type="array", nullable=false)
+     */
     private $config = [];
 
-    /** @var string $host */
+    /**
+     * @var string $host
+     *
+     * @ORM\Column(name="host", type="string", length=255, nullable=false)
+     */
     private $host;
 
-    /** @var int $pid */
+    /**
+     * @var int $pid
+     *
+     * @ORM\Column(name="pid", type="integer", nullable=false)
+     */
     private $pid;
 
-    /** @var \DateTime $bornOn */
+    /**
+     * @var \DateTime $bornOn
+     *
+     * @ORM\Column(name="born_on", type="datetime", nullable=false)
+     */
     private $bornOn;
 
-    /** @var \DateTime $diedOn */
+    /**
+     * @var \DateTime $diedOn
+     *
+     * @ORM\Column(name="died_on", type="datetime", nullable=true)
+     */
     private $diedOn;
 
-    /** @var string $mortisCausa */
+    /**
+     * @var string $mortisCausa
+     *
+     * @ORM\Column(name="mortis_causa", type="string", length=255, nullable=true)
+     */
     private $mortisCausa;
 
-    /** @var Collection $processedJobs */
+    /**
+     * @var Collection $processedJobs
+     *
+     * @ORM\OneToMany(targetEntity="SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job", mappedBy="processedBy")
+     */
     private $processedJobs;
 
     /**

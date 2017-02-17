@@ -8,6 +8,7 @@ use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Daemon;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\JobsMarker;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\Profiler;
+use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Process\Process;
@@ -55,11 +56,19 @@ class QueuesDaemon
     private $verbosity;
 
     /**
+     * @param array $config
      * @param EntityManager $entityManager
+     * @param JobsManager $jobsManager
+     * @param JobsMarker $jobsMarker
+     * @param Profiler $profiler
      */
-    public function __construct(EntityManager $entityManager)
+    public function __construct(array $config, EntityManager $entityManager, JobsManager $jobsManager, JobsMarker $jobsMarker, Profiler $profiler)
     {
+        $this->config = $config;
         $this->entityManager = $entityManager;
+        $this->jobsManager = $jobsManager;
+        $this->jobsMarker = $jobsMarker;
+        $this->profiler = $profiler;
     }
 
     /**
@@ -112,7 +121,7 @@ class QueuesDaemon
     /**
      * Whil this returns true, the Daemon will continue to run.
      *
-     * This service is not meant to be retrieved outside of QueuesRunCommand.
+     * This service is not meant to be retrieved outside of RunCommand.
      *
      * @return bool
      */
@@ -155,14 +164,12 @@ class QueuesDaemon
         }
 
         // Get the next job to process
-        $job = $this->entityManager->getRepository(Job::class)->findNextRunnableJob();
+        $job = $this->entityManager->getRepository('SHQCommandsQueuesBundle:Job')->findNextRunnableJob();
 
         // If no more jobs exists in the queue
         if (null === $job) {
-            if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
-                $this->ioWriter->infoLineNoBg(
-                    sprintf('No jobs to process. Idling fo %s seconds...', $this->config['idle_time'])
-                );
+            if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
+                $this->ioWriter->infoLineNoBg(sprintf('No Jobs to process. Idling for %s seconds...', $this->config['idle_time']));
             }
             sleep($this->config['idle_time']);
 
@@ -179,6 +186,20 @@ class QueuesDaemon
                     '[%s] Job "%s" on Queue "%s": Initializing the process.',
                     $now->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue()
                 ));
+
+            if (false !== strpos($job->getCommand(), 'mark-as-cancelled')) {
+                $this->ioWriter->noteLineNoBg(sprintf(
+                    '[%s] Job "%s" on Queue "%s": This will mark as CANCELLED childs of #%s.',
+                    $now->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue(), $job->getArguments()[0]
+                ));
+            }
+
+            if ($job->isRetry()) {
+                $this->ioWriter->noteLineNoBg(sprintf(
+                    '[%s] Job "%s" on Queue "%s": this is a retry of original process #%s.',
+                    $now->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue(), $job->getRetryOf()->getId()
+                ));
+            }
         }
 
         // Create the process for the scheduled job
@@ -192,6 +213,12 @@ class QueuesDaemon
             $info['output'] = 'Failing start the process.';
             $info['output_error'] = $e;
 
+            // Check if it can be retried
+            if (true === $this->retryJob($job, $info, 'Job didn\'t started as its process were aborted.')) {
+                // Exit
+                return;
+            }
+
             $this->jobsMarker->markJobAsAborted($job, $info, $this->me);
             if ($this->verbosity >= SymfonyStyle::VERBOSITY_NORMAL) {
                 $this->ioWriter->infoLineNoBg(sprintf(
@@ -203,7 +230,18 @@ class QueuesDaemon
             return;
         }
 
-        // Now start processing the job
+        /*
+         * Mark the Job as pending.
+         *
+         * When we mark it as Running we want its PID printed in the Console and saved to the database.
+         * If we mark now the Job as Running, on a very busy server may happen that at this point the real process isn't
+         * already started and so the Job hasn't already a PID.
+         * Marking it as pending now allows us to save its PID in the database later, when we will process again this
+         * Job as a running one.
+         *
+         * At that time, if it recognized as a running job, its process is really started and itt will have a PID for
+         * sure.
+         */
         $this->jobsMarker->markJobAsPending($job, $info, $this->me);
 
         // Now add the process to the runningJobs list to keep track of it later
@@ -240,10 +278,29 @@ class QueuesDaemon
     /**
      * Processes the Jobs already running.
      */
-    public function checkRunningJobs()
+    public function checkRunningJobs(ProgressBar $progressBar = null)
     {
         foreach ($this->runningJobs as $index => $runningJob) {
-            // If the running job is porcessed correctly...
+            $now = new \DateTime();
+
+            /** @var Job $checkingJob */
+            $checkingJob = $runningJob['job'];
+            /** @var Process $checkingProcess */
+            $checkingProcess = $runningJob['process'];
+
+            if (null !== $progressBar) {
+                $progressBar->advance();
+                $this->ioWriter->writeln('');
+            }
+
+            if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
+                $this->ioWriter->infoLineNoBg(sprintf(
+                    '[%s] Job "%s" on Queue "%s": Checking status...',
+                    $now->format('Y-m-d H:i:s'), $checkingJob->getId(), $checkingJob->getQueue(), $checkingProcess->getPid()
+                    ));
+            }
+
+            // If the running job is processed correctly...
             if (true === $this->processRunningJob($runningJob)) {
                 // ... Unset it from the running jobs queue
                 unset($this->runningJobs[$index]);
@@ -266,21 +323,22 @@ class QueuesDaemon
         /** @var Process $process */
         $process = $runningJob['process'];
 
-        // If the current status of the job is Pending but its process started and is not already terminated
-        if ($job->getStatus() === Job::STATUS_PENDING && $process->isStarted() && false === $process->isTerminated()) {
-            // Mark it as running (those checks will avoid an unuseful query to the DB)
-            $this->jobsMarker->markJobAsRunning($job);
+        //  If it is not already terminated...
+        if (false === $process->isTerminated()) {
+            // ... and it is still pending but its process were effectively started
+            if ($job->getStatus() === Job::STATUS_PENDING && $process->isStarted()) {
+                // Mark it as running (those checks will avoid an unuseful query to the DB)
+                $this->jobsMarker->markJobAsRunning($job);
+            }
 
             // And print its PID (available only if the process is already running)
-            if ($this->verbosity >= SymfonyStyle::VERBOSITY_NORMAL) {
+            if ($process->isStarted() && $this->verbosity >= SymfonyStyle::VERBOSITY_NORMAL) {
                 $this->ioWriter->infoLineNoBg(sprintf(
-                    '[%s] Job "%s" on Queue "%s": Process is currently running with PID "%s".',
-                    $now->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue(), $process->getPid())
+                        '[%s] Job "%s" on Queue "%s": Process is currently running with PID "%s".',
+                        $now->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue(), $process->getPid())
                 );
             }
-        }
 
-        if (false === $process->isTerminated()) {
             // ... don't continue to process it as we have to wait it will terminate
             return false;
         }
@@ -301,8 +359,10 @@ class QueuesDaemon
 //        VarDumper::dump($process->hasBeenSignaled());
 //        VarDumper::dump($process->hasBeenStopped());
 
-        // Remove the Job from the Entity Manager
-        $this->entityManager->detach($job);
+        // If it has to be retried, Remove the Job from the Entity Manager
+        if ($job->getStatus() !== Job::STATUS_RETRIED) {
+            //$this->entityManager->detach($job);
+        }
 
         // First set to false, then unset to free up memory ASAP
         $now =
@@ -320,7 +380,7 @@ class QueuesDaemon
      */
     public function optimize()
     {
-        // Force the garbage collection after a command is closed
+        // Force the garbage collection
         gc_collect_cycles();
     }
 
@@ -350,22 +410,6 @@ class QueuesDaemon
     }
 
     /**
-     * @param array         $config
-     * @param EntityManager $entityManager
-     * @param JobsManager   $jobsManager
-     * @param JobsMarker    $jobsMarker
-     * @param Profiler      $profiler
-     */
-    public function setDependencies(array $config, EntityManager $entityManager, JobsManager $jobsManager, JobsMarker $jobsMarker, Profiler $profiler)
-    {
-        $this->config = $config;
-        $this->entityManager = $entityManager;
-        $this->jobsManager = $jobsManager;
-        $this->jobsMarker = $jobsMarker;
-        $this->profiler = $profiler;
-    }
-
-    /**
      * @return Daemon
      */
     public function getIdentity() : Daemon
@@ -388,11 +432,31 @@ class QueuesDaemon
     final protected function handleFailedJob(Job $job, Process $process)
     {
         $info = $this->jobsManager->buildDefaultInfo($process);
+
+        // Check if it can be retried
+        if (true === $this->retryJob($job, $info, 'Job failed')) {
+            // Exit
+            return;
+        }
+
         $this->jobsMarker->markJobAsFailed($job, $info);
         $this->ioWriter->errorLineNoBg(sprintf(
-            '[%s] Job "%s" on Queue "%s": Process failed.',
-            $job->getClosedAt()->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue())
-        );
+                '[%s] Job "%s" on Queue "%s": Process failed (no retries allowed)',
+                $job->getClosedAt()->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue()
+            ));
+
+        if ($job->getChildDependencies()->count() > 0) {
+            $this->ioWriter->noteLineNoBg(sprintf(
+                '[%s] Job "%s" on Queue "%s": Creating a Job to mark childs as as CANCELLED.',
+                $job->getClosedAt()->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue()
+            ));
+
+            $cancelChildsJobs = $job->createCancelChildsJob();
+            $this->entityManager->persist($cancelChildsJobs);
+
+            // Flush it immediately to start the process as soon as possible
+            $this->entityManager->flush($cancelChildsJobs);
+        }
     }
 
     /**
@@ -451,5 +515,31 @@ class QueuesDaemon
         if ($this->verbosity >= SymfonyStyle::VERBOSITY_NORMAL) {
             $this->ioWriter->successLineNoBg('PCNTL is available: signals will be processed.');
         }
+    }
+
+    /**
+     * @param Job $job
+     * @param array $info
+     * @param string $retryReason
+     * @return bool
+     */
+    private function retryJob(Job $job, array $info, string $retryReason)
+    {
+        // Check if it can be retried
+        if (false === $job->getRetryStrategy()->canRetry()) {
+            return false;
+        }
+
+        $retryJob = $this->jobsMarker->markJobAsRetried($job, $info);
+        $this->ioWriter->errorLineNoBg(sprintf(
+                '[%s] Job "%s" on Queue "%s": %s.',
+                $job->getClosedAt()->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue(), $retryReason)
+        );
+        $this->ioWriter->noteLineNoBg(sprintf(
+                '[%s] Job "%s" on Queue "%s": Retry with Job "%s" (Attempt #%s/%s).',
+                $job->getClosedAt()->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue(), $retryJob->getId(), $retryJob->getRetryStrategy()->getAttempts(), $retryJob->getRetryStrategy()->getMaxAttempts())
+        );
+
+        return true;
     }
 }

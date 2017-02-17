@@ -35,7 +35,7 @@ class JobRepository extends EntityRepository
         $excludedJobs = [];
 
         while (null !== $job = $this->findNextJob($excludedJobs)) {
-            // If it can be run and its lock is successfully acquired...
+            // If it can be run...
             if (false === $job->hasNotFinishedParentJobs()) {
                 // ... Return it
                 return $job;
@@ -45,8 +45,10 @@ class JobRepository extends EntityRepository
             $excludedJobs[] = $job->getId();
 
             // Remove it from the Entity Manager to free some memory
-            $this->_em->detach($job);
+            // $this->getEntityManager()->detach($job);
         }
+
+        return null;
     }
 
     /**
@@ -58,8 +60,8 @@ class JobRepository extends EntityRepository
      */
     private function findNextJob(array $excludedJobs = [])
     {
-        $queryBuilder = $this->_em->createQueryBuilder();
-        $queryBuilder->select('j')->from('QueuesBundle:Job', 'j')
+        $queryBuilder = $this->getEntityManager()->createQueryBuilder();
+        $queryBuilder->select('j')->from('SHQCommandsQueuesBundle:Job', 'j')
             ->orderBy('j.priority', 'ASC')
             ->addOrderBy('j.createdAt', 'ASC')
             // The status MUST be NEW

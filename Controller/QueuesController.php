@@ -5,9 +5,12 @@ namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
-use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Daemon;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
+use SerendipityHQ\Component\ThenWhen\Strategy\LiveStrategy;
+use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Output\NullOutput;
 
 /**
  * {@inheritdoc}
@@ -20,7 +23,7 @@ class QueuesController extends Controller
      */
     public function indexAction()
     {
-        $jobs = $this->getDoctrine()->getRepository(Daemon::class)->findAll();
+        $jobs = $this->getDoctrine()->getRepository('SHQCommandsQueuesBundle:Daemon')->findAll();
 
         return [
             'daemons' => $jobs,
@@ -33,7 +36,7 @@ class QueuesController extends Controller
      */
     public function jobsAction()
     {
-        $jobs = $this->getDoctrine()->getRepository(Job::class)->findBy([], ['createdAt' => 'ASC', 'id' => 'ASC']);
+        $jobs = $this->getDoctrine()->getRepository('SHQCommandsQueuesBundle:Job')->findBy([], ['createdAt' => 'ASC', 'id' => 'ASC']);
 
         return [
             'jobs' => $jobs,
@@ -48,6 +51,8 @@ class QueuesController extends Controller
      *     "mapping": {"id": "id"},
      *     "map_method_signature" = true
      * })
+     * @param Job $job
+     * @return array
      */
     public function jobAction(Job $job)
     {
@@ -57,60 +62,45 @@ class QueuesController extends Controller
     }
 
     /**
-     * @Route("/test", name="queues_test")
-     * @Template()
+     * @Route("/test", name="queues_test_random")
      */
-    public function testAction()
+    public function testRandomAction()
     {
-        $jobs = [];
-        for ($i = 0; $i <= 100; $i++) {
-            // First: we create a Job to push to the queue
-            $arguments = '--id='.$i;
-            $scheduledJob = new Job('queues:test', $arguments);
+        $kernel = $this->get('kernel');
+        $appliction = new Application($kernel);
+        $appliction->setAutoExit(false);
 
-            // Decide if this will be executed in the future
-            $condition = rand(0, 10);
-            if (7 <= $condition) {
-                $days = rand(1, 10);
-                $future = new \DateTime();
-                $future->modify('+'.$days.' day');
-                $scheduledJob->setExecuteAfterTime($future);
-            }
+        $input = new ArrayInput([
+            'command' => 'queues:random-jobs',
+            'how-many-jobs' => 100,
+            '--env' => 'prod',
+            '--no-future-jobs',
+            '--retry-strategies' => ['live']
+        ]);
 
-            // Decide if this has a dependency on another job
-            $condition = rand(0, 10);
-            // Be sure there is at least one already created Job!!!
-            if (7 <= $condition && 0 < count($jobs)) {
-                // Decide how many dependencies it has
-                $howMany = rand(1, count($jobs) - 1);
-
-                for ($ii = 0; $ii <= $howMany; $ii++) {
-                    $parentJob = rand(0, count($jobs) - 1);
-                    $scheduledJob->addParentDependency($jobs[$parentJob]);
-                }
-            }
-
-            $this->get('queues')->schedule($scheduledJob);
-            $jobs[] = $scheduledJob;
-        }
+        $output = new NullOutput();
+        $appliction->run($input, $output);
 
         return $this->redirectToRoute('queues_jobs');
+    }
 
-        /*
-        $jobOne = new Job('queues:test', '--id=job_one');
-        $jobTwo = new Job('queues:test', '--id=job_two');
+    /**
+     * @Route("/test/failed", name="queues_test_failed")
+     */
+    public function testFailedAction()
+    {
+        $job1 = new Job('queues:test', '--id=1 --trigger-error=true');
+        $job1->setRetryStrategy(new LiveStrategy(3));
+        $this->get('queues')->schedule($job1);
 
-        $jobTwo->addParentDependency($jobOne);
+        $job2 = new Job('queues:test', '--id=2 --trigger-error=true');
+        $job2->addParentDependency($job1);
+        $this->get('queues')->schedule($job2);
 
-        dump('Job One', 'Child deps', $jobOne->getChildDependencies(), 'Parent deps', $jobOne->getParentDependencies());
-        dump('Job Two', 'Child deps', $jobTwo->getChildDependencies(), 'Parent deps', $jobTwo->getParentDependencies());
+        $job3 = new Job('queues:test', '--id=3 --trigger-error=true');
+        $job2->addChildDependency($job3);
+        $this->get('queues')->schedule($job3);
 
-        $this->getDoctrine()->getManager()->persist($jobOne);
-        $this->getDoctrine()->getManager()->persist($jobTwo);
-        $this->getDoctrine()->getManager()->flush();
-
-        dump('Job One', 'Child deps', $jobOne->getChildDependencies(), 'Parent deps', $jobOne->getParentDependencies());
-        dump('Job Two', 'Child deps', $jobTwo->getChildDependencies(), 'Parent deps', $jobTwo->getParentDependencies());
-        */
+        return $this->redirectToRoute('queues_jobs');
     }
 }
