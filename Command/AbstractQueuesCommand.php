@@ -15,13 +15,13 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 abstract class AbstractQueuesCommand extends ContainerAwareCommand
 {
-    /** @var  EntityManager $entityManager */
+    /** @var EntityManager $entityManager */
     private $entityManager;
 
-    /** @var  SerendipityHQStyle */
+    /** @var SerendipityHQStyle */
     private $ioWriter;
 
-    /** @var  JobsMarker $jobsMarker */
+    /** @var JobsMarker $jobsMarker */
     private $jobsMarker;
 
     /**
@@ -44,7 +44,7 @@ abstract class AbstractQueuesCommand extends ContainerAwareCommand
     /**
      * @return EntityManager
      */
-    protected final function getEntityManager() : EntityManager
+    final protected function getEntityManager() : EntityManager
     {
         return $this->entityManager;
     }
@@ -52,7 +52,7 @@ abstract class AbstractQueuesCommand extends ContainerAwareCommand
     /**
      * @return JobsMarker
      */
-    protected final function getJobsMarker() : JobsMarker
+    final protected function getJobsMarker() : JobsMarker
     {
         if (null === $this->jobsMarker) {
             $this->jobsMarker = $this->getContainer()->get('commands_queues.do_not_use.jobs_marker');
@@ -64,7 +64,7 @@ abstract class AbstractQueuesCommand extends ContainerAwareCommand
     /**
      * @return SerendipityHQStyle
      */
-    protected final function getIoWriter() : SerendipityHQStyle
+    final protected function getIoWriter() : SerendipityHQStyle
     {
         return $this->ioWriter;
     }

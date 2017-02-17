@@ -28,7 +28,7 @@ class MarkAsCancelledCommand extends AbstractQueuesCommand
             ->setDescription('[INTERNAL] Marks the given Job and its childs as CANCELLED.')
             ->setDefinition(
                 new InputDefinition([
-                    new InputOption('id', 'id', InputOption::VALUE_REQUIRED)
+                    new InputOption('id', 'id', InputOption::VALUE_REQUIRED),
                 ])
             );
 
@@ -67,10 +67,10 @@ class MarkAsCancelledCommand extends AbstractQueuesCommand
     }
 
     /**
-     * @param Job $job
+     * @param Job    $job
      * @param string $cancellationReason
-     * @param array $parentInfo
-     * @param array $cancelledJobs
+     * @param array  $parentInfo
+     * @param array  $cancelledJobs
      *
      * @return bool
      */
@@ -97,12 +97,12 @@ class MarkAsCancelledCommand extends AbstractQueuesCommand
         $childInfo = [
             'debug' => [
                 'cancellation_reason' => $cancellationReason,
-                'parent_info' => $parentInfo
-            ]
+                'parent_info'         => $parentInfo,
+            ],
         ];
 
         foreach ($job->getChildDependencies() as $childDependency) {
-            if (false === key_exists($childDependency->getId(), $cancelledJobs)) {
+            if (false === array_key_exists($childDependency->getId(), $cancelledJobs)) {
                 $this->getJobsMarker()->markJobAsCancelled($childDependency, $childInfo);
                 $cancelledJobs[$childDependency->getId()] = $childDependency->getId();
             }

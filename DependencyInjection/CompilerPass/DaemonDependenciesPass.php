@@ -40,7 +40,7 @@ class DaemonDependenciesPass implements CompilerPassInterface
             $container->findDefinition('commands_queues.do_not_use.entity_manager'),
             $jobsManagerDefinition,
             $container->findDefinition('commands_queues.do_not_use.jobs_marker'),
-            $profilerDefinition
+            $profilerDefinition,
         ]);
         $container->setDefinition('commands_queues.do_not_use.daemon', $daemonDefinition);
     }

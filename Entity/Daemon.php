@@ -21,7 +21,7 @@ class Daemon
     const MORTIS_STRAGGLER = 'straggler';
 
     /**
-     * @var int $id
+     * @var int
      *
      * @ORM\Column(name="id", type="integer", nullable=false)
      * @ORM\Id
@@ -30,49 +30,49 @@ class Daemon
     private $id;
 
     /**
-     * @var array $config
+     * @var array
      *
      * @ORM\Column(name="config", type="array", nullable=false)
      */
     private $config = [];
 
     /**
-     * @var string $host
+     * @var string
      *
      * @ORM\Column(name="host", type="string", length=255, nullable=false)
      */
     private $host;
 
     /**
-     * @var int $pid
+     * @var int
      *
      * @ORM\Column(name="pid", type="integer", nullable=false)
      */
     private $pid;
 
     /**
-     * @var \DateTime $bornOn
+     * @var \DateTime
      *
      * @ORM\Column(name="born_on", type="datetime", nullable=false)
      */
     private $bornOn;
 
     /**
-     * @var \DateTime $diedOn
+     * @var \DateTime
      *
      * @ORM\Column(name="died_on", type="datetime", nullable=true)
      */
     private $diedOn;
 
     /**
-     * @var string $mortisCausa
+     * @var string
      *
      * @ORM\Column(name="mortis_causa", type="string", length=255, nullable=true)
      */
     private $mortisCausa;
 
     /**
-     * @var Collection $processedJobs
+     * @var Collection
      *
      * @ORM\OneToMany(targetEntity="SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job", mappedBy="processedBy")
      */

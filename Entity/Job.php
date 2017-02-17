@@ -77,7 +77,7 @@ class Job
     const STATUS_CANCELLED = 'cancelled';
 
     /**
-     * @var int $id The ID of the Job
+     * @var int The ID of the Job
      *
      * @ORM\Column(name="id", type="integer", nullable=false)
      * @ORM\Id
@@ -86,63 +86,63 @@ class Job
     private $id;
 
     /**
-     * @var string $command
+     * @var string
      *
      * @ORM\Column(name="command", type="string", length=255, nullable=false)
      */
     private $command;
 
     /**
-     * @var array $arguments
+     * @var array
      *
      * @ORM\Column(name="arguments", type="array", nullable=false)
      */
     private $arguments;
 
     /**
-     * @var \DateTime $executeAfterTime
+     * @var \DateTime
      *
      * @ORM\Column(name="execute_after_time", type="datetime", nullable=true)
      */
     private $executeAfterTime;
 
     /**
-     * @var \DateTime $createdAt
+     * @var \DateTime
      *
      * @ORM\Column(name="created_at", type="datetime", nullable=false)
      */
     private $createdAt;
 
     /**
-     * @var \DateTime $startedAt
+     * @var \DateTime
      *
      * @ORM\Column(name="started_at", type="datetime", nullable=true)
      */
     private $startedAt;
 
     /**
-     * @var \DateTime $closedAt When the Job is marked as Finished, Failed or Terminated.
+     * @var \DateTime When the Job is marked as Finished, Failed or Terminated.
      *
      * @ORM\Column(name="closed_at", type="datetime", nullable=true)
      */
     private $closedAt;
 
     /**
-     * @var array $debug The error produced by the job (usually an exception)
+     * @var array The error produced by the job (usually an exception)
      *
      * @ORM\Column(name="debug", type="array", nullable=true)
      */
     private $debug = [];
 
     /**
-     * @var int $priority
+     * @var int
      *
      * @ORM\Column(name="priority", type="smallint", nullable=false)
      */
     private $priority;
 
     /**
-     * @var Daemon $processedBy The daemon that processed the Job.
+     * @var Daemon The daemon that processed the Job.
      *
      * @ORM\Column(name="processed_by", type="integer", nullable=true)
      * @ORM\ManyToOne(targetEntity="SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Daemon", inversedBy="processedJobs")
@@ -151,42 +151,42 @@ class Job
     private $processedBy;
 
     /**
-     * @var string $queue
+     * @var string
      *
      * @ORM\Column(name="queue", type="string", length=255, nullable=false)
      */
     private $queue;
 
     /**
-     * @var string $status
+     * @var string
      *
      * @ORM\Column(name="status", type="string", length=255, nullable=false)
      */
     private $status;
 
     /**
-     * @var  string $cancellationReason If the status is self::STATUS_CANCELLED this property tells the why
+     * @var string If the status is self::STATUS_CANCELLED this property tells the why
      *
      * @ORM\Column(name="cancellation_reason", type="string", length=255, nullable=true)
      */
     private $cancellationReason;
 
     /**
-     * @var string $output The output produced by the job
+     * @var string The output produced by the job
      *
      * @ORM\Column(name="output", type="text", nullable=true)
      */
     private $output;
 
     /**
-     * @var int $exitCode The code with which the process exited
+     * @var int The code with which the process exited
      *
      * @ORM\Column(name="exit_code", type="integer", nullable=true)
      */
     private $exitCode;
 
     /**
-     * @var Collection $childDependencies
+     * @var Collection
      *
      * @ORM\ManyToMany(targetEntity="SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job", inversedBy="parentDependencies")
      * @ORM\JoinTable(name="queues_jobs_dependencies",
@@ -197,21 +197,21 @@ class Job
     private $childDependencies;
 
     /**
-     * @var Collection $parentDependencies
+     * @var Collection
      *
      * @ORM\ManyToMany(targetEntity="SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job", mappedBy="childDependencies")
      */
     private $parentDependencies;
 
     /**
-     * @var  StrategyInterface $retryStrategy
+     * @var StrategyInterface
      *
      * @ORM\Column(name="retry_strategy", type="array", nullable=false)
      */
     private $retryStrategy;
 
     /**
-     * @var  Job $retryOf If this Job is a retry of another job, here there is the Job of which this is the retry
+     * @var Job If this Job is a retry of another job, here there is the Job of which this is the retry
      *
      * @ORM\OneToOne(targetEntity="SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job", inversedBy="retriedBy")
      * @ORM\JoinColumn(name="retry_of", referencedColumnName="id")
@@ -219,14 +219,14 @@ class Job
     private $retryOf;
 
     /**
-     * @var  Job $retriedBy
+     * @var Job
      *
      * @ORM\OneToOne(targetEntity="SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job", mappedBy="retryOf")
      */
     private $retriedBy;
 
     /**
-     * @var  Job $firstRetriedJob If this Job is a retry of another retried job, here there is the first retried Job
+     * @var Job If this Job is a retry of another retried job, here there is the first retried Job
      *
      * @ORM\ManyToOne(targetEntity="SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job", inversedBy="retriedJobs")
      * @ORM\JoinColumn(name="first_retried_job", referencedColumnName="id")
@@ -234,7 +234,7 @@ class Job
     private $firstRetriedJob;
 
     /**
-     * @var Collection $retriedJobs The Jobs used to retry this one
+     * @var Collection The Jobs used to retry this one
      *
      * @ORM\OneToMany(targetEntity="SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job", mappedBy="firstRetriedJob")
      */
@@ -347,7 +347,7 @@ class Job
     public function createCancelChildsJob() : Job
     {
         // If the Job as child Jobs, create a process to mark them as cancelled
-        $markChildsAsCancelledJob = (new Job('queues:internal:mark-as-cancelled', [sprintf('--id=%s', $this->getId())]))
+        $markChildsAsCancelledJob = (new self('queues:internal:mark-as-cancelled', [sprintf('--id=%s', $this->getId())]))
             ->setQueue($this->getQueue())
             // This Job has to be successful!
             ->setRetryStrategy(new LiveStrategy(100000))
@@ -363,7 +363,7 @@ class Job
     public function createRetryForFailed() : Job
     {
         // Create a new Job that will retry the original one
-        $retryJob = (new Job($this->getCommand(), $this->getArguments()))
+        $retryJob = (new self($this->getCommand(), $this->getArguments()))
             // First get the retry date
             ->setExecuteAfterTime($this->getRetryStrategy()->retryOn())
             // Then we can increment the current number of attempts setting also the RetryStrategy
@@ -701,6 +701,7 @@ class Job
 
     /**
      * @param StrategyInterface $retryStrategy
+     *
      * @return Job
      */
     public function setRetryStrategy(StrategyInterface $retryStrategy) : self
