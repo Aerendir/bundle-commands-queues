@@ -2,19 +2,16 @@
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Command;
 
-use SerendipityHQ\Bundle\ConsoleStyles\Console\Formatter\SerendipityHQOutputFormatter;
-use SerendipityHQ\Bundle\ConsoleStyles\Console\Style\SerendipityHQStyle;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Daemon;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Service\QueuesDaemon;
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * Command to manage the queue.
+ * Runs the daemon that listens for new Joobs to process.
  */
-class QueuesRunCommand extends ContainerAwareCommand
+class RunCommand extends AbstractQueuesCommand
 {
     /** @var QueuesDaemon $daemon */
     private $daemon;
@@ -37,31 +34,29 @@ class QueuesRunCommand extends ContainerAwareCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        // Create the Input/Output writer
-        $ioWriter = new SerendipityHQStyle($input, $output);
-        $ioWriter->setFormatter(new SerendipityHQOutputFormatter(true));
+        parent::execute($input, $output);
 
         // Do the initializing operations
         $this->daemon = $this->getContainer()->get('commands_queues.do_not_use.daemon');
-        $this->daemon->initialize($ioWriter);
+        $this->daemon->initialize($this->getIoWriter());
         $this->daemon->printProfilingInfo();
 
         // Check that the Daemons in the database that are still running are really still running
-        $this->checkAliveDaemons($ioWriter);
+        $this->checkAliveDaemons();
 
-        $ioWriter->success('Waiting for new ScheduledJobs to process...');
-        $ioWriter->commentLineNoBg('To quit the Queues Daemon use CONTROL-C.');
+        $this->getIoWriter()->success('Waiting for new ScheduledJobs to process...');
+        $this->getIoWriter()->commentLineNoBg('To quit the Queues Daemon use CONTROL-C.');
 
         // Run the Daemon
         while ($this->daemon->isAlive()) {
-            // Start processing the next in the queue
+            // Start processing the next Job in the queue
             $this->daemon->processNextJob();
 
             // Then process jobs already running
             $runningJobsCheckInterval = $this->getContainer()->getParameter('commands_queues.running_jobs_check_interval');
-            if ($this->daemon->getProfiler()->getCurrentIteration() % $runningJobsCheckInterval === 0) {
-                if ($ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
-                    $ioWriter->infoLineNoBg('Checking running jobs...');
+            if ($this->daemon->getProfiler()->getCurrentIteration() % $runningJobsCheckInterval === 0 && $this->daemon->hasRunningJobs()) {
+                if ($this->getIoWriter()->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
+                    $this->getIoWriter()->infoLineNoBg(sprintf('Checking %s running jobs...', $this->daemon->countRunningJobs()));
                 }
                 $this->daemon->checkRunningJobs();
             }
@@ -69,17 +64,17 @@ class QueuesRunCommand extends ContainerAwareCommand
             // Check alive daemons
             $aliveDaemonsCheckInterval = $this->getContainer()->getParameter('commands_queues.alive_daemons_check_interval');
             if ($this->daemon->getProfiler()->getCurrentIteration() % $aliveDaemonsCheckInterval === 0) {
-                if ($ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
-                    $ioWriter->infoLineNoBg('Checking alive Daemons...');
+                if ($this->getIoWriter()->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
+                    $this->getIoWriter()->infoLineNoBg('Checking alive Daemons...');
                 }
-                $this->checkAliveDaemons($ioWriter);
+                $this->checkAliveDaemons();
             }
 
             // Free some memory
             $optimizationInterval = $this->getContainer()->getParameter('commands_queues.optimization_interval');
             if ($this->daemon->getProfiler()->getCurrentIteration() % $optimizationInterval === 0) {
-                if ($ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
-                    $ioWriter->infoLineNoBg('Optimizing the Daemons...');
+                if ($this->getIoWriter()->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
+                    $this->getIoWriter()->infoLineNoBg('Optimizing the Daemons...');
                 }
                 $this->daemon->optimize();
             }
@@ -88,87 +83,77 @@ class QueuesRunCommand extends ContainerAwareCommand
             $printProfilingInfoInterval = $this->getContainer()->getParameter('commands_queues.print_profiling_info_interval');
             if (
                 (microtime(true) - $this->daemon->getProfiler()->getLastMicrotime()) >= $printProfilingInfoInterval
-                && $ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE
+                && $this->getIoWriter()->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE
             ) {
                 $this->daemon->printProfilingInfo();
             }
         }
 
-        $ioWriter->note('Entering shutdown sequence.');
+        $this->getIoWriter()->note('Entering shutdown sequence.');
 
         // Wait for the currently running jobs to finish
         $remainedJobs = $this->daemon->countRunningJobs();
-        $progress = new ProgressBar($output, $remainedJobs);
-        $progress->setFormat('<success-nobg>%current%</success-nobg>/%max% [%bar%] %percent:3s%% %elapsed:6s%/%estimated:-6s%');
-        if (0 < $remainedJobs) {
-            $progress->start();
-            $ioWriter->writeln('');
-        }
+        $currentlyRunningProgress = new ProgressBar($output, $remainedJobs);
+        $currentlyRunningProgress->setFormat('<info-nobg>[>] Processing job %current%/%max% (%percent:3s%% )</info-nobg><comment-nobg> %elapsed:6s%/%estimated:-6s%</comment-nobg>');
+
         while ($this->daemon->hasRunningJobs()) {
             // Continue to process running jobs
-            $this->daemon->checkRunningJobs();
-
-            $progress->setProgress($remainedJobs - $this->daemon->countRunningJobs());
-            $ioWriter->writeln('');
+            $this->daemon->checkRunningJobs($currentlyRunningProgress);
 
             // And wait a bit to give them the time to finish
             $this->daemon->wait();
         }
 
-        // A simple line separator
-        if (0 < $remainedJobs) {
-            $ioWriter->writeln('');
-        }
-
         // Set the daemon as died
         $this->daemon->requiescantInPace();
 
-        $ioWriter->success('All done: Queue Daemon ended running. No more ScheduledJobs will be processed.');
+        $this->getIoWriter()->success('All done: Queue Daemon ended running. No more ScheduledJobs will be processed.');
 
         return 0;
     }
 
     /**
-     * Checks that the Damons in the database without a didedOn date are still alive (running).
-     *
-     * @param SerendipityHQStyle $ioWriter
+     * Checks that the Damons in the database without a didedOn date are still alive (running)
      */
-    private function checkAliveDaemons(SerendipityHQStyle $ioWriter)
+    private function checkAliveDaemons()
     {
         $strugglers = [];
-        while (null !== $daemon = $this->getContainer()->get('commands_queues.do_not_use.entity_manager')
-                ->getRepository('QueuesBundle:Daemon')->findNextAlive($this->daemon->getIdentity())) {
+        /** @var Daemon $daemon */
+        while (null !== $daemon = $this->getEntityManager()->getRepository('SHQCommandsQueuesBundle:Daemon')
+                ->findNextAlive($this->daemon->getIdentity())) {
             if (false === $this->isDaemonStillRunning($daemon)) {
                 $daemon->requiescatInPace(Daemon::MORTIS_STRAGGLER);
-                $this->getContainer()->get('commands_queues.do_not_use.entity_manager')->flush();
-                $this->getContainer()->get('commands_queues.do_not_use.entity_manager')->detach($daemon);
+                $this->getEntityManager()->flush();
+                $this->getEntityManager()->detach($daemon);
                 $strugglers[] = $daemon;
             }
         }
 
-        if (false === empty($strugglers) && $ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
-            $ioWriter->infoLineNoBg(
+        if (false === empty($strugglers) && $this->getIoWriter()->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
+            $this->getIoWriter()->infoLineNoBg(
                 sprintf(
                     'Found %s struggler Daemon(s).',
                     count($strugglers)
                 )
             );
-            $ioWriter->commentLineNoBg('Daemons are "struggler" if they are not running anymore.');
-            $ioWriter->noteLineNoBg('Their "diedOn" date is set to NOW and mortisCausa is "struggler".');
+            $this->getIoWriter()->commentLineNoBg('Daemons are "struggler" if they are not running anymore.');
+            $this->getIoWriter()->noteLineNoBg('Their "diedOn" date is set to NOW and mortisCausa is "struggler".');
             $table = [];
             /** @var Daemon $strugglerDaemon */
             foreach ($strugglers as $strugglerDaemon) {
+                $age = $strugglerDaemon->getDiedOn()->diff($strugglerDaemon->getBornOn());
                 $table[] = [
                     sprintf('<%s>%s</>', 'success-nobg', "\xE2\x9C\x94"),
                     $strugglerDaemon->getPid(),
                     $strugglerDaemon->getHost(),
                     $strugglerDaemon->getBornOn()->format('Y-m-d H:i:s'),
                     $strugglerDaemon->getDiedOn()->format('Y-m-d H:i:s'),
+                    $age->format('%h hours, %i minutes and %s seconds.'),
                     $strugglerDaemon->getMortisCausa(),
                 ];
             }
-            $ioWriter->table(
-                ['', 'PID', 'Host', 'Born on', 'Died On', 'Mortis Causa'],
+            $this->getIoWriter()->table(
+                ['', 'PID', 'Host', 'Born on', 'Died On', 'Age', 'Mortis Causa'],
                 $table
             );
         }

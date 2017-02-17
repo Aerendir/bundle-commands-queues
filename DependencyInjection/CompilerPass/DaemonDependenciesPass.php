@@ -3,6 +3,7 @@
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\DependencyInjection\CompilerPass;
 
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Service\JobsManager;
+use SerendipityHQ\Bundle\CommandsQueuesBundle\Service\QueuesDaemon;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\JobsMarker;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\Profiler;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
@@ -28,18 +29,19 @@ class DaemonDependenciesPass implements CompilerPassInterface
         $jobsMarkerDefinition = new Definition(JobsMarker::class, [
             $container->findDefinition('commands_queues.do_not_use.entity_manager'),
         ]);
+        $container->setDefinition('commands_queues.do_not_use.jobs_marker', $jobsMarkerDefinition);
 
         // The Profiler
         $profilerDefinition = new Definition(Profiler::class);
 
         // The Daemon
-        $daemonDefinition = $container->findDefinition('commands_queues.do_not_use.daemon');
-        $daemonDefinition->addMethodCall('setDependencies', [
+        $daemonDefinition = new Definition(QueuesDaemon::class, [
             $container->getParameter('commands_queues.config'),
             $container->findDefinition('commands_queues.do_not_use.entity_manager'),
             $jobsManagerDefinition,
-            $jobsMarkerDefinition,
-            $profilerDefinition,
+            $container->findDefinition('commands_queues.do_not_use.jobs_marker'),
+            $profilerDefinition
         ]);
+        $container->setDefinition('commands_queues.do_not_use.daemon', $daemonDefinition);
     }
 }

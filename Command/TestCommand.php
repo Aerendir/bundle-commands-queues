@@ -1,19 +1,5 @@
 <?php
 
-/*
- * This file is part of the Trust Back Me Www.
- *
- * Copyright Adamo Aerendir Crespi 2012-2016.
- *
- * This code is to consider private and non disclosable to anyone for whatever reason.
- * Every right on this code is reserved.
- *
- * @author    Adamo Aerendir Crespi <hello@aerendir.me>
- * @copyright Copyright (C) 2012 - 2016 Aerendir. All rights reserved.
- * @license   SECRETED. No distribution, no copy, no derivative, no divulgation or any other activity or action that
- *            could disclose this text.
- */
-
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Command;
 
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
@@ -34,10 +20,11 @@ class TestCommand extends ContainerAwareCommand
     {
         $this
             ->setName('queues:test')
-            ->setDescription('A test command to test SHQCommandsQueuesBundle.')
+            ->setDescription('[INTERNAL] A Job to test the behaviors of SHQCommandsQueuesBundle. Returns randomly exceptions, and false or true results.')
             ->setDefinition(
                 new InputDefinition([
                     new InputOption('id', 'id', InputOption::VALUE_REQUIRED),
+                    new InputOption('trigger-error', 'te', InputOption::VALUE_OPTIONAL),
                 ])
             );
     }
@@ -50,6 +37,7 @@ class TestCommand extends ContainerAwareCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $triggerError = null === $input->getOption('trigger-error') ? rand(0, 10) : 1;
         $duration = rand(10, 10000);
         // Ok, all gone well (fingers crossed? :P )
         $output->writeln([
@@ -62,7 +50,7 @@ class TestCommand extends ContainerAwareCommand
         ]);
 
         // If the rand doesn't return a number divisible by two (is just a random condition)
-        if (rand(0, 10) % 2 !== 0) {
+        if ($triggerError % 2 !== 0) {
             // ... Randomly throw an exception
             throw new \RuntimeException('I\'ve just decided to throw a nice exception! Ah ah ah ah!');
         }
