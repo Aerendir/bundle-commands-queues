@@ -113,7 +113,7 @@ class RunCommand extends AbstractQueuesCommand
     }
 
     /**
-     * Checks that the Damons in the database without a didedOn date are still alive (running)
+     * Checks that the Damons in the database without a didedOn date are still alive (running).
      */
     private function checkAliveDaemons()
     {

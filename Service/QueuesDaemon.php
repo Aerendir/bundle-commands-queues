@@ -3,11 +3,11 @@
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Service;
 
 use Doctrine\ORM\EntityManager;
-use SerendipityHQ\Bundle\ConsoleStyles\Console\Style\SerendipityHQStyle;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Daemon;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\JobsMarker;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\Profiler;
+use SerendipityHQ\Bundle\ConsoleStyles\Console\Style\SerendipityHQStyle;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
@@ -56,11 +56,11 @@ class QueuesDaemon
     private $verbosity;
 
     /**
-     * @param array $config
+     * @param array         $config
      * @param EntityManager $entityManager
-     * @param JobsManager $jobsManager
-     * @param JobsMarker $jobsMarker
-     * @param Profiler $profiler
+     * @param JobsManager   $jobsManager
+     * @param JobsMarker    $jobsMarker
+     * @param Profiler      $profiler
      */
     public function __construct(array $config, EntityManager $entityManager, JobsManager $jobsManager, JobsMarker $jobsMarker, Profiler $profiler)
     {
@@ -518,9 +518,10 @@ class QueuesDaemon
     }
 
     /**
-     * @param Job $job
-     * @param array $info
+     * @param Job    $job
+     * @param array  $info
      * @param string $retryReason
+     *
      * @return bool
      */
     private function retryJob(Job $job, array $info, string $retryReason)

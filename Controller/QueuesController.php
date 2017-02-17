@@ -51,7 +51,9 @@ class QueuesController extends Controller
      *     "mapping": {"id": "id"},
      *     "map_method_signature" = true
      * })
+     *
      * @param Job $job
+     *
      * @return array
      */
     public function jobAction(Job $job)
@@ -71,11 +73,11 @@ class QueuesController extends Controller
         $appliction->setAutoExit(false);
 
         $input = new ArrayInput([
-            'command' => 'queues:random-jobs',
+            'command'       => 'queues:random-jobs',
             'how-many-jobs' => 100,
-            '--env' => 'prod',
+            '--env'         => 'prod',
             '--no-future-jobs',
-            '--retry-strategies' => ['live']
+            '--retry-strategies' => ['live'],
         ]);
 
         $output = new NullOutput();

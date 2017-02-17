@@ -70,7 +70,7 @@ class JobsMarker
     }
 
     /**
-     * @param Job $job
+     * @param Job   $job
      * @param array $info
      *
      * @return Job The created retry Job.
