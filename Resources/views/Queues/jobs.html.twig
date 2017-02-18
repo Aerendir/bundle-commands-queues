@@ -21,7 +21,7 @@
             <th>Exit code</th>
             <th>Retry strategy</th>
         </thead>
-    {% for job in jobs %}
+    {% for job in jobPager %}
         {% set status = '' %}
         {% if 'running' == job.status %}
             {% set status = 'active' %}
@@ -119,4 +119,8 @@
         </tr>
     {% endfor %}
     </table>
+
+    {% if jobPager.haveToPaginate %}
+        {{ jobPagerView.render(jobPager, jobPagerGenerator)|raw }}
+    {% endif %}
 {% endblock %}

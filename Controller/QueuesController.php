@@ -2,6 +2,11 @@
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Controller;
 
+use Doctrine\ORM\EntityManager;
+use Pagerfanta\Adapter\DoctrineORMAdapter;
+use Pagerfanta\Pagerfanta;
+use Pagerfanta\View\TwitterBootstrap3View;
+use Pagerfanta\View\TwitterBootstrapView;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
@@ -11,6 +16,7 @@ use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\NullOutput;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * {@inheritdoc}
@@ -33,13 +39,36 @@ class QueuesController extends Controller
     /**
      * @Route("/jobs", name="queues_jobs")
      * @Template()
+     *
+     * @param Request $request
+     *
+     * @return array
      */
-    public function jobsAction()
+    public function jobsAction(Request $request)
     {
-        $jobs = $this->getDoctrine()->getRepository('SHQCommandsQueuesBundle:Job')->findBy([], ['createdAt' => 'ASC', 'id' => 'ASC']);
+        //$jobs = $this->getDoctrine()->getRepository('SHQCommandsQueuesBundle:Job')->findBy([], ['createdAt' => 'ASC', 'id' => 'ASC']);
+
+        /** @var EntityManager $em */
+        $em = $this->getDoctrine()->getManagerForClass('SHQCommandsQueuesBundle:Job');
+        $qb = $em->createQueryBuilder();
+        $qb->select('j')->from('SHQCommandsQueuesBundle:Job', 'j')
+            ->addOrderBy('j.createdAt', 'ASC')
+            ->addOrderBy('j.id', 'ASC');
+
+        $pager = new Pagerfanta(new DoctrineORMAdapter($qb, false));
+        $pager->setCurrentPage(max(1, (integer) $request->query->get('page', 1)));
+        $pager->setMaxPerPage(max(5, min(50, (integer) $request->query->get('per_page', 20))));
+
+        $pagerView = new TwitterBootstrap3View();
+        $router = $this->get('router');
+        $routeGenerator = function($page) use ($router, $pager) {
+            return $router->generate('queues_jobs', ['page' => $page, 'per_page' => $pager->getMaxPerPage()]);
+        };
 
         return [
-            'jobs' => $jobs,
+            'jobPager' => $pager,
+            'jobPagerView' => $pagerView,
+            'jobPagerGenerator' => $routeGenerator,
         ];
     }
 
