@@ -6,6 +6,10 @@
     <h1>Scheduled Jobs in the Queue</h1>
     <p><small><a href="{{ url('queues_test_random') }}">Generate 100 random jobs.</a></small> | <small><a href="{{ url('queues_test_failed') }}">Generate failing jobs.</a></small></p>
 
+    {% if jobPager.haveToPaginate %}
+        {{ jobPagerView.render(jobPager, jobPagerGenerator)|raw }}
+    {% endif %}
+
     <table class="table">
         <thead>
             <th>ID</th>
