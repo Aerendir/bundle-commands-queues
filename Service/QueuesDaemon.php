@@ -88,7 +88,7 @@ class QueuesDaemon
         // Save the Daemon to the Database
         $this->me = new Daemon(gethostname(), getmypid(), $this->config);
         $this->entityManager->persist($this->me);
-        $this->entityManager->flush();
+        $this->entityManager->flush($this->me);
         $ioWriter->successLineNoBg(sprintf('I\'m Daemon "%s@%s".', $this->me->getPid(), $this->me->getHost()));
 
         // Start the profiler
@@ -106,6 +106,7 @@ class QueuesDaemon
         // Setup pcntl signals so it is possible to manage process
         $this->setupPcntlSignals();
 
+        // Check for Jobs started by a previous Daemon
         $this->checkStaleJobs($output, $this->config['retry_stale_jobs']);
     }
 
@@ -118,7 +119,7 @@ class QueuesDaemon
     {
         $this->me->requiescatInPace();
         $this->entityManager->persist($this->me);
-        $this->entityManager->flush();
+        $this->entityManager->flush($this->me);
     }
 
     /**
@@ -363,8 +364,13 @@ class QueuesDaemon
 //        VarDumper::dump($process->hasBeenStopped());
 
         // If it has to be retried, Remove the Job from the Entity Manager
-        if ($job->getStatus() !== Job::STATUS_RETRIED) {
-            //$this->entityManager->detach($job);
+        if (
+            $job->getStatus() === Job::STATUS_ABORTED
+            || $job->getStatus() === Job::STATUS_FINISHED
+            || $job->getStatus() === Job::STATUS_FAILED
+            || $job->getStatus() === Job::STATUS_CANCELLED
+        ) {
+            $this->entityManager->detach($job);
         }
 
         // First set to false, then unset to free up memory ASAP
@@ -384,7 +390,8 @@ class QueuesDaemon
     public function optimize()
     {
         // Force the garbage collection
-        gc_collect_cycles();
+        $cycles = gc_collect_cycles();
+        $this->ioWriter->infoLineNoBg(sprintf('Collected %s cycles.', $cycles));
     }
 
     /**
@@ -410,6 +417,14 @@ class QueuesDaemon
     {
         $waitTimeInMs = mt_rand(500, 1000);
         usleep($waitTimeInMs * 1E3);
+    }
+
+    /**
+     * @return array
+     */
+    public function getConfig() : array
+    {
+        return $this->config;
     }
 
     /**
@@ -558,10 +573,10 @@ class QueuesDaemon
     {
         if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
             $this->ioWriter->infoLineNoBg('Checking stale jobs...');
-            $this->ioWriter->commentLineNoBg('Jobs are "stale" if their status is already RUNNING when the queue is started.');
+            $this->ioWriter->commentLineNoBg('Jobs are "stale" if their status is already PENDING or RUNNING when the queue is started.');
         }
 
-        $staleJobsCount = $this->entityManager->getRepository('SHQCommandsQueuesBundle:Job')->countRunningJobs();
+        $staleJobsCount = $this->entityManager->getRepository('SHQCommandsQueuesBundle:Job')->countStaleJobs();
 
         // No stale Jobs
         if (0 >= $staleJobsCount && $this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
@@ -569,8 +584,11 @@ class QueuesDaemon
             return;
         }
 
-        $progressBar = new ProgressBar($output, $staleJobsCount);
-        $progressBar->setFormat('<info-nobg>[>] Processing job %current%/%max% (%percent:3s%% )</info-nobg><comment-nobg> %elapsed:6s%/%estimated:-6s%</comment-nobg>');
+        $progressBar = null;
+        if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
+            $progressBar = new ProgressBar($output, $staleJobsCount);
+            $progressBar->setFormat('<info-nobg>[>] Processing job %current%/%max% (%percent:3s%% )</info-nobg><comment-nobg> %elapsed:6s%/%estimated:-6s%  (%memory:-6s%)</comment-nobg>');
+        }
 
         // There are stale Jobs
         if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
@@ -589,7 +607,7 @@ class QueuesDaemon
         while (null !== $job = $this->entityManager->getRepository('SHQCommandsQueuesBundle:Job')->findNextStaleJob($stales)) {
             $stales[] = $job->getId();
 
-            if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE && isset($progressBar)) {
+            if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
                 $progressBar->advance();
                 $this->ioWriter->writeln('');
             }
@@ -610,6 +628,10 @@ class QueuesDaemon
 
             $this->handleChildsOfFailedJob($job);
         }
+
+        // Free up memory
+        $progressBar = null;
+        unset($progressBar);
     }
 
     /**

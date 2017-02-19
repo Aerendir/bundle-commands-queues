@@ -37,22 +37,25 @@ class JobRepository extends EntityRepository
         while (null !== $job = $this->findNextJob($excludedJobs)) {
             // If it can be run...
             if (false === $job->hasNotFinishedParentJobs()) {
+                // Refresh the Job to get loaded again child and parent Jobs that were eventually detached
+                $this->getEntityManager()->refresh($job);
+
                 // ... Return it
                 return $job;
             }
 
-            // The Job cannot be run or its lock cannot be acquired
+            // The Job cannot be run
             $excludedJobs[] = $job->getId();
 
             // Remove it from the Entity Manager to free some memory
-            // $this->getEntityManager()->detach($job);
+            $this->getEntityManager()->detach($job);
         }
     }
 
     /**
      * @return int
      */
-    public function countRunningJobs()
+    public function countStaleJobs()
     {
         $queryBuilder = $this->getEntityManager()->createQueryBuilder();
 
@@ -76,7 +79,7 @@ class JobRepository extends EntityRepository
     {
         $queryBuilder = $this->getEntityManager()->createQueryBuilder();
         $queryBuilder->select('j')->from('SHQCommandsQueuesBundle:Job', 'j')
-            // The status MUST be NEW
+            // The status MUST be NEW (just inserted) or PENDING (waiting for the process to start)
             ->where(
                 $queryBuilder->expr()->orX(
                     $queryBuilder->expr()->eq('j.status', ':running'),

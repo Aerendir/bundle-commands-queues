@@ -5,6 +5,7 @@ namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Util;
 use Doctrine\ORM\EntityManager;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Daemon;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
+use Symfony\Component\VarDumper\VarDumper;
 
 /**
  * Changes the status of Jobs during their execution attaching to them execution info.
@@ -135,10 +136,11 @@ class JobsMarker
     }
 
     /**
-     * @param Job         $job
-     * @param string      $status
-     * @param array       $info
+     * @param Job $job
+     * @param string $status
+     * @param array $info
      * @param Daemon|null $daemon
+     * @throws \Exception
      */
     private function markJob(Job $job, string $status, array $info = [], Daemon $daemon = null)
     {

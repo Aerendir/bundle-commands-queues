@@ -188,7 +188,7 @@ class Job
     /**
      * @var Collection
      *
-     * @ORM\ManyToMany(targetEntity="SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job", inversedBy="parentDependencies")
+     * @ORM\ManyToMany(targetEntity="SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job", inversedBy="parentDependencies", cascade={"detach", "refresh"})
      * @ORM\JoinTable(name="queues_jobs_dependencies",
      *     joinColumns={@ORM\JoinColumn(name="parent_job", referencedColumnName="id")},
      *     inverseJoinColumns={@ORM\JoinColumn(name="child_job", referencedColumnName="id")}
@@ -213,7 +213,7 @@ class Job
     /**
      * @var Job If this Job is a retry of another job, here there is the Job of which this is the retry
      *
-     * @ORM\OneToOne(targetEntity="SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job", inversedBy="retriedBy")
+     * @ORM\OneToOne(targetEntity="SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job", inversedBy="retriedBy", cascade={"detach", "refresh"})
      * @ORM\JoinColumn(name="retry_of", referencedColumnName="id")
      */
     private $retryOf;
@@ -228,7 +228,7 @@ class Job
     /**
      * @var Job If this Job is a retry of another retried job, here there is the first retried Job
      *
-     * @ORM\ManyToOne(targetEntity="SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job", inversedBy="retriedJobs")
+     * @ORM\ManyToOne(targetEntity="SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job", inversedBy="retriedJobs", cascade={"detach", "refresh"})
      * @ORM\JoinColumn(name="first_retried_job", referencedColumnName="id")
      */
     private $firstRetriedJob;
@@ -236,7 +236,7 @@ class Job
     /**
      * @var Collection The Jobs used to retry this one
      *
-     * @ORM\OneToMany(targetEntity="SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job", mappedBy="firstRetriedJob")
+     * @ORM\OneToMany(targetEntity="SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job", mappedBy="firstRetriedJob", cascade={"detach", "refresh"})
      */
     private $retriedJobs;
 
@@ -751,5 +751,10 @@ class Job
         $this->firstRetriedJob = $firstRetriedJob;
 
         return $this;
+    }
+
+    public function __toString()
+    {
+        return (string) $this->getId();
     }
 }
