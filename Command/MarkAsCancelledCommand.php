@@ -53,13 +53,8 @@ class MarkAsCancelledCommand extends AbstractQueuesCommand
 
         $failedJob = $jobRepo->findOneById($input->getOption('id'));
 
-        $this->getIoWriter()->noteLineNoBg(sprintf(
-                '[%s] Job "%s" on Queue "%s": Marking child jobs as CANCELLED...',
-                $failedJob->getClosedAt()->format('Y-m-d H:i:s'), $failedJob->getId(), $failedJob->getQueue())
-        );
-
-        $cancelledJobs = [];
-        $this->cancelChildJobs($failedJob, sprintf('Parent Job %s failed.', $failedJob->getId()), $failedJob->getDebug(), $cancelledJobs);
+        //$cancelledJobs = [];
+        $this->cancelChildJobs($failedJob, sprintf('Parent Job %s failed.', $failedJob->getId()));
 
         $this->getIoWriter()->successLineNoBg(sprintf('All child jobs of Job %s and their respective child Jobs were marked as cancelled.', $failedJob->getId()));
 
@@ -69,26 +64,20 @@ class MarkAsCancelledCommand extends AbstractQueuesCommand
     /**
      * @param Job    $job
      * @param string $cancellationReason
-     * @param array  $parentInfo
-     * @param array  $cancelledJobs
+     * @param array  $alreadyCancelledJobs
      *
      * @return bool
      */
-    private function cancelChildJobs(Job $job, string $cancellationReason, array $parentInfo, array &$cancelledJobs = [])
+    private function cancelChildJobs(Job $job, string $cancellationReason, array $alreadyCancelledJobs = [])
     {
-        // If the Job cannot be retried, mark all Child jobs as failed as they wait for this one that will never success
-        $this->getIoWriter()->noteLineNoBg(sprintf(
-                '[%s] Job "%s" on Queue "%s": Marking child jobs as CANCELLED...',
-                $job->getClosedAt()->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue())
-        );
+        // If this is already marked as CANCELLED...
+        if (array_key_exists($job->getId(), $alreadyCancelledJobs)) {
+            // ... Exit
+            return 0;
+        }
 
-        // No child jobs: ...
+        // "Security check", no child jobs: ...
         if ($job->getChildDependencies()->count() <= 0) {
-            $this->getIoWriter()->successLineNoBg(sprintf(
-                    '[%s] Job "%s" on Queue "%s": No child Jobs found to mark as CANCELLED.',
-                    $job->getClosedAt()->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue())
-            );
-
             // ... Exit
             return 0;
         }
@@ -96,20 +85,46 @@ class MarkAsCancelledCommand extends AbstractQueuesCommand
         // Mark childs as cancelled
         $childInfo = [
             'debug' => [
-                'cancellation_reason' => $cancellationReason,
-                'parent_info'         => $parentInfo,
+                'cancellation_reason' => $cancellationReason
             ],
         ];
 
+        $this->getIoWriter()->noteLineNoBg(sprintf(
+                '[%s] Job "%s" on Queue "%s": Found %s child dependencies. Start marking them.',
+                $job->getClosedAt()->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue(), $job->getChildDependencies()->count())
+        );
+
+        $cancelledChilds = [];
+        /** @var Job $childDependency */
         foreach ($job->getChildDependencies() as $childDependency) {
-            if (false === array_key_exists($childDependency->getId(), $cancelledJobs)) {
-                $this->getJobsMarker()->markJobAsCancelled($childDependency, $childInfo);
-                $cancelledJobs[$childDependency->getId()] = $childDependency->getId();
+            // If the status is already cancelled...
+            if ($childDependency->getStatus() === Job::STATUS_CANCELLED) {
+                // ... Add it to the array of already cancelled Jobs
+                $alreadyCancelledJobs[$childDependency->getStatus()] = $childDependency->getStatus();
             }
 
-            // Mark as cancelled also the child Jobs of this child Job
-            $this->cancelChildJobs($childDependency, sprintf('Parent Job "%s" were cancelled.', $childDependency->getId()), $childInfo, $cancelledJobs);
+            // If this is not in the already cancelled Jobs array...
+            if (false === array_key_exists($childDependency->getId(), $alreadyCancelledJobs)) {
+                $this->getJobsMarker()->markJobAsCancelled($childDependency, $childInfo);
+                $alreadyCancelledJobs[$childDependency->getId()] = $childDependency->getId();
+                $cancelledChilds[$childDependency->getId()] = $childDependency->getId();
+            }
+
+            // If this child has other childs on its own...
+            if ($job->getChildDependencies()->count() > 0) {
+                // ... Mark as cancelled also the child Jobs of this child Job
+                $this->cancelChildJobs($childDependency, sprintf('Parent Job "%s" were cancelled.', $childDependency->getId()), $alreadyCancelledJobs);
+            }
         }
+
+        $cancelledChilds = implode(', ', $cancelledChilds);
+        $this->getIoWriter()->noteLineNoBg(sprintf(
+            '[%s] Job "%s" on Queue "%s": Cancelled childs are:',
+            $job->getClosedAt()->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue(), $job->getChildDependencies()->count()
+        ));
+        $this->getIoWriter()->noteLineNoBg(wordwrap(
+            $cancelledChilds, $this->getIoWriter()->getLineLength(), "\n"
+        ));
 
         return 0;
     }

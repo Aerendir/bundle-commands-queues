@@ -19,6 +19,50 @@
                         <p>Queue: {{ job.queue }}</p>
                         <p>Priority: {{ job.priority }}</p>
                         <p>Status: {{ job.status }}</p>
+                        {% if job.isRetry %}
+                            <p><small class="text-muted">Is retry of <a href="#{{ job.retryOf.id }}">#{{ job.retryOf.id }}</a></small></p>
+                        {% endif %}
+                        {% if job.isRetried %}
+                            <p><small class="text-muted">Retried by <br /><a href="#{{ job.retriedBy.id }}">#{{ job.retriedBy.id }}</a> ({{ job.retriedBy.status }})</small></p>
+                            {% if 0 < job.retriedJobs.count %}
+                                <small class="text-muted">All retrying Jobs:</small>
+                                {% set retriedJobs = {} %}
+                                {% for retriedJob in job.retriedJobs %}
+                                    {% set linkedRetriedJob = '<a href="#' ~ retriedJob.id ~ '">#' ~ retriedJob.id ~ '</a> (' ~ retriedJob.status ~ ')' %}
+                                    {% set retriedJobs = retriedJobs|merge({ ('_' ~ retriedJob.id ~ '-'): linkedRetriedJob}) %}
+                                {% endfor %}
+                                <p><small class="text-muted">{{ retriedJobs|join(', ')|raw }}</small></p>
+                            {% endif %}
+                        {% endif %}
+                        {% if job.firstRetriedJob %}
+                            <p><small class="text-muted">First retried job:<br /><a href="#{{ job.firstRetriedJob.id }}">#{{ job.firstRetriedJob.id }} ({{ job.firstRetriedJob.status }})</a></small></p>
+                        {% endif %}
+                        {% if 'cancelled' == job.status %}
+                            <p><small class="text-muted">{{ job.debug.cancellation_reason }}</small></p>
+                        {% endif %}
+                        {% if false == job.hasParentDependencies %}
+                            {% if false == job.isRetry %}No parent Jobs{% endif %}
+                        {% else %}
+                            <p>Parent Jobs:</p>
+                            {% set parentJobs = {} %}
+                            {% for parentJob in job.parentDependencies %}
+                                {% set linkedParentJob = '<a href="#' ~ parentJob.id ~ '">#' ~ parentJob.id ~ '</a> (' ~ parentJob.status ~ ')' %}
+                                {% set parentJobs = parentJobs|merge({ ('_' ~ parentJob.id ~ '-'): linkedParentJob}) %}
+                            {% endfor %}
+                            <p>{{ parentJobs|join(', ')|raw }}</p>
+                        {% endif %}
+                        {% if false == job.isRetry %}<hr />{% endif %}
+                        {% if false == job.hasChildDependencies %}
+                            No child Jobs
+                        {% else %}
+                            <p>Child Jobs:</p>
+                            {% set childJobs = {} %}
+                            {% for childJob in job.childDependencies %}
+                                {% set linkedChildJob = '<a href="#' ~ childJob.id ~ '">#' ~ childJob.id ~ '</a> (' ~ childJob.status ~ ')' %}
+                                {% set childJobs = childJobs|merge({ ('_' ~ childJob.id ~ '-'): linkedChildJob}) %}
+                            {% endfor %}
+                            <p>{{ childJobs|join(', ')|raw }}</p>
+                        {% endif %}
                         <p>Created At: {% if job.createdAt %}{{ job.createdAt|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }}{% endif %}</p>
                         <p>Started At: {% if job.startedAt %}{{ job.startedAt|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }}{% endif %}</p>
                         <p>Closed at: {% if job.closedAt %}{{ job.closedAt|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }}{% endif %}</p>

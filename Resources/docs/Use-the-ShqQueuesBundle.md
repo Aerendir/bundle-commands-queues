@@ -1,7 +1,9 @@
 How to use Serendipity HQ Quesus Bundle
 =======================================
 
-To use SHQCommandsQueuesBundle you have to do basiclly two things:
+BEFORE STARTING: A good reading is [Understanding PHP memory](http://www.slideshare.net/jpauli/understanding-php-memory/).
+
+To use SHQCommandsQueuesBundle you have to do basically two things:
 
 1. Start the daemon that listens for new `Job`s to process;
 2. Create new `Job`s to process.

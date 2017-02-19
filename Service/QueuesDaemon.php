@@ -159,12 +159,14 @@ class QueuesDaemon
 
     /**
      * Processes the next Job in the queue.
+     *
+     * @return null|bool
      */
     public function processNextJob()
     {
         // If the max_concurrent_jobs number is reached, don't process one more job
         if ($this->countRunningJobs() >= $this->config['max_concurrent_jobs']) {
-            return;
+            return null;
         }
 
         // Get the next job to process
@@ -177,7 +179,7 @@ class QueuesDaemon
             }
             sleep($this->config['idle_time']);
 
-            return;
+            return null;
         }
 
         // Start processing the Job
@@ -220,7 +222,7 @@ class QueuesDaemon
             // Check if it can be retried and if the retry were successful
             if ($job->getRetryStrategy()->canRetry() && true === $this->retryFailedJob($job, $info, 'Job didn\'t started as its process were aborted.')) {
                 // Exit
-                return;
+                return null;
             }
 
             $this->jobsMarker->markJobAsAborted($job, $info, $this->me);
@@ -231,7 +233,7 @@ class QueuesDaemon
                 ));
             }
 
-            return;
+            return null;
         }
 
         /*
@@ -259,6 +261,8 @@ class QueuesDaemon
 
         // Wait some millisedonds to permit Doctrine to finish writings (sometimes it is slower than the Daemon)
         $this->wait();
+
+        return true;
     }
 
     /**
@@ -281,6 +285,8 @@ class QueuesDaemon
 
     /**
      * Processes the Jobs already running or pending.
+     *
+     * @param null|ProgressBar $progressBar
      */
     public function checkRunningJobs(ProgressBar $progressBar = null)
     {
@@ -322,24 +328,24 @@ class QueuesDaemon
         $now = new \DateTime();
 
         /** @var Job $job */
-        $job = $runningJob['job'];
+        //$job = $runningJob['job'];
 
         /** @var Process $process */
-        $process = $runningJob['process'];
+        //$process = $runningJob['process'];
 
         //  If it is not already terminated...
-        if (false === $process->isTerminated()) {
+        if (false === $runningJob['process']->isTerminated()) {
             // ... and it is still pending but its process were effectively started
-            if ($job->getStatus() === Job::STATUS_PENDING && $process->isStarted()) {
+            if ($runningJob['job']->getStatus() === Job::STATUS_PENDING && $runningJob['process']->isStarted()) {
                 // Mark it as running (those checks will avoid an unuseful query to the DB)
-                $this->jobsMarker->markJobAsRunning($job);
+                $this->jobsMarker->markJobAsRunning($runningJob['job']);
             }
 
             // And print its PID (available only if the process is already running)
-            if ($process->isStarted() && $this->verbosity >= SymfonyStyle::VERBOSITY_NORMAL) {
+            if ($runningJob['process']->isStarted() && $this->verbosity >= SymfonyStyle::VERBOSITY_NORMAL) {
                 $this->ioWriter->infoLineNoBg(sprintf(
                         '[%s] Job "%s" on Queue "%s": Process is currently running with PID "%s".',
-                        $now->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue(), $process->getPid())
+                        $now->format('Y-m-d H:i:s'), $runningJob['job']->getId(), $runningJob['job']->getQueue(), $runningJob['process']->getPid())
                 );
             }
 
@@ -348,12 +354,12 @@ class QueuesDaemon
         }
 
         $processHandler = 'handleSuccessfulJob';
-        if (false === $process->isSuccessful()) {
+        if (false === $runningJob['process']->isSuccessful()) {
             $processHandler = 'handleFailedJob';
         }
 
         // Handle a successful or a failed job
-        $this->{$processHandler}($job, $process);
+        $this->{$processHandler}($runningJob['job'], $runningJob['process']);
 
         // The process is terminated
 //        VarDumper::dump($process->getIdleTimeout());
@@ -363,21 +369,22 @@ class QueuesDaemon
 //        VarDumper::dump($process->hasBeenSignaled());
 //        VarDumper::dump($process->hasBeenStopped());
 
-        // If it has to be retried, Remove the Job from the Entity Manager
+        // If it has a final status, Remove the Job from the Entity Manager
         if (
-            $job->getStatus() === Job::STATUS_ABORTED
-            || $job->getStatus() === Job::STATUS_FINISHED
-            || $job->getStatus() === Job::STATUS_FAILED
-            || $job->getStatus() === Job::STATUS_CANCELLED
+            $runningJob['job']->getStatus() === Job::STATUS_ABORTED
+            || $runningJob['job']->getStatus() === Job::STATUS_FINISHED
+            || $runningJob['job']->getStatus() === Job::STATUS_FAILED
+            || $runningJob['job']->getStatus() === Job::STATUS_CANCELLED
         ) {
-            $this->entityManager->detach($job);
+            $this->entityManager->detach($runningJob['job']);
         }
 
         // First set to false, then unset to free up memory ASAP
         $now =
-        $process =
-        $job = null;
-        unset($now, $process, $job);
+        $runningJob = null;
+        //$process =
+        //$job = null;
+        unset($now, $runningJob/*, $process, $job*/);
 
         $this->wait();
 

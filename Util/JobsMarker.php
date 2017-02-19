@@ -132,6 +132,8 @@ class JobsMarker
 
         $this->markJobAsClosed($retriedJob, Job::STATUS_RETRIED, $info);
 
+        $this->entityManager->detach($retryingJob);
+
         return $retryingJob ;
     }
 
@@ -214,7 +216,13 @@ class JobsMarker
         }
 
         // Flush the original Job
-        $this->entityManager->flush($job);
+        try {
+            $this->entityManager->flush($job);
+        } catch(\Exception $e) {
+            VarDumper::dump($job);
+            throw $e;
+            die;
+        }
 
         // Now first set to null and then unset to save memory ASAP
         $reflectedClass =

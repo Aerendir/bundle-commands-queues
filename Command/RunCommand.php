@@ -64,13 +64,17 @@ class RunCommand extends AbstractQueuesCommand
             // Then load new Jobs until the maximum number of concurrent Jobs is reached
             $jobsToLoad = $this->daemon->getConfig()['max_concurrent_jobs'] - $this->daemon->countRunningJobs();
             if ($this->getIoWriter()->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
-                $this->getIoWriter()->infoLineNoBg(sprintf('Initializing %s new Jobs...', $jobsToLoad));
+                $this->getIoWriter()->infoLineNoBg(sprintf('Trying to initialize %s new Jobs...', $jobsToLoad));
                 $initializingJobs = new ProgressBar($output, $jobsToLoad);
                 $initializingJobs->setFormat('<info-nobg>[>] Initializing job %current%/%max% (%percent:3s%% )</info-nobg><comment-nobg> %elapsed:6s%/%estimated:-6s% (%memory:-6s%)</comment-nobg>');
             }
             for ($i = 0; $i < $jobsToLoad; $i++) {
                 // Start processing the next Job in the queue
-                $this->daemon->processNextJob();
+                if (null === $this->daemon->processNextJob()) {
+                    // if null, no new Jobs exists, so exit the for
+                    break;
+                }
+
                 if (isset($initializingJobs)) {
                     $initializingJobs->advance();
                     $this->getIoWriter()->writeln('');
@@ -112,6 +116,7 @@ class RunCommand extends AbstractQueuesCommand
         $currentlyRunningProgress = new ProgressBar($output, $remainedJobs);
         $currentlyRunningProgress->setFormat('<info-nobg>[>] Processing job %current%/%max% (%percent:3s%% )</info-nobg><comment-nobg> %elapsed:6s%/%estimated:-6s% (%memory:-6s%)</comment-nobg>');
 
+        $this->getIoWriter()->infoLineNoBg('Emptying the queue of still running Jobs...');
         while ($this->daemon->hasRunningJobs()) {
             // Continue to process running jobs
             $this->daemon->checkRunningJobs($currentlyRunningProgress);
