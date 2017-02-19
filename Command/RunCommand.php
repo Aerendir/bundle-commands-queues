@@ -49,16 +49,32 @@ class RunCommand extends AbstractQueuesCommand
 
         // Run the Daemon
         while ($this->daemon->isAlive()) {
-            // Start processing the next Job in the queue
-            $this->daemon->processNextJob();
-
-            // Then process jobs already running
+            // First process Jobs already running
             $runningJobsCheckInterval = $this->getContainer()->getParameter('commands_queues.running_jobs_check_interval');
             if ($this->daemon->getProfiler()->getCurrentIteration() % $runningJobsCheckInterval === 0 && $this->daemon->hasRunningJobs()) {
+                $currentlyRunningProgress = null;
                 if ($this->getIoWriter()->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
                     $this->getIoWriter()->infoLineNoBg(sprintf('Checking %s running jobs...', $this->daemon->countRunningJobs()));
+                    $currentlyRunningProgress = new ProgressBar($output, $this->daemon->countRunningJobs());
+                    $currentlyRunningProgress->setFormat('<info-nobg>[>] Processing job %current%/%max% (%percent:3s%% )</info-nobg><comment-nobg> %elapsed:6s%/%estimated:-6s% (%memory:-6s%)</comment-nobg>');
                 }
-                $this->daemon->checkRunningJobs();
+                $this->daemon->checkRunningJobs($currentlyRunningProgress);
+            }
+
+            // Then load new Jobs until the maximum number of concurrent Jobs is reached
+            $jobsToLoad = $this->daemon->getConfig()['max_concurrent_jobs'] - $this->daemon->countRunningJobs();
+            if ($this->getIoWriter()->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
+                $this->getIoWriter()->infoLineNoBg(sprintf('Initializing %s new Jobs...', $jobsToLoad));
+                $initializingJobs = new ProgressBar($output, $jobsToLoad);
+                $initializingJobs->setFormat('<info-nobg>[>] Initializing job %current%/%max% (%percent:3s%% )</info-nobg><comment-nobg> %elapsed:6s%/%estimated:-6s% (%memory:-6s%)</comment-nobg>');
+            }
+            for ($i = 0; $i < $jobsToLoad; $i++) {
+                // Start processing the next Job in the queue
+                $this->daemon->processNextJob();
+                if (isset($initializingJobs)) {
+                    $initializingJobs->advance();
+                    $this->getIoWriter()->writeln('');
+                }
             }
 
             // Check alive daemons
@@ -74,7 +90,7 @@ class RunCommand extends AbstractQueuesCommand
             $optimizationInterval = $this->getContainer()->getParameter('commands_queues.optimization_interval');
             if ($this->daemon->getProfiler()->getCurrentIteration() % $optimizationInterval === 0) {
                 if ($this->getIoWriter()->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
-                    $this->getIoWriter()->infoLineNoBg('Optimizing the Daemons...');
+                    $this->getIoWriter()->info('Optimizing the Daemons...');
                 }
                 $this->daemon->optimize();
             }
@@ -94,7 +110,7 @@ class RunCommand extends AbstractQueuesCommand
         // Wait for the currently running jobs to finish
         $remainedJobs = $this->daemon->countRunningJobs();
         $currentlyRunningProgress = new ProgressBar($output, $remainedJobs);
-        $currentlyRunningProgress->setFormat('<info-nobg>[>] Processing job %current%/%max% (%percent:3s%% )</info-nobg><comment-nobg> %elapsed:6s%/%estimated:-6s%</comment-nobg>');
+        $currentlyRunningProgress->setFormat('<info-nobg>[>] Processing job %current%/%max% (%percent:3s%% )</info-nobg><comment-nobg> %elapsed:6s%/%estimated:-6s% (%memory:-6s%)</comment-nobg>');
 
         while ($this->daemon->hasRunningJobs()) {
             // Continue to process running jobs
