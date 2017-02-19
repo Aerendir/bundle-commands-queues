@@ -62,7 +62,7 @@ class RandomJobsCommand extends AbstractQueuesCommand
 
         // Generate the random jobs
         $progress = new ProgressBar($output, $howManyJobs);
-        $progress->setFormat('<success-nobg>%current%</success-nobg>/%max% [%bar%] %percent:3s%% %elapsed:6s%/%estimated:-6s%');
+        $progress->setFormat('<success-nobg>%current%</success-nobg>/%max% [%bar%] %percent:3s%% %elapsed:6s%/%estimated:-6s% (%memory:6s%)');
         $progress->start();
 
         $progress->setRedrawFrequency($batch);
