@@ -56,7 +56,7 @@ class Configuration implements ConfigurationInterface
                 ->scalarNode('worker_name')->defaultValue('DefaultWorker')->end()
                 ->integerNode('print_profiling_info_interval')->defaultValue(350)->end()
                 ->integerNode('alive_daemons_check_interval')->defaultValue(10000)->end()
-                ->integerNode('optimization_interval')->defaultValue(1000)->end()
+                ->integerNode('optimization_interval')->defaultValue(10)->end()
                 ->integerNode('running_jobs_check_interval')->defaultValue(1000)->end()
                 ->scalarNode('retry_stale_jobs')->defaultTrue()->end();
 
