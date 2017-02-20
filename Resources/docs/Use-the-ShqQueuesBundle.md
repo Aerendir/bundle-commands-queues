@@ -73,3 +73,9 @@ It is really easy to do this:
 
 This setting doesn't guarantee that the `Job` will be executed exactly at the specified time BUT only that it will be
  considered as processable ONLY after the set `datetime`.
+
+## Detecting memory leaks
+
+- https://www.google.it/search?q=php+memory+profiling+tools
+- http://stackoverflow.com/questions/880458/php-memory-profiling
+
