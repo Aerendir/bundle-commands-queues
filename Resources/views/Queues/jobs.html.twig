@@ -57,6 +57,9 @@
             <td>{{ job.priority }}</td>
             <td>{{ job.queue }}</td>
             <td>
+                {% if 'new' == job.status %}
+                    {% set status = 'default' %}
+                {% endif %}
                 <span class="label label-{{ status }}">{{ job.status }}</span>
                 {% if job.isRetry %}
                     <p><small class="text-muted">Is retry of <a href="#{{ job.retryOf.id }}">#{{ job.retryOf.id }}</a></small></p>
@@ -86,6 +89,9 @@
                             {% if 'pending' == retriedJob.status %}
                                 {% set status = 'info' %}
                             {% endif %}
+                            {% if 'new' == retriedJob.status %}
+                                {% set status = 'default' %}
+                            {% endif %}
                             {% set linkedRetriedJob = '<a href="#' ~ retriedJob.id ~ '">#' ~ retriedJob.id ~ '</a> <span class="label label-' ~ status ~ '">' ~ retriedJob.status ~ '</span>' %}
                             {% set retriedJobs = retriedJobs|merge({ ('_' ~ retriedJob.id ~ '-'): linkedRetriedJob}) %}
                         {% endfor %}
@@ -112,7 +118,7 @@
                     {% if 'pending' == job.firstRetriedJob.status %}
                         {% set status = 'info' %}
                     {% endif %}
-                    <p><small class="text-muted">First retried job:<br /><a href="#{{ job.firstRetriedJob.id }}">#{{ job.firstRetriedJob.id }} <span class="lable label-{{ status }}">{{ job.firstRetriedJob.status }}</span></a></small></p>
+                    <p><small class="text-muted">First retried job:<br /><a href="#{{ job.firstRetriedJob.id }}">#{{ job.firstRetriedJob.id }} <span class="label label-{{ status }}">{{ job.firstRetriedJob.status }}</span></a></small></p>
                 {% endif %}
                 {% if 'cancelled' == job.status %}
                     <p><small class="text-muted">{{ job.debug.cancellation_reason }}</small></p>
@@ -144,7 +150,10 @@
                         {% if 'pending' == parentJob.status %}
                             {% set status = 'info' %}
                         {% endif %}
-                        {% set linkedParentJob = '<a href="#' ~ parentJob.id ~ '">#' ~ parentJob.id ~ '</a> <span class="lable label-' ~ status ~ '">' ~ parentJob.status ~ ')' %}
+                        {% if 'new' == parentJob.status %}
+                            {% set status = 'default' %}
+                        {% endif %}
+                        {% set linkedParentJob = '<a href="#' ~ parentJob.id ~ '">#' ~ parentJob.id ~ '</a> <span class="label label-' ~ status ~ '">' ~ parentJob.status ~ '</span>' %}
                         {% set parentJobs = parentJobs|merge({ ('_' ~ parentJob.id ~ '-'): linkedParentJob}) %}
                     {% endfor %}
                     <p>{{ parentJobs|join(', ')|raw }}</p>
@@ -156,7 +165,29 @@
                     <p>Child Jobs:</p>
                     {% set childJobs = {} %}
                     {% for childJob in job.childDependencies %}
-                        {% set linkedChildJob = '<a href="#' ~ childJob.id ~ '">#' ~ childJob.id ~ '</a> (' ~ childJob.status ~ ')' %}
+                        {% set status = '' %}
+                        {% if 'running' == childJob.status %}
+                            {% set status = 'active' %}
+                        {% endif %}
+                        {% if 'retried' == childJob.status %}
+                            {% set status = 'warning' %}
+                        {% endif %}
+                        {% if 'failed' == childJob.status %}
+                            {% set status = 'danger' %}
+                        {% endif %}
+                        {% if 'finished' == childJob.status %}
+                            {% set status = 'success' %}
+                        {% endif %}
+                        {% if 'cancelled' == childJob.status %}
+                            {% set status = 'danger' %}
+                        {% endif %}
+                        {% if 'pending' == childJob.status %}
+                            {% set status = 'info' %}
+                        {% endif %}
+                        {% if 'new' == childJob.status %}
+                            {% set status = 'default' %}
+                        {% endif %}
+                        {% set linkedChildJob = '<a href="#' ~ childJob.id ~ '">#' ~ childJob.id ~ '</a> <span class="label label-' ~ status ~ '">' ~ childJob.status ~ '</span>' %}
                         {% set childJobs = childJobs|merge({ ('_' ~ childJob.id ~ '-'): linkedChildJob}) %}
                     {% endfor %}
                     <p>{{ childJobs|join(', ')|raw }}</p>

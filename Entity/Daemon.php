@@ -5,6 +5,7 @@ namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Entity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use SerendipityHQ\Bundle\CommandsQueuesBundle\Config\DaemonConfig;
 
 /**
  * Represents a Daemon.
@@ -30,7 +31,7 @@ class Daemon
     private $id;
 
     /**
-     * @var array
+     * @var DaemonConfig
      *
      * @ORM\Column(name="config", type="array", nullable=false)
      */
@@ -81,9 +82,9 @@ class Daemon
     /**
      * @param string $host
      * @param int    $pid
-     * @param array  $config
+     * @param DaemonConfig  $config
      */
-    public function __construct(string $host, int $pid, array $config = [])
+    public function __construct(string $host, int $pid, DaemonConfig $config)
     {
         $this->bornOn = new \DateTime();
         $this->config = $config;
@@ -109,9 +110,9 @@ class Daemon
     }
 
     /**
-     * @return array
+     * @return DaemonConfig
      */
-    public function getConfig() : array
+    public function getConfig() : DaemonConfig
     {
         return $this->config;
     }

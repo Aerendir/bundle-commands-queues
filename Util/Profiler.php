@@ -10,11 +10,20 @@ class Profiler
     /** @var float $startTime */
     private $startTime;
 
+    /** @var float $aliveDaemonsLastCheckedAt The last time the alive daemons were checked */
+    private $aliveDaemonsLastCheckedAt;
+
     /** @var float $lastMicrotime The last time the self::profile() method was called */
     private $lastMicrotime;
 
+    /** @var float $lastOptimizationAt The last time the optimization were done */
+    private $lastOptimizationAt;
+
     /** @var int $lastMemoryUsage */
     private $lastMemoryUsage;
+
+    /** @var array $runningJobsLastCheckedAt */
+    private $runningJobsLastCheckedAt = [];
 
     /** @var int $highestMemoryPeak */
     private $highestMemoryPeak;
@@ -29,10 +38,20 @@ class Profiler
      * Start the profiler.
      *
      * @param float $maxRuntime After this amount of time the Daemon MUST die.
+     * @param array $queues The configured queues
      */
-    public function start(float $maxRuntime)
+    public function start(float $maxRuntime, array $queues)
     {
-        $this->startTime = $this->lastMicrotime = microtime(true);
+        $this->startTime
+            = $this->aliveDaemonsLastCheckedAt
+            = $this->lastMicrotime
+            = $this->lastOptimizationAt
+            = microtime(true);
+
+        foreach ($queues as $queue) {
+            $this->runningJobsLastCheckedAt[$queue] = $this->startTime;
+        }
+
         $this->lastMemoryUsage = memory_get_usage(true);
         $this->highestMemoryPeak = memory_get_peak_usage(true);
         $this->maxRuntime = $maxRuntime;
@@ -93,9 +112,50 @@ class Profiler
     /**
      * @return float
      */
+    public function getAliveDaemonsLastCheckedAt(): float
+    {
+        return $this->aliveDaemonsLastCheckedAt;
+    }
+
+    /**
+     * @return float
+     */
     public function getLastMicrotime(): float
     {
         return $this->lastMicrotime;
+    }
+
+    /**
+     * @return float
+     */
+    public function getLastOptimizationAt() : float
+    {
+        return $this->lastOptimizationAt;
+    }
+
+    /**
+     * @param string $queueName
+     * @return float
+     */
+    public function getRunningJobsLastCheckedAt(string $queueName) : float
+    {
+        return $this->runningJobsLastCheckedAt[$queueName];
+    }
+
+    /**
+     * Sets to NOW the microtime of last check of alive damons.
+     */
+    public function aliveDaemonsJustCheked()
+    {
+        $this->aliveDaemonsLastCheckedAt = microtime(true);
+    }
+
+    /**
+     * Sets to NOW the microtime of the last optimization.
+     */
+    public function optimized()
+    {
+        $this->lastOptimizationAt = microtime(true);
     }
 
     /**
@@ -104,6 +164,14 @@ class Profiler
     public function hitIteration()
     {
         $this->iterations++;
+    }
+
+    /**
+     * @param string $queueName
+     */
+    public function runningJobsJustChecked(string $queueName)
+    {
+        $this->runningJobsLastCheckedAt[$queueName] = microtime(true);
     }
 
     /**

@@ -17,7 +17,7 @@ You can configure some parameters using your `config.yml`.
 
 Here there is the available configuration parameters:
 
-    queues:
+    shq_commands_queues:
         max_runtime: 100 # OPTIONAL. The Daemon will die after this amount of seconds.
         max_concurrent_jobs: 1 # OPTIONAL. The number of concurrent jobs to process at the same time.
         idle_time: 10 # OPTIONAL. The amount of seconds to sleep when the worker runs out of jobs.

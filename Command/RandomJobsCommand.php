@@ -22,6 +22,10 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class RandomJobsCommand extends AbstractQueuesCommand
 {
+    private $queues = [
+        'queue_1', 'queue_2', 'queue_3', 'queue_4', 'queue_5'
+    ];
+
     /**
      * {@inheritdoc}
      */
@@ -72,6 +76,10 @@ class RandomJobsCommand extends AbstractQueuesCommand
             // First: we create a Job to push to the queue
             $arguments = '--id='.($i + 1);
             $scheduledJob = new Job('queues:test', $arguments);
+
+            // Set a random queue
+            $queue = rand(0, count($this->queues) - 1);
+            $scheduledJob->setQueue($this->queues[$queue]);
 
             // Set a random retry strategy
             if (0 < count($retryStrategies)) {

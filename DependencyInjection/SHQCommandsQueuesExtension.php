@@ -2,8 +2,15 @@
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\DependencyInjection;
 
+use SerendipityHQ\Bundle\CommandsQueuesBundle\Command\RunCommand;
+use SerendipityHQ\Bundle\CommandsQueuesBundle\Config\DaemonConfig;
+use SerendipityHQ\Bundle\CommandsQueuesBundle\Service\JobsManager;
+use SerendipityHQ\Bundle\CommandsQueuesBundle\Service\QueuesDaemon;
+use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\JobsMarker;
+use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\Profiler;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 
@@ -21,25 +28,45 @@ class SHQCommandsQueuesExtension extends Extension
         $config = $this->processConfiguration($configuration, $configs);
 
         // Set parameters in the container
-        $container->setParameter('commands_queues.db_driver', $config['db_driver']);
-        $container->setParameter(sprintf('commands_queues.backend_%s', $config['db_driver']), true);
         $container->setParameter('commands_queues.model_manager_name', $config['model_manager_name']);
-        $container->setParameter('commands_queues.alive_daemons_check_interval', $config['alive_daemons_check_interval']);
-        $container->setParameter('commands_queues.optimization_interval', $config['optimization_interval']);
-        $container->setParameter('commands_queues.running_jobs_check_interval', $config['running_jobs_check_interval']);
-        $container->setParameter('commands_queues.print_profiling_info_interval', $config['print_profiling_info_interval']);
-        $container->setParameter('commands_queues.config', [
-            'max_runtime'         => $config['max_runtime'],
-            'max_concurrent_jobs' => $config['max_concurrent_jobs'],
-            'idle_time'           => $config['idle_time'],
-            'worker_name'         => $config['worker_name'],
-            'retry_stale_jobs'    => $config['retry_stale_jobs'],
-        ]);
 
         $loader = new YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.yml');
 
         // load db_driver container configuration
         $loader->load(sprintf('%s.yml', $config['db_driver']));
+
+        // The Jobs Manager
+        $jobsManagerDefinition = (new Definition(JobsManager::class, [
+            $container->getParameter('kernel.root_dir'),
+        ]))->setPublic(false);
+
+        // The Jobs Marker
+        $jobsMarkerDefinition = (new Definition(JobsMarker::class, [
+            $container->findDefinition('commands_queues.do_not_use.entity_manager'),
+        ]))->setPublic(false);
+
+        // The Profiler
+        $profilerDefinition = (new Definition(Profiler::class))->setPublic(false);
+
+        // The Daemon
+        $daemonConfigDefinition = (new Definition(DaemonConfig::class, [$config['daemons'], $config['queues']]))
+            ->setPublic(false);
+
+        $daemonDefinition = (new Definition(QueuesDaemon::class, [
+            $daemonConfigDefinition,
+            $container->findDefinition('commands_queues.do_not_use.entity_manager'),
+            $jobsManagerDefinition,
+            $jobsMarkerDefinition,
+            $profilerDefinition,
+        ]))->setPublic(false);
+
+        // The queues:run command
+        $runCommandDefinition = (new Definition(RunCommand::class, [
+            $daemonDefinition,
+            $container->findDefinition('commands_queues.do_not_use.entity_manager'),
+            $jobsMarkerDefinition
+        ]))->addTag('console.command');
+        $container->setDefinition('commands_queues.command.run', $runCommandDefinition);
     }
 }

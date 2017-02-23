@@ -142,9 +142,9 @@ class Job
     private $priority;
 
     /**
-     * @var Daemon The daemon that processed the Job.
+     * @var Daemon The Daemon that processed the Job.
      *
-     * @ORM\Column(name="processed_by", type="integer", nullable=true)
+     * @ORM\Column(name="processed_by_damon", type="integer", nullable=true)
      * @ORM\ManyToOne(targetEntity="SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Daemon", inversedBy="processedJobs")
      * @ORM\JoinColumn(name="id", referencedColumnName="id")
      */
@@ -751,10 +751,5 @@ class Job
         $this->firstRetriedJob = $firstRetriedJob;
 
         return $this;
-    }
-
-    public function __toString()
-    {
-        return (string) $this->getId();
     }
 }

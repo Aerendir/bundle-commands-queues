@@ -2,19 +2,52 @@
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Command;
 
+use Doctrine\ORM\EntityManager;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Daemon;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Service\QueuesDaemon;
+use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\JobsMarker;
+use SerendipityHQ\Bundle\ConsoleStyles\Console\Formatter\SerendipityHQOutputFormatter;
+use SerendipityHQ\Bundle\ConsoleStyles\Console\Style\SerendipityHQStyle;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\ProgressBar;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * Runs the daemon that listens for new Joobs to process.
  */
-class RunCommand extends AbstractQueuesCommand
+class RunCommand extends Command
 {
     /** @var QueuesDaemon $daemon */
     private $daemon;
+    
+    /** @var  EntityManager $entityManager */
+    private $entityManager;
+    
+    /** @var  JobsMarker $jobsMarker */
+    private $jobsMarker;
+    
+    /** @var  SerendipityHQStyle $ioWriter */
+    private $ioWriter;
+
+    /** @var  OutputInterface $output */
+    private $output;
+
+    /**
+     * @param QueuesDaemon $daemon
+     * @param EntityManager $entityManager
+     * @param JobsMarker $jobsMarker
+     */
+    public function __construct(QueuesDaemon $daemon, EntityManager $entityManager, JobsMarker $jobsMarker)
+    {
+        $this->daemon = $daemon;
+        $this->entityManager = $entityManager;
+        $this->jobsMarker = $jobsMarker;
+
+        parent::__construct();
+    }
 
     /**
      * {@inheritdoc}
@@ -23,7 +56,12 @@ class RunCommand extends AbstractQueuesCommand
     {
         $this
             ->setName('queues:run')
-            ->setDescription('Start the daemon to continuously process the queue.');
+            ->setDescription('Start the daemon to continuously process the queue.')
+            ->setDefinition(
+                new InputDefinition([
+                    new InputArgument('daemon', InputArgument::OPTIONAL, 'The Daemon to run.')
+                ])
+            );
     }
 
     /**
@@ -34,92 +72,104 @@ class RunCommand extends AbstractQueuesCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        parent::execute($input, $output);
+        $this->output = $output;
+
+        // Create the Input/Output writer
+        $this->ioWriter = new SerendipityHQStyle($input, $output);
+        $this->ioWriter->setFormatter(new SerendipityHQOutputFormatter(true));
 
         // Do the initializing operations
-        $this->daemon = $this->getContainer()->get('commands_queues.do_not_use.daemon');
-        $this->daemon->initialize($this->getIoWriter(), $output);
+        $this->daemon->initialize($input->getArgument('daemon'), $this->ioWriter, $output);
 
         // Check that the Daemons in the database that are still running are really still running
         $this->checkAliveDaemons();
         $this->daemon->printProfilingInfo();
 
-        $this->getIoWriter()->success('Waiting for new ScheduledJobs to process...');
-        $this->getIoWriter()->commentLineNoBg('To quit the Queues Daemon use CONTROL-C.');
+        $this->ioWriter->success('Waiting for new ScheduledJobs to process...');
+        $this->ioWriter->commentLineNoBg('To quit the Queues Daemon use CONTROL-C.');
 
         // Run the Daemon
         while ($this->daemon->isAlive()) {
-            // First process Jobs already running
-            $runningJobsCheckInterval = $this->getContainer()->getParameter('commands_queues.running_jobs_check_interval');
-            if ($this->daemon->getProfiler()->getCurrentIteration() % $runningJobsCheckInterval === 0 && $this->daemon->hasRunningJobs()) {
-                $currentlyRunningProgress = null;
-                if ($this->getIoWriter()->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
-                    $this->getIoWriter()->infoLineNoBg(sprintf('Checking %s running jobs...', $this->daemon->countRunningJobs()));
-                    $currentlyRunningProgress = new ProgressBar($output, $this->daemon->countRunningJobs());
-                    $currentlyRunningProgress->setFormat('<info-nobg>[>] Processing job %current%/%max% (%percent:3s%% )</info-nobg><comment-nobg> %elapsed:6s%/%estimated:-6s% (%memory:-6s%)</comment-nobg>');
+            // First process Jobs already running in each queue
+            foreach ($this->daemon->getConfig()->getQueues() as $queueName) {
+                if ($this->daemon->hasToCheckRunningJobs($queueName)) {
+                    $this->processRunningJobs($queueName);
+                } elseif ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_DEBUG) {
+                    $this->ioWriter->infoLineNoBg(sprintf('No running jobs to check on queue %s', $queueName));
                 }
-                $this->daemon->checkRunningJobs($currentlyRunningProgress);
             }
 
-            // Then load new Jobs until the maximum number of concurrent Jobs is reached
-            $jobsToLoad = $this->daemon->getConfig()['max_concurrent_jobs'] - $this->daemon->countRunningJobs();
-            if ($this->getIoWriter()->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
-                $this->getIoWriter()->infoLineNoBg(sprintf('Trying to initialize %s new Jobs...', $jobsToLoad));
-                $initializingJobs = new ProgressBar($output, $jobsToLoad);
-                $initializingJobs->setFormat('<info-nobg>[>] Initializing job %current%/%max% (%percent:3s%% )</info-nobg><comment-nobg> %elapsed:6s%/%estimated:-6s% (%memory:-6s%)</comment-nobg>');
-            }
-            for ($i = 0; $i < $jobsToLoad; $i++) {
-                // Start processing the next Job in the queue
-                if (null === $this->daemon->processNextJob()) {
-                    // if null, no new Jobs exists, so exit the for
-                    break;
-                }
+            // Then initialize new Jobs for each queue if possible
+            foreach ($this->daemon->getConfig()->getQueues() as $queueName) {
+                $jobsToLoad = $this->daemon->getJobsToLoad($queueName);
+                if (0 < $jobsToLoad) {
+                    if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
+                        $this->ioWriter->infoLineNoBg(sprintf('Trying to initialize "%s" new Jobs for queue "%s"...', $jobsToLoad, $queueName));
+                        $initializingJobs = new ProgressBar($output, $jobsToLoad);
+                        $initializingJobs->setFormat('<info-nobg>[>] Job "%current%"/%max% initialized (%percent:3s%% )</info-nobg><comment-nobg> %elapsed:6s%/%estimated:-6s% (%memory:-6s%)</comment-nobg>');
+                    }
+                    for ($i = 0; $i < $jobsToLoad; $i++) {
+                        // Start processing the next Job in the queue
+                        if (null === $this->daemon->processNextJob($queueName)) {
+                            if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
+                                $this->ioWriter->infoLineNoBg(sprintf('Queue "%s" is empty: no more Jobs to initialize.', $queueName));
+                            }
+                            // The next Job is null: exit this queue and pass to the next one
+                            break;
+                        }
 
-                if (isset($initializingJobs)) {
-                    $initializingJobs->advance();
-                    $this->getIoWriter()->writeln('');
+                        if (isset($initializingJobs)) {
+                            $initializingJobs->advance();
+                            $this->ioWriter->writeln('');
+                        }
+                    }
                 }
             }
 
             // Check alive daemons
-            $aliveDaemonsCheckInterval = $this->getContainer()->getParameter('commands_queues.alive_daemons_check_interval');
-            if ($this->daemon->getProfiler()->getCurrentIteration() % $aliveDaemonsCheckInterval === 0) {
-                if ($this->getIoWriter()->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
-                    $this->getIoWriter()->infoLineNoBg('Checking alive Daemons...');
+            if ($this->daemon->hasToCheckAliveDaemons()) {
+                if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
+                    $this->ioWriter->infoLineNoBg('Checking alive Daemons...');
                 }
                 $this->checkAliveDaemons();
             }
 
             // Free some memory
-            $optimizationInterval = $this->getContainer()->getParameter('commands_queues.optimization_interval');
-            if ($this->daemon->getProfiler()->getCurrentIteration() % $optimizationInterval === 0) {
-                if ($this->getIoWriter()->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
-                    $this->getIoWriter()->info('Optimizing the Daemons...');
+            if ($this->daemon->hasToOptimize()) {
+                if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
+                    $this->ioWriter->info('Optimizing the Daemons...');
                 }
                 $this->daemon->optimize();
             }
 
             // Print profiling info
-            $printProfilingInfoInterval = $this->getContainer()->getParameter('commands_queues.print_profiling_info_interval');
-            if (
-                (microtime(true) - $this->daemon->getProfiler()->getLastMicrotime()) >= $printProfilingInfoInterval
-                && $this->getIoWriter()->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE
-            ) {
+            if ($this->daemon->hasToPrintProfilingInfo()) {
                 $this->daemon->printProfilingInfo();
+            }
+
+            // If the daemon can sleep, make it sleep
+            if ($this->daemon->canSleep()) {
+                if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
+                    $this->ioWriter->infoLineNoBg(sprintf(
+                        'No Jobs to process. Idling for %s seconds...', $this->daemon->getConfig()->getIdleTime()
+                    ));
+                }
+                $this->daemon->sleep();
             }
         }
 
-        $this->getIoWriter()->note('Entering shutdown sequence.');
+        $this->ioWriter->note('Entering shutdown sequence.');
 
         // Wait for the currently running jobs to finish
-        $remainedJobs = $this->daemon->countRunningJobs();
-        $currentlyRunningProgress = new ProgressBar($output, $remainedJobs);
-        $currentlyRunningProgress->setFormat('<info-nobg>[>] Processing job %current%/%max% (%percent:3s%% )</info-nobg><comment-nobg> %elapsed:6s%/%estimated:-6s% (%memory:-6s%)</comment-nobg>');
-
-        $this->getIoWriter()->infoLineNoBg('Emptying the queue of still running Jobs...');
+        if ($this->daemon->hasRunningJobs()) {
+            $this->ioWriter->infoLineNoBg('Emptying the queue of still running Jobs...');
+        }
         while ($this->daemon->hasRunningJobs()) {
-            // Continue to process running jobs
-            $this->daemon->checkRunningJobs($currentlyRunningProgress);
+            foreach ($this->daemon->getConfig()->getQueues() as $queueName) {
+                if ($this->daemon->hasRunningJobs($queueName)) {
+                    $this->processRunningJobs($queueName);
+                }
+            }
 
             // And wait a bit to give them the time to finish
             $this->daemon->wait();
@@ -128,7 +178,7 @@ class RunCommand extends AbstractQueuesCommand
         // Set the daemon as died
         $this->daemon->requiescantInPace();
 
-        $this->getIoWriter()->success('All done: Queue Daemon ended running. No more ScheduledJobs will be processed.');
+        $this->ioWriter->success('All done: Queue Daemon ended running. No more ScheduledJobs will be processed.');
 
         return 0;
     }
@@ -138,30 +188,31 @@ class RunCommand extends AbstractQueuesCommand
      */
     private function checkAliveDaemons()
     {
-        if ($this->getIoWriter()->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
-            $this->getIoWriter()->infoLineNoBg('Checking struggler Daemons...');
-            $this->getIoWriter()->commentLineNoBg('Daemons are "struggler" if they are not running anymore.');
+        if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
+            $this->ioWriter->infoLineNoBg('Checking struggler Daemons...');
+            $this->ioWriter->commentLineNoBg('Daemons are "struggler" if they are not running anymore.');
         }
 
         $strugglers = [];
         /** @var Daemon $daemon */
-        while (null !== $daemon = $this->getEntityManager()->getRepository('SHQCommandsQueuesBundle:Daemon')
+        while (null !== $daemon = $this->entityManager->getRepository('SHQCommandsQueuesBundle:Daemon')
                 ->findNextAlive($this->daemon->getIdentity())) {
             if (false === $this->isDaemonStillRunning($daemon)) {
                 $daemon->requiescatInPace(Daemon::MORTIS_STRAGGLER);
-                $this->getEntityManager()->flush();
-                $this->getEntityManager()->detach($daemon);
+                $this->entityManager->flush();
+                $this->entityManager->detach($daemon);
                 $strugglers[] = $daemon;
             }
         }
 
-        if (empty($strugglers) && $this->getIoWriter()->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
-            $this->getIoWriter()->infoLineNoBg('No Struggler Daemons found.');
+        if (0 >= count($strugglers) && $this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
+            $this->ioWriter->infoLineNoBg('No Struggler Daemons found.');
 
             return;
         }
 
-        $this->getIoWriter()->infoLineNoBg(sprintf('Found %s struggler Daemon(s).', count($strugglers)));
+        $this->ioWriter->infoLineNoBg(sprintf('Found %s struggler Daemon(s).', count($strugglers)));
+        $this->ioWriter->commentLineNoBg('Their "diedOn" date is set to NOW and mortisCausa is "struggler".');
 
         $table = [];
         /** @var Daemon $strugglerDaemon */
@@ -177,11 +228,12 @@ class RunCommand extends AbstractQueuesCommand
                 $strugglerDaemon->getMortisCausa(),
             ];
         }
-        $this->getIoWriter()->table(
+        $this->ioWriter->table(
             ['', 'PID', 'Host', 'Born on', 'Died On', 'Age', 'Mortis Causa'],
             $table
         );
-        $this->getIoWriter()->commentLineNoBg('Their "diedOn" date is set to NOW and mortisCausa is "struggler".');
+
+        $this->daemon->getProfiler()->aliveDaemonsJustCheked();
     }
 
     /**
@@ -204,5 +256,26 @@ class RunCommand extends AbstractQueuesCommand
         }
 
         return false;
+    }
+
+    /**
+     * @param string $queueName
+     */
+    private function processRunningJobs(string $queueName)
+    {
+        $currentlyRunningProgress = null;
+        if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
+            $this->ioWriter->infoLineNoBg(sprintf(
+                'Checking <comment-nobg>%s</comment-nobg> running jobs on queue "%s"...',
+                $this->daemon->countRunningJobs($queueName), $queueName
+            ));
+            $currentlyRunningProgress = new ProgressBar($this->output, $this->daemon->countRunningJobs($queueName));
+            $currentlyRunningProgress->setFormat('<info-nobg>[>] Processing job "%current%"/%max% (%percent:3s%% )</info-nobg><comment-nobg> %elapsed:6s%/%estimated:-6s% (%memory:-6s%)</comment-nobg>');
+        }
+        $this->daemon->checkRunningJobs($queueName, $currentlyRunningProgress);
+
+        // Small memory cleanup
+        $currentlyRunningProgress = null;
+        unset($currentlyRunningProgress);
     }
 }

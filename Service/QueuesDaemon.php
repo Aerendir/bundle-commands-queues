@@ -3,14 +3,15 @@
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Service;
 
 use Doctrine\ORM\EntityManager;
+use SerendipityHQ\Bundle\CommandsQueuesBundle\Config\DaemonConfig;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Daemon;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
+use SerendipityHQ\Bundle\CommandsQueuesBundle\Repository\JobRepository;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\JobsMarker;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\Profiler;
 use SerendipityHQ\Bundle\ConsoleStyles\Console\Style\SerendipityHQStyle;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Process\Process;
 
 /**
@@ -20,6 +21,9 @@ class QueuesDaemon
 {
     /** @var Daemon $me Is the Daemon object */
     private $me;
+
+    /** @var bool $canSleep */
+    private $canSleep = false;
 
     /** @var array $config */
     private $config;
@@ -32,6 +36,9 @@ class QueuesDaemon
 
     /** @var JobsMarker $processMarker Used to change the status of Jobs during their execution */
     private $jobsMarker;
+    
+    /** @var  JobRepository $jobsRepo */
+    private $jobsRepo;
 
     /** @var SerendipityHQStyle $ioWriter */
     private $ioWriter;
@@ -41,7 +48,7 @@ class QueuesDaemon
      *           This will be true when a PCNTL SIGTERM signal is intercepted or when the max runtime execution
      *           is reached.
      */
-    private $stop;
+    private $mustDie;
 
     /** @var bool $pcntlLoaded */
     private $pcntlLoaded;
@@ -56,28 +63,30 @@ class QueuesDaemon
     private $verbosity;
 
     /**
-     * @param array         $config
+     * @param DaemonConfig         $config
      * @param EntityManager $entityManager
      * @param JobsManager   $jobsManager
      * @param JobsMarker    $jobsMarker
      * @param Profiler      $profiler
      */
-    public function __construct(array $config, EntityManager $entityManager, JobsManager $jobsManager, JobsMarker $jobsMarker, Profiler $profiler)
+    public function __construct(DaemonConfig $config, EntityManager $entityManager, JobsManager $jobsManager, JobsMarker $jobsMarker, Profiler $profiler)
     {
         $this->config = $config;
         $this->entityManager = $entityManager;
         $this->jobsManager = $jobsManager;
         $this->jobsMarker = $jobsMarker;
+        $this->jobsRepo = $this->entityManager->getRepository('SHQCommandsQueuesBundle:Job');
         $this->profiler = $profiler;
     }
 
     /**
      * Initializes the Daemon.
      *
+     * @param string|null $daemon
      * @param SerendipityHQStyle $ioWriter
      * @param OutputInterface $output
      */
-    public function initialize(SerendipityHQStyle $ioWriter, OutputInterface $output)
+    public function initialize($daemon, SerendipityHQStyle $ioWriter, OutputInterface $output)
     {
         $this->ioWriter = $ioWriter;
         $this->verbosity = $this->ioWriter->getVerbosity();
@@ -85,20 +94,28 @@ class QueuesDaemon
         $this->ioWriter->title('SerendipityHQ Queue Bundle Daemon');
         $ioWriter->infoLineNoBg('Starting the Daemon...');
 
+        // Initialize the configuration
+        $this->config->initialize($daemon);
+
         // Save the Daemon to the Database
         $this->me = new Daemon(gethostname(), getmypid(), $this->config);
         $this->entityManager->persist($this->me);
         $this->entityManager->flush($this->me);
-        $ioWriter->successLineNoBg(sprintf('I\'m Daemon "%s@%s".', $this->me->getPid(), $this->me->getHost()));
+        $ioWriter->successLineNoBg(sprintf(
+            'I\'m Daemon "%s@%s" (ID: %s).', $this->me->getPid(), $this->me->getHost(), $this->me->getId())
+        );
 
         // Start the profiler
-        $this->profiler->start($this->config['max_runtime']);
+        $this->profiler->start($this->config->getMaxRuntime(), $this->getConfig()->getQueues());
 
         // Initialize the JobsManager
         $this->jobsManager->initialize($ioWriter);
 
         // Disable logging in Doctrine
         $this->entityManager->getConfiguration()->setSQLLogger(null);
+
+        // Configure the repository
+        $this->jobsRepo->configure($this->config->getRepoConfig());
 
         // Force garbage collection (used by JobsMarker::markJobAsClosed()
         gc_enable();
@@ -107,7 +124,7 @@ class QueuesDaemon
         $this->setupPcntlSignals();
 
         // Check for Jobs started by a previous Daemon
-        $this->checkStaleJobs($output, $this->config['retry_stale_jobs']);
+        $this->checkStaleJobs($output);
     }
 
     /**
@@ -139,15 +156,15 @@ class QueuesDaemon
         }
 
         // This is true if a SIGTERM or a SIGINT signal is received
-        if (true === $this->stop) {
+        if (true === $this->mustDie) {
             return false;
         }
 
         // The max_runtime is reached
         if ($this->profiler->isMaxRuntimeReached()) {
-            if ($this->verbosity >= SymfonyStyle::VERBOSITY_NORMAL) {
-                $this->ioWriter->successLineNoBg(
-                    sprintf('Max runtime of "%s" seconds reached.', $this->config['max_runtime'])
+            if ($this->verbosity >= OutputInterface::VERBOSITY_NORMAL) {
+                $this->ioWriter->warning(
+                    sprintf('Max runtime of "%s" seconds reached.', $this->config->getMaxRuntime())
                 );
             }
 
@@ -160,47 +177,49 @@ class QueuesDaemon
     /**
      * Processes the next Job in the queue.
      *
+     * @param string $queueName
+     *
      * @return null|bool
      */
-    public function processNextJob()
+    public function processNextJob(string $queueName)
     {
         // If the max_concurrent_jobs number is reached, don't process one more job
-        if ($this->countRunningJobs() >= $this->config['max_concurrent_jobs']) {
+        if ($this->countRunningJobs($queueName) >= $this->config->getQueue($queueName)['max_concurrent_jobs']) {
             return null;
         }
 
         // Get the next job to process
-        $job = $this->entityManager->getRepository('SHQCommandsQueuesBundle:Job')->findNextRunnableJob();
+        $job = $this->jobsRepo->findNextRunnableJob($queueName);
 
         // If no more jobs exists in the queue
         if (null === $job) {
-            if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
-                $this->ioWriter->infoLineNoBg(sprintf('No Jobs to process. Idling for %s seconds...', $this->config['idle_time']));
-            }
-            sleep($this->config['idle_time']);
-
+            // This queue has no more Jobs: for it the Daemon can sleep
+            $this->canSleep = true;
             return null;
         }
+
+        // This queue has another Job: for it the Daemon can't sleep as the next cycle is required to check if there are other Jobs
+        $this->canSleep = false;
 
         // Start processing the Job
         $now = new \DateTime();
         $info = [
             'started_at' => $now,
         ];
-        if ($this->verbosity >= SymfonyStyle::VERBOSITY_NORMAL) {
+        if ($this->verbosity >= OutputInterface::VERBOSITY_NORMAL) {
             $this->ioWriter->infoLineNoBg(sprintf(
                     '[%s] Job "%s" on Queue "%s": Initializing the process.',
                     $now->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue()
                 ));
 
-            if (false !== strpos($job->getCommand(), 'mark-as-cancelled')) {
+            if (false !== strpos($job->getCommand(), 'mark-as-cancelled')  && $this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
                 $this->ioWriter->warningLineNoBg(sprintf(
                     '[%s] Job "%s" on Queue "%s": This will mark as CANCELLED childs of #%s.',
                     $now->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue(), $job->getArguments()[0]
                 ));
             }
 
-            if ($job->isRetry()) {
+            if ($job->isRetry() && $this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
                 $this->ioWriter->noteLineNoBg(sprintf(
                     '[%s] Job "%s" on Queue "%s": This is a retry of original process #%s.',
                     $now->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue(), $job->getRetryOf()->getId()
@@ -226,7 +245,7 @@ class QueuesDaemon
             }
 
             $this->jobsMarker->markJobAsAborted($job, $info, $this->me);
-            if ($this->verbosity >= SymfonyStyle::VERBOSITY_NORMAL) {
+            if ($this->verbosity >= OutputInterface::VERBOSITY_NORMAL) {
                 $this->ioWriter->infoLineNoBg(sprintf(
                     '[%s] Job "%s" on Queue "%s": The process didn\'t started due to some errors. See them in the'
                     .' logs of the Job.', $now->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue()
@@ -257,7 +276,7 @@ class QueuesDaemon
         unset($info['started_at']);
 
         // Save the just created new Job into the running jobs queue
-        $this->runningJobs[] = $info;
+        $this->runningJobs[$queueName][] = $info;
 
         // Wait some millisedonds to permit Doctrine to finish writings (sometimes it is slower than the Daemon)
         $this->wait();
@@ -268,29 +287,71 @@ class QueuesDaemon
     /**
      * @return bool
      */
-    public function hasRunningJobs() : bool
+    public function canSleep() : bool
     {
-        return $this->countRunningJobs() > 0 ? true : false;
+        return $this->canSleep;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasToCheckAliveDaemons() : bool
+    {
+        return microtime(true) - $this->getProfiler()->getAliveDaemonsLastCheckedAt() >= $this->getConfig()->getAliveDaemonsCheckInterval();
+    }
+
+    /**
+     * @param string $queueName
+     * @return bool
+     */
+    public function hasToCheckRunningJobs(string $queueName) : bool
+    {
+        // The number of iterations is reached and the queue has currently running Jobs
+        return microtime(true) - $this->getProfiler()->getRunningJobsLastCheckedAt($queueName) >= $this->getConfig()->getRunningJobsCheckInterval($queueName)
+            && $this->hasRunningJobs($queueName);
+    }
+
+    /**
+     * @param string $queueName
+     * @return bool
+     */
+    public function hasRunningJobs(string $queueName = null) : bool
+    {
+        return $this->countRunningJobs($queueName) > 0 ? true : false;
     }
 
     /**
      * Returns the number of currently running Jobs.
      *
+     * @param string $queueName
+     *
      * @return int
      */
-    public function countRunningJobs() : int
+    public function countRunningJobs(string $queueName = null) : int
     {
-        return count($this->runningJobs);
+        // If the queue name is not passed, the count is on all the processing queues
+        if (null === $queueName) {
+            $runningJobs = 0;
+            foreach ($this->runningJobs as $currentlyRunning) {
+                $runningJobs += count($currentlyRunning);
+            }
+
+            // Return the overall amount
+            return $runningJobs;
+        }
+
+        return isset($this->runningJobs[$queueName]) ? count($this->runningJobs[$queueName]) : 0;
     }
 
     /**
      * Processes the Jobs already running or pending.
      *
+     * @param string $queueName
      * @param null|ProgressBar $progressBar
      */
-    public function checkRunningJobs(ProgressBar $progressBar = null)
+    public function checkRunningJobs(string $queueName, ProgressBar $progressBar = null)
     {
-        foreach ($this->runningJobs as $index => $runningJob) {
+        foreach ($this->runningJobs[$queueName] as $index => $runningJob) {
             $now = new \DateTime();
 
             /** @var Job $checkingJob */
@@ -313,7 +374,7 @@ class QueuesDaemon
             // If the running job is processed correctly...
             if (true === $this->processRunningJob($runningJob)) {
                 // ... Unset it from the running jobs queue
-                unset($this->runningJobs[$index]);
+                unset($this->runningJobs[$queueName][$index]);
             }
         }
     }
@@ -342,7 +403,7 @@ class QueuesDaemon
             }
 
             // And print its PID (available only if the process is already running)
-            if ($runningJob['process']->isStarted() && $this->verbosity >= SymfonyStyle::VERBOSITY_NORMAL) {
+            if ($runningJob['process']->isStarted() && $this->verbosity >= OutputInterface::VERBOSITY_VERBOSE) {
                 $this->ioWriter->infoLineNoBg(sprintf(
                         '[%s] Job "%s" on Queue "%s": Process is currently running with PID "%s".',
                         $now->format('Y-m-d H:i:s'), $runningJob['job']->getId(), $runningJob['job']->getQueue(), $runningJob['process']->getPid())
@@ -392,6 +453,23 @@ class QueuesDaemon
     }
 
     /**
+     * @return bool
+     */
+    public function hasToOptimize() : bool
+    {
+        return microtime(true) - $this->getProfiler()->getLastOptimizationAt() >= $this->getConfig()->getOptimizationInterval()
+            && $this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasToPrintProfilingInfo() : bool
+    {
+        return microtime(true) - $this->getProfiler()->getLastMicrotime() >= $this->getConfig()->getProfilingInfoInterval();
+    }
+
+    /**
      * Optimizes the usage of memory.
      */
     public function optimize()
@@ -399,6 +477,8 @@ class QueuesDaemon
         // Force the garbage collection
         $cycles = gc_collect_cycles();
         $this->ioWriter->infoLineNoBg(sprintf('Collected %s cycles.', $cycles));
+
+        $this->getProfiler()->optimized();
     }
 
     /**
@@ -410,6 +490,14 @@ class QueuesDaemon
             ['', 'Profiling info'],
             $this->profiler->profile()
         );
+    }
+
+    /**
+     * Put the Daemon in sleep.
+     */
+    public function sleep()
+    {
+        sleep($this->getConfig()->getIdleTime());
     }
 
     /**
@@ -427,9 +515,9 @@ class QueuesDaemon
     }
 
     /**
-     * @return array
+     * @return DaemonConfig
      */
-    public function getConfig() : array
+    public function getConfig() : DaemonConfig
     {
         return $this->config;
     }
@@ -440,6 +528,15 @@ class QueuesDaemon
     public function getIdentity() : Daemon
     {
         return $this->me;
+    }
+
+    /**
+     * @param string $queueName
+     * @return int
+     */
+    public function getJobsToLoad(string $queueName)
+    {
+        return $this->getConfig()->getQueue($queueName)['max_concurrent_jobs'] - $this->countRunningJobs($queueName);
     }
 
     /**
@@ -492,10 +589,12 @@ class QueuesDaemon
     final protected function handleChildsOfFailedJob(Job $job)
     {
         if ($job->getChildDependencies()->count() > 0) {
-            $this->ioWriter->noteLineNoBg(sprintf(
-                '[%s] Job "%s" on Queue "%s": Creating a Job to mark childs as as CANCELLED.',
-                $job->getClosedAt()->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue()
-            ));
+            if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
+                $this->ioWriter->noteLineNoBg(sprintf(
+                    '[%s] Job "%s" on Queue "%s": Creating a Job to mark childs as as CANCELLED.',
+                    $job->getClosedAt()->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue()
+                ));
+            }
 
             $cancelChildsJobs = $job->createCancelChildsJob();
             $this->entityManager->persist($cancelChildsJobs);
@@ -515,18 +614,18 @@ class QueuesDaemon
             switch ($signo) {
                 case SIGTERM:
                     $signal = 'SIGTERM';
-                    $this->stop = true;
+                    $this->mustDie = true;
                     break;
                 case SIGINT:
                     $signal = 'SIGINT';
-                    $this->stop = true;
+                    $this->mustDie = true;
                     break;
                 default:
                     $signal = 'Unknown '.$signo;
             }
 
-            if ($this->verbosity >= SymfonyStyle::VERBOSITY_NORMAL) {
-                $this->ioWriter->successLineNoBg(sprintf('%s signal received.', $signal));
+            if ($this->verbosity >= OutputInterface::VERBOSITY_NORMAL) {
+                $this->ioWriter->warning(sprintf('%s signal received.', $signal));
             }
         };
 
@@ -534,7 +633,7 @@ class QueuesDaemon
 
         // If the PCNTL extension is not loded ...
         if (false === $this->pcntlLoaded) {
-            if ($this->verbosity >= SymfonyStyle::VERBOSITY_NORMAL) {
+            if ($this->verbosity >= OutputInterface::VERBOSITY_NORMAL) {
                 $this->ioWriter->note('PCNTL extension is not loaded. Signals cannot be processd.');
             }
 
@@ -545,7 +644,7 @@ class QueuesDaemon
         pcntl_signal(SIGTERM, $signalHandler);
         pcntl_signal(SIGINT, $signalHandler);
 
-        if ($this->verbosity >= SymfonyStyle::VERBOSITY_NORMAL) {
+        if ($this->verbosity >= OutputInterface::VERBOSITY_NORMAL) {
             $this->ioWriter->successLineNoBg('PCNTL is available: signals will be processed.');
         }
     }
@@ -564,26 +663,27 @@ class QueuesDaemon
                 '[%s] Job "%s" on Queue "%s": %s.',
                 $job->getClosedAt()->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue(), $retryReason)
         );
-        $this->ioWriter->noteLineNoBg(sprintf(
-                '[%s] Job "%s" on Queue "%s": Retry with Job "%s" (Attempt #%s/%s).',
-                $job->getClosedAt()->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue(), $retryJob->getId(), $retryJob->getRetryStrategy()->getAttempts(), $retryJob->getRetryStrategy()->getMaxAttempts())
-        );
+        if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
+            $this->ioWriter->noteLineNoBg(sprintf(
+                    '[%s] Job "%s" on Queue "%s": Retry with Job "%s" (Attempt #%s/%s).',
+                    $job->getClosedAt()->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue(), $retryJob->getId(), $retryJob->getRetryStrategy()->getAttempts(), $retryJob->getRetryStrategy()->getMaxAttempts())
+            );
+        }
 
         return true;
     }
 
     /**
      * @param OutputInterface $output
-     * @param bool $retryStaleJobs
      */
-    private function checkStaleJobs(OutputInterface $output, bool $retryStaleJobs)
+    private function checkStaleJobs(OutputInterface $output)
     {
         if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
             $this->ioWriter->infoLineNoBg('Checking stale jobs...');
-            $this->ioWriter->commentLineNoBg('Jobs are "stale" if their status is already PENDING or RUNNING when the queue is started.');
+            $this->ioWriter->commentLineNoBg('Jobs are "stale" if their status is already PENDING or RUNNING when the Daemon is started.');
         }
 
-        $staleJobsCount = $this->entityManager->getRepository('SHQCommandsQueuesBundle:Job')->countStaleJobs();
+        $staleJobsCount = $this->jobsRepo->countStaleJobs();
 
         // No stale Jobs
         if (0 >= $staleJobsCount && $this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
@@ -594,24 +694,17 @@ class QueuesDaemon
         $progressBar = null;
         if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
             $progressBar = new ProgressBar($output, $staleJobsCount);
-            $progressBar->setFormat('<info-nobg>[>] Processing job %current%/%max% (%percent:3s%% )</info-nobg><comment-nobg> %elapsed:6s%/%estimated:-6s%  (%memory:-6s%)</comment-nobg>');
+            $progressBar->setFormat('<info-nobg>[>] Processing job <comment-nobg>%current%</comment-nobg>/%max% (%percent%%)</info-nobg><comment-nobg> %elapsed:6s%/%estimated:-6s%  (%memory:-6s%)</comment-nobg>');
         }
 
         // There are stale Jobs
         if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
-            $this->ioWriter->infoLineNoBg(sprintf('Found %s stale Jobs: start processing them.', $staleJobsCount));
-
-            $message = 'They WILL NOT BE retried';
-            if (true === $retryStaleJobs) {
-                $message = 'They WILL BE retried.';
-            }
-
-            $this->ioWriter->commentLineNoBg($message);
+            $this->ioWriter->infoLineNoBg(sprintf('Found <comment-nobg>%s</comment-nobg> stale Jobs: start processing them.', $staleJobsCount));
         }
 
         $stales = [];
         /** @var Job $job */
-        while (null !== $job = $this->entityManager->getRepository('SHQCommandsQueuesBundle:Job')->findNextStaleJob($stales)) {
+        while (null !== $job = $this->jobsRepo->findNextStaleJob($stales)) {
             $stales[] = $job->getId();
 
             if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
@@ -622,7 +715,7 @@ class QueuesDaemon
             // Something went wrong starting the process: close it as failed
             $info['output'] = 'Job were stale.';
 
-            if ($retryStaleJobs) {
+            if ($this->getConfig()->getRetryStaleJobs($job->getQueue())) {
                 $this->retryStaleJob($job, $info, 'Job were stale.');
                 continue;
             }
