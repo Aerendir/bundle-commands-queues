@@ -44,7 +44,8 @@ class SHQCommandsQueuesExtension extends Extension
         // The Jobs Marker
         $jobsMarkerDefinition = (new Definition(JobsMarker::class, [
             $container->findDefinition('commands_queues.do_not_use.entity_manager'),
-        ]))->setPublic(false);
+        ]));
+        $container->setDefinition('commands_queues.do_not_use.jobs_marker', $jobsMarkerDefinition);
 
         // The Profiler
         $profilerDefinition = (new Definition(Profiler::class))->setPublic(false);

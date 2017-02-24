@@ -2,6 +2,8 @@
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Util;
 
+use Symfony\Component\Console\Helper\Helper;
+
 /**
  * A class to profile the Daemon during the execution.
  */
@@ -75,8 +77,8 @@ class Profiler
         $return = [
             ['', 'Microtime', $this->formatTime($currentMicrotime)],
             ['', 'Last Microtime', $this->formatTime($this->lastMicrotime)],
-            ['', 'Memory Usage (real)', $this->formatMemory($currentMemoryUsage)],
-            ['', 'Memory Peak (real)', $this->formatMemory($currentMemoryPeak)],
+            ['', 'Memory Usage (real)', Helper::formatMemory($currentMemoryUsage)],
+            ['', 'Memory Peak (real)', Helper::formatMemory($currentMemoryPeak)],
             ['', 'Current Iteration', $this->getCurrentIteration()],
             ['', 'Elapsed Time', $currentMicrotime - $this->lastMicrotime],
             // If the difference is negative, then this is an increase in memory consumption
@@ -85,13 +87,15 @@ class Profiler
                     ? sprintf('<%s>%s</>', 'success-nobg', "\xE2\x9C\x94")
                     : sprintf('<%s>%s</>', 'error-nobg', "\xE2\x9C\x96"),
                 'Memory Usage Difference (real)',
-                ($memoryDifference <= 0 ? '+' : '-').abs($memoryDifference).'%', ],
+                ($memoryDifference <= 0 ? '+' : '-').abs($memoryDifference).'%',
+            ],
             [
                 $memoryPeakDifference >= 0
                     ? sprintf('<%s>%s</>', 'success-nobg', "\xE2\x9C\x94")
                     : sprintf('<%s>%s</>', 'error-nobg', "\xE2\x9C\x96"),
                 'Memory Peak Difference (real)',
-                ($memoryPeakDifference <= 0 ? '+' : '-').abs($memoryPeakDifference).'%', ],
+                ($memoryPeakDifference <= 0 ? '+' : '-').abs($memoryPeakDifference).'%',
+            ],
         ];
 
         $this->lastMicrotime = $currentMicrotime;
@@ -180,35 +184,6 @@ class Profiler
     public function isMaxRuntimeReached() : bool
     {
         return microtime(true) - $this->startTime > $this->maxRuntime;
-    }
-
-    /**
-     * Format an integer in bytes.
-     *
-     * @see http://php.net/manual/en/function.memory-get-usage.php#96280
-     *
-     * @param $size
-     *
-     * @return string
-     */
-    private function formatMemory($size)
-    {
-        $isNegative = false;
-        $unit = ['b', 'kb', 'mb', 'gb', 'tb', 'pb'];
-
-        if (0 > $size) {
-            // This is a negative value
-            $isNegative = true;
-        }
-
-        $return = ($isNegative) ? '-' : '';
-
-        return $return
-            .round(
-                abs($size) / pow(1024, ($i = floor(log(abs($size), 1024)))), 2
-            )
-            .' '
-            .$unit[$i];
     }
 
     /**

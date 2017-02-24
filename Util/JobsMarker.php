@@ -2,6 +2,7 @@
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Util;
 
+use Doctrine\Common\Persistence\Proxy;
 use Doctrine\ORM\EntityManager;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Daemon;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
@@ -48,6 +49,11 @@ class JobsMarker
      */
     public function markJobAsFailed(Job $job, array $info)
     {
+        // If this Job is a retry of another one, mark also the retried as finished
+        if ($job->isRetry()) {
+            $this->markParentsAsRetryFailed($job->getRetryOf());
+        }
+
         $this->markJobAsClosed($job, Job::STATUS_FAILED, $info);
     }
 
@@ -57,6 +63,11 @@ class JobsMarker
      */
     public function markJobAsFinished(Job $job, array $info)
     {
+        // If this Job is a retry of another one, mark also the retried as finished
+        if ($job->isRetry()) {
+            $this->markParentsAsRetryFinished($job->getRetryOf());
+        }
+
         $this->markJobAsClosed($job, Job::STATUS_FINISHED, $info);
     }
 
@@ -138,6 +149,30 @@ class JobsMarker
     }
 
     /**
+     * @param Job $retriedJob
+     */
+    private function markParentsAsRetryFailed(Job $retriedJob)
+    {
+        if ($retriedJob->isRetry()) {
+            $this->markParentsAsRetryFailed($retriedJob->getRetryOf());
+        }
+
+        $this->markJob($retriedJob, Job::STATUS_RETRY_FAILED);
+    }
+
+    /**
+     * @param Job $retriedJob
+     */
+    private function markParentsAsRetryFinished(Job $retriedJob)
+    {
+        if ($retriedJob->isRetry()) {
+            $this->markParentsAsRetryFinished($retriedJob->getRetryOf());
+        }
+
+        $this->markJob($retriedJob, Job::STATUS_RETRY_FINISHED);
+    }
+
+    /**
      * @param Job $job
      * @param string $status
      * @param array $info
@@ -147,6 +182,11 @@ class JobsMarker
     private function markJob(Job $job, string $status, array $info = [], Daemon $daemon = null)
     {
         $reflectedClass = new \ReflectionClass($job);
+
+        // If the $job is a Doctrine proxy...
+        if ($job instanceof Proxy)
+            // ... This gets the real object, the one that the Proxy extends
+            $reflectedClass = $reflectedClass->getParentClass();
 
         // First of all set the current status
         $reflectedProperty = $reflectedClass->getProperty('status');
@@ -216,12 +256,18 @@ class JobsMarker
         }
 
         // Flush the original Job
-        try {
-            $this->entityManager->flush($job);
-        } catch(\Exception $e) {
-            VarDumper::dump($job);
-            throw $e;
-            die;
+        $this->entityManager->flush($job);
+
+        if (
+            (
+                Job::STATUS_FINISHED === $job->getStatus()
+                || Job::STATUS_RETRY_FINISHED === $job->getStatus()
+                || Job::STATUS_FAILED === $job->getStatus()
+                || Job::STATUS_RETRY_FAILED === $job->getStatus()
+            ) && false === $job->hasChildDependencies()
+            && false === $job->hasRunningRetryingJobs()
+        ) {
+            $this->entityManager->detach($job);
         }
 
         // Now first set to null and then unset to save memory ASAP

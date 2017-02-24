@@ -100,7 +100,7 @@ class MarkAsCancelledCommand extends AbstractQueuesCommand
             // If the status is already cancelled...
             if ($childDependency->getStatus() === Job::STATUS_CANCELLED) {
                 // ... Add it to the array of already cancelled Jobs
-                $alreadyCancelledJobs[$childDependency->getStatus()] = $childDependency->getStatus();
+                $alreadyCancelledJobs[$childDependency->getId()] = $childDependency->getId();
             }
 
             // If this is not in the already cancelled Jobs array...

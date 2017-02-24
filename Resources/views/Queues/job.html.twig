@@ -20,22 +20,22 @@
                         <p>Priority: {{ job.priority }}</p>
                         <p>Status: {{ job.status }}</p>
                         {% if job.isRetry %}
-                            <p><small class="text-muted">Is retry of <a href="#{{ job.retryOf.id }}">#{{ job.retryOf.id }}</a></small></p>
+                            <p><small class="text-muted">Is retry of <a href="{{ path('queues_job', {'id': job.retryOf.id}) }}">#{{ job.retryOf.id }}</a></small></p>
                         {% endif %}
                         {% if job.isRetried %}
-                            <p><small class="text-muted">Retried by <br /><a href="#{{ job.retriedBy.id }}">#{{ job.retriedBy.id }}</a> ({{ job.retriedBy.status }})</small></p>
-                            {% if 0 < job.retriedJobs.count %}
+                            <p><small class="text-muted">Retried by <br /><a href="{{ path('queues_job', {'id': job.retriedBy.id}) }}">#{{ job.retriedBy.id }}</a> ({{ job.retriedBy.status }})</small></p>
+                            {% if 0 < job.retryingJobs.count %}
                                 <small class="text-muted">All retrying Jobs:</small>
-                                {% set retriedJobs = {} %}
-                                {% for retriedJob in job.retriedJobs %}
-                                    {% set linkedRetriedJob = '<a href="#' ~ retriedJob.id ~ '">#' ~ retriedJob.id ~ '</a> (' ~ retriedJob.status ~ ')' %}
-                                    {% set retriedJobs = retriedJobs|merge({ ('_' ~ retriedJob.id ~ '-'): linkedRetriedJob}) %}
+                                {% set retryingJobs = {} %}
+                                {% for retryingJob in job.retryingJobs %}
+                                    {% set linkedretryingJob = '<a href="' ~ path('queues_job', {'id': retryingJob.id}) ~ '">#' ~ retryingJob.id ~ '</a> (' ~ retryingJob.status ~ ')' %}
+                                    {% set retryingJobs = retryingJobs|merge({ ('_' ~ retryingJob.id ~ '-'): linkedretryingJob}) %}
                                 {% endfor %}
-                                <p><small class="text-muted">{{ retriedJobs|join(', ')|raw }}</small></p>
+                                <p><small class="text-muted">{{ retryingJobs|join(', ')|raw }}</small></p>
                             {% endif %}
                         {% endif %}
                         {% if job.firstRetriedJob %}
-                            <p><small class="text-muted">First retried job:<br /><a href="#{{ job.firstRetriedJob.id }}">#{{ job.firstRetriedJob.id }} ({{ job.firstRetriedJob.status }})</a></small></p>
+                            <p><small class="text-muted">First retried job:<br /><a href="{{ path('queues_job', {'id': job.firstRetriedJob.id}) }}">#{{ job.firstRetriedJob.id }} ({{ job.firstRetriedJob.status }})</a></small></p>
                         {% endif %}
                         {% if 'cancelled' == job.status %}
                             <p><small class="text-muted">{{ job.debug.cancellation_reason }}</small></p>
@@ -46,7 +46,7 @@
                             <p>Parent Jobs:</p>
                             {% set parentJobs = {} %}
                             {% for parentJob in job.parentDependencies %}
-                                {% set linkedParentJob = '<a href="#' ~ parentJob.id ~ '">#' ~ parentJob.id ~ '</a> (' ~ parentJob.status ~ ')' %}
+                                {% set linkedParentJob = '<a href="' ~ path('queues_job', {'id': parentJob.id}) ~ '">#' ~ parentJob.id ~ '</a> (' ~ parentJob.status ~ ')' %}
                                 {% set parentJobs = parentJobs|merge({ ('_' ~ parentJob.id ~ '-'): linkedParentJob}) %}
                             {% endfor %}
                             <p>{{ parentJobs|join(', ')|raw }}</p>
@@ -58,7 +58,7 @@
                             <p>Child Jobs:</p>
                             {% set childJobs = {} %}
                             {% for childJob in job.childDependencies %}
-                                {% set linkedChildJob = '<a href="#' ~ childJob.id ~ '">#' ~ childJob.id ~ '</a> (' ~ childJob.status ~ ')' %}
+                                {% set linkedChildJob = '<a href="' ~ path('queues_job', {'id': childJob.id}) ~ '">#' ~ childJob.id ~ '</a> (' ~ childJob.status ~ ')' %}
                                 {% set childJobs = childJobs|merge({ ('_' ~ childJob.id ~ '-'): linkedChildJob}) %}
                             {% endfor %}
                             <p>{{ childJobs|join(', ')|raw }}</p>

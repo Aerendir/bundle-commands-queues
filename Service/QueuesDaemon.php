@@ -403,7 +403,7 @@ class QueuesDaemon
             }
 
             // And print its PID (available only if the process is already running)
-            if ($runningJob['process']->isStarted() && $this->verbosity >= OutputInterface::VERBOSITY_VERBOSE) {
+            if ($runningJob['process']->isStarted() && $this->verbosity >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
                 $this->ioWriter->infoLineNoBg(sprintf(
                         '[%s] Job "%s" on Queue "%s": Process is currently running with PID "%s".',
                         $now->format('Y-m-d H:i:s'), $runningJob['job']->getId(), $runningJob['job']->getQueue(), $runningJob['process']->getPid())
@@ -476,7 +476,9 @@ class QueuesDaemon
     {
         // Force the garbage collection
         $cycles = gc_collect_cycles();
-        $this->ioWriter->infoLineNoBg(sprintf('Collected %s cycles.', $cycles));
+        if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
+            $this->ioWriter->infoLineNoBg(sprintf('Collected %s cycles.', $cycles));
+        }
 
         $this->getProfiler()->optimized();
     }

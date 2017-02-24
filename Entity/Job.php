@@ -67,11 +67,17 @@ class Job
     /** The job was processed and finished with success. */
     const STATUS_FINISHED = 'finished';
 
+    /** A failed Job that were retried and the retry Job were finished */
+    const STATUS_RETRY_FINISHED = 'retry_finished';
+
     /** The $process->start() method thrown an exception. */
     const STATUS_ABORTED = 'aborted';
 
     /** The job failed for some reasons. */
     const STATUS_FAILED = 'failed';
+
+    /** A failed Job that were retried and the retry Job failed, too */
+    const STATUS_RETRY_FAILED = 'retry_failed';
 
     /** The parent job (on which this one depends) failed. */
     const STATUS_CANCELLED = 'cancelled';
@@ -228,7 +234,7 @@ class Job
     /**
      * @var Job If this Job is a retry of another retried job, here there is the first retried Job
      *
-     * @ORM\ManyToOne(targetEntity="SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job", inversedBy="retriedJobs", cascade={"detach", "refresh"})
+     * @ORM\ManyToOne(targetEntity="SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job", inversedBy="retryingJobs", cascade={"detach", "refresh"})
      * @ORM\JoinColumn(name="first_retried_job", referencedColumnName="id")
      */
     private $firstRetriedJob;
@@ -238,7 +244,7 @@ class Job
      *
      * @ORM\OneToMany(targetEntity="SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job", mappedBy="firstRetriedJob", cascade={"detach", "refresh"})
      */
-    private $retriedJobs;
+    private $retryingJobs;
 
     /**
      * @param string       $command
@@ -270,7 +276,7 @@ class Job
         $this->childDependencies = new ArrayCollection();
         $this->parentDependencies = new ArrayCollection();
         $this->retryStrategy = new NeverRetryStrategy();
-        $this->retriedJobs = new ArrayCollection();
+        $this->retryingJobs = new ArrayCollection();
     }
 
     /**
@@ -554,9 +560,9 @@ class Job
     /**
      * @return Collection
      */
-    public function getRetriedJobs() : Collection
+    public function getRetryingJobs() : Collection
     {
-        return $this->retriedJobs;
+        return $this->retryingJobs;
     }
 
     /**
@@ -603,13 +609,40 @@ class Job
         /** @var Job $parentJob */
         foreach ($this->getParentDependencies() as $parentJob) {
             // Check if the status is not finished and if it isn't...
-            if (self::STATUS_FINISHED !== $parentJob->getStatus()) {
-                // Return false as at least one parent Job is not finished
+            if (self::STATUS_FINISHED !== $parentJob->getStatus() && self::STATUS_RETRY_FINISHED !== $parentJob->getStatus()) {
+                // Return true as at least one parent Job is not finished
                 return true;
             }
         }
 
         // All parent Jobs were finished
+        return false;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasRunningRetryingJobs()
+    {
+        /** @var Job $retriedJob */
+        foreach ($this->getRetryingJobs() as $retriedJob) {
+            if (
+                self::STATUS_FINISHED !== $retriedJob->getStatus()
+                && self::STATUS_RETRY_FINISHED !== $retriedJob->getStatus()
+                && self::STATUS_FAILED !== $retriedJob->getStatus()
+                && self::STATUS_RETRY_FAILED !== $retriedJob->getStatus()
+            ) {
+                return true;
+            }
+        }
+
+        if ($this->isRetried()) {
+            return self::STATUS_FINISHED !== $this->getRetriedBy()->getStatus()
+                && self::STATUS_RETRY_FINISHED !== $this->getRetriedBy()->getStatus()
+                && self::STATUS_FAILED !== $this->getRetriedBy()->getStatus()
+                && self::STATUS_RETRY_FAILED !== $this->getRetriedBy()->getStatus();
+        }
+
         return false;
     }
 

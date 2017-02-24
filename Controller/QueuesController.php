@@ -55,14 +55,25 @@ class QueuesController extends Controller
             ->addOrderBy('j.createdAt', 'ASC')
             ->addOrderBy('j.id', 'ASC');
 
+        $status = $request->query->get('status', null);
+        if (null !== $status) {
+            $qb->where($qb->expr()->eq('j.status', ':status'))->setParameter('status', 'new');
+        }
+
         $pager = new Pagerfanta(new DoctrineORMAdapter($qb, false));
         $pager->setCurrentPage(max(1, (integer) $request->query->get('page', 1)));
         $pager->setMaxPerPage(max(5, min(50, (integer) $request->query->get('per_page', 20))));
 
         $pagerView = new TwitterBootstrap3View();
         $router = $this->get('router');
-        $routeGenerator = function($page) use ($router, $pager) {
-            return $router->generate('queues_jobs', ['page' => $page, 'per_page' => $pager->getMaxPerPage()]);
+        $routeGenerator = function($page) use ($router, $pager, $status) {
+            $params = ['page' => $page, 'per_page' => $pager->getMaxPerPage()];
+
+            if (null !== $status) {
+                $params['status'] = $status;
+            }
+
+            return $router->generate('queues_jobs', $params);
         };
 
         return [

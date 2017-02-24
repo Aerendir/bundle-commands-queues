@@ -7,7 +7,6 @@ use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\JobsMarker;
 use SerendipityHQ\Bundle\ConsoleStyles\Console\Formatter\SerendipityHQOutputFormatter;
 use SerendipityHQ\Bundle\ConsoleStyles\Console\Style\SerendipityHQStyle;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
-use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -37,6 +36,8 @@ abstract class AbstractQueuesCommand extends ContainerAwareCommand
         $this->ioWriter = new SerendipityHQStyle($input, $output);
         $this->ioWriter->setFormatter(new SerendipityHQOutputFormatter(true));
 
+        $this->entityManager = $this->getContainer()->get('commands_queues.do_not_use.entity_manager');
+
         return 0;
     }
 
@@ -53,6 +54,10 @@ abstract class AbstractQueuesCommand extends ContainerAwareCommand
      */
     final protected function getJobsMarker() : JobsMarker
     {
+        if (null === $this->jobsMarker) {
+            $this->jobsMarker = $this->getContainer()->get('commands_queues.do_not_use.jobs_marker');
+        }
+
         return $this->jobsMarker;
     }
 

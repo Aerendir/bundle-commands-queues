@@ -3,4 +3,3 @@ services:
         class: Doctrine\ORM\EntityManager
         factory: ["@doctrine", getManager]
         arguments: ["%commands_queues.model_manager_name%"]
-        public: false
