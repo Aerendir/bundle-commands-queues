@@ -12,7 +12,6 @@ namespace SerendipityHQ\Bundle\CommandsQueuesBundle\DependencyInjection;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
-use Symfony\Component\VarDumper\VarDumper;
 
 /**
  * @author Audrius Karabanovas <audrius@karabanovas.net>

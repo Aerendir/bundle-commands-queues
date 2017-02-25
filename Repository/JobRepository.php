@@ -122,20 +122,6 @@ class JobRepository extends EntityRepository
     }
 
     /**
-     * Configures in the query the queues to include.
-     *
-     * @param QueryBuilder $queryBuilder
-     */
-    private function configureQueues(QueryBuilder $queryBuilder)
-    {
-        // Set the queues to include
-        if (isset($this->config['included_queues'])) {
-            $queryBuilder->andWhere($queryBuilder->expr()->in('j.queue', ':includedQueues'))
-                ->setParameter('includedQueues', $this->config['included_queues'], Connection::PARAM_STR_ARRAY);
-        }
-    }
-
-    /**
      * Finds the next Job to process.
      *
      * @param string $queueName
@@ -171,5 +157,19 @@ class JobRepository extends EntityRepository
         $this->configureQueues($queryBuilder);
 
         return $queryBuilder->getQuery()->setMaxResults(1)->getOneOrNullResult();
+    }
+
+    /**
+     * Configures in the query the queues to include.
+     *
+     * @param QueryBuilder $queryBuilder
+     */
+    private function configureQueues(QueryBuilder $queryBuilder)
+    {
+        // Set the queues to include
+        if (isset($this->config['included_queues'])) {
+            $queryBuilder->andWhere($queryBuilder->expr()->in('j.queue', ':includedQueues'))
+                ->setParameter('includedQueues', $this->config['included_queues'], Connection::PARAM_STR_ARRAY);
+        }
     }
 }

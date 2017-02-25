@@ -6,7 +6,6 @@ use Doctrine\Common\Persistence\Proxy;
 use Doctrine\ORM\EntityManager;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Daemon;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
-use Symfony\Component\VarDumper\VarDumper;
 
 /**
  * Changes the status of Jobs during their execution attaching to them execution info.
@@ -269,13 +268,6 @@ class JobsMarker
         ) {
             $this->entityManager->detach($job);
         }
-
-        // Now first set to null and then unset to save memory ASAP
-        $reflectedClass =
-        $reflectedProperty =
-        $property =
-        $value = null;
-        unset($reflectedClass, $reflectedProperty, $property, $value);
     }
 
     /**
