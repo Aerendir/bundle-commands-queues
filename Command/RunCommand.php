@@ -13,6 +13,7 @@ use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
@@ -59,7 +60,8 @@ class RunCommand extends Command
             ->setDescription('Start the daemon to continuously process the queue.')
             ->setDefinition(
                 new InputDefinition([
-                    new InputArgument('daemon', InputArgument::OPTIONAL, 'The Daemon to run.')
+                    new InputArgument('daemon', InputArgument::OPTIONAL, 'The Daemon to run.'),
+                    new InputOption('enable-memprof', null),
                 ])
             );
     }
@@ -68,7 +70,7 @@ class RunCommand extends Command
      * @param InputInterface  $input
      * @param OutputInterface $output
      *
-     * @return bool
+     * @return int The status code of the command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
@@ -273,9 +275,5 @@ class RunCommand extends Command
             $currentlyRunningProgress->setFormat('<info-nobg>[>] Processing job "%current%"/%max% (%percent:3s%% )</info-nobg><comment-nobg> %elapsed:6s%/%estimated:-6s% (%memory:-6s%)</comment-nobg>');
         }
         $this->daemon->checkRunningJobs($queueName, $currentlyRunningProgress);
-
-        // Small memory cleanup
-        $currentlyRunningProgress = null;
-        unset($currentlyRunningProgress);
     }
 }

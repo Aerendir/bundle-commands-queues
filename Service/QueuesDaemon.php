@@ -105,8 +105,11 @@ class QueuesDaemon
             'I\'m Daemon "%s@%s" (ID: %s).', $this->me->getPid(), $this->me->getHost(), $this->me->getId())
         );
 
+        // First of all setup Memprof if required
+        $this->setupMemprof();
+
         // Start the profiler
-        $this->profiler->start($this->config->getMaxRuntime(), $this->getConfig()->getQueues());
+        $this->profiler->start($this->getIdentity()->getPid(), $this->config->getMaxRuntime(), $this->getConfig()->getQueues());
 
         // Initialize the JobsManager
         $this->jobsManager->initialize($ioWriter);
@@ -389,24 +392,24 @@ class QueuesDaemon
         $now = new \DateTime();
 
         /** @var Job $job */
-        //$job = $runningJob['job'];
+        $job = $runningJob['job'];
 
         /** @var Process $process */
-        //$process = $runningJob['process'];
+        $process = $runningJob['process'];
 
         //  If it is not already terminated...
-        if (false === $runningJob['process']->isTerminated()) {
+        if (false === $process->isTerminated()) {
             // ... and it is still pending but its process were effectively started
-            if ($runningJob['job']->getStatus() === Job::STATUS_PENDING && $runningJob['process']->isStarted()) {
+            if ($job->getStatus() === Job::STATUS_PENDING && $process->isStarted()) {
                 // Mark it as running (those checks will avoid an unuseful query to the DB)
-                $this->jobsMarker->markJobAsRunning($runningJob['job']);
+                $this->jobsMarker->markJobAsRunning($job);
             }
 
             // And print its PID (available only if the process is already running)
-            if ($runningJob['process']->isStarted() && $this->verbosity >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
+            if ($process->isStarted() && $this->verbosity >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
                 $this->ioWriter->infoLineNoBg(sprintf(
                         '[%s] Job "%s" on Queue "%s": Process is currently running with PID "%s".',
-                        $now->format('Y-m-d H:i:s'), $runningJob['job']->getId(), $runningJob['job']->getQueue(), $runningJob['process']->getPid())
+                        $now->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue(), $process->getPid())
                 );
             }
 
@@ -415,12 +418,12 @@ class QueuesDaemon
         }
 
         $processHandler = 'handleSuccessfulJob';
-        if (false === $runningJob['process']->isSuccessful()) {
+        if (false === $process->isSuccessful()) {
             $processHandler = 'handleFailedJob';
         }
 
         // Handle a successful or a failed job
-        $this->{$processHandler}($runningJob['job'], $runningJob['process']);
+        $this->{$processHandler}($job, $process);
 
         // The process is terminated
 //        VarDumper::dump($process->getIdleTimeout());
@@ -432,20 +435,13 @@ class QueuesDaemon
 
         // If it has a final status, Remove the Job from the Entity Manager
         if (
-            $runningJob['job']->getStatus() === Job::STATUS_ABORTED
-            || $runningJob['job']->getStatus() === Job::STATUS_FINISHED
-            || $runningJob['job']->getStatus() === Job::STATUS_FAILED
-            || $runningJob['job']->getStatus() === Job::STATUS_CANCELLED
+            $job->getStatus() === Job::STATUS_ABORTED
+            || $job->getStatus() === Job::STATUS_FINISHED
+            || $job->getStatus() === Job::STATUS_FAILED
+            || $job->getStatus() === Job::STATUS_CANCELLED
         ) {
-            $this->entityManager->detach($runningJob['job']);
+            $this->entityManager->detach($job);
         }
-
-        // First set to false, then unset to free up memory ASAP
-        $now =
-        $runningJob = null;
-        //$process =
-        //$job = null;
-        unset($now, $runningJob/*, $process, $job*/);
 
         $this->wait();
 
@@ -607,6 +603,21 @@ class QueuesDaemon
     }
 
     /**
+     * Enables Memprof if required.
+     */
+    private function setupMemprof()
+    {
+        // Intialize php-memprof
+        if (true === $this->ioWriter->getInput()->getOption('enable-memprof')) {
+            if (false === $this->profiler->enableMemprof()) {
+                $this->ioWriter->errorLineNoBg('MEMPROF extension is not loaded: --enable-memprof will be ignored.');
+            }
+
+            $this->ioWriter->successLineNoBg('MEMPROF is available: memory profiling is enabled.');
+        }
+    }
+
+    /**
      * Sets the PCNTL signals handlers.
      */
     private function setupPcntlSignals()
@@ -730,10 +741,6 @@ class QueuesDaemon
 
             $this->handleChildsOfFailedJob($job);
         }
-
-        // Free up memory
-        $progressBar = null;
-        unset($progressBar);
     }
 
     /**
