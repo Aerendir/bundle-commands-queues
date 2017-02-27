@@ -257,15 +257,7 @@ class JobsMarker
         // Flush the original Job
         $this->entityManager->flush($job);
 
-        if (
-            (
-                Job::STATUS_FINISHED === $job->getStatus()
-                || Job::STATUS_RETRY_FINISHED === $job->getStatus()
-                || Job::STATUS_FAILED === $job->getStatus()
-                || Job::STATUS_RETRY_FAILED === $job->getStatus()
-            ) && false === $job->hasChildDependencies()
-            && false === $job->hasRunningRetryingJobs()
-        ) {
+        if ($job->isClosed() && false === $job->hasChildDependencies() && false === $job->hasRunningRetryingJobs()) {
             $this->entityManager->detach($job);
         }
     }

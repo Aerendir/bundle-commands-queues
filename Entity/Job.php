@@ -606,7 +606,7 @@ class Job
         /** @var Job $parentJob */
         foreach ($this->getParentDependencies() as $parentJob) {
             // Check if the status is not finished and if it isn't...
-            if (self::STATUS_FINISHED !== $parentJob->getStatus() && self::STATUS_RETRY_FINISHED !== $parentJob->getStatus()) {
+            if (false === $parentJob->isFinished()) {
                 // Return true as at least one parent Job is not finished
                 return true;
             }
@@ -623,24 +623,68 @@ class Job
     {
         /** @var Job $retriedJob */
         foreach ($this->getRetryingJobs() as $retriedJob) {
-            if (
-                self::STATUS_FINISHED !== $retriedJob->getStatus()
-                && self::STATUS_RETRY_FINISHED !== $retriedJob->getStatus()
-                && self::STATUS_FAILED !== $retriedJob->getStatus()
-                && self::STATUS_RETRY_FAILED !== $retriedJob->getStatus()
-            ) {
+            if (false === $retriedJob->isClosed()) {
                 return true;
             }
         }
 
-        if ($this->isRetried()) {
-            return self::STATUS_FINISHED !== $this->getRetriedBy()->getStatus()
-                && self::STATUS_RETRY_FINISHED !== $this->getRetriedBy()->getStatus()
-                && self::STATUS_FAILED !== $this->getRetriedBy()->getStatus()
-                && self::STATUS_RETRY_FAILED !== $this->getRetriedBy()->getStatus();
+        if ($this->isRetried() && false === $this->getRetriedBy()->isClosed()) {
+            return true;
         }
 
         return false;
+    }
+
+    /**
+     * @return bool
+     */
+    public function canRun() : bool
+    {
+        // If it is closed, it were already runned/processed
+        return false === $this->isClosed()
+            // If at least one parent is running, this Job cannot be processed
+            && false === $this->hasNotFinishedParentJobs();
+    }
+
+    /**
+     * A Job is closed if its status is one of the final ones:
+     *
+     * - FINISHED
+     * - RETRY_FINISHED
+     * - FAILED
+     * - RETRY_FAILED
+     *
+     * @return bool
+     */
+    public function isClosed() : bool
+    {
+        return $this->isFailed() || $this->isFinished();
+    }
+
+    /**
+     * A Job is failed if its status is one of
+     *
+     * - FAILED
+     * - RETRY_FAILED
+     *
+     * @return bool
+     */
+    public function isFailed() : bool
+    {
+        return Job::STATUS_FAILED === $this->getStatus() || Job::STATUS_RETRY_FAILED === $this->getStatus();
+    }
+
+    /**
+     * A Job is finished if its status is one of
+     *
+     * - FINISHED
+     * - RETRY_FINISHED
+     *
+     * @return bool
+     */
+    public function isFinished() : bool
+    {
+        return self::STATUS_FINISHED === $this->getStatus() || self::STATUS_RETRY_FINISHED === $this->getStatus();
     }
 
     /**

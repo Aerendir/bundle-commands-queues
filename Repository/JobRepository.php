@@ -50,7 +50,7 @@ class JobRepository extends EntityRepository
 
         while (null !== $job = $this->findNextJob($queueName, $excludedJobs)) {
             // If it can be run...
-            if (false === $job->hasNotFinishedParentJobs()) {
+            if ($job->canRun()) {
                 // Refresh the Job to get loaded again child and parent Jobs that were eventually detached
                 $this->getEntityManager()->refresh($job);
 
