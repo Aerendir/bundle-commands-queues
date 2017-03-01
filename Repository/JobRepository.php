@@ -6,6 +6,8 @@ use Doctrine\DBAL\Connection;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\EntityRepository;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
+use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\JobsMarker;
+use Symfony\Component\VarDumper\VarDumper;
 
 /**
  * {@inheritdoc}
@@ -62,7 +64,7 @@ class JobRepository extends EntityRepository
             $excludedJobs[] = $job->getId();
 
             // Remove it from the Entity Manager to free some memory
-            $this->getEntityManager()->detach($job);
+            JobsMarker::detach($job, 'JobRepository');
         }
 
         return null;

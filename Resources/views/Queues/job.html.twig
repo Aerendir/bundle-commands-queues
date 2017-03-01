@@ -11,14 +11,34 @@
             <div class="col-lg-12">
                 <div class="row">
                     <div class="col-lg-12">
+                        {% set status = '' %}
+                        {% if 'running' == job.status %}
+                            {% set status = 'active' %}
+                        {% endif %}
+                        {% if 'retried' == job.status %}
+                            {% set status = 'warning' %}
+                        {% endif %}
+                        {% if 'failed' == job.status or 'retry_failed' == job.status %}
+                            {% set status = 'danger' %}
+                        {% endif %}
+                        {% if 'succeeded' == job.status or 'retry_succeeded' == job.status %}
+                            {% set status = 'success' %}
+                        {% endif %}
+                        {% if 'cancelled' == job.status %}
+                            {% set status = 'danger' %}
+                        {% endif %}
+                        {% if 'pending' == job.status or 'running' == job.status %}
+                            {% set status = 'info' %}
+                        {% endif %}
+                        {% if 'new' == job.status %}
+                            {% set status = 'default' %}
+                        {% endif %}
+                        <p><strong>#{{ job.id }}</strong> <span class="label label-{{ status }}">{{ job.status }}</span> <code>@{{ job.queue }}</code> (<code>{{ job.priority }}</code>)</p>
                         <pre>>: {{ job.command }}{% if job.arguments %} {{ job.arguments|join(' ') }}{% endif %}</pre>
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-lg-4">
-                        <p>Queue: {{ job.queue }}</p>
-                        <p>Priority: {{ job.priority }}</p>
-                        <p>Status: {{ job.status }}</p>
                         {% if job.isRetry %}
                             <p><small class="text-muted">Is retry of <a href="{{ path('queues_job', {'id': job.retryOf.id}) }}">#{{ job.retryOf.id }}</a></small></p>
                         {% endif %}
@@ -39,6 +59,7 @@
                         {% endif %}
                         {% if 'cancelled' == job.status %}
                             <p><small class="text-muted">{{ job.debug.cancellation_reason }}</small></p>
+                            <p><small class="text-muted">Cancelled by <a href="{{ path('queues_job', {'id': job.cancelledBy}) }}">#{{ job.cancelledBy }}</a></small></p>
                         {% endif %}
                         {% if false == job.hasParentDependencies %}
                             {% if false == job.isRetry %}No parent Jobs{% endif %}

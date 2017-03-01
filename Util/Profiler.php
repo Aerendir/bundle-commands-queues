@@ -2,7 +2,11 @@
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Util;
 
+use Doctrine\ORM\UnitOfWork;
+use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
+use SerendipityHQ\Bundle\ConsoleStyles\Console\Style\SerendipityHQStyle;
 use Symfony\Component\Console\Helper\Helper;
+use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * A class to profile the Daemon during the execution.
@@ -27,6 +31,9 @@ class Profiler
     /** @var int $lastMemoryUsageReal */
     private $lastMemoryUsageReal;
 
+    /** @var int $lastUowSize */
+    private $lastUowSize;
+
     /** @var array $runningJobsLastCheckedAt */
     private $runningJobsLastCheckedAt = [];
 
@@ -35,6 +42,9 @@ class Profiler
 
     /** @var int $highestMemoryPeak */
     private $highestMemoryPeakReal;
+
+    /** @var int $highestUowSize */
+    private $highestUowSize;
 
     /** @var int $iterations How many times Daemon::mustRun() was called in the "while(Daemon::mustRun())" */
     private $iterations = 0;
@@ -48,22 +58,82 @@ class Profiler
     /** @var  int $pid The PID of the Daemon to be used to mark the callgrindout file */
     private $pid;
 
+    /** @var  UnitOfWork $uow */
+    private static $uow;
+
+    /** @var  SerendipityHQStyle $ioWriter */
+    private static $ioWriter;
+
+    /**
+     * @return string
+     */
+    public static function buildJobsList() : string
+    {
+        if (false === isset(self::$uow->getIdentityMap()[Job::class])) {
+            return '';
+        }
+
+        $managedEntities = [];
+
+        /** @var Job $job */
+        foreach (self::$uow->getIdentityMap()[Job::class] as $job) {
+            $managedEntities[] = '#' . $job->getId() . ' (' . $job->getStatus() . ')';
+        }
+
+        asort($managedEntities);
+        return implode(', ', $managedEntities);
+    }
+
+    /**
+     * @param string $where
+     */
+    public static function printUnitOfWork(string $where = null)
+    {
+        if (self::$ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
+            $message = sprintf('Currently there are <success-nobg>%s</success-nobg> Jobs managed <comment-nobg>(%s)</comment-nobg>',
+                count(self::$uow->getIdentityMap()[Job::class]), Helper::formatMemory(memory_get_usage(true))
+            );
+
+
+            if (null !== $where) {
+                $message = sprintf('[%s] %s', $where, $message);
+            }
+
+            self::$ioWriter->noteLineNoBg($message);
+        }
+
+        if (self::$ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
+            $managedJobs = self::buildJobsList();
+
+            self::$ioWriter->commentLineNoBg($managedJobs);
+        }
+    }
+
     /**
      * Start the profiler.
      *
      * @param int $pid
      * @param float $maxRuntime After this amount of time the Daemon MUST die.
      * @param array $queues The configured queues
+     * @param SerendipityHQStyle $ioWriter
+     * @param UnitOfWork $unitOfWork
      */
-    public function start(int $pid, float $maxRuntime, array $queues)
+    public function start(int $pid, float $maxRuntime, array $queues, SerendipityHQStyle $ioWriter, UnitOfWork $unitOfWork)
     {
         $this->pid = $pid;
+        self::$uow = $unitOfWork;
+        self::$ioWriter = $ioWriter;
 
         $this->startTime
             = $this->aliveDaemonsLastCheckedAt
             = $this->lastMicrotime
             = $this->lastOptimizationAt
             = microtime(true);
+
+        $this->lastUowSize
+            = $this->highestUowSize
+            // Subtract the daemon entity
+            = self::$uow->size() - 1;
 
         foreach ($queues as $queue) {
             $this->runningJobsLastCheckedAt[$queue] = $this->startTime;
@@ -86,6 +156,9 @@ class Profiler
         $currentMemoryUsageReal = memory_get_usage(true);
         $currentMemoryPeak = memory_get_peak_usage();
         $currentMemoryPeakReal = memory_get_peak_usage(true);
+        // Subtract the daemon entity
+        $currentUowSize = self::$uow->size() - 1;
+        $currentHighestUowSize = $this->highestUowSize < $currentUowSize ? $currentUowSize : $this->highestUowSize;
 
         $memoryDifference = $this->lastMemoryUsage - $currentMemoryUsage;
         $memoryDifference = 0 !== $memoryDifference ? round($memoryDifference / $this->lastMemoryUsage * 100, 2) : 0;
@@ -99,51 +172,77 @@ class Profiler
         $memoryPeakDifferenceReal = $this->highestMemoryPeakReal - $currentMemoryPeakReal;
         $memoryPeakDifferenceReal = 0 !== $memoryPeakDifferenceReal ? round($memoryPeakDifferenceReal / $this->highestMemoryPeakReal * 100, 2) : 0;
 
+        $uowSizeDifference = $this->lastUowSize - $currentUowSize;
+        $uowSizeDifference = (0 !== $uowSizeDifference && 0 !== $this->lastUowSize) ? round($uowSizeDifference / $this->lastUowSize * 100, 2) : 0;
+
+        $uowHighestSizeDifference = $this->highestUowSize - $currentHighestUowSize;
+        $uowHighestSizeDifference = (0 !== $uowHighestSizeDifference && 0 !== $this->highestUowSize) ? round($uowHighestSizeDifference / $this->highestUowSize * 100, 2) : 0;
+
         $return = [
-            ['', 'Microtime', $this->formatTime($currentMicrotime)],
-            ['', 'Last Microtime', $this->formatTime($this->lastMicrotime)],
-            ['', 'Memory Usage', Helper::formatMemory($currentMemoryUsage)],
-            ['', 'Memory Usage (real)', Helper::formatMemory($currentMemoryUsageReal)],
-            ['', 'Memory Peak', Helper::formatMemory($currentMemoryPeak)],
-            ['', 'Memory Peak (real)', Helper::formatMemory($currentMemoryPeakReal)],
+            ['', '<success-nobg>Time info</success-nobg>'],
             ['', 'Current Iteration', $this->getCurrentIteration()],
             ['', 'Elapsed Time', $currentMicrotime - $this->lastMicrotime],
-            // If the difference is negative, then this is an increase in memory consumption
+            ['', 'Current Microtime', $this->formatTime($currentMicrotime)],
+            ['', 'Last Microtime', $this->formatTime($this->lastMicrotime)],
+            ['', 'Last optimization at', $this->formatTime($this->lastOptimizationAt)],
+            ['', '', ''],
+            ['', '<success-nobg>Memory info (real)</success-nobg>'],
             [
-                $memoryDifference >= 0
-                    ? sprintf('<%s>%s</>', 'success-nobg', "\xE2\x9C\x94")
-                    : sprintf('<%s>%s</>', 'error-nobg', "\xE2\x9C\x96"),
-                'Memory Usage Difference',
-                ($memoryDifference <= 0 ? '+' : '-').abs($memoryDifference).'%',
-            ],
-            [
+                // If the difference is negative, then this is an increase in memory consumption
                 $memoryDifferenceReal >= 0
                     ? sprintf('<%s>%s</>', 'success-nobg', "\xE2\x9C\x94")
-                    : sprintf('<%s>%s</>', 'error-nobg', "\xE2\x9C\x96"),
-                'Memory Usage Difference (real)',
-                ($memoryDifferenceReal <= 0 ? '+' : '-').abs($memoryDifferenceReal).'%',
-            ],
-            [
-                $memoryPeakDifference >= 0
-                    ? sprintf('<%s>%s</>', 'success-nobg', "\xE2\x9C\x94")
-                    : sprintf('<%s>%s</>', 'error-nobg', "\xE2\x9C\x96"),
-                'Memory Peak Difference',
-                ($memoryPeakDifference <= 0 ? '+' : '-').abs($memoryPeakDifference).'%',
+                    : sprintf('<%s>%s</>', 'error-nobg', "\xE2\x9C\x96")
+                , 'Memory Usage (real)',
+                Helper::formatMemory($this->lastMemoryUsageReal) . ' => ' . Helper::formatMemory($currentMemoryUsageReal) . ' (' . ($memoryDifferenceReal <= 0 ? '+' : '-').abs($memoryDifferenceReal).'%)'
             ],
             [
                 $memoryPeakDifferenceReal >= 0
                     ? sprintf('<%s>%s</>', 'success-nobg', "\xE2\x9C\x94")
                     : sprintf('<%s>%s</>', 'error-nobg', "\xE2\x9C\x96"),
-                'Memory Peak Difference (real)',
-                ($memoryPeakDifferenceReal <= 0 ? '+' : '-').abs($memoryPeakDifferenceReal).'%',
+                'Memory Peak (real)',
+                Helper::formatMemory($this->highestMemoryPeakReal) . ' => ' . Helper::formatMemory($currentMemoryPeakReal) . ' (' . ($memoryPeakDifferenceReal <= 0 ? '+' : '-').abs($memoryPeakDifferenceReal).'%)'
             ],
+            ['', '', ''],
+            ['', '<success-nobg>Memory info (without real)</success-nobg>'],
+            [
+                $memoryDifference >= 0
+                    ? sprintf('<%s>%s</>', 'success-nobg', "\xE2\x9C\x94")
+                    : sprintf('<%s>%s</>', 'error-nobg', "\xE2\x9C\x96"),
+                'Memory Usage',
+                Helper::formatMemory($this->lastMemoryUsage) . ' => ' . Helper::formatMemory($currentMemoryUsage) . ' (' . ($memoryDifference <= 0 ? '+' : '-').abs($memoryDifference).'%)'
+            ],
+            [
+                $memoryPeakDifference >= 0
+                    ? sprintf('<%s>%s</>', 'success-nobg', "\xE2\x9C\x94")
+                    : sprintf('<%s>%s</>', 'error-nobg', "\xE2\x9C\x96"),
+                'Memory Peak',
+                Helper::formatMemory($this->highestMemoryPeak) . ' => ' . Helper::formatMemory($currentMemoryPeak) . ' (' . ($memoryPeakDifference <= 0 ? '+' : '-').abs($memoryPeakDifference).'%)'
+            ],
+            ['', '', ''],
+            ['', '<success-nobg>UnitOfWork info</success-nobg>'],
+            [
+                $uowSizeDifference >= 0
+                    ? sprintf('<%s>%s</>', 'success-nobg', "\xE2\x9C\x94")
+                    : sprintf('<%s>%s</>', 'error-nobg', "\xE2\x9C\x96"),
+                'Uow size',
+                $this->lastUowSize . ' => ' . $currentUowSize . ' (' . ($uowSizeDifference <= 0 ? '+' : '-').abs($uowSizeDifference).'%)'
+            ],
+            [
+                $uowHighestSizeDifference >= 0
+                    ? sprintf('<%s>%s</>', 'success-nobg', "\xE2\x9C\x94")
+                    : sprintf('<%s>%s</>', 'error-nobg', "\xE2\x9C\x96"),
+                'Uow peak size',
+                $this->highestUowSize . ' => ' . $currentHighestUowSize . ' (' . ($uowHighestSizeDifference <= 0 ? '+' : '-').abs($uowHighestSizeDifference).'%)'
+            ]
         ];
 
         $this->lastMicrotime = $currentMicrotime;
         $this->lastMemoryUsage = $currentMemoryUsage;
         $this->lastMemoryUsageReal = $currentMemoryUsageReal;
+        $this->lastUowSize = $currentUowSize;
         $this->highestMemoryPeak = $this->highestMemoryPeak < $currentMemoryPeak ? $currentMemoryPeak : $this->highestMemoryPeak;
         $this->highestMemoryPeakReal = $this->highestMemoryPeakReal < $currentMemoryPeakReal ? $currentMemoryPeakReal : $this->highestMemoryPeakReal;
+        $this->highestUowSize = $currentHighestUowSize;
 
         if ($this->isMemprofEnabled()) {
             // Create the directory if it doesn't exist

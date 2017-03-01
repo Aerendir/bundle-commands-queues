@@ -6,6 +6,7 @@ use Doctrine\ORM\EntityManager;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Daemon;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Service\QueuesDaemon;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\JobsMarker;
+use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\Profiler;
 use SerendipityHQ\Bundle\ConsoleStyles\Console\Formatter\SerendipityHQOutputFormatter;
 use SerendipityHQ\Bundle\ConsoleStyles\Console\Style\SerendipityHQStyle;
 use Symfony\Component\Console\Command\Command;
@@ -80,6 +81,8 @@ class RunCommand extends Command
         $this->ioWriter = new SerendipityHQStyle($input, $output);
         $this->ioWriter->setFormatter(new SerendipityHQOutputFormatter(true));
 
+        $this->jobsMarker->setIoWriter($this->ioWriter);
+
         // Do the initializing operations
         $this->daemon->initialize($input->getArgument('daemon'), $this->ioWriter, $output);
 
@@ -92,12 +95,14 @@ class RunCommand extends Command
 
         // Run the Daemon
         while ($this->daemon->isAlive()) {
+            $printUow = false;
             // First process Jobs already running in each queue
             foreach ($this->daemon->getConfig()->getQueues() as $queueName) {
                 if ($this->daemon->hasToCheckRunningJobs($queueName)) {
                     $this->processRunningJobs($queueName);
+                    $printUow = true;
                 } elseif ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_DEBUG) {
-                    $this->ioWriter->infoLineNoBg(sprintf('No running jobs to check on queue %s', $queueName));
+                    $this->ioWriter->infoLineNoBg(sprintf('No running jobs to check on queue <success-nobg>%s</success-nobg>', $queueName));
                 }
             }
 
@@ -106,15 +111,15 @@ class RunCommand extends Command
                 $jobsToLoad = $this->daemon->getJobsToLoad($queueName);
                 if (0 < $jobsToLoad) {
                     if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
-                        $this->ioWriter->infoLineNoBg(sprintf('Trying to initialize "%s" new Jobs for queue "%s"...', $jobsToLoad, $queueName));
+                        $this->ioWriter->infoLineNoBg(sprintf('Trying to initialize <success-nobg>%s</success-nobg> new Jobs for queue <success-nobg>%s</success-nobg>...', $jobsToLoad, $queueName));
                         $initializingJobs = new ProgressBar($output, $jobsToLoad);
-                        $initializingJobs->setFormat('<info-nobg>[>] Job "%current%"/%max% initialized (%percent:3s%% )</info-nobg><comment-nobg> %elapsed:6s%/%estimated:-6s% (%memory:-6s%)</comment-nobg>');
+                        $initializingJobs->setFormat('<info-nobg>[>] Job <success-nobg>%current%</success-nobg>/%max% initialized (%percent:3s%% )</info-nobg><comment-nobg> %elapsed:6s%/%estimated:-6s% (%memory:-6s%)</comment-nobg>');
                     }
                     for ($i = 0; $i < $jobsToLoad; $i++) {
                         // Start processing the next Job in the queue
                         if (null === $this->daemon->processNextJob($queueName)) {
                             if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
-                                $this->ioWriter->infoLineNoBg(sprintf('Queue "%s" is empty: no more Jobs to initialize.', $queueName));
+                                $this->ioWriter->infoLineNoBg(sprintf('Queue <success-nobg>%s</success-nobg> is empty: no more Jobs to initialize.', $queueName));
                             }
                             // The next Job is null: exit this queue and pass to the next one
                             break;
@@ -125,6 +130,8 @@ class RunCommand extends Command
                             $this->ioWriter->writeln('');
                         }
                     }
+
+                    $printUow = true;
                 }
             }
 
@@ -149,11 +156,15 @@ class RunCommand extends Command
                 $this->daemon->printProfilingInfo();
             }
 
+            if ($printUow) {
+                Profiler::printUnitOfWork('RunCommand');
+            }
+
             // If the daemon can sleep, make it sleep
             if ($this->daemon->canSleep()) {
                 if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
                     $this->ioWriter->infoLineNoBg(sprintf(
-                        'No Jobs to process. Idling for %s seconds...', $this->daemon->getConfig()->getIdleTime()
+                        'No Jobs to process. Idling for <success-nobg>%s seconds<success-nobg>...', $this->daemon->getConfig()->getIdleTime()
                     ));
                 }
                 $this->daemon->sleep();
@@ -213,7 +224,7 @@ class RunCommand extends Command
             return;
         }
 
-        $this->ioWriter->infoLineNoBg(sprintf('Found %s struggler Daemon(s).', count($strugglers)));
+        $this->ioWriter->infoLineNoBg(sprintf('Found <success-nobg>%s</success-nobg> struggler Daemon(s).', count($strugglers)));
         $this->ioWriter->commentLineNoBg('Their "diedOn" date is set to NOW and mortisCausa is "struggler".');
 
         $table = [];
@@ -268,11 +279,11 @@ class RunCommand extends Command
         $currentlyRunningProgress = null;
         if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
             $this->ioWriter->infoLineNoBg(sprintf(
-                'Checking <comment-nobg>%s</comment-nobg> running jobs on queue "%s"...',
+                'Checking <success-nobg>%s</success-nobg> running jobs on queue "%s"...',
                 $this->daemon->countRunningJobs($queueName), $queueName
             ));
             $currentlyRunningProgress = new ProgressBar($this->output, $this->daemon->countRunningJobs($queueName));
-            $currentlyRunningProgress->setFormat('<info-nobg>[>] Processing job "%current%"/%max% (%percent:3s%% )</info-nobg><comment-nobg> %elapsed:6s%/%estimated:-6s% (%memory:-6s%)</comment-nobg>');
+            $currentlyRunningProgress->setFormat('<info-nobg>[>] Processing job <success-nobg>%current%</success-nobg>/%max% (%percent:3s%% )</info-nobg><comment-nobg> %elapsed:6s%/%estimated:-6s% (%memory:-6s%)</comment-nobg>');
         }
         $this->daemon->checkRunningJobs($queueName, $currentlyRunningProgress);
     }

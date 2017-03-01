@@ -4,8 +4,12 @@ namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Util;
 
 use Doctrine\Common\Persistence\Proxy;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\ORMInvalidArgumentException;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Daemon;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
+use SerendipityHQ\Bundle\ConsoleStyles\Console\Style\SerendipityHQStyle;
+use Symfony\Component\Console\Helper\Helper;
+use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * Changes the status of Jobs during their execution attaching to them execution info.
@@ -13,14 +17,73 @@ use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
 class JobsMarker
 {
     /** @var EntityManager $entityManager */
-    private $entityManager;
+    private static $entityManager;
+
+    /** @var  SerendipityHQStyle $ioWriter */
+    private static $ioWriter;
 
     /**
      * @param EntityManager $entityManager
      */
     public function __construct(EntityManager $entityManager)
     {
-        $this->entityManager = $entityManager;
+        self::$entityManager = $entityManager;
+    }
+
+    /**
+     * @param SerendipityHQStyle $ioWriter
+     */
+    public function setIoWriter(SerendipityHQStyle $ioWriter)
+    {
+        self::$ioWriter = $ioWriter;
+    }
+
+    /**
+     * @param Job $job
+     * @return \ReflectionClass
+     */
+    public static function createReflectedJob(Job $job)
+    {
+        $reflectedClass = new \ReflectionClass($job);
+
+        // If the $job is a Doctrine proxy...
+        if ($job instanceof Proxy) {
+            // ... This gets the real object, the one that the Proxy extends
+            $reflectedClass = $reflectedClass->getParentClass();
+        }
+
+        return $reflectedClass;
+    }
+
+    /**
+     * Handles the detach of a Job.
+     * 
+     * IMplements a custom logic to detach Jobs linked to the detaching one.
+     * 
+     * @param Job $job
+     * @param string $where
+     *
+     * @return bool
+     */
+    public static function detach(Job $job, string $where = null)
+    {
+        $detached = self::doDetach($job, $where);
+
+        if (false !== $detached && self::$ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
+            $message = sprintf('Job <success-nobg>#%s</success-nobg> detached', $job->getId());
+
+            if (null !== $where) {
+                $message = sprintf('[%s] %s', $where, $message);
+            }
+
+            if (0 < count($detached)) {
+                $message = sprintf('%s <comment-nobg>(Cascaded: %s)</comment-nobg>', $message, implode(', ', $detached));
+            }
+
+            self::$ioWriter->infoLineNoBg($message . '.');
+        }
+
+        return false !== $detached ? true : false;
     }
 
     /**
@@ -67,7 +130,7 @@ class JobsMarker
             $this->markParentsAsRetryFinished($job->getRetryOf());
         }
 
-        $this->markJobAsClosed($job, Job::STATUS_FINISHED, $info);
+        $this->markJobAsClosed($job, Job::STATUS_SUCCEEDED, $info);
     }
 
     /**
@@ -138,11 +201,11 @@ class JobsMarker
     {
         $this->updateChildDependencies($retryingJob);
 
-        $this->entityManager->persist($retryingJob);
+        self::$entityManager->persist($retryingJob);
 
         $this->markJobAsClosed($retriedJob, Job::STATUS_RETRIED, $info);
 
-        $this->entityManager->detach($retryingJob);
+        self::detach($retryingJob, 'JobsMarker::markJobAsRetried');
 
         return $retryingJob ;
     }
@@ -168,7 +231,7 @@ class JobsMarker
             $this->markParentsAsRetryFinished($retriedJob->getRetryOf());
         }
 
-        $this->markJob($retriedJob, Job::STATUS_RETRY_FINISHED);
+        $this->markJob($retriedJob, Job::STATUS_RETRY_SUCCEEDED);
     }
 
     /**
@@ -176,16 +239,13 @@ class JobsMarker
      * @param string $status
      * @param array $info
      * @param Daemon|null $daemon
+     *
      * @throws \Exception
      */
     private function markJob(Job $job, string $status, array $info = [], Daemon $daemon = null)
     {
-        $reflectedClass = new \ReflectionClass($job);
-
-        // If the $job is a Doctrine proxy...
-        if ($job instanceof Proxy)
-            // ... This gets the real object, the one that the Proxy extends
-            $reflectedClass = $reflectedClass->getParentClass();
+        $oldStatus = $job->getStatus();
+        $reflectedClass = self::createReflectedJob($job);
 
         // First of all set the current status
         $reflectedProperty = $reflectedClass->getProperty('status');
@@ -205,12 +265,15 @@ class JobsMarker
             $reflectedProperty->setAccessible(true);
             $reflectedProperty->setValue($job, $daemon);
 
-            $this->entityManager->persist($daemon);
+            self::$entityManager->persist($daemon);
         }
 
         // Now set the other info
         foreach ($info as $property => $value) {
             switch ($property) {
+                case 'cancelled_by':
+                    $reflectedProperty = $reflectedClass->getProperty('cancelledBy');
+                    break;
                 case 'closed_at':
                     $reflectedProperty = $reflectedClass->getProperty('closedAt');
                     break;
@@ -242,24 +305,136 @@ class JobsMarker
         }
 
         // Persist the entity again (just to be sure it is managed)
-        $this->entityManager->persist($job);
+        self::$entityManager->persist($job);
 
-        /*
-         * Flush now to be sure editings aren't cleared during optimizations.
-         *
-         * We flush the single Jobs to don't affect the others that may be still processing.
-         */
-        if ($job->isRetried()) {
-            // Flush the new retrying Job
-            $this->entityManager->flush($job->getRetriedBy());
+        try {
+            /*
+             * Flush now to be sure editings aren't cleared during optimizations.
+             *
+             * We flush the single Jobs to don't affect the others that may be still processing.
+             */
+            if ($job->isRetried()) {
+                // Flush the new retrying Job
+                self::$entityManager->flush($job->getRetriedBy());
+            }
+
+            // Flush the original Job
+            self::$entityManager->flush($job);
+        } catch (ORMInvalidArgumentException $e) {
+            self::$ioWriter->error(sprintf('Error trying to flush Job #%s (%s => %s).', $job->getId(), $oldStatus, $job->getStatus()));
+            Profiler::printUnitOfWork();
+            throw $e;
         }
 
-        // Flush the original Job
-        $this->entityManager->flush($job);
-
-        if ($job->isClosed() && false === $job->hasChildDependencies() && false === $job->hasRunningRetryingJobs()) {
-            $this->entityManager->detach($job);
+        // If this is a cancelling Job, refresh the Job for which childs were cancelled
+        if ($job->isCancelling()) {
+            $processedJob = self::$entityManager->getRepository('SHQCommandsQueuesBundle:Job')->findOneById($job->getProcessedJobId());
+            self::$entityManager->refresh($processedJob);
+            self::detach($processedJob, 'JobsMarker::markJob (Cancelling Job)');
         }
+
+        if ($job->isFinished()) {
+            self::detach($job, 'JobsMarker::markJob (finished Job)');
+        }
+    }
+
+    /**
+     * @param Job $job
+     * @param string $where
+     * @param Job $linkedBy
+     * @param array $detached The already detached entities. This not works ever, but is required to avoid "Fatal error:
+     * Maximum function nesting level ... reached, aborting!".
+     *
+     * If a Job is skipped here, it will then be detached during the optimization.
+     *
+     * @return array|bool
+     */
+    private static function doDetach(Job $job, string $where = null, Job $linkedBy = null, array &$detached = [])
+    {
+        $linkedByMessage = null !== $linkedBy ? sprintf('(linked by #%s)', $linkedBy->getId()) : '';
+        // Detach the object only if it isn't already detached or if it can be
+        if (key_exists($job->getId(), $detached)) {
+            if (self::$ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
+                $message = sprintf('Skipping detaching Job <success-nobg>#%s</success-nobg> %s as it <success-nobg>is already detached</success-nobg>.', $job->getId(), $linkedByMessage);
+
+                if (null !== $where) {
+                    $message = sprintf('[%s] %s', $where, $message);
+                }
+
+                self::$ioWriter->infoLineNoBg($message);
+            }
+            return false;
+        }
+
+        if (false === $job->canBeDetached()) {
+            if (self::$ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
+                $message = sprintf(
+                    'Skipping detaching Job <success-nobg>#%s</success-nobg> %s because <success-nobg>%s</success-nobg>.',
+                    $job->getId(), $linkedByMessage, $job->getCannotBeDetachedBecause()
+                );
+
+                if (null !== $where) {
+                    $message = sprintf('[%s] %s', $where, $message);
+                }
+
+                self::$ioWriter->infoLineNoBg($message);
+            }
+            return false;
+        }
+
+        // Add the current Job to the already detached
+        self::$entityManager->detach($job);
+        if (self::$ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
+            $message = sprintf('Job <info-nobg>#%s</info-nobg> %s detached.', $job->getId(), $linkedByMessage);
+
+            if (null !== $where) {
+                $message = sprintf('[%s] %s', $where, $message);
+            }
+
+            self::$ioWriter->successLineNoBg($message);
+        }
+        $detached[$job->getId()] = '#'. $job->getId();
+
+        // Detach retryOf
+        if (null !== $job->getRetryOf() && false !== self::doDetach($job->getRetryOf(), $where, $job, $detached)) {
+            $detached[$job->getRetryOf()->getId()] = '#' . $job->getRetryOf()->getId();
+        }
+
+        // Detach retryiedBy
+        if (null !== $job->getRetriedBy() && false !== self::doDetach($job->getRetriedBy(), $where, $job, $detached)) {
+            $detached[$job->getRetriedBy()->getId()] = '#' . $job->getRetriedBy()->getId();
+        }
+
+        // Detach firstRetriedJob
+        if (null !== $job->getFirstRetriedJob() && false !== self::doDetach($job->getFirstRetriedJob(), $where, $job, $detached)) {
+            $detached[$job->getFirstRetriedJob()->getId()] = '#' . $job->getFirstRetriedJob()->getId();
+        }
+
+        /** @var Job $childDependency Detach childDeps **/
+        foreach ($job->getChildDependencies() as $childDependency) {
+            $job->getChildDependencies()->removeElement($childDependency);
+            if (false !== self::doDetach($childDependency, $where, $job, $detached)) {
+                $detached[$childDependency->getId()] = '#' . $childDependency->getId();
+            }
+        }
+
+        /** @var Job $parentDependency Detach childDeps **/
+        foreach ($job->getParentDependencies() as $parentDependency) {
+            $job->getParentDependencies()->removeElement($parentDependency);
+            if (false !== self::doDetach($parentDependency, $where, $job, $detached)) {
+                $detached[$parentDependency->getId()] = '#' . $parentDependency->getId();
+            }
+        }
+
+        /** @var Job $retryingJob Detach childDeps **/
+        foreach ($job->getRetryingJobs() as $retryingJob) {
+            $job->getRetryingJobs()->removeElement($retryingJob);
+            if (false !== self::doDetach($retryingJob, $where, $job, $detached)) {
+                $detached[$retryingJob->getId()] = '#' . $retryingJob->getId();
+            }
+        }
+
+        return $detached;
     }
 
     /**
