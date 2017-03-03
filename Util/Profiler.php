@@ -77,7 +77,7 @@ class Profiler
 
         /** @var Job $job */
         foreach (self::$uow->getIdentityMap()[Job::class] as $job) {
-            $managedEntities[] = '#' . $job->getId() . ' (' . $job->getStatus() . ')';
+            $managedEntities[] = '<success-nobg>#' . $job->getId() . '</success-nobg> (' . $job->getStatus() . ') [Em: ' . JobsMarker::guessJobEmState($job) . ']';
         }
 
         asort($managedEntities);
@@ -90,8 +90,10 @@ class Profiler
     public static function printUnitOfWork(string $where = null)
     {
         if (self::$ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
-            $message = sprintf('Currently there are <success-nobg>%s</success-nobg> Jobs managed <comment-nobg>(%s)</comment-nobg>',
-                count(self::$uow->getIdentityMap()[Job::class]), Helper::formatMemory(memory_get_usage(true))
+            $count = isset(self::$uow->getIdentityMap()[Job::class]) ? count(self::$uow->getIdentityMap()[Job::class]) : 0;
+            $message = sprintf(
+                'Currently there are <success-nobg>%s</success-nobg> Jobs managed <comment-nobg>(%s (%s))</comment-nobg>',
+                $count, Helper::formatMemory(memory_get_usage(true)), Helper::formatMemory(memory_get_usage(false))
             );
 
 
