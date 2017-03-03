@@ -36,6 +36,7 @@ An alternative: https://github.com/gperftools/gperftools
 Memory leaks
 
 - https://derickrethans.nl/circular-references.html
+http://php.net/manual/en/internals2.memory.management.php
 - http://php.net/manual/en/features.gc.collecting-cycles.php
 - https://alexatnet.com/articles/optimize-php-memory-usage-eliminate-circular-references
 - http://paul-m-jones.com/archives/262
