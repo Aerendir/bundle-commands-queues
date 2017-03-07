@@ -4,6 +4,7 @@ namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Command;
 
 use Doctrine\ORM\EntityManager;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\JobsMarker;
+use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\Profiler;
 use SerendipityHQ\Bundle\ConsoleStyles\Console\Formatter\SerendipityHQOutputFormatter;
 use SerendipityHQ\Bundle\ConsoleStyles\Console\Style\SerendipityHQStyle;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
@@ -38,6 +39,8 @@ abstract class AbstractQueuesCommand extends ContainerAwareCommand
 
         $this->entityManager = $this->getContainer()->get('commands_queues.do_not_use.entity_manager');
 
+        Profiler::setDependencies($this->getIoWriter(), $this->getEntityManager()->getUnitOfWork());
+
         return 0;
     }
 
@@ -56,6 +59,7 @@ abstract class AbstractQueuesCommand extends ContainerAwareCommand
     {
         if (null === $this->jobsMarker) {
             $this->jobsMarker = $this->getContainer()->get('commands_queues.do_not_use.jobs_marker');
+            $this->jobsMarker->setIoWriter($this->getIoWriter());
         }
 
         return $this->jobsMarker;

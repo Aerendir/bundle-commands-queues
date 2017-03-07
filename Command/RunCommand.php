@@ -7,10 +7,10 @@ use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Daemon;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Service\QueuesDaemon;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\JobsMarker;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\Profiler;
+use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\ProgressBar;
 use SerendipityHQ\Bundle\ConsoleStyles\Console\Formatter\SerendipityHQOutputFormatter;
 use SerendipityHQ\Bundle\ConsoleStyles\Console\Style\SerendipityHQStyle;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
@@ -88,7 +88,8 @@ class RunCommand extends Command
 
         // Check that the Daemons in the database that are still running are really still running
         $this->checkAliveDaemons();
-        $this->daemon->printProfilingInfo();
+        $this->daemon->getProfiler()->profile();
+        $this->daemon->getProfiler()->printProfilingInfo();
 
         $this->ioWriter->success('Waiting for new ScheduledJobs to process...');
         $this->ioWriter->commentLineNoBg('To quit the Queues Daemon use CONTROL-C.');
@@ -112,8 +113,7 @@ class RunCommand extends Command
                 if (0 < $jobsToLoad) {
                     if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
                         $this->ioWriter->infoLineNoBg(sprintf('Trying to initialize <success-nobg>%s</success-nobg> new Jobs for queue <success-nobg>%s</success-nobg>...', $jobsToLoad, $queueName));
-                        $initializingJobs = new ProgressBar($output, $jobsToLoad);
-                        $initializingJobs->setFormat('<info-nobg>[>] Job <success-nobg>%current%</success-nobg>/%max% initialized (%percent:3s%% )</info-nobg><comment-nobg> %elapsed:6s%/%estimated:-6s% (%memory:-6s%)</comment-nobg>');
+                        $initializingJobs = ProgressBar::createProgressBar(ProgressBar::FORMAT_INITIALIZING_JOBS, $output, $jobsToLoad);
                     }
                     for ($i = 0; $i < $jobsToLoad; $i++) {
                         // Start processing the next Job in the queue
@@ -153,7 +153,8 @@ class RunCommand extends Command
 
             // Print profiling info
             if ($this->daemon->hasToPrintProfilingInfo()) {
-                $this->daemon->printProfilingInfo();
+                $this->daemon->getProfiler()->profile();
+                $this->daemon->getProfiler()->printProfilingInfo();
             }
 
             if ($printUow) {
@@ -282,8 +283,7 @@ class RunCommand extends Command
                 'Checking <success-nobg>%s</success-nobg> running jobs on queue "%s"...',
                 $this->daemon->countRunningJobs($queueName), $queueName
             ));
-            $currentlyRunningProgress = new ProgressBar($this->output, $this->daemon->countRunningJobs($queueName));
-            $currentlyRunningProgress->setFormat('<info-nobg>[>] Processing job <success-nobg>%current%</success-nobg>/%max% (%percent:3s%% )</info-nobg><comment-nobg> %elapsed:6s%/%estimated:-6s% (%memory:-6s%)</comment-nobg>');
+            $currentlyRunningProgress = ProgressBar::createProgressBar(ProgressBar::FORMAT_PROCESS_RUNNING_JOBS, $this->output, $this->daemon->countRunningJobs($queueName));
         }
         $this->daemon->checkRunningJobs($queueName, $currentlyRunningProgress);
     }

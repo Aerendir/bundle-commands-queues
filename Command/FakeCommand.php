@@ -9,9 +9,9 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * Class SynchOrdersCommand.
+ * A Fake command to use as fake Job.
  */
-class TestCommand extends ContainerAwareCommand
+class FakeCommand extends ContainerAwareCommand
 {
     /**
      * {@inheritdoc}
@@ -19,7 +19,7 @@ class TestCommand extends ContainerAwareCommand
     protected function configure()
     {
         $this
-            ->setName('queues:test')
+            ->setName('queues:test:fake')
             ->setDescription('[INTERNAL] A Job to test the behaviors of SHQCommandsQueuesBundle. Returns randomly exceptions, and false or true results.')
             ->setDefinition(
                 new InputDefinition([

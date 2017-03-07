@@ -75,7 +75,7 @@ class Daemon
     /**
      * @var Collection
      *
-     * @ORM\OneToMany(targetEntity="SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job", mappedBy="processedBy")
+     * @ ORM\OneToMany(targetEntity="SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job", mappedBy="processedBy")
      */
     private $processedJobs;
 

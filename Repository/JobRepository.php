@@ -6,8 +6,9 @@ use Doctrine\DBAL\Connection;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\EntityRepository;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
-use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\JobsMarker;
-use Symfony\Component\VarDumper\VarDumper;
+use SerendipityHQ\Bundle\CommandsQueuesBundle\Service\JobsManager;
+use SerendipityHQ\Bundle\ConsoleStyles\Console\Style\SerendipityHQStyle;
+use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * {@inheritdoc}
@@ -17,12 +18,17 @@ class JobRepository extends EntityRepository
     /** @var  array $config */
     private $config;
 
+    /** @var  SerendipityHQStyle $ioWriter */
+    private $ioWriter;
+
     /**
      * @param array $config
+     * @param SerendipityHQStyle $ioWriter
      */
-    public function configure(array $config)
+    public function configure(array $config, SerendipityHQStyle $ioWriter)
     {
         $this->config = $config;
+        $this->ioWriter = $ioWriter;
     }
 
     /**
@@ -56,15 +62,23 @@ class JobRepository extends EntityRepository
                 // Refresh the Job to get loaded again child and parent Jobs that were eventually detached
                 $this->getEntityManager()->refresh($job);
 
+                if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
+                    $this->ioWriter->infoLineNoBg(sprintf('Job <success-nobg>#%s</success-nobg> ready to run.', $job->getId()));
+                }
+
                 // ... Return it
                 return $job;
+            }
+
+            if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
+                $this->ioWriter->infoLineNoBg(sprintf('Job <success-nobg>#%s</success-nobg> cannot run because <success-nobg>%s</success-nobg>.', $job->getId(), $job->getCannotRunReason()));
             }
 
             // The Job cannot be run
             $excludedJobs[] = $job->getId();
 
             // Remove it from the Entity Manager to free some memory
-            JobsMarker::detach($job, 'JobRepository');
+            JobsManager::detach($job);
         }
 
         return null;
@@ -137,6 +151,7 @@ class JobRepository extends EntityRepository
         $queryBuilder->select('j')->from('SHQCommandsQueuesBundle:Job', 'j')
             ->orderBy('j.priority', 'ASC')
             ->addOrderBy('j.createdAt', 'ASC')
+            ->addOrderBy('j.id', 'ASC')
             // The status MUST be NEW
             ->where($queryBuilder->expr()->eq('j.status', ':status'))->setParameter('status', Job::STATUS_NEW)
             // It hasn't an executeAfterTime set or the set time is in the past
@@ -158,7 +173,7 @@ class JobRepository extends EntityRepository
 
         $this->configureQueues($queryBuilder);
 
-        return $queryBuilder->getQuery()->setMaxResults(1)->getOneOrNullResult();
+        return $queryBuilder->getQuery()->setCacheable(false)->setMaxResults(1)->getOneOrNullResult();
     }
 
     /**

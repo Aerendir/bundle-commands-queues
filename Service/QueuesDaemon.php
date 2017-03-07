@@ -9,11 +9,10 @@ use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Repository\JobRepository;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\JobsMarker;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\Profiler;
+use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\ProgressBar;
 use SerendipityHQ\Bundle\ConsoleStyles\Console\Style\SerendipityHQStyle;
-use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\Process;
-use Symfony\Component\VarDumper\VarDumper;
 
 /**
  * The Daemon that listens for new jobs to process.
@@ -23,8 +22,8 @@ class QueuesDaemon
     /** @var Daemon $me Is the Daemon object */
     private $me;
 
-    /** @var bool $canSleep */
-    private $canSleep = false;
+    /** @var array $canSleep */
+    private $canSleep = [];
 
     /** @var array $config */
     private $config;
@@ -110,18 +109,20 @@ class QueuesDaemon
         $this->setupMemprof();
 
         // Start the profiler
+        Profiler::setDependencies($this->ioWriter, $this->entityManager->getUnitOfWork());
         $this->profiler->start(
-            $this->getIdentity()->getPid(), $this->config->getMaxRuntime(), $this->getConfig()->getQueues(), $this->ioWriter, $this->entityManager->getUnitOfWork()
+            $this->getIdentity()->getPid(), $this->config->getMaxRuntime(), $this->getConfig()->getQueues()
         );
 
         // Initialize the JobsManager
-        $this->jobsManager->initialize($ioWriter);
+        $this->jobsManager->initialize($this->entityManager, $ioWriter);
 
         // Disable logging in Doctrine
         $this->entityManager->getConfiguration()->setSQLLogger(null);
+        $this->entityManager->getConfiguration()->setSecondLevelCacheEnabled(false);
 
         // Configure the repository
-        $this->jobsRepo->configure($this->config->getRepoConfig());
+        $this->jobsRepo->configure($this->config->getRepoConfig(), $this->ioWriter);
 
         // Force garbage collection (used by JobsMarker::markJobAsClosed()
         gc_enable();
@@ -200,12 +201,12 @@ class QueuesDaemon
         // If no more jobs exists in the queue
         if (null === $job) {
             // This queue has no more Jobs: for it the Daemon can sleep
-            $this->canSleep = true;
+            $this->canSleep[$queueName] = true;
             return null;
         }
 
         // This queue has another Job: for it the Daemon can't sleep as the next cycle is required to check if there are other Jobs
-        $this->canSleep = false;
+        $this->canSleep[$queueName] = false;
 
         // Start processing the Job
         $now = new \DateTime();
@@ -214,27 +215,29 @@ class QueuesDaemon
         ];
         if ($this->verbosity >= OutputInterface::VERBOSITY_NORMAL) {
             $this->ioWriter->infoLineNoBg(sprintf(
-                    '[%s] Job <success-nobg>#%s</success-nobg> on Queue <success-nobg>%s</success-nobg>: Initializing the process.',
-                    $now->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue()
-                ));
+                '[%s] Job <success-nobg>#%s</success-nobg> on Queue <success-nobg>%s</success-nobg>: Initializing the process.',
+                $now->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue()
+            ));
+        }
 
-            if ($job->isCancelling()  && $this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
+        if ($job->isTypeCancelling()) {
+            if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
                 $this->ioWriter->warningLineNoBg(sprintf(
                     '[%s] Job <success-nobg>#%s</success-nobg> on Queue <success-nobg>%s</success-nobg>: This will mark as CANCELLED childs of #%s.',
                     $now->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue(), $job->getArguments()[0]
                 ));
             }
 
-            if ($job->isRetry() && $this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
-                $this->ioWriter->noteLineNoBg(sprintf(
-                    '[%s] Job <success-nobg>#%s</success-nobg> on Queue <success-nobg>%s</success-nobg>: This is a retry of original Job <success-nobg>#%s</success-nobg> (Childs: %s).',
-                    $now->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue(), $job->getRetryOf()->getId(), $job->getChildDependencies()->count()
-                ));
-            }
+            // Add the ID of the cancelling Job to the command to execute
+            $job->addArgument(sprintf('--cancelling-job-id=%s', $job->getId()));
         }
 
-        // Add the ID of the cancelling Job to the command to execute
-        $job->addArgument(sprintf('--cancelling-job-id=%s', $job->getId()));
+        if ($job->isTypeRetrying() && $this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
+            $this->ioWriter->noteLineNoBg(sprintf(
+                '[%s] Job <success-nobg>#%s</success-nobg> on Queue <success-nobg>%s</success-nobg>: This is a retry of original Job <success-nobg>#%s</success-nobg> (Childs: %s).',
+                $now->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue(), $job->getRetryOf()->getId(), $job->getChildDependencies()->count()
+            ));
+        }
 
         // Create the process for the scheduled job
         $process = $this->jobsManager->createJobProcess($job);
@@ -253,12 +256,16 @@ class QueuesDaemon
                 return null;
             }
 
+            $cancellingJob = $this->handleChildsOfFailedJob($job);
             $this->jobsMarker->markJobAsAborted($job, $info, $this->me);
             if ($this->verbosity >= OutputInterface::VERBOSITY_NORMAL) {
-                $this->ioWriter->infoLineNoBg(sprintf(
+                $this->ioWriter->errorLineNoBg(sprintf(
                     '[%s] Job <success-nobg>#%s</success-nobg> on Queue <success-nobg>%s</success-nobg>: The process didn\'t started due to some errors. See them in the'
                     .' logs of the Job.', $now->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue()
                 ));
+                if (false !== $cancellingJob) {
+                    $this->ioWriter->errorLineNoBg(sprintf('The Job #%s will mark its childs as cancelled.', $cancellingJob->getId()));
+                }
             }
 
             return null;
@@ -298,7 +305,17 @@ class QueuesDaemon
      */
     public function canSleep() : bool
     {
-        return $this->canSleep;
+        foreach($this->canSleep as $can) {
+            if (false === $can) {
+                return false;
+            }
+        }
+
+        if ($this->hasRunningJobs()) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -356,9 +373,9 @@ class QueuesDaemon
      * Processes the Jobs already running or pending.
      *
      * @param string $queueName
-     * @param null|ProgressBar $progressBar
+     * @param null|\Symfony\Component\Console\Helper\ProgressBar $progressBar
      */
-    public function checkRunningJobs(string $queueName, ProgressBar $progressBar = null)
+    public function checkRunningJobs(string $queueName, \Symfony\Component\Console\Helper\ProgressBar $progressBar = null)
     {
         foreach ($this->runningJobs[$queueName] as $index => $runningJob) {
             $now = new \DateTime();
@@ -431,6 +448,19 @@ class QueuesDaemon
         // Handle a successful or a failed job
         $this->{$processHandler}($job, $process);
 
+        // If this is a cancelling Job or a retrying one, refresh the entire tree
+        if ($job->isTypeCancelling()) {
+            $startJobId = str_replace('--id=', '', $job->getArguments()[0]);
+            $this->jobsManager->refreshTree($this->entityManager->getRepository('SHQCommandsQueuesBundle:Job')->findOneById($startJobId));
+        }
+
+        if ($job->isStatusFinished() && false === $job->isTypeCancelling()) {
+            $this->jobsManager->refreshTree($job);
+        }
+
+        // Now detach the Job
+        JobsManager::detach($job);
+
         // The process is terminated
 //        VarDumper::dump($process->getIdleTimeout());
 //        VarDumper::dump($process->getStopSignal());
@@ -449,8 +479,11 @@ class QueuesDaemon
      */
     public function hasToOptimize() : bool
     {
-        return microtime(true) - $this->getProfiler()->getLastOptimizationAt() >= $this->getConfig()->getOptimizationInterval()
-            && $this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE;
+        if (false === isset($this->entityManager->getUnitOfWork()->getIdentityMap()[Job::class])) {
+            return false;
+        }
+
+        return 2000 < count($this->entityManager->getUnitOfWork()->getIdentityMap()[Job::class]);
     }
 
     /**
@@ -466,12 +499,7 @@ class QueuesDaemon
      */
     public function optimize()
     {
-        /** @var Job $job */
-        foreach ($this->entityManager->getUnitOfWork()->getIdentityMap()[Job::class] as $job) {
-            JobsMarker::detach($job, 'QueuesDaemon::optimize()');
-        }
-
-        Profiler::printUnitOfWork('QueuesDaemon::optimize()');
+        $this->profiler->profile();
 
         // Force the garbage collection
         $cycles = gc_collect_cycles();
@@ -480,49 +508,11 @@ class QueuesDaemon
         }
 
         $this->getProfiler()->optimized();
-    }
 
-    /**
-     * Prints the current profiling info.
-     */
-    public function printProfilingInfo()
-    {
-        $this->ioWriter->table(
-            ['', 'Profiling info'],
-            $this->profiler->profile()
-        );
+        $this->profiler->profile();
+        $this->profiler->printProfilingInfo();
 
-        /*
-        VarDumper::dump('Cache');
-        VarDumper::dump($this->entityManager->getCache());
-
-        VarDumper::dump('Class metadata');
-        VarDumper::dump($this->entityManager->getClassMetadata(Job::class));
-
-        VarDumper::dump('Configuration');
-        VarDumper::dump($this->entityManager->getConfiguration());
-
-        VarDumper::dump('Connection');
-        VarDumper::dump($this->entityManager->getConnection());
-
-        VarDumper::dump('Event manager');
-        VarDumper::dump($this->entityManager->getEventManager());
-
-        VarDumper::dump('Expression builder');
-        VarDumper::dump($this->entityManager->getExpressionBuilder());
-
-        VarDumper::dump('Filters');
-        VarDumper::dump($this->entityManager->getFilters());
-
-        VarDumper::dump('Metadata factory');
-        VarDumper::dump($this->entityManager->getMetadataFactory());
-
-        VarDumper::dump('Proxy factory');
-        VarDumper::dump($this->entityManager->getProxyFactory());
-
-        VarDumper::dump('Unit of work');
-        VarDumper::dump($this->entityManager->getUnitOfWork());
-        */
+        $this->ioWriter->success(sprintf('Optimization completed.'));
     }
 
     /**
@@ -589,7 +579,7 @@ class QueuesDaemon
         $info = $this->jobsManager->buildDefaultInfo($process);
 
         // Check if it can be retried
-        if ($job->getRetryStrategy()->canRetry() && true === $this->retryFailedJob($job, $info, 'Process failed but can be retried.')) {
+        if ($job->getRetryStrategy()->canRetry() && true === $this->retryFailedJob($job, $info, 'Job failed but can be retried.')) {
             // Exit
             return;
         }
@@ -599,7 +589,7 @@ class QueuesDaemon
         $this->jobsMarker->markJobAsFailed($job, $info);
 
         $message = sprintf(
-            '[%s] Job <success-nobg>#%s</success-nobg> on Queue <success-nobg>%s</success-nobg>: Process failed (no retries allowed).',
+            '[%s] Job <success-nobg>#%s</success-nobg> on Queue <success-nobg>%s</success-nobg>: Job failed (no retries allowed).',
             $job->getClosedAt()->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue()
         );
 
@@ -650,7 +640,7 @@ class QueuesDaemon
 
         if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
             $this->ioWriter->noteLineNoBg(sprintf(
-                '[%s] Job <success-nobg>#%s</success-nobg> on Queue <success-nobg>%s</success-nobg>: No childs found. The Job to mark childs as as CANCELLED will not be created.',
+                '[%s] Job <success-nobg>#%s</success-nobg> on Queue <success-nobg>%s</success-nobg>: No childs found. The Job to mark childs as CANCELLED will not be created.',
                 (new \DateTime())->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue()
             ));
         }
@@ -734,7 +724,7 @@ class QueuesDaemon
         );
         if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
             $this->ioWriter->noteLineNoBg(sprintf(
-                    '[%s] Job <success-nobg>#%s</success-nobg> on Queue "%s": Retry with Job "#%s" (Attempt #%s/%s).',
+                '[%s] Job <success-nobg>#%s</success-nobg> on Queue "%s": Retry with Job "#%s" (Attempt #%s/%s).',
                     $job->getClosedAt()->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue(), $retryJob->getId(), $retryJob->getRetryStrategy()->getAttempts(), $retryJob->getRetryStrategy()->getMaxAttempts())
             );
         }
@@ -762,8 +752,7 @@ class QueuesDaemon
 
         $progressBar = null;
         if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
-            $progressBar = new ProgressBar($output, $staleJobsCount);
-            $progressBar->setFormat('<info-nobg>[>] Processing job <success-nobg>%current%</success-nobg>/%max% (%percent%%)</info-nobg><comment-nobg> %elapsed:6s%/%estimated:-6s%  (%memory:-6s%)</comment-nobg>');
+            $progressBar = ProgressBar::createProgressBar(ProgressBar::FORMAT_PROCESS_STALE_JOBS, $output, $staleJobsCount);
         }
 
         // There are stale Jobs

@@ -4,6 +4,7 @@ namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Util;
 
 use Doctrine\ORM\UnitOfWork;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
+use SerendipityHQ\Bundle\CommandsQueuesBundle\Service\JobsManager;
 use SerendipityHQ\Bundle\ConsoleStyles\Console\Style\SerendipityHQStyle;
 use Symfony\Component\Console\Helper\Helper;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -58,6 +59,9 @@ class Profiler
     /** @var  int $pid The PID of the Daemon to be used to mark the callgrindout file */
     private $pid;
 
+    /** @var  array $profilingInfo */
+    private $profilingInfo = [];
+
     /** @var  UnitOfWork $uow */
     private static $uow;
 
@@ -77,11 +81,21 @@ class Profiler
 
         /** @var Job $job */
         foreach (self::$uow->getIdentityMap()[Job::class] as $job) {
-            $managedEntities[] = '<success-nobg>#' . $job->getId() . '</success-nobg> (' . $job->getStatus() . ') [Em: ' . JobsMarker::guessJobEmState($job) . ']';
+            $managedEntities[] = '<success-nobg>#' . $job->getId() . '</success-nobg> (' . $job->getStatus() . ') [Em: ' . JobsManager::guessJobEmState($job) . ']';
         }
 
         asort($managedEntities);
         return implode(', ', $managedEntities);
+    }
+
+    /**
+     * @param SerendipityHQStyle $ioWriter
+     * @param UnitOfWork $uow
+     */
+    public static function setDependencies(SerendipityHQStyle $ioWriter, UnitOfWork $uow)
+    {
+        self::$ioWriter = $ioWriter;
+        self::$uow = $uow;
     }
 
     /**
@@ -92,8 +106,8 @@ class Profiler
         if (self::$ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
             $count = isset(self::$uow->getIdentityMap()[Job::class]) ? count(self::$uow->getIdentityMap()[Job::class]) : 0;
             $message = sprintf(
-                'Currently there are <success-nobg>%s</success-nobg> Jobs managed <comment-nobg>(%s (%s))</comment-nobg>',
-                $count, Helper::formatMemory(memory_get_usage(true)), Helper::formatMemory(memory_get_usage(false))
+                'Currently there are <success-nobg>%s</success-nobg> Jobs managed <comment-nobg>(%s of %s)</comment-nobg>',
+                $count, Helper::formatMemory(memory_get_usage(false)), Helper::formatMemory(memory_get_usage(true))
             );
 
 
@@ -117,14 +131,10 @@ class Profiler
      * @param int $pid
      * @param float $maxRuntime After this amount of time the Daemon MUST die.
      * @param array $queues The configured queues
-     * @param SerendipityHQStyle $ioWriter
-     * @param UnitOfWork $unitOfWork
      */
-    public function start(int $pid, float $maxRuntime, array $queues, SerendipityHQStyle $ioWriter, UnitOfWork $unitOfWork)
+    public function start(int $pid, float $maxRuntime, array $queues)
     {
         $this->pid = $pid;
-        self::$uow = $unitOfWork;
-        self::$ioWriter = $ioWriter;
 
         $this->startTime
             = $this->aliveDaemonsLastCheckedAt
@@ -180,7 +190,7 @@ class Profiler
         $uowHighestSizeDifference = $this->highestUowSize - $currentHighestUowSize;
         $uowHighestSizeDifference = (0 !== $uowHighestSizeDifference && 0 !== $this->highestUowSize) ? round($uowHighestSizeDifference / $this->highestUowSize * 100, 2) : 0;
 
-        $return = [
+        $this->profilingInfo = [
             ['', '<success-nobg>Time info</success-nobg>'],
             ['', 'Current Iteration', $this->getCurrentIteration()],
             ['', 'Elapsed Time', $currentMicrotime - $this->lastMicrotime],
@@ -188,36 +198,36 @@ class Profiler
             ['', 'Last Microtime', $this->formatTime($this->lastMicrotime)],
             ['', 'Last optimization at', $this->formatTime($this->lastOptimizationAt)],
             ['', '', ''],
-            ['', '<success-nobg>Memory info (real)</success-nobg>'],
+            ['', '<success-nobg>Memory info (memory_get_*(true))</success-nobg>'],
             [
                 // If the difference is negative, then this is an increase in memory consumption
                 $memoryDifferenceReal >= 0
                     ? sprintf('<%s>%s</>', 'success-nobg', "\xE2\x9C\x94")
                     : sprintf('<%s>%s</>', 'error-nobg', "\xE2\x9C\x96")
-                , 'Memory Usage (real)',
+                , 'Allocated Memory',
                 Helper::formatMemory($this->lastMemoryUsageReal) . ' => ' . Helper::formatMemory($currentMemoryUsageReal) . ' (' . ($memoryDifferenceReal <= 0 ? '+' : '-').abs($memoryDifferenceReal).'%)'
             ],
             [
                 $memoryPeakDifferenceReal >= 0
                     ? sprintf('<%s>%s</>', 'success-nobg', "\xE2\x9C\x94")
                     : sprintf('<%s>%s</>', 'error-nobg', "\xE2\x9C\x96"),
-                'Memory Peak (real)',
+                'Allocated Memory Peak',
                 Helper::formatMemory($this->highestMemoryPeakReal) . ' => ' . Helper::formatMemory($currentMemoryPeakReal) . ' (' . ($memoryPeakDifferenceReal <= 0 ? '+' : '-').abs($memoryPeakDifferenceReal).'%)'
             ],
             ['', '', ''],
-            ['', '<success-nobg>Memory info (without real)</success-nobg>'],
+            ['', '<success-nobg>Memory info (memory_get_*(false))</success-nobg>'],
             [
                 $memoryDifference >= 0
                     ? sprintf('<%s>%s</>', 'success-nobg', "\xE2\x9C\x94")
                     : sprintf('<%s>%s</>', 'error-nobg', "\xE2\x9C\x96"),
-                'Memory Usage',
+                'Memory Actually Used',
                 Helper::formatMemory($this->lastMemoryUsage) . ' => ' . Helper::formatMemory($currentMemoryUsage) . ' (' . ($memoryDifference <= 0 ? '+' : '-').abs($memoryDifference).'%)'
             ],
             [
                 $memoryPeakDifference >= 0
                     ? sprintf('<%s>%s</>', 'success-nobg', "\xE2\x9C\x94")
                     : sprintf('<%s>%s</>', 'error-nobg', "\xE2\x9C\x96"),
-                'Memory Peak',
+                'Memory Actual Peak',
                 Helper::formatMemory($this->highestMemoryPeak) . ' => ' . Helper::formatMemory($currentMemoryPeak) . ' (' . ($memoryPeakDifference <= 0 ? '+' : '-').abs($memoryPeakDifference).'%)'
             ],
             ['', '', ''],
@@ -261,7 +271,18 @@ class Profiler
             fclose($callgrind);
         }
 
-        return $return;
+        return $this->profilingInfo;
+    }
+
+    /**
+     * Prints the current profiling info.
+     */
+    public function printProfilingInfo()
+    {
+        self::$ioWriter->table(
+            ['', 'Profiling info'],
+            $this->profilingInfo
+        );
     }
 
     /**

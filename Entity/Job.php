@@ -9,7 +9,6 @@ use Doctrine\ORM\PersistentCollection;
 use SerendipityHQ\Component\ThenWhen\Strategy\LiveStrategy;
 use SerendipityHQ\Component\ThenWhen\Strategy\NeverRetryStrategy;
 use SerendipityHQ\Component\ThenWhen\Strategy\StrategyInterface;
-use Symfony\Component\VarDumper\VarDumper;
 
 /**
  * Basic properties and methods o a Job.
@@ -161,9 +160,9 @@ class Job
     /**
      * @var Daemon The Daemon that processed the Job.
      *
-     * @ORM\Column(name="processed_by_damon", type="integer", nullable=true)
-     * @ORM\ManyToOne(targetEntity="SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Daemon", inversedBy="processedJobs")
-     * @ORM\JoinColumn(name="id", referencedColumnName="id")
+     * @ ORM\Column(name="processed_by_damon", type="integer", nullable=true)
+     * @ ORM\ManyToOne(targetEntity="SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Daemon", inversedBy="processedJobs")
+     * @ ORM\JoinColumn(name="id", referencedColumnName="id")
      */
     private $processedBy;
 
@@ -191,15 +190,15 @@ class Job
     /**
      * @var Job $cancelledBy
      *
-     * @ORM\ManyToOne(targetEntity="SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job", inversedBy="cancelledJobs", cascade={"refresh"})
+     * @ORM\ManyToOne(targetEntity="SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job", inversedBy="cancelledJobs")
      * @ORM\JoinColumn(name="cancelled_by", referencedColumnName="id")
      */
     private $cancelledBy;
 
     /**
-     * @var Collection $cancelledJobs
+     * @var Collection|ArrayCollection|PersistentCollection $cancelledJobs
      *
-     * @ORM\OneToMany(targetEntity="SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job", mappedBy="cancelledBy", cascade={"refresh"})
+     * @ORM\OneToMany(targetEntity="SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job", mappedBy="cancelledBy")
      */
     private $cancelledJobs;
 
@@ -218,9 +217,9 @@ class Job
     private $exitCode;
 
     /**
-     * @var Collection
+     * @var Collection|ArrayCollection|PersistentCollection
      *
-     * @ORM\ManyToMany(targetEntity="SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job", inversedBy="parentDependencies", cascade={"refresh"})
+     * @ORM\ManyToMany(targetEntity="SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job", inversedBy="parentDependencies")
      * @ORM\JoinTable(name="queues_jobs_dependencies",
      *     joinColumns={@ORM\JoinColumn(name="parent_job", referencedColumnName="id")},
      *     inverseJoinColumns={@ORM\JoinColumn(name="child_job", referencedColumnName="id")}
@@ -231,7 +230,7 @@ class Job
     /**
      * @var Collection|ArrayCollection|PersistentCollection
      *
-     * @ORM\ManyToMany(targetEntity="SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job", mappedBy="childDependencies", cascade={"refresh"})
+     * @ORM\ManyToMany(targetEntity="SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job", mappedBy="childDependencies")
      */
     private $parentDependencies;
 
@@ -245,7 +244,7 @@ class Job
     /**
      * @var Job If this Job is a retry of another job, here there is the Job of which this is the retry
      *
-     * @ORM\OneToOne(targetEntity="SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job", inversedBy="retriedBy", cascade={"refresh"})
+     * @ORM\OneToOne(targetEntity="SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job", inversedBy="retriedBy")
      * @ORM\JoinColumn(name="retry_of", referencedColumnName="id")
      */
     private $retryOf;
@@ -260,20 +259,23 @@ class Job
     /**
      * @var Job If this Job is a retry of another retried job, here there is the first retried Job
      *
-     * @ORM\ManyToOne(targetEntity="SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job", inversedBy="retryingJobs", cascade={"refresh"})
+     * @ORM\ManyToOne(targetEntity="SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job", inversedBy="retryingJobs")
      * @ORM\JoinColumn(name="first_retried_job", referencedColumnName="id")
      */
     private $firstRetriedJob;
 
     /**
-     * @var Collection The Jobs used to retry this one
+     * @var Collection|ArrayCollection|PersistentCollection The Jobs used to retry this one
      *
-     * @ORM\OneToMany(targetEntity="SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job", mappedBy="firstRetriedJob", cascade={"refresh"})
+     * @ORM\OneToMany(targetEntity="SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job", mappedBy="firstRetriedJob")
      */
     private $retryingJobs;
 
     /** @var  string $cannotBeDetachedBecause This is not persisted. It is used to give the reason why the Job cannot be detached. */
     private $cannotBeDetachedBecause;
+
+    /** @var  string $cannotRunReason This is not persisted. It is used to give the reason why the Job cannot run. */
+    private $cannotRunReason;
 
     /**
      * @param string       $command
@@ -366,17 +368,18 @@ class Job
         if (self::STATUS_PENDING === $this->getStatus() || self::STATUS_RUNNING === $this->getStatus()) {
             throw new \LogicException(
                 sprintf(
-                    'The Job %s has already started. You cannot add a parent dependency.',
-                    $this->getId()
+                    'The Job %s has already started. You cannot add the parent dependency %s.',
+                    $this->getId(), $job->getId()
                 )
             );
         }
 
         if (true === $this->childDependencies->contains($job)) {
-            throw new \LogicException(
-                'You cannot add a parent dependecy that is already a child dependency.'
-                .' This will create an unresolvable circular reference.'
-            );
+            throw new \LogicException(sprintf(
+                'You cannot add a parent dependecy (%s) that is already a child dependency.'
+                .' This will create an unresolvable circular reference.',
+                $job->getId()
+                ));
         }
 
         if (false === $this->parentDependencies->contains($job)) {
@@ -548,7 +551,7 @@ class Job
     /**
      * @return Job
      */
-    public function getCancelledBy(): Job
+    public function getCancelledBy()
     {
         return $this->cancelledBy;
     }
@@ -556,7 +559,7 @@ class Job
     /**
      * @return Collection
      */
-    public function getCancelledJobs(): Collection
+    public function getCancelledJobs()
     {
         return $this->cancelledJobs;
     }
@@ -640,11 +643,11 @@ class Job
      */
     public function getType() : string
     {
-        if ($this->isCancelling()) {
+        if ($this->isTypeCancelling()) {
             return self::TYPE_CANCELLING;
         }
 
-        if ($this->isRetry()) {
+        if ($this->isTypeRetrying()) {
             return self::TYPE_RETRY;
         }
 
@@ -661,7 +664,7 @@ class Job
      */
     public function getProcessedJobId()
     {
-        if (false === $this->isInternal()) {
+        if (false === $this->isTypeInternal()) {
             throw new \BadMethodCallException(
                 sprintf(
                     'This Job #%s is not internal, so you cannot call the method Job::getProcessedJobId().',
@@ -689,32 +692,81 @@ class Job
     }
 
     /**
+     * @return string
+     */
+    public function getCannotRunReason(): string
+    {
+        return $this->cannotRunReason;
+    }
+
+    /**
      * Checks if a Job can or cannot be detached.
      *
      * @return bool
      */
     public function canBeDetached() : bool
     {
-        // If this Job is not already completed and is not new...
-        if (false === $this->isFinished() && self::STATUS_NEW !== $this->getStatus()) {
-            $this->cannotBeDetachedBecause = 'is not finished';
+        // PENDING or RUNNING
+        if ($this->isStatusWorking()) {
+            // It has to be flushed at the end
+            $this->cannotBeDetachedBecause = 'is currently working (' . $this->getStatus() . ')';
             return false;
         }
 
-        // If there are alredy running retrying Jobs...
-        if ($this->hasRunningRetryingJobs()) {
-            $this->cannotBeDetachedBecause = 'has running retrying Jobs';
-            // ... This cannot be detached as required t flush retrying Jobs
-            return false;
+        if ($this->isTypeRetried()) {
+            // The retried Job is updated before the retrying one...
+            if ($this->getRetriedBy()->isStatusWaiting()) {
+                // ... So we need to keep this in memory until the retrying is flushed
+                $this->cannotBeDetachedBecause = 'its retrying Job is currently waiting (' . $this->getStatus() . ')';
+                return false;
+            }
+
+            // If there are still working retrying Jobs...
+            if (false !== $retryingJob = $this->hasWorkingRetryingJobs()) {
+                // ... This cannot be detached as it is required to flush the retrying Job
+                $this->cannotBeDetachedBecause = sprintf(
+                    'has retrying Job #%s@%s that is still working (%s)',
+                    $retryingJob->getId(), $retryingJob->getQueue(), $retryingJob->getStatus()
+                );
+                return false;
+            }
         }
 
-        /** @var Job $parentDependency */
-        if (false !== $parentDependency = $this->hasNotFinishedParentDependencies()) {
-            $this->cannotBeDetachedBecause = sprintf('has parent dependency #%s that is not yet finished', $parentDependency->getId());
-            // This cannot be detached, as it currently is a child dep required to flush the parent dep
-            return false;
+        /** @var Job $parentJob Now check the parent Jobs **/
+        foreach ($this->getParentDependencies() as $parentJob) {
+            switch ($parentJob->getStatus()) {
+                // Waiting dependencies
+                case self::STATUS_NEW:
+                    $this->cannotBeDetachedBecause = sprintf(
+                        'has parent Job #%s@%s that has to be processed (%s)',
+                        $parentJob->getId(), $parentJob->getQueue(), $parentJob->getStatus()
+                    );
+                    return false;
+                    break;
+                case self::STATUS_RETRIED:
+                    $this->cannotBeDetachedBecause = sprintf(
+                        'has parent Job #%s@%s that were retried (%s)',
+                        $parentJob->getId(), $parentJob->getQueue(), $parentJob->getStatus()
+                    );
+                    return false;
+                    break;
+                // Working dependencies
+                case self::STATUS_PENDING:
+                    $this->cannotBeDetachedBecause = sprintf(
+                        'has parent Job #%s@%s that is being processed (%s)',
+                        $parentJob->getId(), $parentJob->getQueue(), $parentJob->getStatus()
+                    );
+                    return false;
+                case self::STATUS_RUNNING:
+                    $this->cannotBeDetachedBecause = sprintf(
+                        'has parent Job #%s@%s that is running (%s)',
+                        $parentJob->getId(), $parentJob->getQueue(), $parentJob->getStatus()
+                    );
+                    return false;
+            }
         }
 
+        // OK: can be detached
         return true;
     }
 
@@ -723,10 +775,28 @@ class Job
      */
     public function canRun() : bool
     {
-        // If it is closed, it were already runned/processed
-        return false === $this->isFinished()
-            // If at least one parent is running, this Job cannot be processed
-            && false === $this->hasNotFinishedParentDependencies();
+        if ($this->isStatusFinished()) {
+            $this->cannotRunReason = 'is already finished';
+            return false;
+        }
+
+        if (false !== $parentJob = $this->hasWaitingParentDependencies()) {
+            $this->cannotRunReason = sprintf(
+                'has to start after its parent Job #%s@%s that is still waiting to be started (%s)',
+                $parentJob->getId(), $parentJob->getQueue(), $parentJob->getStatus()
+            );
+            return false;
+        }
+
+        if (false !== $parentJob = $this->hasWorkingParentDependencies()) {
+            $this->cannotRunReason = sprintf(
+                'has parent Job #%s@%s that is waiting its turn to be processed or finalised (%s)',
+                $parentJob->getId(), $parentJob->getQueue(), $parentJob->getStatus()
+            );
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -738,18 +808,47 @@ class Job
     }
 
     /**
-     * Checks each parent Job to see if they are finished or not.
+     * @return bool
+     */
+    public function hasParentDependencies() : bool
+    {
+        return $this->getParentDependencies()->count() > 0;
+    }
+
+    /**
+     * Checks each parent Job to see if they are waiting.
      *
-     * If they are all finished, return false. If also only one parent Job isn't finished, returns true.
+     * If there aren't, return false. If also only one parent Job is waiting, returns the waiting parent Job.
      *
      * @return bool|Job
      */
-    public function hasNotFinishedParentDependencies()
+    private function hasWaitingParentDependencies()
     {
         /** @var Job $parentJob */
         foreach ($this->getParentDependencies() as $parentJob) {
-            // Check if the status is not finished and if it isn't...
-            if (false === $parentJob->isFinished()) {
+            if ($parentJob->isStatusWaiting()) {
+                // Return true as at least one parent Job is waiting to be finished
+                return $parentJob;
+            }
+        }
+
+        // All parent Jobs were finished
+        return false;
+    }
+
+    /**
+     * Checks each parent Job to see if they are finished or not.
+     *
+     * If they are all finished, return false. If also only one parent Job isn't finished, returns the working parent Job.
+     *
+     * @return bool|Job
+     */
+    private function hasWorkingParentDependencies()
+    {
+        /** @var Job $parentJob */
+        foreach ($this->getParentDependencies() as $parentJob) {
+            // Status is not new (so it is started) and status is not finished and if it isn't...
+            if ($parentJob->isStatusWorking()) {
                 // Return true as at least one parent Job is not finished
                 return $parentJob;
             }
@@ -760,27 +859,20 @@ class Job
     }
 
     /**
-     * @return bool
+     * @return bool|job
      */
-    public function hasParentDependencies() : bool
+    private function hasWorkingRetryingJobs()
     {
-        return $this->getParentDependencies()->count() > 0;
-    }
-
-    /**
-     * @return bool
-     */
-    public function hasRunningRetryingJobs()
-    {
-        /** @var Job $retriedJob */
-        foreach ($this->getRetryingJobs() as $retriedJob) {
-            if (false === $retriedJob->isFinished()) {
-                return true;
-            }
+        // Check the Retrying Job
+        if ($this->isTypeRetried() && $this->getRetriedBy()->isStatusWorking()) {
+            return $this->getRetriedBy();
         }
 
-        if ($this->isRetried() && false === $this->getRetriedBy()->isFinished()) {
-            return true;
+        /** @var Job $retriedJob Check the Jobs that reference this through "firstRetryOf" */
+        foreach ($this->getRetryingJobs() as $retriedJob) {
+            if ($retriedJob->isStatusWorking()) {
+                return $retriedJob;
+            }
         }
 
         return false;
@@ -789,70 +881,134 @@ class Job
     /**
      * @return bool
      */
-    public function isCancelling() : bool
+    public function isStatusAborted() : bool
+    {
+        return self::STATUS_ABORTED === $this->getStatus();
+    }
+
+    /**
+     * @return bool
+     */
+    public function isStatusCancelled() : bool
+    {
+        return self::STATUS_CANCELLED === $this->getStatus();
+    }
+
+    /**
+     * @return bool
+     */
+    public function isStatusNew() : bool
+    {
+        return self::STATUS_NEW === $this->getStatus();
+    }
+
+    /**
+     * @return bool
+     */
+    public function isStatusPending() : bool
+    {
+        return self::STATUS_PENDING === $this->getStatus();
+    }
+
+    /**
+     * @return bool
+     */
+    public function isStatusRetried() : bool
+    {
+        return self::STATUS_RETRIED === $this->getStatus();
+    }
+
+    /**
+     * @return bool
+     */
+    public function isStatusRunning() : bool
+    {
+        return self::STATUS_RUNNING === $this->getStatus();
+    }
+
+    /**
+     * @return bool
+     */
+    public function isStatusFailed() : bool
+    {
+        switch ($this->getStatus()) {
+            case Job::STATUS_CANCELLED:
+            case Job::STATUS_FAILED:
+            case Job::STATUS_RETRY_FAILED:
+            case Job::STATUS_ABORTED:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    /**
+     * @return bool
+     */
+    public function isStatusFinished() : bool
+    {
+        switch ($this->getStatus()) {
+            case Job::STATUS_ABORTED:
+            case Job::STATUS_CANCELLED:
+            case Job::STATUS_FAILED:
+            case Job::STATUS_RETRIED:
+            case Job::STATUS_RETRY_FAILED:
+            case Job::STATUS_RETRY_SUCCEEDED:
+            case Job::STATUS_SUCCEEDED:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    /**
+     * @return bool
+     */
+    public function isStatusSuccessful() : bool
+    {
+        switch ($this->getStatus()) {
+            case Job::STATUS_SUCCEEDED:
+            case Job::STATUS_RETRY_SUCCEEDED:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    /**
+     * @return bool
+     */
+    public function isStatusWaiting() : bool
+    {
+        switch ($this->getStatus()) {
+            case Job::STATUS_NEW:
+            case Job::STATUS_RETRIED:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    /**
+     * @return bool
+     */
+    public function isStatusWorking() : bool
+    {
+        switch ($this->getStatus()) {
+            case Job::STATUS_PENDING:
+            case Job::STATUS_RUNNING:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    /**
+     * @return bool
+     */
+    public function isTypeCancelling() : bool
     {
         return strpos($this->getCommand(), 'mark-as-cancelled');
-    }
-
-    /**
-     * A Job is failed if its status is one of
-     *
-     * - FAILED
-     * - RETRY_FAILED
-     *
-     * @return bool
-     */
-    public function isFailed() : bool
-    {
-        return Job::STATUS_FAILED === $this->getStatus() || Job::STATUS_RETRY_FAILED === $this->getStatus();
-    }
-
-    /**
-     * A Job is finished if its status is one of
-     *
-     * - FINISHED
-     * - RETRY_FINISHED
-     *
-     * @return bool
-     */
-    public function isSuccessful() : bool
-    {
-        return self::STATUS_SUCCEEDED === $this->getStatus() || self::STATUS_RETRY_SUCCEEDED === $this->getStatus();
-    }
-
-    /**
-     * If this Job is a retry of another job this will return true.
-     *
-     * @return bool
-     */
-    public function isRetry() : bool
-    {
-        return null !== $this->getRetryOf();
-    }
-
-    /**
-     * If this Job has a retried job.
-     *
-     * @return bool
-     */
-    public function isRetried() : bool
-    {
-        return null !== $this->getRetriedBy();
-    }
-
-    /**
-     * A Job is closed if its status is one of the final ones:
-     *
-     * - FINISHED
-     * - RETRY_FINISHED
-     * - FAILED
-     * - RETRY_FAILED
-     *
-     * @return bool
-     */
-    public function isFinished() : bool
-    {
-        return $this->isFailed() || $this->isSuccessful();
     }
 
     /**
@@ -860,7 +1016,7 @@ class Job
      *
      * @return bool
      */
-    public function isInternal() : bool
+    public function isTypeInternal() : bool
     {
         switch ($this->getType()) {
             case self::TYPE_CANCELLING:
@@ -871,6 +1027,26 @@ class Job
             default:
                 return false;
         }
+    }
+
+    /**
+     * If this Job is a retry of another job this will return true.
+     *
+     * @return bool
+     */
+    public function isTypeRetrying() : bool
+    {
+        return null !== $this->getRetryOf();
+    }
+
+    /**
+     * If this Job has a retried job.
+     *
+     * @return bool
+     */
+    public function isTypeRetried() : bool
+    {
+        return null !== $this->getRetriedBy();
     }
 
     /**
@@ -960,7 +1136,7 @@ class Job
      *
      * @return Job
      */
-    protected function setRetryOf(Job $retriedJob) : Job
+    public function setRetryOf(Job $retriedJob) : Job
     {
         // This is a retry Job for another job
         $this->retryOf = $retriedJob;

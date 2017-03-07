@@ -12,14 +12,9 @@
 
     <table class="table">
         <thead>
-            <th>ID</th>
+            <th width="20%">ID</th>
             <th>Command & Timing</th>
-            <th>Priority</th>
-            <th>Queue</th>
-            <th width="10%">Status</th>
-            <th width="30%">Dependencies</th>
-            <th>Exit code</th>
-            <th>Retry strategy</th>
+            <th>Dependencies</th>
         </thead>
     {% for job in jobPager %}
         {% set status = '' %}
@@ -41,34 +36,38 @@
         {% if 'pending' == job.status or 'running' == job.status %}
             {% set status = 'info' %}
         {% endif %}
+        {% if 'new' == job.status %}
+            {% set status = 'default' %}
+        {% endif %}
         <tr{% if '' != status %} class="{{ status }}"{% endif %}>
-            <td id="{{ job.id }}"><a href="{{ path('queues_job', {id: job.id}) }}">{{ job.id }}</a></td>
-            <td>
-                <p>
-                    <code style="width:300px; overflow:hidden; white-space:nowrap;">{{ job.command }}
-                    {% if job.arguments %}
-                        <span class="text-muted">{{ job.arguments|join(' ') }}</span>
+            <td id="{{ job.id }}" style="line-height: 1.9;">
+                <p><code style="white-space:nowrap;padding: 5px;"><a href="{{ path('queues_job', {id: job.id}) }}">#{{ job.id }}</a> ({{ job.priority }}) @{{ job.queue }} <span class="label label-{{ status }}">{{ job.status }}{% if job.exitCode %} [{{ job.exitCode}}]{% endif %}</span></code></p>
+                {% if job.isTypeRetrying %}
+                    {% set status = '' %}
+                    {% if 'running' == job.retryOf.status %}
+                        {% set status = 'active' %}
                     {% endif %}
-                    </code>
-                </p>
-                <p>
-                    <b>Created at</b>: {% if job.createdAt %}{{ job.createdAt|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }}{% endif %}<br />
-                    <b>Execute after</b>: {% if job.executeAfterTime %}{{ job.executeAfterTime|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }}{% endif %}<br />
-                    <b>Started at</b>: {% if job.startedAt %}{{ job.startedAt|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }}{% endif %}<br />
-                    <b>Closed At</b>: {% if job.closedAt %}{{ job.closedAt|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }}{% endif %}<br />
-                </p>
-            </td>
-            <td><code>{{ job.priority }}</code></td>
-            <td><code>{{ job.queue }}</code></td>
-            <td>
-                {% if 'new' == job.status %}
-                    {% set status = 'default' %}
+                    {% if 'retried' == job.retryOf.status %}
+                        {% set status = 'warning' %}
+                    {% endif %}
+                    {% if 'failed' == job.retryOf.status or 'retry_failed' == job.retryOf.status %}
+                        {% set status = 'danger' %}
+                    {% endif %}
+                    {% if 'succeeded' == job.retryOf.status or 'retry_succeeded' == job.retryOf.status %}
+                        {% set status = 'success' %}
+                    {% endif %}
+                    {% if 'cancelled' == job.retryOf.status %}
+                        {% set status = 'danger' %}
+                    {% endif %}
+                    {% if 'pending' == job.retryOf.status or 'running' == job.retryOf.status %}
+                        {% set status = 'info' %}
+                    {% endif %}
+                    {% if 'new' == job.retryOf.status %}
+                        {% set status = 'default' %}
+                    {% endif %}
+                    <p><small class="text-muted">Is retry of <code style="white-space:nowrap;padding: 5px;"><a href="{{ path('queues_job', {'id': job.retryOf.id}) }}">#{{ job.retryOf.id }}</a> ({{ job.retryOf.priority }}) @{{ job.retryOf.queue }} <span class="label label-{{ status }}">{{ job.retryOf.status }}{% if job.retryOf.exitCode %} [{{ job.retryOf.exitCode}}]{% endif %}</span></code></small></p>
                 {% endif %}
-                <span class="label label-{{ status }}">{{ job.status }}</span>
-                {% if job.isRetry %}
-                    <p><small class="text-muted">Is retry of <a href="{{ path('queues_job', {'id': job.retryOf.id}) }}">#{{ job.retryOf.id }}</a></small></p>
-                {% endif %}
-                {% if job.isRetried %}
+                {% if job.isTypeRetried %}
                     {% set status = '' %}
                     {% if 'running' == job.retriedBy.status %}
                         {% set status = 'active' %}
@@ -91,7 +90,10 @@
                     {% if 'new' == job.retriedBy.status %}
                         {% set status = 'default' %}
                     {% endif %}
-                    <p><small class="text-muted">Retried by <br /><a href="{{ path('queues_job', {'id': job.retriedBy.id}) }}">#{{ job.retriedBy.id }}</a> <span class="label label-{{ status }}">{{ job.retriedBy.status }}</span></small></p>
+                    <p><small class="text-muted">
+                        Retried by <br />
+                        <code style="white-space:nowrap;padding: 5px;"><a href="{{ path('queues_job', {'id': job.retriedBy.id}) }}">#{{ job.retriedBy.id }}</a> ({{ job.retriedBy.priority }}) <span class="label label-{{ status }}">{{ job.retriedBy.status }}{% if job.retriedBy.exitCode %} [{{ job.retriedBy.exitCode}}]{% endif %}</span></code>
+                    </small></p>
                     {% if 0 < job.retryingJobs.count %}
                         <small class="text-muted">All retrying Jobs:</small>
                         {% set retryingJobs = {} %}
@@ -118,10 +120,14 @@
                             {% if 'new' == retryingJob.status %}
                                 {% set status = 'default' %}
                             {% endif %}
-                            {% set linkedretryingJob = '<a href="' ~ path('queues_job', {'id': retryingJob.id}) ~ '">#' ~ retryingJob.id ~ '</a> <span class="label label-' ~ status ~ '">' ~ retryingJob.status ~ '</span>' %}
+                            {% set linkedretryingJob = '<code style="white-space:nowrap;padding: 5px;"><a href="' ~ path('queues_job', {'id': retryingJob.id}) ~ '">#' ~ retryingJob.id ~ '</a> (' ~ retryingJob.priority ~ ') <span class="label label-' ~ status ~ '">' ~ retryingJob.status %}
+                            {% if job.exitCode %}
+                                {% set linkedretryingJob = linkedretryingJob ~ ' [' ~ job.retriedBy.exitCode ~ ']' %}
+                            {% endif %}
+                            {% set linkedretryingJob = linkedretryingJob ~ '</span></code>' %}
                             {% set retryingJobs = retryingJobs|merge({ ('_' ~ retryingJob.id ~ '-'): linkedretryingJob}) %}
                         {% endfor %}
-                        <p><small class="text-muted">{{ retryingJobs|join(' - ')|raw }}</small></p>
+                        <p><small class="text-muted">{{ retryingJobs|join(' ')|raw }}</small></p>
                     {% endif %}
                 {% endif %}
                 {% if job.firstRetriedJob %}
@@ -144,18 +150,61 @@
                     {% if 'pending' == job.firstRetriedJob.status or 'running' == job.firstRetriedJob.status %}
                         {% set status = 'info' %}
                     {% endif %}
-                    <p><small class="text-muted">First retried job:<br /><a href="{{ path('queues_job', {'id': job.firstRetriedJob.id}) }}">#{{ job.firstRetriedJob.id }} <span class="label label-{{ status }}">{{ job.firstRetriedJob.status }}</span></a></small></p>
+                    <p><small class="text-muted">First retried job <code style="white-space:nowrap;padding: 5px;"><a href="{{ path('queues_job', {'id': job.firstRetriedJob.id}) }}">#{{ job.firstRetriedJob.id }}</a> ({{ job.firstRetriedJob.priority }}) @{{ job.firstRetriedJob.queue }} <span class="label label-{{ status }}">{{ job.firstRetriedJob.status }}{% if job.firstRetriedJob.exitCode %} [{{ job.firstRetriedJob.exitCode}}]{% endif %}</span></code></small></p>
                 {% endif %}
                 {% if 'cancelled' == job.status %}
-                    <p><small class="text-muted">{{ job.debug.cancellation_reason }}</small></p>
-                    <p><small class="text-muted">Cancelled by <a href="{{ path('queues_job', {'id': job.cancelledBy}) }}">#{{ job.cancelledBy }}</a></small></p>
+                    {% set status = '' %}
+                    {% if 'running' == job.cancelledBy.status %}
+                        {% set status = 'active' %}
+                    {% endif %}
+                    {% if 'retried' == job.cancelledBy.status %}
+                        {% set status = 'warning' %}
+                    {% endif %}
+                    {% if 'failed' == job.cancelledBy.status or 'retry_failed' == job.cancelledBy.status %}
+                        {% set status = 'danger' %}
+                    {% endif %}
+                    {% if 'succeeded' == job.cancelledBy.status or 'retry_succeeded' == job.cancelledBy.status %}
+                        {% set status = 'success' %}
+                    {% endif %}
+                    {% if 'cancelled' == job.cancelledBy.status %}
+                        {% set status = 'danger' %}
+                    {% endif %}
+                    {% if 'pending' == job.cancelledBy.status or 'running' == job.cancelledBy.status %}
+                        {% set status = 'info' %}
+                    {% endif %}
+                    <p><small class="text-muted"><b>Cancellation Reason</b>: <i>{{ job.debug.cancellation_reason }}</i></small></p>
+                    <p><small class="text-muted">Cancelled by <code style="white-space:nowrap;padding: 5px;"><a href="{{ path('queues_job', {'id': job.cancelledBy.id}) }}">#{{ job.cancelledBy.id }}</a> ({{ job.cancelledBy.priority }}) @{{ job.cancelledBy.queue }} <span class="label label-{{ status }}">{{ job.cancelledBy.status }}{% if job.cancelledBy.exitCode %} [{{ job.cancelledBy.exitCode}}]{% endif %}</span></code></small></p>
                 {% endif %}
             </td>
             <td>
+                <p>
+                    <code style="width:300px; overflow:hidden; white-space:nowrap;">{{ job.command }}
+                    {% if job.arguments %}
+                        <span class="text-muted">{{ job.arguments|join(' ') }}</span>
+                    {% endif %}
+                    </code>
+                </p>
+                <p>
+                    <b>Created at</b>: {% if job.createdAt %}{{ job.createdAt|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }}{% endif %}<br />
+                    <b>Execute after</b>: {% if job.executeAfterTime %}{{ job.executeAfterTime|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }}{% endif %}<br />
+                    <b>Started at</b>: {% if job.startedAt %}{{ job.startedAt|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }}{% endif %}<br />
+                    <b>Closed At</b>: {% if job.closedAt %}{{ job.closedAt|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }}{% endif %}<br />
+                </p>
+                <p><small>
+                        <b>Retry strategy: {{ job.retryStrategy.strategyName }}</b><br />
+                        {% if job.retryStrategy.canRetry %}Will be retried on: {{ job.retryStrategy.retryOn|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }}<br />{% endif %}
+                        <span class="text-muted">
+                            Current attempt: {{ job.retryStrategy.attempts }}, Max attempts: {{ job.retryStrategy.maxAttempts }},
+                            Increment by: {{ job.retryStrategy.incrementBy }} {{ job.retryStrategy.timeUnit }},
+                            {% if 'exponential' == job.retryStrategy.strategyName %}Exponential base: {{ job.retryStrategy.exponentialBase }}, {% endif %}
+                        </span>
+                    </small></p>
+            </td>
+            <td style="line-height: 2;">
                 {% if false == job.hasParentDependencies %}
-                {% if false == job.isRetry %}No parent Jobs{% endif %}
+                    {% if false == job.isTypeRetrying %}<p><span class="text-muted">No parent Jobs</span></p>{% endif %}
                 {% else %}
-                    <p>Parent Jobs:</p>
+                    <p><b>Parent Jobs</b></p>
                     {% set parentJobs = {} %}
                     {% for parentJob in job.parentDependencies %}
                         {% set status = '' %}
@@ -180,16 +229,20 @@
                         {% if 'new' == parentJob.status %}
                             {% set status = 'default' %}
                         {% endif %}
-                        {% set linkedParentJob = '<a href="' ~ path('queues_job', {'id': parentJob.id}) ~ '">#' ~ parentJob.id ~ '</a> <span class="label label-' ~ status ~ '">' ~ parentJob.status ~ '</span>' %}
+                        {% set linkedParentJob = '<code style="white-space:nowrap;padding: 5px;"><a href="' ~ path('queues_job', {'id': parentJob.id}) ~ '">#' ~ parentJob.id ~ '</a> (' ~ parentJob.priority ~ ') <span class="label label-' ~ status ~ '">' ~ parentJob.status %}
+                        {% if parentJob.exitCode %}
+                            {% set linkedParentJob = linkedParentJob ~ ' [' ~ parentJob.exitCode ~ ']' %}
+                        {% endif %}
+                        {% set linkedParentJob = linkedParentJob ~ '</span></code>' %}
                         {% set parentJobs = parentJobs|merge({ ('_' ~ parentJob.id ~ '-'): linkedParentJob}) %}
                     {% endfor %}
-                    <p>{{ parentJobs|join(' - ')|raw }}</p>
+                    <p>{{ parentJobs|join(' ')|raw }}</p>
                 {% endif %}
-                {% if false == job.isRetry %}<hr />{% endif %}
+
                 {% if false == job.hasChildDependencies %}
-                    No child Jobs
+                    <p><span class="text-muted">No child Jobs</span></p>
                 {% else %}
-                    <p>Child Jobs:</p>
+                    <p><b>Child Jobs</b></p>
                     {% set childJobs = {} %}
                     {% for childJob in job.childDependencies %}
                         {% set status = '' %}
@@ -214,23 +267,15 @@
                         {% if 'new' == childJob.status %}
                             {% set status = 'default' %}
                         {% endif %}
-                        {% set linkedChildJob = '<a href="' ~ path('queues_job', {'id': childJob.id}) ~ '">#' ~ childJob.id ~ '</a> <span class="label label-' ~ status ~ '">' ~ childJob.status ~ '</span>' %}
+                        {% set linkedChildJob = '<code style="white-space:nowrap;padding: 5px;"><a href="' ~ path('queues_job', {'id': childJob.id}) ~ '">#' ~ childJob.id ~ '</a> (' ~ childJob.priority ~ ') <span class="label label-' ~ status ~ '">' ~ childJob.status %}
+                        {% if childJob.exitCode %}
+                            {% set linkedChildJob = linkedChildJob ~ ' [' ~ childJob.exitCode ~ ']' %}
+                        {% endif %}
+                        {% set linkedChildJob = linkedChildJob ~ '</span></code>' %}
                         {% set childJobs = childJobs|merge({ ('_' ~ childJob.id ~ '-'): linkedChildJob}) %}
                     {% endfor %}
-                    <p>{{ childJobs|join(' - ')|raw }}</p>
+                    <p>{{ childJobs|join(' ')|raw }}</p>
                 {% endif %}
-            </td>
-            <td>{{ job.exitCode }}</td>
-            <td>
-                {% if job.retryStrategy.canRetry %}{{ job.retryStrategy.retryOn|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }}{% endif %}
-                <small class="text-muted">{{ job.retryStrategy.strategyName }}</small>
-                <p>
-                    <small>
-                        Current attempt: {{ job.retryStrategy.attempts }}, Max attempts: {{ job.retryStrategy.maxAttempts }},
-                        Increment by: {{ job.retryStrategy.incrementBy }} {{ job.retryStrategy.timeUnit }},
-                        {% if 'exponential' == job.retryStrategy.strategyName %}Exponential base: {{ job.retryStrategy.exponentialBase }}, {% endif %}
-                    </small>
-                </p>
             </td>
         </tr>
     {% endfor %}

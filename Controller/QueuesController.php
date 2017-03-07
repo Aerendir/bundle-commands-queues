@@ -51,8 +51,9 @@ class QueuesController extends Controller
         $em = $this->getDoctrine()->getManagerForClass('SHQCommandsQueuesBundle:Job');
         $qb = $em->createQueryBuilder();
         $qb->select('j')->from('SHQCommandsQueuesBundle:Job', 'j')
-            ->addOrderBy('j.createdAt', 'ASC')
-            ->addOrderBy('j.id', 'ASC');
+            ->orderBy('j.priority', 'ASC')
+            ->addOrderBy('j.createdAt', 'ASC');
+            //->addOrderBy('j.id', 'ASC');
 
         $status = $request->query->get('status', null);
         if (null !== $status) {
@@ -112,7 +113,7 @@ class QueuesController extends Controller
         $appliction->setAutoExit(false);
 
         $input = new ArrayInput([
-            'command'       => 'queues:random-jobs',
+            'command'       => 'queues:test:random-jobs',
             'how-many-jobs' => 100,
             '--env'         => 'prod',
             '--no-future-jobs',
@@ -130,17 +131,17 @@ class QueuesController extends Controller
      */
     public function testFailedAction()
     {
-        $job1 = new Job('queues:test', '--id=1 --trigger-error=true');
-        $job1->setRetryStrategy(new LiveStrategy(3));
-        $this->get('queues')->schedule($job1);
+        $kernel = $this->get('kernel');
+        $appliction = new Application($kernel);
+        $appliction->setAutoExit(false);
 
-        $job2 = new Job('queues:test', '--id=2 --trigger-error=true');
-        $job2->addParentDependency($job1);
-        $this->get('queues')->schedule($job2);
+        $input = new ArrayInput([
+            'command'       => 'queues:test:failing-jobs',
+            '--env'         => 'prod'
+        ]);
 
-        $job3 = new Job('queues:test', '--id=3 --trigger-error=true');
-        $job2->addChildDependency($job3);
-        $this->get('queues')->schedule($job3);
+        $output = new NullOutput();
+        $appliction->run($input, $output);
 
         return $this->redirectToRoute('queues_jobs');
     }

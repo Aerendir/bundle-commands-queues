@@ -3,6 +3,7 @@
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Command;
 
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
+use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\ProgressBar;
 use SerendipityHQ\Component\ThenWhen\Strategy\ConstantStrategy;
 use SerendipityHQ\Component\ThenWhen\Strategy\ExponentialStrategy;
 use SerendipityHQ\Component\ThenWhen\Strategy\LinearStrategy;
@@ -10,7 +11,6 @@ use SerendipityHQ\Component\ThenWhen\Strategy\LiveStrategy;
 use SerendipityHQ\Component\ThenWhen\Strategy\NeverRetryStrategy;
 use SerendipityHQ\Component\ThenWhen\Strategy\StrategyInterface;
 use SerendipityHQ\Component\ThenWhen\Strategy\TimeFixedStrategy;
-use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
@@ -18,9 +18,9 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * Class SynchOrdersCommand.
+ * Creates random Jobs.
  */
-class RandomJobsCommand extends AbstractQueuesCommand
+class TestRandomJobsCommand extends AbstractQueuesCommand
 {
     private $queues = [
         'queue_1', 'queue_2', 'queue_3', 'queue_4', 'queue_5'
@@ -32,12 +32,12 @@ class RandomJobsCommand extends AbstractQueuesCommand
     protected function configure()
     {
         $this
-            ->setName('queues:random-jobs')
+            ->setName('queues:test:random-jobs')
             ->setDescription('[INTERNAL] Generates random Jobs to test SHQCommandsQueuesBundle.')
             ->setDefinition(
                 new InputDefinition([
                     new InputArgument('how-many-jobs', InputArgument::OPTIONAL, 'How many random Jobs would you like to create?', 10),
-                    new InputOption('batch', null, InputOption::VALUE_OPTIONAL, 'The number of Jobs in a batch.', 100),
+                    new InputOption('batch', null, InputOption::VALUE_OPTIONAL, 'The number of Jobs in a batch.', 10),
                     new InputOption('no-future-jobs', null),
                     new InputOption('retry-strategies', null, InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, 'The allowed retry strategies.', ['constant', 'exponential', 'linear', 'live', 'never_retry', 'time_fixed']),
                     new InputOption('time-units', null, InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, 'The allowed time units.', StrategyInterface::TIME_UNITS),
@@ -65,8 +65,7 @@ class RandomJobsCommand extends AbstractQueuesCommand
         $this->getIoWriter()->info(sprintf('Starting generating %s random jobs...', $howManyJobs));
 
         // Generate the random jobs
-        $progress = new ProgressBar($output, $howManyJobs);
-        $progress->setFormat('<success-nobg>%current%</success-nobg>/%max% [%bar%] %percent:3s%% %elapsed:6s%/%estimated:-6s% (%memory:6s%)');
+        $progress = ProgressBar::createProgressBar(ProgressBar::FORMAT_CREATE_JOBS, $output, $howManyJobs);
         $progress->start();
 
         $progress->setRedrawFrequency($batch);
@@ -75,7 +74,7 @@ class RandomJobsCommand extends AbstractQueuesCommand
         for ($i = 0; $i < $howManyJobs; $i++) {
             // First: we create a Job to push to the queue
             $arguments = '--id='.($i + 1);
-            $scheduledJob = new Job('queues:test', $arguments);
+            $scheduledJob = new Job('queues:test:fake', $arguments);
 
             // Set a random queue
             $queue = rand(0, count($this->queues) - 1);

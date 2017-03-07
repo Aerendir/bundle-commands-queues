@@ -40,3 +40,4 @@ http://php.net/manual/en/internals2.memory.management.php
 - http://php.net/manual/en/features.gc.collecting-cycles.php
 - https://alexatnet.com/articles/optimize-php-memory-usage-eliminate-circular-references
 - http://paul-m-jones.com/archives/262
+- http://jpauli.github.io/2014/07/02/php-memory.html

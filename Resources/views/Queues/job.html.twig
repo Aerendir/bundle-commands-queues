@@ -39,10 +39,10 @@
                 </div>
                 <div class="row">
                     <div class="col-lg-4">
-                        {% if job.isRetry %}
+                        {% if job.isTypeRetrying %}
                             <p><small class="text-muted">Is retry of <a href="{{ path('queues_job', {'id': job.retryOf.id}) }}">#{{ job.retryOf.id }}</a></small></p>
                         {% endif %}
-                        {% if job.isRetried %}
+                        {% if job.isTypeRetried %}
                             <p><small class="text-muted">Retried by <br /><a href="{{ path('queues_job', {'id': job.retriedBy.id}) }}">#{{ job.retriedBy.id }}</a> ({{ job.retriedBy.status }})</small></p>
                             {% if 0 < job.retryingJobs.count %}
                                 <small class="text-muted">All retrying Jobs:</small>
@@ -62,7 +62,7 @@
                             <p><small class="text-muted">Cancelled by <a href="{{ path('queues_job', {'id': job.cancelledBy}) }}">#{{ job.cancelledBy }}</a></small></p>
                         {% endif %}
                         {% if false == job.hasParentDependencies %}
-                            {% if false == job.isRetry %}No parent Jobs{% endif %}
+                            {% if false == job.isTypeRetrying %}No parent Jobs{% endif %}
                         {% else %}
                             <p>Parent Jobs:</p>
                             {% set parentJobs = {} %}
@@ -72,7 +72,7 @@
                             {% endfor %}
                             <p>{{ parentJobs|join(', ')|raw }}</p>
                         {% endif %}
-                        {% if false == job.isRetry %}<hr />{% endif %}
+                        {% if false == job.isTypeRetrying %}<hr />{% endif %}
                         {% if false == job.hasChildDependencies %}
                             No child Jobs
                         {% else %}
