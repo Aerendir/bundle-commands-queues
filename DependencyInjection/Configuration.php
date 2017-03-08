@@ -69,6 +69,7 @@ class Configuration implements ConfigurationInterface
                 ->scalarNode('retry_stale_jobs')->defaultTrue()->end()
                 // In seconds
                 ->integerNode('running_jobs_check_interval')->defaultValue(10)->end()
+                ->integerNode('managed_entities_treshold')->defaultValue(100)->end()
                 ->arrayNode('daemons')
                     ->useAttributeAsKey('name')
                     ->prototype('array')
@@ -80,6 +81,7 @@ class Configuration implements ConfigurationInterface
                             ->integerNode('print_profiling_info')->defaultNull()->end()
                             ->scalarNode('retry_stale_jobs')->defaultNull()->end()
                             ->integerNode('running_jobs_check_interval')->defaultNull()->end()
+                            ->integerNode('managed_entities_treshold')->defaultValue(100)->end()
                             ->arrayNode('queues')
                                 ->prototype('scalar')->end()
                             ->end()
@@ -199,6 +201,7 @@ class Configuration implements ConfigurationInterface
             // Queues specific configurations
             'retry_stale_jobs' => $config['retry_stale_jobs'] ?? $tree['retry_stale_jobs'],
             'running_jobs_check_interval' => $config['running_jobs_check_interval'] ?? $tree['running_jobs_check_interval'],
+            'managed_entities_treshold' => $config['managed_entities_treshold'] ?? $tree['managed_entities_treshold'],
             'queues' => $config['queues']
         ];
 

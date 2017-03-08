@@ -22,6 +22,9 @@ class DaemonConfig extends AbstractConfig
     /** @var  int $idleTime */
     private $idleTime;
 
+    /** @var  int $managedEntitiesTreshold */
+    private $managedEntitiesTreshold;
+
     /** @var  int $maxRuntime */
     private $maxRuntime;
 
@@ -64,6 +67,7 @@ class DaemonConfig extends AbstractConfig
         $this->name = $daemon;
         $this->setAliveDaemonsCheckInterval($this->daemons[$daemon]['alive_daemons_check_interval']);
         $this->setIdleTime($this->daemons[$daemon]['idle_time']);
+        $this->setManagedEntitiesTreshold($this->daemons[$daemon]['managed_entities_treshold']);
         $this->setMaxRuntime($this->daemons[$daemon]['max_runtime']);
         $this->setOptimizationInterval($this->daemons[$daemon]['optimization_interval']);
         $this->setProfilingInfoInterval($this->daemons[$daemon]['profiling_info_interval']);
@@ -143,6 +147,14 @@ class DaemonConfig extends AbstractConfig
     /**
      * @return int
      */
+    public function getManagedEntitiesTreshold(): int
+    {
+        return $this->managedEntitiesTreshold;
+    }
+
+    /**
+     * @return int
+     */
     public function getProfilingInfoInterval(): int
     {
         return $this->profilingInfoInterval;
@@ -199,6 +211,14 @@ class DaemonConfig extends AbstractConfig
     private function setIdleTime(int $idleTime)
     {
         $this->idleTime = $idleTime;
+    }
+
+    /**
+     * @param int $managedEntitiesTreshold
+     */
+    private function setManagedEntitiesTreshold(int $managedEntitiesTreshold)
+    {
+        $this->managedEntitiesTreshold = $managedEntitiesTreshold;
     }
 
     /**

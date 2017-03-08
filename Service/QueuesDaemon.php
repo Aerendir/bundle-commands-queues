@@ -483,7 +483,7 @@ class QueuesDaemon
             return false;
         }
 
-        return 2000 < count($this->entityManager->getUnitOfWork()->getIdentityMap()[Job::class]);
+        return $this->getConfig()->getManagedEntitiesTreshold() < count($this->entityManager->getUnitOfWork()->getIdentityMap()[Job::class]);
     }
 
     /**
@@ -500,6 +500,33 @@ class QueuesDaemon
     public function optimize()
     {
         $this->profiler->profile();
+
+        // First try a soft detach
+        foreach ($this->entityManager->getUnitOfWork()->getIdentityMap()[Job::class] as $job) {
+            JobsManager::detach($job);
+        }
+
+        // Check if the optimization worked
+        if ($this->hasToOptimize()) {
+            if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
+                $this->ioWriter->warning(sprintf('Trying to hard detach all Jobs to free more space.'));
+                $this->ioWriter->infoLineNoBg('Emptying the queue of still running Jobs...');
+            }
+            // Wait for the currently running jobs to finish
+            while ($this->hasRunningJobs()) {
+                foreach ($this->getConfig()->getQueues() as $queueName) {
+                    if ($this->hasRunningJobs($queueName)) {
+                        $this->checkRunningJobs($queueName);
+                    }
+                }
+
+                // And wait a bit to give them the time to finish
+                $this->wait();
+            }
+
+            // Comepletely clear the entity manager
+            $this->entityManager->clear();
+        }
 
         // Force the garbage collection
         $cycles = gc_collect_cycles();

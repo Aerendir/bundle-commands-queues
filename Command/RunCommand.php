@@ -102,8 +102,6 @@ class RunCommand extends Command
                 if ($this->daemon->hasToCheckRunningJobs($queueName)) {
                     $this->processRunningJobs($queueName);
                     $printUow = true;
-                } elseif ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_DEBUG) {
-                    $this->ioWriter->infoLineNoBg(sprintf('No running jobs to check on queue <success-nobg>%s</success-nobg>', $queueName));
                 }
             }
 

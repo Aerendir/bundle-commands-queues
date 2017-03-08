@@ -713,28 +713,54 @@ class Job
             return false;
         }
 
+        // Is being retried
+        if ($this->isStatusRetried()) {
+            // It has to be flushed at the end
+            $this->cannotBeDetachedBecause = sprintf('is being retried by Job #%s (%s)', $this->getRetriedBy()->getId(), $this->getRetriedBy()->getStatus());
+            return false;
+        }
+
+        /*
         if ($this->isTypeRetried()) {
             // The retried Job is updated before the retrying one...
-            if ($this->getRetriedBy()->isStatusWaiting()) {
+            if ($this->getRetriedBy()->isStatusWorking()) {
                 // ... So we need to keep this in memory until the retrying is flushed
                 $this->cannotBeDetachedBecause = 'its retrying Job is currently waiting (' . $this->getStatus() . ')';
                 return false;
             }
 
-            // If there are still working retrying Jobs...
-            if (false !== $retryingJob = $this->hasWorkingRetryingJobs()) {
-                // ... This cannot be detached as it is required to flush the retrying Job
-                $this->cannotBeDetachedBecause = sprintf(
-                    'has retrying Job #%s@%s that is still working (%s)',
-                    $retryingJob->getId(), $retryingJob->getQueue(), $retryingJob->getStatus()
-                );
-                return false;
+            /** @var Job $parentJob Now check the parent Jobs **
+            foreach ($this->getRetryingJobs() as $retryingJob) {
+                switch ($retryingJob->getStatus()) {
+                    // Working dependencies
+                    case self::STATUS_PENDING:
+                        $this->cannotBeDetachedBecause = sprintf(
+                            'has a retrying Job #%s@%s that is being processed (%s)',
+                            $retryingJob->getId(), $retryingJob->getQueue(), $retryingJob->getStatus()
+                        );
+                        return false;
+                    case self::STATUS_RUNNING:
+                        $this->cannotBeDetachedBecause = sprintf(
+                            'has retrying Job #%s@%s that is running (%s)',
+                            $retryingJob->getId(), $retryingJob->getQueue(), $retryingJob->getStatus()
+                        );
+                        return false;
+                    // The retrying Job failed and is retried on its own: we have to keep this in memory to flush them
+                    case self::STATUS_RETRIED:
+                        $this->cannotBeDetachedBecause = sprintf(
+                            'has retrying Job #%s@%s that is retried on its own by Job #%s',
+                            $retryingJob->getId(), $retryingJob->getQueue(), $retryingJob->getRetriedBy()->getId()
+                        );
+                        return false;
+                }
             }
         }
 
         /** @var Job $parentJob Now check the parent Jobs **/
         foreach ($this->getParentDependencies() as $parentJob) {
             switch ($parentJob->getStatus()) {
+
+
                 // Waiting dependencies
                 case self::STATUS_NEW:
                     $this->cannotBeDetachedBecause = sprintf(
@@ -750,6 +776,7 @@ class Job
                     );
                     return false;
                     break;
+
                 // Working dependencies
                 case self::STATUS_PENDING:
                     $this->cannotBeDetachedBecause = sprintf(
@@ -780,20 +807,39 @@ class Job
             return false;
         }
 
-        if (false !== $parentJob = $this->hasWaitingParentDependencies()) {
-            $this->cannotRunReason = sprintf(
-                'has to start after its parent Job #%s@%s that is still waiting to be started (%s)',
-                $parentJob->getId(), $parentJob->getQueue(), $parentJob->getStatus()
-            );
-            return false;
-        }
+        /** @var Job $parentJob Now check the parent Jobs **/
+        foreach ($this->getParentDependencies() as $parentJob) {
+            switch ($parentJob->getStatus()) {
+                // Waiting dependencies
+                case self::STATUS_NEW:
+                    $this->cannotRunReason = sprintf(
+                        'has parent Job #%s@%s that has to be processed (%s)',
+                        $parentJob->getId(), $parentJob->getQueue(), $parentJob->getStatus()
+                    );
+                    return false;
+                    break;
+                case self::STATUS_RETRIED:
+                    $this->cannotRunReason = sprintf(
+                        'has parent Job #%s@%s that were retried (%s)',
+                        $parentJob->getId(), $parentJob->getQueue(), $parentJob->getStatus()
+                    );
+                    return false;
+                    break;
 
-        if (false !== $parentJob = $this->hasWorkingParentDependencies()) {
-            $this->cannotRunReason = sprintf(
-                'has parent Job #%s@%s that is waiting its turn to be processed or finalised (%s)',
-                $parentJob->getId(), $parentJob->getQueue(), $parentJob->getStatus()
-            );
-            return false;
+                // Working dependencies
+                case self::STATUS_PENDING:
+                    $this->cannotRunReason = sprintf(
+                        'has parent Job #%s@%s that is being processed (%s)',
+                        $parentJob->getId(), $parentJob->getQueue(), $parentJob->getStatus()
+                    );
+                    return false;
+                case self::STATUS_RUNNING:
+                    $this->cannotRunReason = sprintf(
+                        'has parent Job #%s@%s that is running (%s)',
+                        $parentJob->getId(), $parentJob->getQueue(), $parentJob->getStatus()
+                    );
+                    return false;
+            }
         }
 
         return true;
@@ -813,69 +859,6 @@ class Job
     public function hasParentDependencies() : bool
     {
         return $this->getParentDependencies()->count() > 0;
-    }
-
-    /**
-     * Checks each parent Job to see if they are waiting.
-     *
-     * If there aren't, return false. If also only one parent Job is waiting, returns the waiting parent Job.
-     *
-     * @return bool|Job
-     */
-    private function hasWaitingParentDependencies()
-    {
-        /** @var Job $parentJob */
-        foreach ($this->getParentDependencies() as $parentJob) {
-            if ($parentJob->isStatusWaiting()) {
-                // Return true as at least one parent Job is waiting to be finished
-                return $parentJob;
-            }
-        }
-
-        // All parent Jobs were finished
-        return false;
-    }
-
-    /**
-     * Checks each parent Job to see if they are finished or not.
-     *
-     * If they are all finished, return false. If also only one parent Job isn't finished, returns the working parent Job.
-     *
-     * @return bool|Job
-     */
-    private function hasWorkingParentDependencies()
-    {
-        /** @var Job $parentJob */
-        foreach ($this->getParentDependencies() as $parentJob) {
-            // Status is not new (so it is started) and status is not finished and if it isn't...
-            if ($parentJob->isStatusWorking()) {
-                // Return true as at least one parent Job is not finished
-                return $parentJob;
-            }
-        }
-
-        // All parent Jobs were finished
-        return false;
-    }
-
-    /**
-     * @return bool|job
-     */
-    private function hasWorkingRetryingJobs()
-    {
-        // Check the Retrying Job
-        if ($this->isTypeRetried() && $this->getRetriedBy()->isStatusWorking()) {
-            return $this->getRetriedBy();
-        }
-
-        /** @var Job $retriedJob Check the Jobs that reference this through "firstRetryOf" */
-        foreach ($this->getRetryingJobs() as $retriedJob) {
-            if ($retriedJob->isStatusWorking()) {
-                return $retriedJob;
-            }
-        }
-
-        return false;
     }
 
     /**

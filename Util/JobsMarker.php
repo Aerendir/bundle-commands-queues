@@ -218,26 +218,45 @@ class JobsMarker
         $ioWriter = self::$ioWriter;
         $tryAgainBuilder = ThenWhen::createRetryStrategyBuilder();
         $tryAgainBuilder
-            ->setStrategyForException(ORMInvalidArgumentException::class, new LiveStrategy(2))
-            // Very rarely may happen that a Job is detached but it is still required to flush the current Job.
+            ->setStrategyForException([
+                ORMInvalidArgumentException::class, \InvalidArgumentException::class
+            ], new LiveStrategy(100))
+            // May happen that a Job is detached to keep the memory consumption low but then it is required to flush the
+            // current Job.
             // Here we refresh the Job to manage again all the required Jobs.
-            // This often happen when flushing a retrying Job and the exception is thrown on the retried Job (the refreshed Job is the retried one).
-            ->setMiddleHandlerForException(ORMInvalidArgumentException::class, function (\Exception $e) use ($job, $status, $info, $daemon, $ioWriter) {
+            // This is a required trade-off between the memory consumption and the queries to the database: we chose to
+            // the sacrifice queries to the databse in favor of a minor memory consumption.
+            ->setMiddleHandlerForException([
+                ORMInvalidArgumentException::class, \InvalidArgumentException::class
+            ], function (\Exception $e) use ($job, $status, $info, $daemon, $ioWriter) {
+                if (
+                    !$e instanceof ORMInvalidArgumentException
+                    && $e instanceof \InvalidArgumentException
+                    && false === strpos($e->getMessage(), 'Entity has to be managed or scheduled for removal for single computation')
+                ) {
+                        throw $e;
+                }
+
                 if ($ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
                     $ioWriter->warningLineNoBg(sprintf('Refreshing Job #%s@%s because for Doctrine it is a new found entity ("%s").', $job->getId(), $job->getQueue(), $e->getMessage()));
                 }
 
                 self::$entityManager->refresh($job);
+
                 self::updateJob($job, $status, $info, $daemon);
             })
-            ->setFinalHandlerForException(ORMInvalidArgumentException::class, function (\Exception $e) use ($job, $oldStatus, $ioWriter) {
+            ->setFinalHandlerForException([
+                ORMInvalidArgumentException::class, \InvalidArgumentException::class
+            ], function (\Exception $e) use ($job, $oldStatus, $ioWriter) {
                 self::$ioWriter->error(sprintf('Error trying to flush Job #%s (%s => %s).', $job->getId(), $oldStatus, $job->getStatus()));
-
-                Profiler::printUnitOfWork();
+                if ($ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
+                    Profiler::printUnitOfWork();
+                }
                 throw $e;
             });
 
-        $tryAgainBuilder->initializeRetryStrategy()->try(function() use ($job){
+        $tryAgainBuilder->initializeRetryStrategy()
+            ->try(function() use ($job){
             /*
              * Flush now to be sure editings aren't cleared during optimizations.
              *
