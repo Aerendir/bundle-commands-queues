@@ -57,12 +57,12 @@ class QueuesController extends Controller
         }
 
         $pager = new Pagerfanta(new DoctrineORMAdapter($qb, false));
-        $pager->setCurrentPage(max(1, (integer) $request->query->get('page', 1)));
-        $pager->setMaxPerPage(max(5, min(50, (integer) $request->query->get('per_page', 20))));
+        $pager->setCurrentPage(max(1, (int) $request->query->get('page', 1)));
+        $pager->setMaxPerPage(max(5, min(50, (int) $request->query->get('per_page', 20))));
 
         $pagerView = new TwitterBootstrap3View();
         $router = $this->get('router');
-        $routeGenerator = function($page) use ($router, $pager, $status) {
+        $routeGenerator = function ($page) use ($router, $pager, $status) {
             $params = ['page' => $page, 'per_page' => $pager->getMaxPerPage()];
 
             if (null !== $status) {
@@ -73,8 +73,8 @@ class QueuesController extends Controller
         };
 
         return [
-            'jobPager' => $pager,
-            'jobPagerView' => $pagerView,
+            'jobPager'          => $pager,
+            'jobPagerView'      => $pagerView,
             'jobPagerGenerator' => $routeGenerator,
         ];
     }
@@ -133,7 +133,7 @@ class QueuesController extends Controller
 
         $input = new ArrayInput([
             'command'       => 'queues:test:failing-jobs',
-            '--env'         => 'prod'
+            '--env'         => 'prod',
         ]);
 
         $output = new NullOutput();

@@ -16,16 +16,17 @@ class ProgressBar
     const FORMAT_PROCESS_STALE_JOBS = '<info-nobg>[>] Processing job <success-nobg>%current%</success-nobg>/%max% (%percent%%)</info-nobg><comment-nobg> %elapsed:6s%/%estimated:-6s%  (%memory_nr:6s% of %memory:6s%)</comment-nobg>';
 
     /**
-     * @param string $format
+     * @param string          $format
      * @param OutputInterface $output
-     * @param int $howManyJobs
+     * @param int             $howManyJobs
+     *
      * @return \Symfony\Component\Console\Helper\ProgressBar
      */
     public static function createProgressBar(string $format, OutputInterface $output, int $howManyJobs = 0)
     {
         \Symfony\Component\Console\Helper\ProgressBar::setPlaceholderFormatterDefinition(
             'memory_nr',
-            function(\Symfony\Component\Console\Helper\ProgressBar $bar, OutputInterface $output) {
+            function (\Symfony\Component\Console\Helper\ProgressBar $bar, OutputInterface $output) {
                 return Helper::formatMemory(memory_get_usage(false));
             }
         );

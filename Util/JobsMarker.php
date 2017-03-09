@@ -2,9 +2,9 @@
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Util;
 
+use Doctrine\Common\Persistence\Proxy;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\ORMInvalidArgumentException;
-use Doctrine\Common\Persistence\Proxy;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Daemon;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
 use SerendipityHQ\Bundle\ConsoleStyles\Console\Style\SerendipityHQStyle;
@@ -20,7 +20,7 @@ class JobsMarker
     /** @var EntityManager $entityManager */
     private static $entityManager;
 
-    /** @var  SerendipityHQStyle $ioWriter */
+    /** @var SerendipityHQStyle $ioWriter */
     private static $ioWriter;
 
     /**
@@ -41,6 +41,7 @@ class JobsMarker
 
     /**
      * @param Job $job
+     *
      * @return \ReflectionClass
      */
     public static function createReflectedJob(Job $job)
@@ -114,7 +115,7 @@ class JobsMarker
     }
 
     /**
-     * @param Job $failedJob
+     * @param Job   $failedJob
      * @param array $info
      *
      * @return Job The created retry Job.
@@ -128,7 +129,7 @@ class JobsMarker
     }
 
     /**
-     * @param Job $staleJob
+     * @param Job   $staleJob
      * @param array $info
      *
      * @return Job The created retry Job.
@@ -162,9 +163,10 @@ class JobsMarker
     }
 
     /**
-     * @param Job $retriedJob
-     * @param Job $retryingJob
+     * @param Job   $retriedJob
+     * @param Job   $retryingJob
      * @param array $info
+     *
      * @return Job
      */
     private function markJobAsRetried(Job $retriedJob, Job $retryingJob, array $info)
@@ -203,9 +205,9 @@ class JobsMarker
     }
 
     /**
-     * @param Job $job
-     * @param string $status
-     * @param array $info
+     * @param Job         $job
+     * @param string      $status
+     * @param array       $info
      * @param Daemon|null $daemon
      *
      * @throws \Exception
@@ -219,7 +221,7 @@ class JobsMarker
         $tryAgainBuilder = ThenWhen::createRetryStrategyBuilder();
         $tryAgainBuilder
             ->setStrategyForException([
-                ORMInvalidArgumentException::class, \InvalidArgumentException::class
+                ORMInvalidArgumentException::class, \InvalidArgumentException::class,
             ], new LiveStrategy(100))
             // May happen that a Job is detached to keep the memory consumption low but then it is required to flush the
             // current Job.
@@ -227,14 +229,14 @@ class JobsMarker
             // This is a required trade-off between the memory consumption and the queries to the database: we chose to
             // the sacrifice queries to the databse in favor of a minor memory consumption.
             ->setMiddleHandlerForException([
-                ORMInvalidArgumentException::class, \InvalidArgumentException::class
+                ORMInvalidArgumentException::class, \InvalidArgumentException::class,
             ], function (\Exception $e) use ($job, $status, $info, $daemon, $ioWriter) {
                 if (
                     !$e instanceof ORMInvalidArgumentException
                     && $e instanceof \InvalidArgumentException
                     && false === strpos($e->getMessage(), 'Entity has to be managed or scheduled for removal for single computation')
                 ) {
-                        throw $e;
+                    throw $e;
                 }
 
                 if ($ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
@@ -246,7 +248,7 @@ class JobsMarker
                 self::updateJob($job, $status, $info, $daemon);
             })
             ->setFinalHandlerForException([
-                ORMInvalidArgumentException::class, \InvalidArgumentException::class
+                ORMInvalidArgumentException::class, \InvalidArgumentException::class,
             ], function (\Exception $e) use ($job, $oldStatus, $ioWriter) {
                 self::$ioWriter->error(sprintf('Error trying to flush Job #%s (%s => %s).', $job->getId(), $oldStatus, $job->getStatus()));
                 if ($ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
@@ -256,8 +258,8 @@ class JobsMarker
             });
 
         $tryAgainBuilder->initializeRetryStrategy()
-            ->try(function() use ($job){
-            /*
+            ->try(function () use ($job) {
+                /*
              * Flush now to be sure editings aren't cleared during optimizations.
              *
              * We flush the single Jobs to don't affect the others that may be still processing.
@@ -269,13 +271,13 @@ class JobsMarker
 
             // Flush the original Job
             self::$entityManager->flush($job);
-        });
+            });
     }
 
     /**
-     * @param Job $job
-     * @param string $status
-     * @param array $info
+     * @param Job         $job
+     * @param string      $status
+     * @param array       $info
      * @param Daemon|null $daemon
      */
     private function updateJob(Job $job, string $status, array $info = [], Daemon $daemon = null)

@@ -83,8 +83,8 @@ class MarkAsCancelledCommand extends AbstractQueuesCommand
         // Mark childs as cancelled
         $childInfo = [
             'cancelled_by' => $cancellingJob,
-            'debug' => [
-                'cancellation_reason' => $cancellationReason
+            'debug'        => [
+                'cancellation_reason' => $cancellationReason,
             ],
         ];
 

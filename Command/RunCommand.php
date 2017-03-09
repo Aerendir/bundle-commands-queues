@@ -24,23 +24,23 @@ class RunCommand extends Command
 {
     /** @var QueuesDaemon $daemon */
     private $daemon;
-    
-    /** @var  EntityManager $entityManager */
+
+    /** @var EntityManager $entityManager */
     private $entityManager;
-    
-    /** @var  JobsMarker $jobsMarker */
+
+    /** @var JobsMarker $jobsMarker */
     private $jobsMarker;
-    
-    /** @var  SerendipityHQStyle $ioWriter */
+
+    /** @var SerendipityHQStyle $ioWriter */
     private $ioWriter;
 
-    /** @var  OutputInterface $output */
+    /** @var OutputInterface $output */
     private $output;
 
     /**
-     * @param QueuesDaemon $daemon
+     * @param QueuesDaemon  $daemon
      * @param EntityManager $entityManager
-     * @param JobsMarker $jobsMarker
+     * @param JobsMarker    $jobsMarker
      */
     public function __construct(QueuesDaemon $daemon, EntityManager $entityManager, JobsMarker $jobsMarker)
     {

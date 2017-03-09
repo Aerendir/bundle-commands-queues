@@ -15,10 +15,10 @@ use Symfony\Component\Process\ProcessBuilder;
  */
 class JobsManager
 {
-    /** @var  EntityManager $entityManager */
+    /** @var EntityManager $entityManager */
     private static $entityManager;
 
-    /** @var  SerendipityHQStyle $ioWriter */
+    /** @var SerendipityHQStyle $ioWriter */
     private static $ioWriter;
 
     /** @var string $env */
@@ -39,7 +39,7 @@ class JobsManager
     }
 
     /**
-     * @param EntityManager $entityManager
+     * @param EntityManager      $entityManager
      * @param SerendipityHQStyle $ioWriter
      */
     public function initialize(EntityManager $entityManager, SerendipityHQStyle $ioWriter)
@@ -69,7 +69,7 @@ class JobsManager
             if (null === $jobInTree) {
                 if (self::$ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_DEBUG) {
                     // Add the current Job to the already detached
-                    $detached[$jobInTree->getId()] = '#' . $jobInTree->getId();
+                    $detached[$jobInTree->getId()] = '#'.$jobInTree->getId();
                     self::$ioWriter->successLineNoBg(sprintf(
                         'Job <info-nobg>#%s</info-nobg> is not managed and so it will not has to be detached.',
                         $jobInTree->getId()
@@ -86,7 +86,7 @@ class JobsManager
                     ));
                 }
 
-                $notDetached[$jobInTree->getId()] = '#' . $jobInTree->getId();
+                $notDetached[$jobInTree->getId()] = '#'.$jobInTree->getId();
 
                 continue;
             }
@@ -97,7 +97,7 @@ class JobsManager
                 self::$ioWriter->successLineNoBg(sprintf('Job <info-nobg>#%s</info-nobg> detached.', $jobInTree->getId()));
             }
             // Add the current Job to the already detached
-            $detached[$jobInTree->getId()] = '#' . $jobInTree->getId();
+            $detached[$jobInTree->getId()] = '#'.$jobInTree->getId();
         }
 
         if (self::$ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
@@ -196,6 +196,7 @@ class JobsManager
 
     /**
      * @param Job $job
+     *
      * @return string
      */
     public static function guessJobEmState(Job $job)
@@ -225,7 +226,7 @@ class JobsManager
      *
      * It adds to the tree all childs and parents, and all other linked Jobs to the one given and its childs.
      *
-     * @param Job $job
+     * @param Job   $job
      * @param array $tree The buil tree
      *
      * @return array
@@ -233,7 +234,7 @@ class JobsManager
     private static function calculateJobsTree(Job $job, &$tree = [])
     {
         if (null !== $job->getChildDependencies() && 0 < count($job->getChildDependencies())) {
-            /** @var Job $childDependency Detach child deps **/
+            /** @var Job $childDependency Detach child deps * */
             foreach ($job->getChildDependencies() as $childDependency) {
                 if (false === in_array($childDependency->getId(), $tree)) {
                     // Add it to the tree
@@ -246,7 +247,7 @@ class JobsManager
         }
 
         if (null !== $job->getParentDependencies() && 0 < count($job->getParentDependencies())) {
-            /** @var Job $parentDependency Detach parend deps **/
+            /** @var Job $parentDependency Detach parend deps * */
             foreach ($job->getParentDependencies() as $parentDependency) {
                 if (false === in_array($parentDependency->getId(), $tree)) {
                     // Add it to the tree
@@ -266,7 +267,7 @@ class JobsManager
             self::calculateJobsTree($job->getCancelledBy(), $tree);
         }
 
-        /** @var Job $retryingDependency Detach cancelled Jobs **/
+        /* @var Job $retryingDependency Detach cancelled Jobs **/
         if (null !== $job->getCancelledJobs() && 0 < count($job->getCancelledJobs())) {
             foreach ($job->getCancelledJobs() as $cancelledJob) {
                 if (false === in_array($cancelledJob->getId(), $tree)) {
@@ -304,7 +305,7 @@ class JobsManager
         }
 
         // And all the retrying Jobs
-        /** @var Job $retryingDependency Detach retryingDeps **/
+        /* @var Job $retryingDependency Detach retryingDeps **/
         if (null !== $job->getRetryingJobs() && 0 < count($job->getRetryingJobs())) {
             foreach ($job->getRetryingJobs() as $retryingJob) {
                 if (false === in_array($retryingJob->getId(), $tree)) {
@@ -361,7 +362,7 @@ class JobsManager
             case OutputInterface::VERBOSITY_NORMAL:
             default:
                 // This WILL NEVER be reached as default
-                return null;
+                return;
         }
     }
 }

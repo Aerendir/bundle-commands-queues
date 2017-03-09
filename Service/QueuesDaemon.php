@@ -36,8 +36,8 @@ class QueuesDaemon
 
     /** @var JobsMarker $processMarker Used to change the status of Jobs during their execution */
     private $jobsMarker;
-    
-    /** @var  JobRepository $jobsRepo */
+
+    /** @var JobRepository $jobsRepo */
     private $jobsRepo;
 
     /** @var SerendipityHQStyle $ioWriter */
@@ -63,7 +63,7 @@ class QueuesDaemon
     private $verbosity;
 
     /**
-     * @param DaemonConfig         $config
+     * @param DaemonConfig  $config
      * @param EntityManager $entityManager
      * @param JobsManager   $jobsManager
      * @param JobsMarker    $jobsMarker
@@ -82,9 +82,9 @@ class QueuesDaemon
     /**
      * Initializes the Daemon.
      *
-     * @param string|null $daemon
+     * @param string|null        $daemon
      * @param SerendipityHQStyle $ioWriter
-     * @param OutputInterface $output
+     * @param OutputInterface    $output
      */
     public function initialize($daemon, SerendipityHQStyle $ioWriter, OutputInterface $output)
     {
@@ -192,7 +192,7 @@ class QueuesDaemon
     {
         // If the max_concurrent_jobs number is reached, don't process one more job
         if ($this->countRunningJobs($queueName) >= $this->config->getQueue($queueName)['max_concurrent_jobs']) {
-            return null;
+            return;
         }
 
         // Get the next job to process
@@ -202,7 +202,8 @@ class QueuesDaemon
         if (null === $job) {
             // This queue has no more Jobs: for it the Daemon can sleep
             $this->canSleep[$queueName] = true;
-            return null;
+
+            return;
         }
 
         // This queue has another Job: for it the Daemon can't sleep as the next cycle is required to check if there are other Jobs
@@ -253,7 +254,7 @@ class QueuesDaemon
             // Check if it can be retried and if the retry were successful
             if ($job->getRetryStrategy()->canRetry() && true === $this->retryFailedJob($job, $info, 'Job didn\'t started as its process were aborted.')) {
                 // Exit
-                return null;
+                return;
             }
 
             $cancellingJob = $this->handleChildsOfFailedJob($job);
@@ -268,7 +269,7 @@ class QueuesDaemon
                 }
             }
 
-            return null;
+            return;
         }
 
         /*
@@ -305,7 +306,7 @@ class QueuesDaemon
      */
     public function canSleep() : bool
     {
-        foreach($this->canSleep as $can) {
+        foreach ($this->canSleep as $can) {
             if (false === $can) {
                 return false;
             }
@@ -328,6 +329,7 @@ class QueuesDaemon
 
     /**
      * @param string $queueName
+     *
      * @return bool
      */
     public function hasToCheckRunningJobs(string $queueName) : bool
@@ -339,6 +341,7 @@ class QueuesDaemon
 
     /**
      * @param string $queueName
+     *
      * @return bool
      */
     public function hasRunningJobs(string $queueName = null) : bool
@@ -372,7 +375,7 @@ class QueuesDaemon
     /**
      * Processes the Jobs already running or pending.
      *
-     * @param string $queueName
+     * @param string                                             $queueName
      * @param null|\Symfony\Component\Console\Helper\ProgressBar $progressBar
      */
     public function checkRunningJobs(string $queueName, \Symfony\Component\Console\Helper\ProgressBar $progressBar = null)
@@ -574,6 +577,7 @@ class QueuesDaemon
 
     /**
      * @param string $queueName
+     *
      * @return int
      */
     public function getJobsToLoad(string $queueName)
@@ -775,6 +779,7 @@ class QueuesDaemon
         // No stale Jobs
         if (0 >= $staleJobsCount && $this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
             $this->ioWriter->infoLineNoBg('No stale Jobs found.');
+
             return;
         }
 
@@ -817,9 +822,10 @@ class QueuesDaemon
     }
 
     /**
-     * @param Job $job
-     * @param array $info
+     * @param Job    $job
+     * @param array  $info
      * @param string $retryReason
+     *
      * @return bool
      */
     private function retryStaleJob(Job $job, array $info, string $retryReason)

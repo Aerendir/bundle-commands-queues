@@ -23,7 +23,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 class TestRandomJobsCommand extends AbstractQueuesCommand
 {
     private $queues = [
-        'queue_1', 'queue_2', 'queue_3', 'queue_4', 'queue_5'
+        'queue_1', 'queue_2', 'queue_3', 'queue_4', 'queue_5',
     ];
 
     /**

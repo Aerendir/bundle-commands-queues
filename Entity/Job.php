@@ -188,7 +188,7 @@ class Job
     private $cancellationReason;
 
     /**
-     * @var Job $cancelledBy
+     * @var Job
      *
      * @ORM\ManyToOne(targetEntity="SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job", inversedBy="cancelledJobs")
      * @ORM\JoinColumn(name="cancelled_by", referencedColumnName="id")
@@ -196,7 +196,7 @@ class Job
     private $cancelledBy;
 
     /**
-     * @var Collection|ArrayCollection|PersistentCollection $cancelledJobs
+     * @var Collection|ArrayCollection|PersistentCollection
      *
      * @ORM\OneToMany(targetEntity="SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job", mappedBy="cancelledBy")
      */
@@ -271,10 +271,10 @@ class Job
      */
     private $retryingJobs;
 
-    /** @var  string $cannotBeDetachedBecause This is not persisted. It is used to give the reason why the Job cannot be detached. */
+    /** @var string $cannotBeDetachedBecause This is not persisted. It is used to give the reason why the Job cannot be detached. */
     private $cannotBeDetachedBecause;
 
-    /** @var  string $cannotRunReason This is not persisted. It is used to give the reason why the Job cannot run. */
+    /** @var string $cannotRunReason This is not persisted. It is used to give the reason why the Job cannot run. */
     private $cannotRunReason;
 
     /**
@@ -312,6 +312,7 @@ class Job
 
     /**
      * @param string $argument
+     *
      * @return $this
      */
     public function addArgument(string $argument)
@@ -427,7 +428,7 @@ class Job
     public function createRetryForStale() : Job
     {
         // Create a new Job that will retry the original one
-        $retryJob = (new Job($this->getCommand(), $this->getArguments()))
+        $retryJob = (new self($this->getCommand(), $this->getArguments()))
             // Then we can increment the current number of attempts setting also the RetryStrategy
             ->setRetryStrategy($this->getRetryStrategy())
             ->setPriority($this->getPriority())
@@ -709,7 +710,8 @@ class Job
         // PENDING or RUNNING
         if ($this->isStatusWorking()) {
             // It has to be flushed at the end
-            $this->cannotBeDetachedBecause = 'is currently working (' . $this->getStatus() . ')';
+            $this->cannotBeDetachedBecause = 'is currently working ('.$this->getStatus().')';
+
             return false;
         }
 
@@ -717,13 +719,13 @@ class Job
         if ($this->isStatusRetried()) {
             // It has to be flushed at the end
             $this->cannotBeDetachedBecause = sprintf('is being retried by Job #%s (%s)', $this->getRetriedBy()->getId(), $this->getRetriedBy()->getStatus());
+
             return false;
         }
 
-        /** @var Job $parentJob Now check the parent Jobs **/
+        /** @var Job $parentJob Now check the parent Jobs * */
         foreach ($this->getParentDependencies() as $parentJob) {
             switch ($parentJob->getStatus()) {
-
 
                 // Waiting dependencies
                 case self::STATUS_NEW:
@@ -731,6 +733,7 @@ class Job
                         'has parent Job #%s@%s that has to be processed (%s)',
                         $parentJob->getId(), $parentJob->getQueue(), $parentJob->getStatus()
                     );
+
                     return false;
                     break;
                 case self::STATUS_RETRIED:
@@ -738,6 +741,7 @@ class Job
                         'has parent Job #%s@%s that were retried (%s)',
                         $parentJob->getId(), $parentJob->getQueue(), $parentJob->getStatus()
                     );
+
                     return false;
                     break;
 
@@ -747,12 +751,14 @@ class Job
                         'has parent Job #%s@%s that is being processed (%s)',
                         $parentJob->getId(), $parentJob->getQueue(), $parentJob->getStatus()
                     );
+
                     return false;
                 case self::STATUS_RUNNING:
                     $this->cannotBeDetachedBecause = sprintf(
                         'has parent Job #%s@%s that is running (%s)',
                         $parentJob->getId(), $parentJob->getQueue(), $parentJob->getStatus()
                     );
+
                     return false;
             }
         }
@@ -768,10 +774,11 @@ class Job
     {
         if ($this->isStatusFinished()) {
             $this->cannotRunReason = 'is already finished';
+
             return false;
         }
 
-        /** @var Job $parentJob Now check the parent Jobs **/
+        /** @var Job $parentJob Now check the parent Jobs * */
         foreach ($this->getParentDependencies() as $parentJob) {
             switch ($parentJob->getStatus()) {
                 // Waiting dependencies
@@ -780,6 +787,7 @@ class Job
                         'has parent Job #%s@%s that has to be processed (%s)',
                         $parentJob->getId(), $parentJob->getQueue(), $parentJob->getStatus()
                     );
+
                     return false;
                     break;
                 case self::STATUS_RETRIED:
@@ -787,6 +795,7 @@ class Job
                         'has parent Job #%s@%s that were retried (%s)',
                         $parentJob->getId(), $parentJob->getQueue(), $parentJob->getStatus()
                     );
+
                     return false;
                     break;
 
@@ -796,12 +805,14 @@ class Job
                         'has parent Job #%s@%s that is being processed (%s)',
                         $parentJob->getId(), $parentJob->getQueue(), $parentJob->getStatus()
                     );
+
                     return false;
                 case self::STATUS_RUNNING:
                     $this->cannotRunReason = sprintf(
                         'has parent Job #%s@%s that is running (%s)',
                         $parentJob->getId(), $parentJob->getQueue(), $parentJob->getStatus()
                     );
+
                     return false;
             }
         }
@@ -879,10 +890,10 @@ class Job
     public function isStatusFailed() : bool
     {
         switch ($this->getStatus()) {
-            case Job::STATUS_CANCELLED:
-            case Job::STATUS_FAILED:
-            case Job::STATUS_RETRY_FAILED:
-            case Job::STATUS_ABORTED:
+            case self::STATUS_CANCELLED:
+            case self::STATUS_FAILED:
+            case self::STATUS_RETRY_FAILED:
+            case self::STATUS_ABORTED:
                 return true;
             default:
                 return false;
@@ -895,13 +906,13 @@ class Job
     public function isStatusFinished() : bool
     {
         switch ($this->getStatus()) {
-            case Job::STATUS_ABORTED:
-            case Job::STATUS_CANCELLED:
-            case Job::STATUS_FAILED:
-            case Job::STATUS_RETRIED:
-            case Job::STATUS_RETRY_FAILED:
-            case Job::STATUS_RETRY_SUCCEEDED:
-            case Job::STATUS_SUCCEEDED:
+            case self::STATUS_ABORTED:
+            case self::STATUS_CANCELLED:
+            case self::STATUS_FAILED:
+            case self::STATUS_RETRIED:
+            case self::STATUS_RETRY_FAILED:
+            case self::STATUS_RETRY_SUCCEEDED:
+            case self::STATUS_SUCCEEDED:
                 return true;
             default:
                 return false;
@@ -914,8 +925,8 @@ class Job
     public function isStatusSuccessful() : bool
     {
         switch ($this->getStatus()) {
-            case Job::STATUS_SUCCEEDED:
-            case Job::STATUS_RETRY_SUCCEEDED:
+            case self::STATUS_SUCCEEDED:
+            case self::STATUS_RETRY_SUCCEEDED:
                 return true;
             default:
                 return false;
@@ -928,8 +939,8 @@ class Job
     public function isStatusWaiting() : bool
     {
         switch ($this->getStatus()) {
-            case Job::STATUS_NEW:
-            case Job::STATUS_RETRIED:
+            case self::STATUS_NEW:
+            case self::STATUS_RETRIED:
                 return true;
             default:
                 return false;
@@ -942,8 +953,8 @@ class Job
     public function isStatusWorking() : bool
     {
         switch ($this->getStatus()) {
-            case Job::STATUS_PENDING:
-            case Job::STATUS_RUNNING:
+            case self::STATUS_PENDING:
+            case self::STATUS_RUNNING:
                 return true;
             default:
                 return false;
