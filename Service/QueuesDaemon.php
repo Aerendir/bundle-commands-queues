@@ -461,14 +461,6 @@ class QueuesDaemon
         // Now detach the Job
         JobsManager::detach($job);
 
-        // The process is terminated
-//        VarDumper::dump($process->getIdleTimeout());
-//        VarDumper::dump($process->getStopSignal());
-//        VarDumper::dump($process->getTermSignal());
-//        VarDumper::dump($process->getTimeout());
-//        VarDumper::dump($process->hasBeenSignaled());
-//        VarDumper::dump($process->hasBeenStopped());
-
         $this->wait();
 
         return true;
@@ -598,6 +590,15 @@ class QueuesDaemon
     }
 
     /**
+     * @todo Those methods can be used to better define the failure cause:
+     *
+     * - $process->getIdleTimeout()
+     * - $process->getStopSignal()
+     * - $process->getTermSignal()
+     * - $process->getTimeout()
+     * - $process->hasBeenSignaled()
+     * - $process->hasBeenStopped()
+     *
      * @param Job     $job
      * @param Process $process
      */

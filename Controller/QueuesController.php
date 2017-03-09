@@ -10,7 +10,6 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
-use SerendipityHQ\Component\ThenWhen\Strategy\LiveStrategy;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Console\Input\ArrayInput;
@@ -45,15 +44,12 @@ class QueuesController extends Controller
      */
     public function jobsAction(Request $request)
     {
-        //$jobs = $this->getDoctrine()->getRepository('SHQCommandsQueuesBundle:Job')->findBy([], ['createdAt' => 'ASC', 'id' => 'ASC']);
-
         /** @var EntityManager $em */
         $em = $this->getDoctrine()->getManagerForClass('SHQCommandsQueuesBundle:Job');
         $qb = $em->createQueryBuilder();
         $qb->select('j')->from('SHQCommandsQueuesBundle:Job', 'j')
             ->orderBy('j.priority', 'ASC')
             ->addOrderBy('j.createdAt', 'ASC');
-            //->addOrderBy('j.id', 'ASC');
 
         $status = $request->query->get('status', null);
         if (null !== $status) {

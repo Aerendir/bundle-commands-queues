@@ -720,42 +720,6 @@ class Job
             return false;
         }
 
-        /*
-        if ($this->isTypeRetried()) {
-            // The retried Job is updated before the retrying one...
-            if ($this->getRetriedBy()->isStatusWorking()) {
-                // ... So we need to keep this in memory until the retrying is flushed
-                $this->cannotBeDetachedBecause = 'its retrying Job is currently waiting (' . $this->getStatus() . ')';
-                return false;
-            }
-
-            /** @var Job $parentJob Now check the parent Jobs **
-            foreach ($this->getRetryingJobs() as $retryingJob) {
-                switch ($retryingJob->getStatus()) {
-                    // Working dependencies
-                    case self::STATUS_PENDING:
-                        $this->cannotBeDetachedBecause = sprintf(
-                            'has a retrying Job #%s@%s that is being processed (%s)',
-                            $retryingJob->getId(), $retryingJob->getQueue(), $retryingJob->getStatus()
-                        );
-                        return false;
-                    case self::STATUS_RUNNING:
-                        $this->cannotBeDetachedBecause = sprintf(
-                            'has retrying Job #%s@%s that is running (%s)',
-                            $retryingJob->getId(), $retryingJob->getQueue(), $retryingJob->getStatus()
-                        );
-                        return false;
-                    // The retrying Job failed and is retried on its own: we have to keep this in memory to flush them
-                    case self::STATUS_RETRIED:
-                        $this->cannotBeDetachedBecause = sprintf(
-                            'has retrying Job #%s@%s that is retried on its own by Job #%s',
-                            $retryingJob->getId(), $retryingJob->getQueue(), $retryingJob->getRetriedBy()->getId()
-                        );
-                        return false;
-                }
-            }
-        }
-
         /** @var Job $parentJob Now check the parent Jobs **/
         foreach ($this->getParentDependencies() as $parentJob) {
             switch ($parentJob->getStatus()) {

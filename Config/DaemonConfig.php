@@ -174,7 +174,7 @@ class DaemonConfig extends AbstractConfig
      */
     public function getRetryStaleJobs(string $queueName) : bool
     {
-        return $this->queues[$queueName]['running_jobs_check_interval'];
+        return $this->queues[$queueName]['retry_stale_jobs'];
     }
     
     /**
