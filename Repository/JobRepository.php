@@ -3,8 +3,8 @@
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Repository;
 
 use Doctrine\DBAL\Connection;
-use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\QueryBuilder;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Service\JobsManager;
 use SerendipityHQ\Bundle\ConsoleStyles\Console\Style\SerendipityHQStyle;
@@ -15,14 +15,14 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class JobRepository extends EntityRepository
 {
-    /** @var  array $config */
+    /** @var array $config */
     private $config;
 
-    /** @var  SerendipityHQStyle $ioWriter */
+    /** @var SerendipityHQStyle $ioWriter */
     private $ioWriter;
 
     /**
-     * @param array $config
+     * @param array              $config
      * @param SerendipityHQStyle $ioWriter
      */
     public function configure(array $config, SerendipityHQStyle $ioWriter)
@@ -80,8 +80,6 @@ class JobRepository extends EntityRepository
             // Remove it from the Entity Manager to free some memory
             JobsManager::detach($job);
         }
-
-        return null;
     }
 
     /**
@@ -109,6 +107,7 @@ class JobRepository extends EntityRepository
 
     /**
      * @param array $knownAsStale
+     *
      * @return Job
      */
     public function findNextStaleJob(array $knownAsStale)
@@ -141,7 +140,7 @@ class JobRepository extends EntityRepository
      * Finds the next Job to process.
      *
      * @param string $queueName
-     * @param array $excludedJobs The Jobs that have to be excluded from the SELECT
+     * @param array  $excludedJobs The Jobs that have to be excluded from the SELECT
      *
      * @return Job|null
      */

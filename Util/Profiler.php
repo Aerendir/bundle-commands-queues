@@ -53,19 +53,19 @@ class Profiler
     /** @var float $maxRuntime After this amount of time the Daemon MUST die */
     private $maxRuntime;
 
-    /** @var  bool $memprofEnabled */
+    /** @var bool $memprofEnabled */
     private $memprofEnabled = false;
 
-    /** @var  int $pid The PID of the Daemon to be used to mark the callgrindout file */
+    /** @var int $pid The PID of the Daemon to be used to mark the callgrindout file */
     private $pid;
 
-    /** @var  array $profilingInfo */
+    /** @var array $profilingInfo */
     private $profilingInfo = [];
 
-    /** @var  UnitOfWork $uow */
+    /** @var UnitOfWork $uow */
     private static $uow;
 
-    /** @var  SerendipityHQStyle $ioWriter */
+    /** @var SerendipityHQStyle $ioWriter */
     private static $ioWriter;
 
     /**
@@ -81,16 +81,17 @@ class Profiler
 
         /** @var Job $job */
         foreach (self::$uow->getIdentityMap()[Job::class] as $job) {
-            $managedEntities[] = '<success-nobg>#' . $job->getId() . '</success-nobg> (' . $job->getStatus() . ') [Em: ' . JobsManager::guessJobEmState($job) . ']';
+            $managedEntities[] = '<success-nobg>#'.$job->getId().'</success-nobg> ('.$job->getStatus().') [Em: '.JobsManager::guessJobEmState($job).']';
         }
 
         asort($managedEntities);
+
         return implode(', ', $managedEntities);
     }
 
     /**
      * @param SerendipityHQStyle $ioWriter
-     * @param UnitOfWork $uow
+     * @param UnitOfWork         $uow
      */
     public static function setDependencies(SerendipityHQStyle $ioWriter, UnitOfWork $uow)
     {
@@ -110,7 +111,6 @@ class Profiler
                 $count, Helper::formatMemory(memory_get_usage(false)), Helper::formatMemory(memory_get_usage(true))
             );
 
-
             if (null !== $where) {
                 $message = sprintf('[%s] %s', $where, $message);
             }
@@ -128,9 +128,9 @@ class Profiler
     /**
      * Start the profiler.
      *
-     * @param int $pid
+     * @param int   $pid
      * @param float $maxRuntime After this amount of time the Daemon MUST die.
-     * @param array $queues The configured queues
+     * @param array $queues     The configured queues
      */
     public function start(int $pid, float $maxRuntime, array $queues)
     {
@@ -203,16 +203,15 @@ class Profiler
                 // If the difference is negative, then this is an increase in memory consumption
                 $memoryDifferenceReal >= 0
                     ? sprintf('<%s>%s</>', 'success-nobg', "\xE2\x9C\x94")
-                    : sprintf('<%s>%s</>', 'error-nobg', "\xE2\x9C\x96")
-                , 'Allocated Memory',
-                Helper::formatMemory($this->lastMemoryUsageReal) . ' => ' . Helper::formatMemory($currentMemoryUsageReal) . ' (' . ($memoryDifferenceReal <= 0 ? '+' : '-').abs($memoryDifferenceReal).'%)'
+                    : sprintf('<%s>%s</>', 'error-nobg', "\xE2\x9C\x96"), 'Allocated Memory',
+                Helper::formatMemory($this->lastMemoryUsageReal).' => '.Helper::formatMemory($currentMemoryUsageReal).' ('.($memoryDifferenceReal <= 0 ? '+' : '-').abs($memoryDifferenceReal).'%)',
             ],
             [
                 $memoryPeakDifferenceReal >= 0
                     ? sprintf('<%s>%s</>', 'success-nobg', "\xE2\x9C\x94")
                     : sprintf('<%s>%s</>', 'error-nobg', "\xE2\x9C\x96"),
                 'Allocated Memory Peak',
-                Helper::formatMemory($this->highestMemoryPeakReal) . ' => ' . Helper::formatMemory($currentMemoryPeakReal) . ' (' . ($memoryPeakDifferenceReal <= 0 ? '+' : '-').abs($memoryPeakDifferenceReal).'%)'
+                Helper::formatMemory($this->highestMemoryPeakReal).' => '.Helper::formatMemory($currentMemoryPeakReal).' ('.($memoryPeakDifferenceReal <= 0 ? '+' : '-').abs($memoryPeakDifferenceReal).'%)',
             ],
             ['', '', ''],
             ['', '<success-nobg>Memory info (memory_get_*(false))</success-nobg>'],
@@ -221,14 +220,14 @@ class Profiler
                     ? sprintf('<%s>%s</>', 'success-nobg', "\xE2\x9C\x94")
                     : sprintf('<%s>%s</>', 'error-nobg', "\xE2\x9C\x96"),
                 'Memory Actually Used',
-                Helper::formatMemory($this->lastMemoryUsage) . ' => ' . Helper::formatMemory($currentMemoryUsage) . ' (' . ($memoryDifference <= 0 ? '+' : '-').abs($memoryDifference).'%)'
+                Helper::formatMemory($this->lastMemoryUsage).' => '.Helper::formatMemory($currentMemoryUsage).' ('.($memoryDifference <= 0 ? '+' : '-').abs($memoryDifference).'%)',
             ],
             [
                 $memoryPeakDifference >= 0
                     ? sprintf('<%s>%s</>', 'success-nobg', "\xE2\x9C\x94")
                     : sprintf('<%s>%s</>', 'error-nobg', "\xE2\x9C\x96"),
                 'Memory Actual Peak',
-                Helper::formatMemory($this->highestMemoryPeak) . ' => ' . Helper::formatMemory($currentMemoryPeak) . ' (' . ($memoryPeakDifference <= 0 ? '+' : '-').abs($memoryPeakDifference).'%)'
+                Helper::formatMemory($this->highestMemoryPeak).' => '.Helper::formatMemory($currentMemoryPeak).' ('.($memoryPeakDifference <= 0 ? '+' : '-').abs($memoryPeakDifference).'%)',
             ],
             ['', '', ''],
             ['', '<success-nobg>UnitOfWork info</success-nobg>'],
@@ -237,15 +236,15 @@ class Profiler
                     ? sprintf('<%s>%s</>', 'success-nobg', "\xE2\x9C\x94")
                     : sprintf('<%s>%s</>', 'error-nobg', "\xE2\x9C\x96"),
                 'Uow size',
-                $this->lastUowSize . ' => ' . $currentUowSize . ' (' . ($uowSizeDifference <= 0 ? '+' : '-').abs($uowSizeDifference).'%)'
+                $this->lastUowSize.' => '.$currentUowSize.' ('.($uowSizeDifference <= 0 ? '+' : '-').abs($uowSizeDifference).'%)',
             ],
             [
                 $uowHighestSizeDifference >= 0
                     ? sprintf('<%s>%s</>', 'success-nobg', "\xE2\x9C\x94")
                     : sprintf('<%s>%s</>', 'error-nobg', "\xE2\x9C\x96"),
                 'Uow peak size',
-                $this->highestUowSize . ' => ' . $currentHighestUowSize . ' (' . ($uowHighestSizeDifference <= 0 ? '+' : '-').abs($uowHighestSizeDifference).'%)'
-            ]
+                $this->highestUowSize.' => '.$currentHighestUowSize.' ('.($uowHighestSizeDifference <= 0 ? '+' : '-').abs($uowHighestSizeDifference).'%)',
+            ],
         ];
 
         $this->lastMicrotime = $currentMicrotime;
@@ -265,7 +264,7 @@ class Profiler
                 sprintf(
                     'app/logs/callgrind/callgrind.out.%s.%s.%s',
                     (new \DateTime())->format('Y-m-d'), $this->pid, $this->getCurrentIteration()
-                ), "w");
+                ), 'w');
             memprof_dump_callgrind($callgrind);
             fwrite($callgrind, stream_get_contents($callgrind));
             fclose($callgrind);
@@ -319,6 +318,7 @@ class Profiler
 
     /**
      * @param string $queueName
+     *
      * @return float
      */
     public function getRunningJobsLastCheckedAt(string $queueName) : float
@@ -382,6 +382,7 @@ class Profiler
         // Intialize php-memprof
         if (true === extension_loaded('memprof')) {
             memprof_enable();
+
             return $this->memprofEnabled = true;
         }
 

@@ -13,28 +13,28 @@ class DaemonConfig extends AbstractConfig
     /** @var array $queues */
     private $queues;
 
-    /** @var  string $name */
+    /** @var string $name */
     private $name;
 
-    /** @var  int $aliveDaemonsCheckInterval */
+    /** @var int $aliveDaemonsCheckInterval */
     private $aliveDaemonsCheckInterval;
-    
-    /** @var  int $idleTime */
+
+    /** @var int $idleTime */
     private $idleTime;
 
-    /** @var  int $managedEntitiesTreshold */
+    /** @var int $managedEntitiesTreshold */
     private $managedEntitiesTreshold;
 
-    /** @var  int $maxRuntime */
+    /** @var int $maxRuntime */
     private $maxRuntime;
 
-    /** @var  int $optimizationInterval */
+    /** @var int $optimizationInterval */
     private $optimizationInterval;
 
-    /** @var  int $profilingInfoInterval */
+    /** @var int $profilingInfoInterval */
     private $profilingInfoInterval;
 
-    /** @var  bool $printProfilingInfo */
+    /** @var bool $printProfilingInfo */
     private $printProfilingInfo;
 
     /**
@@ -53,10 +53,10 @@ class DaemonConfig extends AbstractConfig
     public function initialize($daemon)
     {
         if (null === $daemon) {
-            if(count($this->daemons) > 1) {
+            if (count($this->daemons) > 1) {
                 throw new \InvalidArgumentException(
                     'More than one Daemon is configured: you MUST specify the Daemon you want to run using the "--daemon"'
-                    . ' argument'
+                    .' argument'
                 );
             }
 
@@ -105,6 +105,7 @@ class DaemonConfig extends AbstractConfig
      * Returns the requested queue or the default one if the requested desn't exist.
      *
      * @param string $queueName
+     *
      * @return array
      */
     public function getQueue(string $queueName) : array
@@ -170,15 +171,17 @@ class DaemonConfig extends AbstractConfig
 
     /**
      * @param string $queueName
+     *
      * @return bool
      */
     public function getRetryStaleJobs(string $queueName) : bool
     {
         return $this->queues[$queueName]['retry_stale_jobs'];
     }
-    
+
     /**
      * @param string $queueName
+     *
      * @return int
      */
     public function getRunningJobsCheckInterval(string $queueName): int
@@ -193,7 +196,7 @@ class DaemonConfig extends AbstractConfig
     {
         // Return the list of queues to include
         return [
-            'included_queues' => array_keys($this->queues)
+            'included_queues' => array_keys($this->queues),
         ];
     }
 

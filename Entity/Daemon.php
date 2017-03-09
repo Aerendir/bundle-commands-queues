@@ -80,9 +80,9 @@ class Daemon
     private $processedJobs;
 
     /**
-     * @param string $host
-     * @param int    $pid
-     * @param DaemonConfig  $config
+     * @param string       $host
+     * @param int          $pid
+     * @param DaemonConfig $config
      */
     public function __construct(string $host, int $pid, DaemonConfig $config)
     {

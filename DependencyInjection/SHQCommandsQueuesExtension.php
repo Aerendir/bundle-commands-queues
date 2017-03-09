@@ -66,7 +66,7 @@ class SHQCommandsQueuesExtension extends Extension
         $runCommandDefinition = (new Definition(RunCommand::class, [
             $daemonDefinition,
             $container->findDefinition('commands_queues.do_not_use.entity_manager'),
-            $jobsMarkerDefinition
+            $jobsMarkerDefinition,
         ]))->addTag('console.command');
         $container->setDefinition('commands_queues.command.run', $runCommandDefinition);
     }
