@@ -86,8 +86,17 @@
                         <p>Closed at: {% if job.closedAt %}{{ job.closedAt|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }}{% endif %}</p>
                         <p>Exit code: {{ job.exitCode }}</p>
                         <p>
-                            Config:<br />
-                            {{ dump(job.debug) }}
+                            Config:
+                            <ul>
+                            <li><code>exit_code_text</code>: {{ job.debug.exit_code_text }}</li>
+                            <li><code>complete_command</code>: {{ job.debug.complete_command }}</li>
+                            <li><code>input</code>: {{ job.debug.input }}</li>
+                            <li><code>working_directory</code>: {{ job.debug.working_directory }}</li>
+                            <li><code>enhanced_sigchild_compatibility</code>: {{ job.debug.enhanced_sigchild_compatibility }}</li>
+                            <li><code>enhanced_windows_compatibility</code>: {{ job.debug.enhanced_windows_compatibility }}</li>
+                            </ul>
+                        <small>There are other info not displayed here as the full array should be traversed in the twig template. On development use the line below.</small><br />
+                        <code>{ dump(job.debug) }</code>
                         </p>
                     </div>
                     <div class="col-lg-8">
