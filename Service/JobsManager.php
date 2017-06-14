@@ -362,7 +362,7 @@ class JobsManager
             case OutputInterface::VERBOSITY_NORMAL:
             default:
                 // This WILL NEVER be reached as default
-                return;
+                return '';
         }
     }
 }
