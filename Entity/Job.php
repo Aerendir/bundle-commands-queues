@@ -1028,7 +1028,7 @@ class Job
      */
     public function makeAwareOfJob(bool $awareOfJobId = true) : self
     {
-        $this->awareOfJobId = $awareOfJobId;
+        $this->awareOfJob = $awareOfJobId;
 
         return $this;
     }
