@@ -116,6 +116,13 @@ class Job
     private $arguments;
 
     /**
+     * @var bool
+     *
+     * @ORM\Column(name="self_aware", type="boolean", nullable=false)
+     */
+    private $awareOfJob = false;
+
+    /**
      * @var \DateTime
      *
      * @ORM\Column(name="execute_after_time", type="datetime", nullable=true)
@@ -839,6 +846,14 @@ class Job
     /**
      * @return bool
      */
+    public function isAwareOfJob() : bool
+    {
+        return $this->awareOfJob;
+    }
+
+    /**
+     * @return bool
+     */
     public function isStatusAborted() : bool
     {
         return self::STATUS_ABORTED === $this->getStatus();
@@ -1005,6 +1020,17 @@ class Job
     public function isTypeRetried() : bool
     {
         return null !== $this->getRetriedBy();
+    }
+
+    /**
+     * @param bool $awareOfJobId
+     * @return Job
+     */
+    public function makeAwareOfJob(bool $awareOfJobId = true) : self
+    {
+        $this->awareOfJobId = $awareOfJobId;
+
+        return $this;
     }
 
     /**

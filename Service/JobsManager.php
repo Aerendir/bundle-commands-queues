@@ -185,6 +185,10 @@ class JobsManager
             $arguments[] = $this->guessVerbosityLevel();
         }
 
+        if ($job->isAwareOfJob()) {
+            $arguments[] = '--job-id='.$job->getId();
+        }
+
         // The arguments of the command
         $arguments = array_merge($arguments, $job->getArguments());
 
