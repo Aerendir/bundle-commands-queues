@@ -49,7 +49,7 @@ class QueuesController extends Controller
         $qb = $em->createQueryBuilder();
         $qb->select('j')->from('SHQCommandsQueuesBundle:Job', 'j')
             ->orderBy('j.priority', 'ASC')
-            ->addOrderBy('j.createdAt', 'DESC');
+            ->addOrderBy('j.executeAfterTime', 'DESC');
 
         $status = $request->query->get('status', null);
         if (null !== $status) {
