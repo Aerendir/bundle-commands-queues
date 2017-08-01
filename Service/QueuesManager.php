@@ -22,6 +22,28 @@ class QueuesManager
     }
 
     /**
+     * Checks if the given Job exists or not.
+     *
+     * @param string $command
+     * @param array $arguments
+     * @param string $queue
+     * @return bool|Job
+     */
+    public function exists(string $command, $arguments = [], string $queue = 'default')
+    {
+        // Check and prepare arguments of the command
+        $arguments = Job::prepareArguments($arguments);
+
+        $exists = $this->entityManager->getRepository('SHQCommandsQueuesBundle:Job')->exists($command, $arguments, $queue);
+
+        if (null === $exists) {
+            return false;
+        }
+
+        return $exists;
+    }
+
+    /**
      * Schedules a job.
      *
      * @param Job $job

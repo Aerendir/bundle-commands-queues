@@ -288,7 +288,31 @@ class Job
      * @param string       $command
      * @param array|string $arguments
      */
-    public function __construct(string $command, $arguments = [])
+    public function __construct(string $command, $arguments = [], string $queue = 'default')
+    {
+        $arguments = self::prepareArguments($arguments);
+
+        $this->command = $command;
+        $this->arguments = $arguments;
+        $this->priority = 1;
+        $this->queue = $queue;
+        $this->status = self::STATUS_NEW;
+        $this->createdAt = new \DateTime();
+        $this->childDependencies = new ArrayCollection();
+        $this->parentDependencies = new ArrayCollection();
+        $this->retryStrategy = new NeverRetryStrategy();
+        $this->retryingJobs = new ArrayCollection();
+    }
+
+    /**
+     * Ensures the $arguments is only a string or an array.
+     * If a string is passed, it is transformed into an array.
+     * Then it reorder the arguments to get a unique signature to facilitate checks on existent Jobs.
+     *
+     * @param array $arguments
+     * @return array
+     */
+    public static function prepareArguments($arguments = [])
     {
         if (false === is_string($arguments) && false === is_array($arguments)) {
             throw new \InvalidArgumentException('Second parameter $arguments can be only an array or a string.');
@@ -305,16 +329,10 @@ class Job
             }, $arguments);
         }
 
-        $this->command = $command;
-        $this->arguments = $arguments;
-        $this->priority = 1;
-        $this->queue = 'default';
-        $this->status = self::STATUS_NEW;
-        $this->createdAt = new \DateTime();
-        $this->childDependencies = new ArrayCollection();
-        $this->parentDependencies = new ArrayCollection();
-        $this->retryStrategy = new NeverRetryStrategy();
-        $this->retryingJobs = new ArrayCollection();
+        // Order arguments
+        asort($arguments);
+
+        return $arguments;
     }
 
     /**

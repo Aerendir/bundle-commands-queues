@@ -106,6 +106,31 @@ class JobRepository extends EntityRepository
     }
 
     /**
+     * Checks if the given Job exists or not.
+     *
+     * @param string $command
+     * @param array $arguments
+     * @param string $queue
+     * @return null|Job
+     */
+    public function exists(string $command, $arguments = [], string $queue = 'default')
+    {
+        $queryBuilder = $this->getEntityManager()->createQueryBuilder();
+
+        $queryBuilder->select('j')->from('SHQCommandsQueuesBundle:Job', 'j')
+            ->where($queryBuilder->expr()->eq('j.command', ':command'))
+            ->setParameter('command', $command)
+            ->andWhere($queryBuilder->expr()->eq('j.queue', ':queue'))
+            ->setParameter('queue', $queue);
+
+        foreach ($arguments as $argument => $value) {
+            $queryBuilder->andWhere($queryBuilder->expr()->like($argument . '=' . $value));
+        }
+
+        return $queryBuilder->getQuery()->setMaxResults(1)->getOneOrNullResult();
+    }
+
+    /**
      * @param array $knownAsStale
      *
      * @return Job
