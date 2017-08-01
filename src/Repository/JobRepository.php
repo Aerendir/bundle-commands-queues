@@ -123,8 +123,8 @@ class JobRepository extends EntityRepository
             ->andWhere($queryBuilder->expr()->eq('j.queue', ':queue'))
             ->setParameter('queue', $queue);
 
-        foreach ($arguments as $argument => $value) {
-            $queryBuilder->andWhere($queryBuilder->expr()->like('j.arguments', $queryBuilder->expr()->literal($argument . '=' . $value)));
+        foreach ($arguments as $argument) {
+            $queryBuilder->andWhere($queryBuilder->expr()->like('j.arguments', $queryBuilder->expr()->literal('%' . $argument . '%')));
         }
 
         return $queryBuilder->getQuery()->setMaxResults(1)->getOneOrNullResult();
