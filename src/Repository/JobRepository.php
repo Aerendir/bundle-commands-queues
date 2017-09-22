@@ -121,7 +121,8 @@ class JobRepository extends EntityRepository
             ->where($queryBuilder->expr()->eq('j.command', ':command'))
             ->setParameter('command', $command)
             ->andWhere($queryBuilder->expr()->eq('j.queue', ':queue'))
-            ->setParameter('queue', $queue);
+            ->setParameter('queue', $queue)
+            ->andWhere($queryBuilder->expr()->isNull('j.startedAt'));
 
         foreach ($arguments as $argument) {
             $queryBuilder->andWhere($queryBuilder->expr()->like('j.arguments', $queryBuilder->expr()->literal('%' . $argument . '%')));
