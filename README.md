@@ -18,7 +18,7 @@ Do you like this bundle? [**Leave a &#9733;**](#js-repo-pjax-container)!
 Requirements
 ------------
 
-1. PHP ^7.0
+1. PHP ^7.1
 
 Status: ACTIVE DEVELOPMENT
 --------------------------
