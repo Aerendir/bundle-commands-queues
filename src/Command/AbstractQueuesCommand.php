@@ -50,7 +50,7 @@ abstract class AbstractQueuesCommand extends ContainerAwareCommand
         $this->ioWriter = new SerendipityHQStyle($input, $output);
         $this->ioWriter->setFormatter(new SerendipityHQOutputFormatter(true));
 
-        $this->entityManager = $this->getContainer()->get('commands_queues.do_not_use.entity_manager');
+        $this->entityManager = $this->getContainer()->get('shq_commands_queues.do_not_use.entity_manager');
 
         Profiler::setDependencies($this->getIoWriter(), $this->getEntityManager()->getUnitOfWork());
 
@@ -71,7 +71,7 @@ abstract class AbstractQueuesCommand extends ContainerAwareCommand
     final protected function getJobsMarker(): JobsMarker
     {
         if (null === $this->jobsMarker) {
-            $this->jobsMarker = $this->getContainer()->get('commands_queues.do_not_use.jobs_marker');
+            $this->jobsMarker = $this->getContainer()->get('shq_commands_queues.do_not_use.jobs_marker');
             $this->jobsMarker->setIoWriter($this->getIoWriter());
         }
 

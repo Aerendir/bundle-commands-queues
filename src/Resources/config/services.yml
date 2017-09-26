@@ -1,4 +1,4 @@
 services:
     queues:
         class: SerendipityHQ\Bundle\CommandsQueuesBundle\Service\QueuesManager
-        arguments: ["@commands_queues.do_not_use.entity_manager"]
+        arguments: ["@shq_commands_queues.do_not_use.entity_manager"]

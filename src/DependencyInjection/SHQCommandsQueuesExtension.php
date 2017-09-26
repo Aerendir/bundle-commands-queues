@@ -56,9 +56,9 @@ class SHQCommandsQueuesExtension extends Extension
 
         // The Jobs Marker
         $jobsMarkerDefinition = (new Definition(JobsMarker::class, [
-            $container->findDefinition('commands_queues.do_not_use.entity_manager'),
+            $container->findDefinition('shq_commands_queues.do_not_use.entity_manager'),
         ]));
-        $container->setDefinition('commands_queues.do_not_use.jobs_marker', $jobsMarkerDefinition);
+        $container->setDefinition('shq_commands_queues.do_not_use.jobs_marker', $jobsMarkerDefinition);
 
         // The Profiler
         $profilerDefinition = (new Definition(Profiler::class))->setPublic(false);
@@ -69,7 +69,7 @@ class SHQCommandsQueuesExtension extends Extension
 
         $daemonDefinition = (new Definition(QueuesDaemon::class, [
             $daemonConfigDefinition,
-            $container->findDefinition('commands_queues.do_not_use.entity_manager'),
+            $container->findDefinition('shq_commands_queues.do_not_use.entity_manager'),
             $jobsManagerDefinition,
             $jobsMarkerDefinition,
             $profilerDefinition,
@@ -78,7 +78,7 @@ class SHQCommandsQueuesExtension extends Extension
         // The queues:run command
         $runCommandDefinition = (new Definition(RunCommand::class, [
             $daemonDefinition,
-            $container->findDefinition('commands_queues.do_not_use.entity_manager'),
+            $container->findDefinition('shq_commands_queues.do_not_use.entity_manager'),
             $jobsMarkerDefinition,
         ]))->addTag('console.command');
         $container->setDefinition('commands_queues.command.run', $runCommandDefinition);
