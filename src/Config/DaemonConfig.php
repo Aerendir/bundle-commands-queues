@@ -1,5 +1,18 @@
 <?php
 
+/*
+ * This file is part of the SHQCommandsQueuesBundle.
+ *
+ * Copyright Adamo Aerendir Crespi 2017.
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ *
+ * @author    Adamo Aerendir Crespi <hello@aerendir.me>
+ * @copyright Copyright (C) 2017 Aerendir. All rights reserved.
+ * @license   MIT License.
+ */
+
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Config;
 
 /**
@@ -44,7 +57,7 @@ class DaemonConfig extends AbstractConfig
     public function __construct(array $daemons, array $queues)
     {
         $this->daemons = $daemons;
-        $this->queues = $queues;
+        $this->queues  = $queues;
     }
 
     /**
@@ -56,7 +69,7 @@ class DaemonConfig extends AbstractConfig
             if (count($this->daemons) > 1) {
                 throw new \InvalidArgumentException(
                     'More than one Daemon is configured: you MUST specify the Daemon you want to run using the "--daemon"'
-                    .' argument'
+                    . ' argument'
                 );
             }
 
@@ -96,7 +109,7 @@ class DaemonConfig extends AbstractConfig
     /**
      * @return array
      */
-    public function getQueues() : array
+    public function getQueues(): array
     {
         return array_keys($this->queues);
     }
@@ -108,7 +121,7 @@ class DaemonConfig extends AbstractConfig
      *
      * @return array
      */
-    public function getQueue(string $queueName) : array
+    public function getQueue(string $queueName): array
     {
         return $this->queues[$queueName] ?? $this->queues['default'];
     }
@@ -174,7 +187,7 @@ class DaemonConfig extends AbstractConfig
      *
      * @return bool
      */
-    public function getRetryStaleJobs(string $queueName) : bool
+    public function getRetryStaleJobs(string $queueName): bool
     {
         return $this->queues[$queueName]['retry_stale_jobs'];
     }
@@ -192,7 +205,7 @@ class DaemonConfig extends AbstractConfig
     /**
      * @return array
      */
-    public function getRepoConfig() : array
+    public function getRepoConfig(): array
     {
         // Return the list of queues to include
         return [

@@ -1,5 +1,18 @@
 <?php
 
+/*
+ * This file is part of the SHQCommandsQueuesBundle.
+ *
+ * Copyright Adamo Aerendir Crespi 2017.
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ *
+ * @author    Adamo Aerendir Crespi <hello@aerendir.me>
+ * @copyright Copyright (C) 2017 Aerendir. All rights reserved.
+ * @license   MIT License.
+ */
+
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Command;
 
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
@@ -52,7 +65,7 @@ class MarkAsCancelledCommand extends AbstractQueuesCommand
         /** @var JobRepository $jobRepo */
         $jobRepo = $this->getEntityManager()->getRepository('SHQCommandsQueuesBundle:Job');
 
-        $failedJob = $jobRepo->findOneById($input->getOption('id'));
+        $failedJob     = $jobRepo->findOneById($input->getOption('id'));
         $cancellingJob = $jobRepo->findOneById($input->getOption('cancelling-job-id'));
 
         $this->cancelChildJobs($failedJob, $cancellingJob, sprintf('Parent Job %s failed.', $failedJob->getId()));
@@ -105,7 +118,7 @@ class MarkAsCancelledCommand extends AbstractQueuesCommand
             $cancelledChilds[$childDependency->getId()] = $childDependency->getId();
 
             // If the status is already cancelled...
-            if ($childDependency->getStatus() === Job::STATUS_CANCELLED) {
+            if (Job::STATUS_CANCELLED === $childDependency->getStatus()) {
                 // ... Add it to the array of already cancelled Jobs
                 $alreadyCancelledJobs[$childDependency->getId()] = $childDependency->getId();
             }

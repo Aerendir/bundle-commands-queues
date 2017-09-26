@@ -1,5 +1,18 @@
 <?php
 
+/*
+ * This file is part of the SHQCommandsQueuesBundle.
+ *
+ * Copyright Adamo Aerendir Crespi 2017.
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ *
+ * @author    Adamo Aerendir Crespi <hello@aerendir.me>
+ * @copyright Copyright (C) 2017 Aerendir. All rights reserved.
+ * @license   MIT License.
+ */
+
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Util;
 
 use Doctrine\ORM\UnitOfWork;
@@ -71,7 +84,7 @@ class Profiler
     /**
      * @return string
      */
-    public static function buildJobsList() : string
+    public static function buildJobsList(): string
     {
         if (false === isset(self::$uow->getIdentityMap()[Job::class])) {
             return '';
@@ -81,7 +94,7 @@ class Profiler
 
         /** @var Job $job */
         foreach (self::$uow->getIdentityMap()[Job::class] as $job) {
-            $managedEntities[] = '<success-nobg>#'.$job->getId().'</success-nobg> ('.$job->getStatus().') [Em: '.JobsManager::guessJobEmState($job).']';
+            $managedEntities[] = '<success-nobg>#' . $job->getId() . '</success-nobg> (' . $job->getStatus() . ') [Em: ' . JobsManager::guessJobEmState($job) . ']';
         }
 
         asort($managedEntities);
@@ -96,7 +109,7 @@ class Profiler
     public static function setDependencies(SerendipityHQStyle $ioWriter, UnitOfWork $uow)
     {
         self::$ioWriter = $ioWriter;
-        self::$uow = $uow;
+        self::$uow      = $uow;
     }
 
     /**
@@ -105,7 +118,7 @@ class Profiler
     public static function printUnitOfWork(string $where = null)
     {
         if (self::$ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
-            $count = isset(self::$uow->getIdentityMap()[Job::class]) ? count(self::$uow->getIdentityMap()[Job::class]) : 0;
+            $count   = isset(self::$uow->getIdentityMap()[Job::class]) ? count(self::$uow->getIdentityMap()[Job::class]) : 0;
             $message = sprintf(
                 'Currently there are <success-nobg>%s</success-nobg> Jobs managed <comment-nobg>(%s of %s)</comment-nobg>',
                 $count, Helper::formatMemory(memory_get_usage(false)), Helper::formatMemory(memory_get_usage(true))
@@ -129,7 +142,7 @@ class Profiler
      * Start the profiler.
      *
      * @param int   $pid
-     * @param float $maxRuntime After this amount of time the Daemon MUST die.
+     * @param float $maxRuntime after this amount of time the Daemon MUST die
      * @param array $queues     The configured queues
      */
     public function start(int $pid, float $maxRuntime, array $queues)
@@ -151,11 +164,11 @@ class Profiler
             $this->runningJobsLastCheckedAt[$queue] = $this->startTime;
         }
 
-        $this->lastMemoryUsage = memory_get_usage();
-        $this->lastMemoryUsageReal = memory_get_usage(true);
-        $this->highestMemoryPeak = memory_get_peak_usage();
+        $this->lastMemoryUsage       = memory_get_usage();
+        $this->lastMemoryUsageReal   = memory_get_usage(true);
+        $this->highestMemoryPeak     = memory_get_peak_usage();
         $this->highestMemoryPeakReal = memory_get_peak_usage(true);
-        $this->maxRuntime = $maxRuntime;
+        $this->maxRuntime            = $maxRuntime;
     }
 
     /**
@@ -163,13 +176,13 @@ class Profiler
      */
     public function profile()
     {
-        $currentMicrotime = microtime(true);
-        $currentMemoryUsage = memory_get_usage();
+        $currentMicrotime       = microtime(true);
+        $currentMemoryUsage     = memory_get_usage();
         $currentMemoryUsageReal = memory_get_usage(true);
-        $currentMemoryPeak = memory_get_peak_usage();
-        $currentMemoryPeakReal = memory_get_peak_usage(true);
+        $currentMemoryPeak      = memory_get_peak_usage();
+        $currentMemoryPeakReal  = memory_get_peak_usage(true);
         // Subtract the daemon entity
-        $currentUowSize = self::$uow->size() - 1;
+        $currentUowSize        = self::$uow->size() - 1;
         $currentHighestUowSize = $this->highestUowSize < $currentUowSize ? $currentUowSize : $this->highestUowSize;
 
         $memoryDifference = $this->lastMemoryUsage - $currentMemoryUsage;
@@ -204,14 +217,14 @@ class Profiler
                 $memoryDifferenceReal >= 0
                     ? sprintf('<%s>%s</>', 'success-nobg', "\xE2\x9C\x94")
                     : sprintf('<%s>%s</>', 'error-nobg', "\xE2\x9C\x96"), 'Allocated Memory',
-                Helper::formatMemory($this->lastMemoryUsageReal).' => '.Helper::formatMemory($currentMemoryUsageReal).' ('.($memoryDifferenceReal <= 0 ? '+' : '-').abs($memoryDifferenceReal).'%)',
+                Helper::formatMemory($this->lastMemoryUsageReal) . ' => ' . Helper::formatMemory($currentMemoryUsageReal) . ' (' . ($memoryDifferenceReal <= 0 ? '+' : '-') . abs($memoryDifferenceReal) . '%)',
             ],
             [
                 $memoryPeakDifferenceReal >= 0
                     ? sprintf('<%s>%s</>', 'success-nobg', "\xE2\x9C\x94")
                     : sprintf('<%s>%s</>', 'error-nobg', "\xE2\x9C\x96"),
                 'Allocated Memory Peak',
-                Helper::formatMemory($this->highestMemoryPeakReal).' => '.Helper::formatMemory($currentMemoryPeakReal).' ('.($memoryPeakDifferenceReal <= 0 ? '+' : '-').abs($memoryPeakDifferenceReal).'%)',
+                Helper::formatMemory($this->highestMemoryPeakReal) . ' => ' . Helper::formatMemory($currentMemoryPeakReal) . ' (' . ($memoryPeakDifferenceReal <= 0 ? '+' : '-') . abs($memoryPeakDifferenceReal) . '%)',
             ],
             ['', '', ''],
             ['', '<success-nobg>Memory info (memory_get_*(false))</success-nobg>'],
@@ -220,14 +233,14 @@ class Profiler
                     ? sprintf('<%s>%s</>', 'success-nobg', "\xE2\x9C\x94")
                     : sprintf('<%s>%s</>', 'error-nobg', "\xE2\x9C\x96"),
                 'Memory Actually Used',
-                Helper::formatMemory($this->lastMemoryUsage).' => '.Helper::formatMemory($currentMemoryUsage).' ('.($memoryDifference <= 0 ? '+' : '-').abs($memoryDifference).'%)',
+                Helper::formatMemory($this->lastMemoryUsage) . ' => ' . Helper::formatMemory($currentMemoryUsage) . ' (' . ($memoryDifference <= 0 ? '+' : '-') . abs($memoryDifference) . '%)',
             ],
             [
                 $memoryPeakDifference >= 0
                     ? sprintf('<%s>%s</>', 'success-nobg', "\xE2\x9C\x94")
                     : sprintf('<%s>%s</>', 'error-nobg', "\xE2\x9C\x96"),
                 'Memory Actual Peak',
-                Helper::formatMemory($this->highestMemoryPeak).' => '.Helper::formatMemory($currentMemoryPeak).' ('.($memoryPeakDifference <= 0 ? '+' : '-').abs($memoryPeakDifference).'%)',
+                Helper::formatMemory($this->highestMemoryPeak) . ' => ' . Helper::formatMemory($currentMemoryPeak) . ' (' . ($memoryPeakDifference <= 0 ? '+' : '-') . abs($memoryPeakDifference) . '%)',
             ],
             ['', '', ''],
             ['', '<success-nobg>UnitOfWork info</success-nobg>'],
@@ -236,24 +249,24 @@ class Profiler
                     ? sprintf('<%s>%s</>', 'success-nobg', "\xE2\x9C\x94")
                     : sprintf('<%s>%s</>', 'error-nobg', "\xE2\x9C\x96"),
                 'Uow size',
-                $this->lastUowSize.' => '.$currentUowSize.' ('.($uowSizeDifference <= 0 ? '+' : '-').abs($uowSizeDifference).'%)',
+                $this->lastUowSize . ' => ' . $currentUowSize . ' (' . ($uowSizeDifference <= 0 ? '+' : '-') . abs($uowSizeDifference) . '%)',
             ],
             [
                 $uowHighestSizeDifference >= 0
                     ? sprintf('<%s>%s</>', 'success-nobg', "\xE2\x9C\x94")
                     : sprintf('<%s>%s</>', 'error-nobg', "\xE2\x9C\x96"),
                 'Uow peak size',
-                $this->highestUowSize.' => '.$currentHighestUowSize.' ('.($uowHighestSizeDifference <= 0 ? '+' : '-').abs($uowHighestSizeDifference).'%)',
+                $this->highestUowSize . ' => ' . $currentHighestUowSize . ' (' . ($uowHighestSizeDifference <= 0 ? '+' : '-') . abs($uowHighestSizeDifference) . '%)',
             ],
         ];
 
-        $this->lastMicrotime = $currentMicrotime;
-        $this->lastMemoryUsage = $currentMemoryUsage;
-        $this->lastMemoryUsageReal = $currentMemoryUsageReal;
-        $this->lastUowSize = $currentUowSize;
-        $this->highestMemoryPeak = $this->highestMemoryPeak < $currentMemoryPeak ? $currentMemoryPeak : $this->highestMemoryPeak;
+        $this->lastMicrotime         = $currentMicrotime;
+        $this->lastMemoryUsage       = $currentMemoryUsage;
+        $this->lastMemoryUsageReal   = $currentMemoryUsageReal;
+        $this->lastUowSize           = $currentUowSize;
+        $this->highestMemoryPeak     = $this->highestMemoryPeak < $currentMemoryPeak ? $currentMemoryPeak : $this->highestMemoryPeak;
         $this->highestMemoryPeakReal = $this->highestMemoryPeakReal < $currentMemoryPeakReal ? $currentMemoryPeakReal : $this->highestMemoryPeakReal;
-        $this->highestUowSize = $currentHighestUowSize;
+        $this->highestUowSize        = $currentHighestUowSize;
 
         if ($this->isMemprofEnabled()) {
             // Create the directory if it doesn't exist
@@ -287,7 +300,7 @@ class Profiler
     /**
      * @return int
      */
-    public function getCurrentIteration() : int
+    public function getCurrentIteration(): int
     {
         return $this->iterations;
     }
@@ -311,7 +324,7 @@ class Profiler
     /**
      * @return float
      */
-    public function getLastOptimizationAt() : float
+    public function getLastOptimizationAt(): float
     {
         return $this->lastOptimizationAt;
     }
@@ -321,7 +334,7 @@ class Profiler
      *
      * @return float
      */
-    public function getRunningJobsLastCheckedAt(string $queueName) : float
+    public function getRunningJobsLastCheckedAt(string $queueName): float
     {
         return $this->runningJobsLastCheckedAt[$queueName];
     }
@@ -347,7 +360,7 @@ class Profiler
      */
     public function hitIteration()
     {
-        $this->iterations++;
+        ++$this->iterations;
     }
 
     /**
@@ -361,7 +374,7 @@ class Profiler
     /**
      * @return bool
      */
-    public function isMaxRuntimeReached() : bool
+    public function isMaxRuntimeReached(): bool
     {
         return microtime(true) - $this->startTime > $this->maxRuntime;
     }
@@ -369,7 +382,7 @@ class Profiler
     /**
      * @return bool
      */
-    public function isMemprofEnabled() : bool
+    public function isMemprofEnabled(): bool
     {
         return $this->memprofEnabled;
     }

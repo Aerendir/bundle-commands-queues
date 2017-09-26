@@ -1,5 +1,18 @@
 <?php
 
+/*
+ * This file is part of the SHQCommandsQueuesBundle.
+ *
+ * Copyright Adamo Aerendir Crespi 2017.
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ *
+ * @author    Adamo Aerendir Crespi <hello@aerendir.me>
+ * @copyright Copyright (C) 2017 Aerendir. All rights reserved.
+ * @license   MIT License.
+ */
+
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Command;
 
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
@@ -55,11 +68,11 @@ class TestRandomJobsCommand extends AbstractQueuesCommand
     {
         parent::execute($input, $output);
 
-        $howManyJobs = (int) $input->getArgument('how-many-jobs');
-        $batch = $input->getOption('batch');
+        $howManyJobs     = (int) $input->getArgument('how-many-jobs');
+        $batch           = $input->getOption('batch');
         $retryStrategies = $input->getOption('retry-strategies');
-        $timeUnits = $input->getOption('time-units');
-        $noFutureJobs = $input->getOption('no-future-jobs');
+        $timeUnits       = $input->getOption('time-units');
+        $noFutureJobs    = $input->getOption('no-future-jobs');
 
         $this->getIoWriter()->title('SerendipityHQ Queue Bundle Daemon');
         $this->getIoWriter()->info(sprintf('Starting generating %s random jobs...', $howManyJobs));
@@ -71,9 +84,9 @@ class TestRandomJobsCommand extends AbstractQueuesCommand
         $progress->setRedrawFrequency($batch);
 
         $jobs = [];
-        for ($i = 0; $i < $howManyJobs; $i++) {
+        for ($i = 0; $i < $howManyJobs; ++$i) {
             // First: we create a Job to push to the queue
-            $arguments = '--id='.($i + 1);
+            $arguments    = '--id=' . ($i + 1);
             $scheduledJob = new Job('queues:test:fake', $arguments);
 
             // Set a random queue
@@ -89,9 +102,9 @@ class TestRandomJobsCommand extends AbstractQueuesCommand
             if (false === $noFutureJobs) {
                 $condition = rand(0, 10);
                 if (7 <= $condition) {
-                    $days = rand(1, 10);
+                    $days   = rand(1, 10);
                     $future = new \DateTime();
-                    $future->modify('+'.$days.' day');
+                    $future->modify('+' . $days . ' day');
                     $scheduledJob->setExecuteAfterTime($future);
                 }
             }
@@ -103,7 +116,7 @@ class TestRandomJobsCommand extends AbstractQueuesCommand
                 // Decide how many dependencies it has
                 $howManyDeps = rand(1, count($jobs) - 1);
 
-                for ($ii = 0; $ii <= $howManyDeps; $ii++) {
+                for ($ii = 0; $ii <= $howManyDeps; ++$ii) {
                     $parentJob = rand(0, count($jobs) - 1);
                     $scheduledJob->addParentDependency($jobs[$parentJob]);
                 }
@@ -112,7 +125,7 @@ class TestRandomJobsCommand extends AbstractQueuesCommand
             $this->getContainer()->get('doctrine')->getManager()->persist($scheduledJob);
             $jobs[] = $scheduledJob;
 
-            if ($i % $input->getOption('batch') === 0) {
+            if (0 === $i % $input->getOption('batch')) {
                 $this->getContainer()->get('doctrine')->getManager()->flush();
                 $jobs = [];
                 $this->getContainer()->get('doctrine')->getManager()->clear();
@@ -136,13 +149,13 @@ class TestRandomJobsCommand extends AbstractQueuesCommand
      *
      * @return StrategyInterface
      */
-    private function getRandomRetryStrategy(array $strategies, array $timeUnits) : StrategyInterface
+    private function getRandomRetryStrategy(array $strategies, array $timeUnits): StrategyInterface
     {
         // Pick a random strategy
-        $strategy = $strategies[rand(0, count($strategies) - 1)];
+        $strategy    = $strategies[rand(0, count($strategies) - 1)];
         $maxAttempts = rand(1, 3);
         $incrementBy = rand(1, 10);
-        $timeUnit = $this->getRandomTimeUnit($timeUnits);
+        $timeUnit    = $this->getRandomTimeUnit($timeUnits);
 
         switch ($strategy) {
             case 'constant':

@@ -1,5 +1,18 @@
 <?php
 
+/*
+ * This file is part of the SHQCommandsQueuesBundle.
+ *
+ * Copyright Adamo Aerendir Crespi 2017.
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ *
+ * @author    Adamo Aerendir Crespi <hello@aerendir.me>
+ * @copyright Copyright (C) 2017 Aerendir. All rights reserved.
+ * @license   MIT License.
+ */
+
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Command;
 
 use Doctrine\ORM\EntityManager;
@@ -44,9 +57,9 @@ class RunCommand extends Command
      */
     public function __construct(QueuesDaemon $daemon, EntityManager $entityManager, JobsMarker $jobsMarker)
     {
-        $this->daemon = $daemon;
+        $this->daemon        = $daemon;
         $this->entityManager = $entityManager;
-        $this->jobsMarker = $jobsMarker;
+        $this->jobsMarker    = $jobsMarker;
 
         parent::__construct();
     }
@@ -113,7 +126,7 @@ class RunCommand extends Command
                         $this->ioWriter->infoLineNoBg(sprintf('Trying to initialize <success-nobg>%s</success-nobg> new Jobs for queue <success-nobg>%s</success-nobg>...', $jobsToLoad, $queueName));
                         $initializingJobs = ProgressBar::createProgressBar(ProgressBar::FORMAT_INITIALIZING_JOBS, $output, $jobsToLoad);
                     }
-                    for ($i = 0; $i < $jobsToLoad; $i++) {
+                    for ($i = 0; $i < $jobsToLoad; ++$i) {
                         // Start processing the next Job in the queue
                         if (null === $this->daemon->processNextJob($queueName)) {
                             if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
@@ -229,7 +242,7 @@ class RunCommand extends Command
         $table = [];
         /** @var Daemon $strugglerDaemon */
         foreach ($strugglers as $strugglerDaemon) {
-            $age = $strugglerDaemon->getDiedOn()->diff($strugglerDaemon->getBornOn());
+            $age     = $strugglerDaemon->getDiedOn()->diff($strugglerDaemon->getBornOn());
             $table[] = [
                 sprintf('<%s>%s</>', 'success-nobg', "\xE2\x9C\x94"),
                 $strugglerDaemon->getPid(),

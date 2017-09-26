@@ -1,5 +1,18 @@
 <?php
 
+/*
+ * This file is part of the SHQCommandsQueuesBundle.
+ *
+ * Copyright Adamo Aerendir Crespi 2017.
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ *
+ * @author    Adamo Aerendir Crespi <hello@aerendir.me>
+ * @copyright Copyright (C) 2017 Aerendir. All rights reserved.
+ * @license   MIT License.
+ */
+
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Service;
 
 use Doctrine\ORM\EntityManager;
@@ -45,9 +58,9 @@ class JobsManager
     public function initialize(EntityManager $entityManager, SerendipityHQStyle $ioWriter)
     {
         self::$entityManager = $entityManager;
-        self::$ioWriter = $ioWriter;
-        $this->env = $ioWriter->getInput()->getOption('env');
-        $this->verbosity = $ioWriter->getVerbosity();
+        self::$ioWriter      = $ioWriter;
+        $this->env           = $ioWriter->getInput()->getOption('env');
+        $this->verbosity     = $ioWriter->getVerbosity();
     }
 
     /**
@@ -59,8 +72,8 @@ class JobsManager
      */
     public static function detach(Job $job)
     {
-        $tree = self::calculateJobsTree($job);
-        $detached = [];
+        $tree        = self::calculateJobsTree($job);
+        $detached    = [];
         $notDetached = [];
 
         foreach ($tree as $jobInTree) {
@@ -69,7 +82,7 @@ class JobsManager
             if (null === $jobInTree) {
                 if (self::$ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_DEBUG) {
                     // Add the current Job to the already detached
-                    $detached[$jobInTree->getId()] = '#'.$jobInTree->getId();
+                    $detached[$jobInTree->getId()] = '#' . $jobInTree->getId();
                     self::$ioWriter->successLineNoBg(sprintf(
                         'Job <info-nobg>#%s</info-nobg> is not managed and so it will not has to be detached.',
                         $jobInTree->getId()
@@ -86,7 +99,7 @@ class JobsManager
                     ));
                 }
 
-                $notDetached[$jobInTree->getId()] = '#'.$jobInTree->getId();
+                $notDetached[$jobInTree->getId()] = '#' . $jobInTree->getId();
 
                 continue;
             }
@@ -97,7 +110,7 @@ class JobsManager
                 self::$ioWriter->successLineNoBg(sprintf('Job <info-nobg>#%s</info-nobg> detached.', $jobInTree->getId()));
             }
             // Add the current Job to the already detached
-            $detached[$jobInTree->getId()] = '#'.$jobInTree->getId();
+            $detached[$jobInTree->getId()] = '#' . $jobInTree->getId();
         }
 
         if (self::$ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
@@ -143,7 +156,7 @@ class JobsManager
     public function buildDefaultInfo(Process $process)
     {
         return [
-            'output'    => $process->getOutput().$process->getErrorOutput(),
+            'output'    => $process->getOutput() . $process->getErrorOutput(),
             'exit_code' => $process->getExitCode(),
             'debug'     => [
                 'exit_code_text'                  => $process->getExitCodeText(),
@@ -166,7 +179,7 @@ class JobsManager
     public function createJobProcess(Job $job)
     {
         $processBuilder = new ProcessBuilder();
-        $arguments = [];
+        $arguments      = [];
 
         // Prepend php
         $arguments[] = 'php';
@@ -178,7 +191,7 @@ class JobsManager
         $arguments[] = $job->getCommand();
 
         // Environment to use
-        $arguments[] = '--env='.$this->env;
+        $arguments[] = '--env=' . $this->env;
 
         // Verbosity level (only if not normal = agument verbosity not set in command)
         if (OutputInterface::VERBOSITY_NORMAL !== $this->verbosity) {
@@ -186,7 +199,7 @@ class JobsManager
         }
 
         if ($job->isAwareOfJob()) {
-            $arguments[] = '--job-id='.$job->getId();
+            $arguments[] = '--job-id=' . $job->getId();
         }
 
         // The arguments of the command
@@ -328,18 +341,18 @@ class JobsManager
     /**
      * Finds the path to the console file.
      *
-     * @throws \RuntimeException If the console file cannot be found.
+     * @throws \RuntimeException if the console file cannot be found
      *
      * @return string
      */
-    private function findConsole() : string
+    private function findConsole(): string
     {
-        if (file_exists($this->kernelRootDir.'/console')) {
-            return $this->kernelRootDir.'/console';
+        if (file_exists($this->kernelRootDir . '/console')) {
+            return $this->kernelRootDir . '/console';
         }
 
-        if (file_exists($this->kernelRootDir.'/../bin/console')) {
-            return $this->kernelRootDir.'/../bin/console';
+        if (file_exists($this->kernelRootDir . '/../bin/console')) {
+            return $this->kernelRootDir . '/../bin/console';
         }
 
         throw new \RuntimeException('Unable to find the console file. You should check your Symfony installation. The console file should be in /app/ folder or in /bin/ folder.');
@@ -348,7 +361,7 @@ class JobsManager
     /**
      * @return string|null
      */
-    private function guessVerbosityLevel() : string
+    private function guessVerbosityLevel(): string
     {
         switch ($this->verbosity) {
             case OutputInterface::VERBOSITY_QUIET:

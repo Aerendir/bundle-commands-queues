@@ -1,5 +1,18 @@
 <?php
 
+/*
+ * This file is part of the SHQCommandsQueuesBundle.
+ *
+ * Copyright Adamo Aerendir Crespi 2017.
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ *
+ * @author    Adamo Aerendir Crespi <hello@aerendir.me>
+ * @copyright Copyright (C) 2017 Aerendir. All rights reserved.
+ * @license   MIT License.
+ */
+
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Util;
 
 use Doctrine\Common\Persistence\Proxy;
@@ -118,7 +131,7 @@ class JobsMarker
      * @param Job   $failedJob
      * @param array $info
      *
-     * @return Job The created retry Job.
+     * @return Job the created retry Job
      */
     public function markFailedJobAsRetried(Job $failedJob, array $info)
     {
@@ -132,7 +145,7 @@ class JobsMarker
      * @param Job   $staleJob
      * @param array $info
      *
-     * @return Job The created retry Job.
+     * @return Job the created retry Job
      */
     public function markStaleJobAsRetried(Job $staleJob, array $info)
     {
@@ -217,7 +230,7 @@ class JobsMarker
         $oldStatus = $job->getStatus();
         $this->updateJob($job, $status, $info, $daemon);
 
-        $ioWriter = self::$ioWriter;
+        $ioWriter        = self::$ioWriter;
         $tryAgainBuilder = ThenWhen::createRetryStrategyBuilder();
         $tryAgainBuilder
             ->setStrategyForException([
@@ -232,7 +245,7 @@ class JobsMarker
                 ORMInvalidArgumentException::class, \InvalidArgumentException::class,
             ], function (\Exception $e) use ($job, $status, $info, $daemon, $ioWriter) {
                 if (
-                    !$e instanceof ORMInvalidArgumentException
+                    ! $e instanceof ORMInvalidArgumentException
                     && $e instanceof \InvalidArgumentException
                     && false === strpos($e->getMessage(), 'Entity has to be managed or scheduled for removal for single computation')
                 ) {
@@ -264,13 +277,13 @@ class JobsMarker
              *
              * We flush the single Jobs to don't affect the others that may be still processing.
              */
-            if ($job->isTypeRetried()) {
-                // Flush the new retrying Job
-                self::$entityManager->flush($job->getRetriedBy());
-            }
+                if ($job->isTypeRetried()) {
+                    // Flush the new retrying Job
+                    self::$entityManager->flush($job->getRetriedBy());
+                }
 
-            // Flush the original Job
-            self::$entityManager->flush($job);
+                // Flush the original Job
+                self::$entityManager->flush($job);
             });
     }
 

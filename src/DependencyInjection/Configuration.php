@@ -1,10 +1,16 @@
 <?php
 
 /*
- * This file is part of the AWS SES Monitor Bundle.
+ * This file is part of the SHQCommandsQueuesBundle.
  *
- * @author Adamo Aerendir Crespi <hello@aerendir.me>
- * @author Audrius Karabanovas <audrius@karabanovas.net>
+ * Copyright Adamo Aerendir Crespi 2017.
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ *
+ * @author    Adamo Aerendir Crespi <hello@aerendir.me>
+ * @copyright Copyright (C) 2017 Aerendir. All rights reserved.
+ * @license   MIT License.
  */
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\DependencyInjection;
@@ -40,14 +46,14 @@ class Configuration implements ConfigurationInterface
     public function getConfigTreeBuilder()
     {
         $treeBuilder = new TreeBuilder();
-        $rootNode = $treeBuilder->root('shq_commands_queues');
+        $rootNode    = $treeBuilder->root('shq_commands_queues');
 
         $rootNode
             ->children()
                 ->scalarNode('db_driver')
                     ->validate()
                         ->ifNotInArray(self::getSupportedDrivers())
-                        ->thenInvalid('The driver %s is not supported. Please choose one of '.json_encode(self::getSupportedDrivers()))
+                        ->thenInvalid('The driver %s is not supported. Please choose one of ' . json_encode(self::getSupportedDrivers()))
                     ->end()
                     ->cannotBeOverwritten()
                     ->defaultValue('orm')

@@ -13,8 +13,11 @@ install:
     - travis_retry composer update ${COMPOSER_FLAGS} --no-interaction
 
 script:
-    - vendor/bin/phpunit --verbose --coverage-clover build/logs/clover.xml
     - phpenv config-rm xdebug.ini || return 0
+    # Check the style rules are applied
+    - ./vendor/bin/php-cs-fixer fix --diff --dry-run -v
+    # Run PHPUnit
+    - vendor/bin/phpunit --verbose --coverage-clover build/logs/clover.xml
 
 after_script:
   - CODECLIMATE_REPO_TOKEN="e488da8cb388432047b921d7aee5bf245085813077fc3a2eda8bb18d9feebb85" vendor/bin/test-reporter --stdout > codeclimate.json

@@ -1,5 +1,18 @@
 <?php
 
+/*
+ * This file is part of the SHQCommandsQueuesBundle.
+ *
+ * Copyright Adamo Aerendir Crespi 2017.
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ *
+ * @author    Adamo Aerendir Crespi <hello@aerendir.me>
+ * @copyright Copyright (C) 2017 Aerendir. All rights reserved.
+ * @license   MIT License.
+ */
+
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Command;
 
 use Doctrine\ORM\EntityManager;
@@ -47,7 +60,7 @@ abstract class AbstractQueuesCommand extends ContainerAwareCommand
     /**
      * @return EntityManager
      */
-    final protected function getEntityManager() : EntityManager
+    final protected function getEntityManager(): EntityManager
     {
         return $this->entityManager;
     }
@@ -55,7 +68,7 @@ abstract class AbstractQueuesCommand extends ContainerAwareCommand
     /**
      * @return JobsMarker
      */
-    final protected function getJobsMarker() : JobsMarker
+    final protected function getJobsMarker(): JobsMarker
     {
         if (null === $this->jobsMarker) {
             $this->jobsMarker = $this->getContainer()->get('commands_queues.do_not_use.jobs_marker');
@@ -68,7 +81,7 @@ abstract class AbstractQueuesCommand extends ContainerAwareCommand
     /**
      * @return SerendipityHQStyle
      */
-    final protected function getIoWriter() : SerendipityHQStyle
+    final protected function getIoWriter(): SerendipityHQStyle
     {
         return $this->ioWriter;
     }

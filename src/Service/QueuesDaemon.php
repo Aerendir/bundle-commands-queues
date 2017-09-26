@@ -1,5 +1,18 @@
 <?php
 
+/*
+ * This file is part of the SHQCommandsQueuesBundle.
+ *
+ * Copyright Adamo Aerendir Crespi 2017.
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ *
+ * @author    Adamo Aerendir Crespi <hello@aerendir.me>
+ * @copyright Copyright (C) 2017 Aerendir. All rights reserved.
+ * @license   MIT License.
+ */
+
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Service;
 
 use Doctrine\ORM\EntityManager;
@@ -71,12 +84,12 @@ class QueuesDaemon
      */
     public function __construct(DaemonConfig $config, EntityManager $entityManager, JobsManager $jobsManager, JobsMarker $jobsMarker, Profiler $profiler)
     {
-        $this->config = $config;
+        $this->config        = $config;
         $this->entityManager = $entityManager;
-        $this->jobsManager = $jobsManager;
-        $this->jobsMarker = $jobsMarker;
-        $this->jobsRepo = $this->entityManager->getRepository('SHQCommandsQueuesBundle:Job');
-        $this->profiler = $profiler;
+        $this->jobsManager   = $jobsManager;
+        $this->jobsMarker    = $jobsMarker;
+        $this->jobsRepo      = $this->entityManager->getRepository('SHQCommandsQueuesBundle:Job');
+        $this->profiler      = $profiler;
     }
 
     /**
@@ -88,7 +101,7 @@ class QueuesDaemon
      */
     public function initialize($daemon, SerendipityHQStyle $ioWriter, OutputInterface $output)
     {
-        $this->ioWriter = $ioWriter;
+        $this->ioWriter  = $ioWriter;
         $this->verbosity = $this->ioWriter->getVerbosity();
 
         $this->ioWriter->title('SerendipityHQ Queue Bundle Daemon');
@@ -153,7 +166,7 @@ class QueuesDaemon
      *
      * @return bool
      */
-    public function isAlive() : bool
+    public function isAlive(): bool
     {
         // Increment the iterations counter
         $this->profiler->hitIteration();
@@ -186,7 +199,7 @@ class QueuesDaemon
      *
      * @param string $queueName
      *
-     * @return null|bool
+     * @return bool|null
      */
     public function processNextJob(string $queueName)
     {
@@ -210,7 +223,7 @@ class QueuesDaemon
         $this->canSleep[$queueName] = false;
 
         // Start processing the Job
-        $now = new \DateTime();
+        $now  = new \DateTime();
         $info = [
             'started_at' => $now,
         ];
@@ -248,7 +261,7 @@ class QueuesDaemon
             $process->start();
         } catch (\Exception $e) {
             // Something went wrong starting the process: close it as failed
-            $info['output'] = 'Failing start the process.';
+            $info['output']       = 'Failing start the process.';
             $info['output_error'] = $e;
 
             // Check if it can be retried and if the retry were successful
@@ -262,7 +275,7 @@ class QueuesDaemon
             if ($this->verbosity >= OutputInterface::VERBOSITY_NORMAL) {
                 $this->ioWriter->errorLineNoBg(sprintf(
                     '[%s] Job <success-nobg>#%s</success-nobg> on Queue <success-nobg>%s</success-nobg>: The process didn\'t started due to some errors. See them in the'
-                    .' logs of the Job.', $now->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue()
+                    . ' logs of the Job.', $now->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue()
                 ));
                 if (false !== $cancellingJob) {
                     $this->ioWriter->errorLineNoBg(sprintf('The Job #%s will mark its childs as cancelled.', $cancellingJob->getId()));
@@ -287,7 +300,7 @@ class QueuesDaemon
         $this->jobsMarker->markJobAsPending($job, $info, $this->me);
 
         // Now add the process to the runningJobs list to keep track of it later
-        $info['job'] = $job;
+        $info['job']     = $job;
         $info['process'] = $process;
         // This info is already in the Job itself, so we don't need it anymore
         unset($info['started_at']);
@@ -304,7 +317,7 @@ class QueuesDaemon
     /**
      * @return bool
      */
-    public function canSleep() : bool
+    public function canSleep(): bool
     {
         foreach ($this->canSleep as $can) {
             if (false === $can) {
@@ -322,7 +335,7 @@ class QueuesDaemon
     /**
      * @return bool
      */
-    public function hasToCheckAliveDaemons() : bool
+    public function hasToCheckAliveDaemons(): bool
     {
         return microtime(true) - $this->getProfiler()->getAliveDaemonsLastCheckedAt() >= $this->getConfig()->getAliveDaemonsCheckInterval();
     }
@@ -332,7 +345,7 @@ class QueuesDaemon
      *
      * @return bool
      */
-    public function hasToCheckRunningJobs(string $queueName) : bool
+    public function hasToCheckRunningJobs(string $queueName): bool
     {
         // The number of iterations is reached and the queue has currently running Jobs
         return microtime(true) - $this->getProfiler()->getRunningJobsLastCheckedAt($queueName) >= $this->getConfig()->getRunningJobsCheckInterval($queueName)
@@ -344,7 +357,7 @@ class QueuesDaemon
      *
      * @return bool
      */
-    public function hasRunningJobs(string $queueName = null) : bool
+    public function hasRunningJobs(string $queueName = null): bool
     {
         return $this->countRunningJobs($queueName) > 0 ? true : false;
     }
@@ -356,7 +369,7 @@ class QueuesDaemon
      *
      * @return int
      */
-    public function countRunningJobs(string $queueName = null) : int
+    public function countRunningJobs(string $queueName = null): int
     {
         // If the queue name is not passed, the count is on all the processing queues
         if (null === $queueName) {
@@ -376,7 +389,7 @@ class QueuesDaemon
      * Processes the Jobs already running or pending.
      *
      * @param string                                             $queueName
-     * @param null|\Symfony\Component\Console\Helper\ProgressBar $progressBar
+     * @param \Symfony\Component\Console\Helper\ProgressBar|null $progressBar
      */
     public function checkRunningJobs(string $queueName, \Symfony\Component\Console\Helper\ProgressBar $progressBar = null)
     {
@@ -426,7 +439,7 @@ class QueuesDaemon
         //  If it is not already terminated...
         if (false === $process->isTerminated()) {
             // ... and it is still pending but its process were effectively started
-            if ($job->getStatus() === Job::STATUS_PENDING && $process->isStarted()) {
+            if (Job::STATUS_PENDING === $job->getStatus() && $process->isStarted()) {
                 // Mark it as running (those checks will avoid an unuseful query to the DB)
                 $this->jobsMarker->markJobAsRunning($job);
             }
@@ -472,7 +485,7 @@ class QueuesDaemon
     /**
      * @return bool
      */
-    public function hasToOptimize() : bool
+    public function hasToOptimize(): bool
     {
         if (false === isset($this->entityManager->getUnitOfWork()->getIdentityMap()[Job::class])) {
             return false;
@@ -484,7 +497,7 @@ class QueuesDaemon
     /**
      * @return bool
      */
-    public function hasToPrintProfilingInfo() : bool
+    public function hasToPrintProfilingInfo(): bool
     {
         return microtime(true) - $this->getProfiler()->getLastMicrotime() >= $this->getConfig()->getProfilingInfoInterval();
     }
@@ -562,7 +575,7 @@ class QueuesDaemon
     /**
      * @return DaemonConfig
      */
-    public function getConfig() : DaemonConfig
+    public function getConfig(): DaemonConfig
     {
         return $this->config;
     }
@@ -570,7 +583,7 @@ class QueuesDaemon
     /**
      * @return Daemon
      */
-    public function getIdentity() : Daemon
+    public function getIdentity(): Daemon
     {
         return $this->me;
     }
@@ -588,7 +601,7 @@ class QueuesDaemon
     /**
      * @return Profiler
      */
-    public function getProfiler() : Profiler
+    public function getProfiler(): Profiler
     {
         return $this->profiler;
     }
@@ -704,15 +717,15 @@ class QueuesDaemon
         $signalHandler = function ($signo) {
             switch ($signo) {
                 case SIGTERM:
-                    $signal = 'SIGTERM';
+                    $signal        = 'SIGTERM';
                     $this->mustDie = true;
                     break;
                 case SIGINT:
-                    $signal = 'SIGINT';
+                    $signal        = 'SIGINT';
                     $this->mustDie = true;
                     break;
                 default:
-                    $signal = 'Unknown '.$signo;
+                    $signal = 'Unknown ' . $signo;
             }
 
             if ($this->verbosity >= OutputInterface::VERBOSITY_NORMAL) {

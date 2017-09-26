@@ -1,5 +1,18 @@
 <?php
 
+/*
+ * This file is part of the SHQCommandsQueuesBundle.
+ *
+ * Copyright Adamo Aerendir Crespi 2017.
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ *
+ * @author    Adamo Aerendir Crespi <hello@aerendir.me>
+ * @copyright Copyright (C) 2017 Aerendir. All rights reserved.
+ * @license   MIT License.
+ */
+
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Repository;
 
 use Doctrine\DBAL\Connection;
@@ -27,14 +40,14 @@ class JobRepository extends EntityRepository
      */
     public function configure(array $config, SerendipityHQStyle $ioWriter)
     {
-        $this->config = $config;
+        $this->config   = $config;
         $this->ioWriter = $ioWriter;
     }
 
     /**
      * @param int $id
      *
-     * @return null|object|Job
+     * @return Job|object|null
      */
     public function findOneById(int $id)
     {
@@ -49,7 +62,7 @@ class JobRepository extends EntityRepository
      *
      * @param string $queueName
      *
-     * @return null|Job
+     * @return Job|null
      */
     public function findNextRunnableJob(string $queueName)
     {
@@ -109,9 +122,10 @@ class JobRepository extends EntityRepository
      * Checks if the given Job exists or not.
      *
      * @param string $command
-     * @param array $arguments
+     * @param array  $arguments
      * @param string $queue
-     * @return null|Job
+     *
+     * @return Job|null
      */
     public function exists(string $command, $arguments = [], string $queue = 'default')
     {

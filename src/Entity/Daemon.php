@@ -1,5 +1,18 @@
 <?php
 
+/*
+ * This file is part of the SHQCommandsQueuesBundle.
+ *
+ * Copyright Adamo Aerendir Crespi 2017.
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ *
+ * @author    Adamo Aerendir Crespi <hello@aerendir.me>
+ * @copyright Copyright (C) 2017 Aerendir. All rights reserved.
+ * @license   MIT License.
+ */
+
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
@@ -86,17 +99,17 @@ class Daemon
      */
     public function __construct(string $host, int $pid, DaemonConfig $config)
     {
-        $this->bornOn = new \DateTime();
-        $this->config = $config;
-        $this->host = $host;
-        $this->pid = $pid;
+        $this->bornOn        = new \DateTime();
+        $this->config        = $config;
+        $this->host          = $host;
+        $this->pid           = $pid;
         $this->processedJobs = new ArrayCollection();
     }
 
     /**
      * @return int
      */
-    public function getId() : int
+    public function getId(): int
     {
         return $this->id;
     }
@@ -104,7 +117,7 @@ class Daemon
     /**
      * @return \DateTime
      */
-    public function getBornOn() : \DateTime
+    public function getBornOn(): \DateTime
     {
         return $this->bornOn;
     }
@@ -112,7 +125,7 @@ class Daemon
     /**
      * @return DaemonConfig
      */
-    public function getConfig() : DaemonConfig
+    public function getConfig(): DaemonConfig
     {
         return $this->config;
     }
@@ -136,7 +149,7 @@ class Daemon
     /**
      * @return string
      */
-    public function getHost() : string
+    public function getHost(): string
     {
         return $this->host;
     }
@@ -144,7 +157,7 @@ class Daemon
     /**
      * @return int
      */
-    public function getPid() : int
+    public function getPid(): int
     {
         return $this->pid;
     }
@@ -152,7 +165,7 @@ class Daemon
     /**
      * @return Collection
      */
-    public function getProcessedJobs() : Collection
+    public function getProcessedJobs(): Collection
     {
         return $this->processedJobs;
     }
@@ -166,7 +179,7 @@ class Daemon
      */
     public function requiescatInPace(string $mortisCausa = self::MORTIS_SIGNAL)
     {
-        $this->diedOn = new \DateTime();
+        $this->diedOn      = new \DateTime();
         $this->mortisCausa = $mortisCausa;
     }
 
@@ -175,7 +188,7 @@ class Daemon
      *
      * @return string
      */
-    public function __toString() : string
+    public function __toString(): string
     {
         return (string) $this->id;
     }
