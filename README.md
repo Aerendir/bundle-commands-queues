@@ -5,7 +5,6 @@
 [![Code Climate](https://codeclimate.com/github/Aerendir/bundle-commands-queues/badges/gpa.svg)](https://codeclimate.com/github/Aerendir/bundle-commands-queues)
 [![Test Coverage](https://codeclimate.com/github/Aerendir/bundle-commands-queues/badges/coverage.svg)](https://codeclimate.com/github/Aerendir/bundle-commands-queues/coverage)
 [![Issue Count](https://codeclimate.com/github/Aerendir/bundle-commands-queues/badges/issue_count.svg)](https://codeclimate.com/github/Aerendir/bundle-commands-queues)
-[![StyleCI](https://styleci.io/repos/80431995/shield?branch=master)](https://styleci.io/repos/80431995)
 [![SensioLabsInsight](https://insight.sensiolabs.com/projects/2a1bcd2f-f241-4969-96e4-10ead299d57b/mini.png)](https://insight.sensiolabs.com/projects/2a1bcd2f-f241-4969-96e4-10ead299d57b)
 
 # SHQCommandsQueuesBundle
