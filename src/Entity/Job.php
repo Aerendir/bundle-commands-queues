@@ -366,7 +366,7 @@ class Job
      *
      * @return Job
      */
-    public function addChildDependency(Job $job): self
+    public function addChildDependency(self $job): self
     {
         if ($this === $job) {
             throw new \LogicException(
@@ -395,7 +395,7 @@ class Job
      *
      * @return Job
      */
-    public function addParentDependency(Job $job): self
+    public function addParentDependency(self $job): self
     {
         if ($this === $job) {
             throw new \LogicException(
@@ -433,7 +433,7 @@ class Job
     /**
      * @return Job
      */
-    public function createCancelChildsJob(): Job
+    public function createCancelChildsJob(): self
     {
         // If the Job as child Jobs, create a process to mark them as cancelled
         return (new self('queues:internal:mark-as-cancelled', [sprintf('--id=%s', $this->getId())]))
@@ -447,7 +447,7 @@ class Job
     /**
      * @return Job
      */
-    public function createRetryForFailed(): Job
+    public function createRetryForFailed(): self
     {
         // Create a new Job that will retry the original one
         return (new self($this->getCommand(), $this->getArguments()))
@@ -464,7 +464,7 @@ class Job
     /**
      * @return Job
      */
-    public function createRetryForStale(): Job
+    public function createRetryForStale(): self
     {
         // Create a new Job that will retry the original one
         $retryJob = (new self($this->getCommand(), $this->getArguments()))
@@ -1070,7 +1070,7 @@ class Job
      *
      * @return Job
      */
-    public function removeChildDependency(Job $job): self
+    public function removeChildDependency(self $job): self
     {
         if ($this->childDependencies->contains($job)) {
             $this->childDependencies->removeElement($job);
@@ -1085,7 +1085,7 @@ class Job
      *
      * @return Job
      */
-    public function removeParentDependency(Job $job): self
+    public function removeParentDependency(self $job): self
     {
         if ($this->parentDependencies->contains($job)) {
             $this->parentDependencies->removeElement($job);
@@ -1152,7 +1152,7 @@ class Job
      *
      * @return Job
      */
-    public function setRetryOf(Job $retriedJob): Job
+    public function setRetryOf(self $retriedJob): self
     {
         // This is a retry Job for another job
         $this->retryOf = $retriedJob;
@@ -1166,7 +1166,7 @@ class Job
      *
      * @return Job
      */
-    protected function setRetriedBy(Job $retryingJob): Job
+    protected function setRetriedBy(self $retryingJob): self
     {
         $this->retriedBy = $retryingJob;
 
@@ -1178,7 +1178,7 @@ class Job
      *
      * @return Job
      */
-    protected function setFirstRetriedJob(Job $firstRetriedJob): Job
+    protected function setFirstRetriedJob(self $firstRetriedJob): self
     {
         $this->firstRetriedJob = $firstRetriedJob;
 
