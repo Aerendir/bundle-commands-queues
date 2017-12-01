@@ -19,14 +19,14 @@
         "sensio/framework-extra-bundle": "^3.0.2",
         "serendipity_hq/console-styles-bundle": "^1.0",
         "serendipity_hq/then-when": "^1.1",
-        "symfony/framework-bundle": "^2.8||^3.0",
-        "symfony/process": "^2.8||^3.0"
+        "symfony/framework-bundle": "^2.8||^3.0||^4.0",
+        "symfony/process": "^2.8||^3.0||^4.0"
     },
     "require-dev": {
         "codeclimate/php-test-reporter": "dev-master",
         "friendsofphp/php-cs-fixer": "^2.0",
         "phpunit/phpunit": "^6",
-        "symfony/var-dumper": "^2.8||^3.0"
+        "symfony/var-dumper": "^2.8||^3.0||^4.0"
     },
     "autoload": {
         "psr-4": {
