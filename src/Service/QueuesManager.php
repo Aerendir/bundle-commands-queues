@@ -35,7 +35,45 @@ class QueuesManager
     }
 
     /**
-     * Checks if the given Job exists or not.
+     * Checks if a Job is scheduled given a Job instance.
+     *
+     * It uses the given Job's parameters to find one already scheduled.
+     *
+     * It uses command, arguments and queue and searches only for Jobs not already executed.
+     *
+     * Returns (bool) false if it doesn't exist or the scheduled Job if it exists.
+     *
+     * @param Job $job
+     *
+     * @return bool|Job
+     */
+    public function jobExists(Job $job)
+    {
+        return $this->exists($job->getCommand(), $job->getArguments(), $job->getQueue());
+    }
+
+    /**
+     * Finds a Job given a Job instance.
+     *
+     * It uses the given Job's parameters to find one already scheduled.
+     *
+     * It uses command, arguments and queue and searches only for Jobs not already executed.
+     *
+     * Returns null if it doesn't exist or the scheduled Job if it exists.
+     *
+     * @param Job $job
+     *
+     * @return Job|null
+     */
+    public function findJob(Job $job): ?Job
+    {
+        return $this->find($job->getCommand(), $job->getArguments(), $job->getQueue());
+    }
+
+    /**
+     * Given Job parameters, checks if it exists or not.
+     *
+     * Returns (bool) false if it doesn't exist or the scheduled Job if it exists.
      *
      * @param string $command
      * @param array  $arguments
@@ -45,10 +83,7 @@ class QueuesManager
      */
     public function exists(string $command, $arguments = [], string $queue = 'default')
     {
-        // Check and prepare arguments of the command
-        $arguments = Job::prepareArguments($arguments);
-
-        $exists = $this->entityManager->getRepository('SHQCommandsQueuesBundle:Job')->exists($command, $arguments, $queue);
+        $exists = $this->find($command, $arguments, $queue);
 
         if (null === $exists) {
             return false;
@@ -58,13 +93,34 @@ class QueuesManager
     }
 
     /**
-     * Schedules a job.
+     * Finds a Job given its parameters.
+     *
+     * Returns null if it doesn't exist or the scheduled Job if it exists.
+     *
+     * @param string $command
+     * @param array  $arguments
+     * @param string $queue
+     *
+     * @return Job|null
+     */
+    public function find(string $command, $arguments = [], string $queue = 'default'): ?Job
+    {
+        // Check and prepare arguments of the command
+        $arguments = Job::prepareArguments($arguments);
+
+        return $this->entityManager->getRepository('SHQCommandsQueuesBundle:Job')->exists($command, $arguments, $queue);
+    }
+
+    /**
+     * persists a job and flushes it to the database.
      *
      * @param Job $job
+     *
+     * @throws \Doctrine\ORM\OptimisticLockException
      */
-    public function schedule(Job $job)
+    public function schedule(Job $job): void
     {
         $this->entityManager->persist($job);
-        $this->entityManager->flush();
+        $this->entityManager->flush($job);
     }
 }
