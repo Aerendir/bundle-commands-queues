@@ -151,6 +151,8 @@ class JobsManager
     /**
      * @param Process $process
      *
+     * @compatibility Symfony 3 and 4
+     *
      * @return array
      */
     public function buildDefaultInfo(Process $process)
@@ -162,11 +164,11 @@ class JobsManager
                 'exit_code_text'                  => $process->getExitCodeText(),
                 'complete_command'                => $process->getCommandLine(),
                 'input'                           => $process->getInput(),
-                'options'                         => $process->getOptions(),
+                'options'                         => method_exists($process, 'getOptions') ? $process->getOptions() : 'You are using Symfony 4 and options are not available in this version.',
                 'env'                             => $process->getEnv(),
                 'working_directory'               => $process->getWorkingDirectory(),
-                'enhanced_sigchild_compatibility' => $process->getEnhanceSigchildCompatibility(),
-                'enhanced_windows_compatibility'  => $process->getEnhanceWindowsCompatibility(),
+                'enhanced_sigchild_compatibility' => method_exists($process, 'getEnhanceSigchildCompatibility') ? $process->getEnhanceSigchildCompatibility() : true,
+                'enhanced_windows_compatibility'  => method_exists($process, 'getEnhanceWindowsCompatibility') ? $process->getEnhanceWindowsCompatibility() : true,
             ],
         ];
     }
@@ -178,8 +180,7 @@ class JobsManager
      */
     public function createJobProcess(Job $job)
     {
-        $processBuilder = new ProcessBuilder();
-        $arguments      = [];
+        $arguments = [];
 
         // Prepend php
         $arguments[] = 'php';
@@ -205,10 +206,10 @@ class JobsManager
         // The arguments of the command
         $arguments = array_merge($arguments, $job->getArguments());
 
-        // Build the command to be run
-        $processBuilder->setArguments($arguments);
-
-        return $processBuilder->getProcess();
+        // Build the command to be run (@compatibility Symfony 3 and 4)
+        return class_exists(ProcessBuilder::class, false)
+            ? (new ProcessBuilder())->setArguments($arguments)->getProcess()
+            : new Process($arguments);
     }
 
     /**
