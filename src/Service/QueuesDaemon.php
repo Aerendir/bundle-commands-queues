@@ -95,9 +95,11 @@ class QueuesDaemon
     /**
      * Initializes the Daemon.
      *
-     * @param string|null        $daemon
+     * @param                    $daemon
      * @param SerendipityHQStyle $ioWriter
      * @param OutputInterface    $output
+     *
+     * @throws \Doctrine\ORM\OptimisticLockException
      */
     public function initialize($daemon, SerendipityHQStyle $ioWriter, OutputInterface $output)
     {
@@ -151,6 +153,8 @@ class QueuesDaemon
      * Sets the Daemon as died.
      *
      * Requiescant In Pace (May it Rest In Pace).
+     *
+     * @throws \Doctrine\ORM\OptimisticLockException
      */
     public function requiescantInPace()
     {
@@ -199,7 +203,8 @@ class QueuesDaemon
      *
      * @param string $queueName
      *
-     * @return bool|null
+     * @return bool|void
+     * @throws \Doctrine\ORM\OptimisticLockException
      */
     public function processNextJob(string $queueName)
     {
@@ -618,6 +623,8 @@ class QueuesDaemon
      *
      * @param Job     $job
      * @param Process $process
+     *
+     * @throws \Doctrine\ORM\OptimisticLockException
      */
     final protected function handleFailedJob(Job $job, Process $process)
     {
@@ -662,7 +669,8 @@ class QueuesDaemon
     /**
      * @param Job $job
      *
-     * @return false|Job
+     * @return bool|Job Returns false or the Job object
+     * @throws \Doctrine\ORM\OptimisticLockException
      */
     final protected function handleChildsOfFailedJob(Job $job)
     {
@@ -779,6 +787,8 @@ class QueuesDaemon
 
     /**
      * @param OutputInterface $output
+     *
+     * @throws \Doctrine\ORM\OptimisticLockException
      */
     private function checkStaleJobs(OutputInterface $output)
     {
