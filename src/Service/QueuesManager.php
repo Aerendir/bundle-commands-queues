@@ -45,7 +45,7 @@ class QueuesManager
      *
      * @param Job $job
      *
-     * @return bool|Job
+     * @return false|Job
      */
     public function jobExists(Job $job)
     {
