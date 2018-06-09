@@ -264,7 +264,7 @@ class QueuesDaemon
         // Try to start the process
         try {
             $process->start();
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             // Something went wrong starting the process: close it as failed
             $info['output']       = 'Failing start the process.';
             $info['output_error'] = $e;
