@@ -17,7 +17,7 @@
         "doctrine/doctrine-bundle": "^1.7",
         "pagerfanta/pagerfanta": "^1.0",
         "sensio/framework-extra-bundle": "^3.0||^5.1",
-        "serendipity_hq/console-styles-bundle": "^1.0",
+        "serendipity_hq/console-styles-bundle": "dev-master",
         "serendipity_hq/then-when": "^1.1",
         "symfony/framework-bundle": "^3.0||^4.0",
         "symfony/process": "^3.0||^4.0"
