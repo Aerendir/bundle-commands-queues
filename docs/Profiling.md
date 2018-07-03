@@ -31,7 +31,10 @@ To view the generated file
 
     qcachegrind app/logs/callgrind.out
 
-An alternative: https://github.com/gperftools/gperftools
+Alternatives:
+
+- https://github.com/gperftools/gperftools
+- Sensio Blackfire
 
 Memory leaks
 

@@ -29,6 +29,9 @@ class DaemonConfig extends AbstractConfig
     /** @var string $name */
     private $name;
 
+    /** @var bool $prodAllowed If true, passes the --env=prod flag to the commands in the queue */
+    private $prodAllowed;
+
     /** @var int $aliveDaemonsCheckInterval */
     private $aliveDaemonsCheckInterval;
 
@@ -62,8 +65,9 @@ class DaemonConfig extends AbstractConfig
 
     /**
      * @param string|null $daemon
+     * @param bool        $allowProd
      */
-    public function initialize($daemon)
+    public function initialize(?string $daemon, bool $allowProd)
     {
         if (null === $daemon) {
             if (count($this->daemons) > 1) {
@@ -78,6 +82,7 @@ class DaemonConfig extends AbstractConfig
         }
 
         $this->name = $daemon;
+        $this->setProdAllowed($allowProd);
         $this->setAliveDaemonsCheckInterval($this->daemons[$daemon]['alive_daemons_check_interval']);
         $this->setIdleTime($this->daemons[$daemon]['idle_time']);
         $this->setManagedEntitiesTreshold($this->daemons[$daemon]['managed_entities_treshold']);
@@ -124,6 +129,14 @@ class DaemonConfig extends AbstractConfig
     public function getQueue(string $queueName): array
     {
         return $this->queues[$queueName] ?? $this->queues['default'];
+    }
+
+    /**
+     * @return bool
+     */
+    public function isProdAllowed(): bool
+    {
+        return $this->prodAllowed;
     }
 
     /**
@@ -211,6 +224,14 @@ class DaemonConfig extends AbstractConfig
         return [
             'included_queues' => array_keys($this->queues),
         ];
+    }
+
+    /**
+     * @param bool $prodAllowed
+     */
+    public function setProdAllowed(bool $prodAllowed): void
+    {
+        $this->prodAllowed = $prodAllowed;
     }
 
     /**

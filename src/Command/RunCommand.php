@@ -35,6 +35,8 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class RunCommand extends Command
 {
+    const NAME = 'queues:run';
+
     /** @var QueuesDaemon $daemon */
     private $daemon;
 
@@ -70,12 +72,13 @@ class RunCommand extends Command
     protected function configure()
     {
         $this
-            ->setName('queues:run')
+            ->setName(self::NAME)
             ->setDescription('Start the daemon to continuously process the queue.')
             ->setDefinition(
                 new InputDefinition([
                     new InputArgument('daemon', InputArgument::OPTIONAL, 'The Daemon to run.'),
                     new InputOption('enable-memprof', null),
+                    new InputOption('allow-prod', null, InputOption::VALUE_NONE, 'Runs the commands in the queue passing the --env=prod flag. If not set, is passed the flag --env=dev.'),
                 ])
             );
     }
@@ -97,7 +100,7 @@ class RunCommand extends Command
         $this->jobsMarker->setIoWriter($this->ioWriter);
 
         // Do the initializing operations
-        $this->daemon->initialize($input->getArgument('daemon'), $this->ioWriter, $output);
+        $this->daemon->initialize($input->getArgument('daemon'), $input->getOption('allow-prod'), $this->ioWriter, $output);
 
         // Check that the Daemons in the database that are still running are really still running
         $this->checkAliveDaemons();

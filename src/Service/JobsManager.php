@@ -174,11 +174,12 @@ class JobsManager
     }
 
     /**
-     * @param Job $job
+     * @param Job  $job
+     * @param bool $allowProd
      *
      * @return \Symfony\Component\Process\Process
      */
-    public function createJobProcess(Job $job)
+    public function createJobProcess(Job $job, bool $allowProd)
     {
         $arguments = [];
 
@@ -191,8 +192,9 @@ class JobsManager
         // The command to execute
         $arguments[] = $job->getCommand();
 
-        // Environment to use
-        $arguments[] = '--env=' . $this->env;
+        // Decide the environment to use
+        $env         = $allowProd ? $this->env : 'dev';
+        $arguments[] = '--env=' . $env;
 
         // Verbosity level (only if not normal = agument verbosity not set in command)
         if (OutputInterface::VERBOSITY_NORMAL !== $this->verbosity) {

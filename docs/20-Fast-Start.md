@@ -32,6 +32,11 @@ To test `SHQCommandsQueuesBundle` during development, we like to use the command
     app/console queues:random-jobs 1000 --env=prod --no-future-jobs --retry-strategies=live &&
     app/console queues:run --env=prod
 
+***NOTE**: Simply passing `--env=prod` runs anyway the commands in the queue using `--env=dev`: this is a security measure to avoid, for example, the sending of emails to the real email addresses.*
+
+*So, to run the queue in production, **don't forget to add the flag `--allow-prod`**: this flag makes possible for the run commands in the queue to inherit the value passed in the flag `--env=prod`
+if it is `prod`. If it is `dev` the commands in the queues will be run using anyway `--env=dev`.*
+
 In a matter of seconds you will see your console printing the logs of the `SHQCommandsQueuesBundle`:
 
     SerendipityHQ Queue Bundle Daemon
@@ -110,7 +115,7 @@ There are other arguments you can pass the command: see its
  for more details (it is not so complex and will give you a good starting point to better understand how to create
  `Job`s.
 
-You can try to play with the verbosity levels to getter deeper insights about what's happening:
+You can try to play with the verbosity levels to get deeper insights about what's happening:
 
     app/console queues:run --env=prod -v
 
@@ -118,6 +123,6 @@ or
 
     app/console queues:run --env=prod -vv
 
-**Remember the `--env=prod` argument to not consume too much memory!**
+**Remember the `--env=prod` argument to not consume too much memory and the `--allow-prod` flag when running CommandsQueues in production!**
 
 ([Go back to index](00-Index.md)) | Next step: [How to use the SHQCommandsQueuesBundle](30-Use-the-ShqCommandsQueuesBundle.md)

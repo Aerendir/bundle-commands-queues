@@ -95,13 +95,14 @@ class QueuesDaemon
     /**
      * Initializes the Daemon.
      *
-     * @param                    $daemon
+     * @param string|null        $daemon
+     * @param bool               $allowProd
      * @param SerendipityHQStyle $ioWriter
      * @param OutputInterface    $output
      *
      * @throws \Doctrine\ORM\OptimisticLockException
      */
-    public function initialize($daemon, SerendipityHQStyle $ioWriter, OutputInterface $output)
+    public function initialize(?string $daemon, bool $allowProd, SerendipityHQStyle $ioWriter, OutputInterface $output)
     {
         $this->ioWriter  = $ioWriter;
         $this->verbosity = $this->ioWriter->getVerbosity();
@@ -110,7 +111,7 @@ class QueuesDaemon
         $ioWriter->infoLineNoBg('Starting the Daemon...');
 
         // Initialize the configuration
-        $this->config->initialize($daemon);
+        $this->config->initialize($daemon, $allowProd);
 
         // Save the Daemon to the Database
         $this->me = new Daemon(gethostname(), getmypid(), $this->config);
@@ -203,8 +204,9 @@ class QueuesDaemon
      *
      * @param string $queueName
      *
-     * @return bool|void
      * @throws \Doctrine\ORM\OptimisticLockException
+     *
+     * @return bool|void
      */
     public function processNextJob(string $queueName)
     {
@@ -259,7 +261,7 @@ class QueuesDaemon
         }
 
         // Create the process for the scheduled job
-        $process = $this->jobsManager->createJobProcess($job);
+        $process = $this->jobsManager->createJobProcess($job, $this->getConfig()->isProdAllowed());
 
         // Try to start the process
         try {
@@ -669,8 +671,9 @@ class QueuesDaemon
     /**
      * @param Job $job
      *
-     * @return bool|Job Returns false or the Job object
      * @throws \Doctrine\ORM\OptimisticLockException
+     *
+     * @return bool|Job Returns false or the Job object
      */
     final protected function handleChildsOfFailedJob(Job $job)
     {
