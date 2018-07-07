@@ -1,3 +1,4 @@
+*Do you like this bundle? [**Leave a &#9733;**](#js-repo-pjax-container) or run `composer global require symfony/thanks && composer thanks` to say thank you to all libraries you use in your current project, this one too!*
 
 Install Judy (http://php.net/manual/en/judy.installation.php)
 
@@ -44,3 +45,5 @@ http://php.net/manual/en/internals2.memory.management.php
 - https://alexatnet.com/articles/optimize-php-memory-usage-eliminate-circular-references
 - http://paul-m-jones.com/archives/262
 - http://jpauli.github.io/2014/07/02/php-memory.html
+
+*Do you like this bundle? [**Leave a &#9733;**](#js-repo-pjax-container) or run `composer global require symfony/thanks && composer thanks` to say thank you to all libraries you use in your current project, this one too!*

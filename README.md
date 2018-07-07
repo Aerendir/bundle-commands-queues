@@ -1,3 +1,12 @@
+<p align="center">
+    <a href="http://www.serendipityhq.com" target="_blank">
+        <img src="http://www.serendipityhq.com/wp-content/uploads/2018/07/Logo-Serendipity-HQ.png">
+    </a>
+</p>
+
+SHQCommandsQueuesBundle
+=======================
+
 [![Latest Stable Version](https://poser.pugx.org/serendipity_hq/commands-queues-bundle/v/stable)](https://packagist.org/packages/serendipity_hq/commands-queues-bundle)
 [![Build Status](https://travis-ci.org/Aerendir/bundle-commands_queues.svg?branch=master)](https://travis-ci.org/Aerendir/bundle-commands-queues)
 [![Total Downloads](https://poser.pugx.org/serendipity_hq/commands-queues-bundle/downloads)](https://packagist.org/packages/serendipity_hq/commands-queues-bundle)
@@ -6,8 +15,6 @@
 [![Test Coverage](https://codeclimate.com/github/Aerendir/bundle-commands-queues/badges/coverage.svg)](https://codeclimate.com/github/Aerendir/bundle-commands-queues/coverage)
 [![Issue Count](https://codeclimate.com/github/Aerendir/bundle-commands-queues/badges/issue_count.svg)](https://codeclimate.com/github/Aerendir/bundle-commands-queues)
 [![SensioLabsInsight](https://insight.sensiolabs.com/projects/2a1bcd2f-f241-4969-96e4-10ead299d57b/mini.png)](https://insight.sensiolabs.com/projects/2a1bcd2f-f241-4969-96e4-10ead299d57b)
-
-# SHQCommandsQueuesBundle
 
 SHQCommandsQueuesBundle manages queues and processes jobs in your Symfony App.
 

@@ -1,3 +1,5 @@
+*Do you like this bundle? [**Leave a &#9733;**](#js-repo-pjax-container) or run `composer global require symfony/thanks && composer thanks` to say thank you to all libraries you use in your current project, this one too!*
+
 How to configure Serendipity HQ Stripe Bundle
 =============================================
 
@@ -59,5 +61,7 @@ To secure the route, you can add a rule to your `security.yml` file like this:
         # http://symfony.com/doc/current/cookbook/security/access_control.html
         access_control:
             - { path: ^/_queues, role: ROLE_SUPER_ADMIN }
+
+*Do you like this bundle? [**Leave a &#9733;**](#js-repo-pjax-container) or run `composer global require symfony/thanks && composer thanks` to say thank you to all libraries you use in your current project, this one too!*
 
 ([Go back to index](Index.md)) | Next step: [Use the bundle](Use-the-SHQCommandsQueuesBundle.md)

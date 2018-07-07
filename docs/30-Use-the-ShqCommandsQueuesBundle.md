@@ -1,3 +1,5 @@
+*Do you like this bundle? [**Leave a &#9733;**](#js-repo-pjax-container) or run `composer global require symfony/thanks && composer thanks` to say thank you to all libraries you use in your current project, this one too!*
+
 How to use Serendipity HQ Commands Quesus Bundle
 ================================================
 
@@ -191,5 +193,7 @@ Done: now your commands are aware of the Job that executes it!
 
 - https://www.google.it/search?q=php+memory+profiling+tools
 - http://stackoverflow.com/questions/880458/php-memory-profiling
+
+*Do you like this bundle? [**Leave a &#9733;**](#js-repo-pjax-container) or run `composer global require symfony/thanks && composer thanks` to say thank you to all libraries you use in your current project, this one too!*
 
 ([Go back to index](00-Index.md)) | Next step: [Configuration](40-Configuration.md)

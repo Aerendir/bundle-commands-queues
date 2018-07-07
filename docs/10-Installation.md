@@ -1,3 +1,5 @@
+*Do you like this bundle? [**Leave a &#9733;**](#js-repo-pjax-container) or run `composer global require symfony/thanks && composer thanks` to say thank you to all libraries you use in your current project, this one too!*
+
 How to install Serendipity HQ Commands Quesus Bundle
 ====================================================
 
@@ -54,5 +56,7 @@ If you use [Doctrine Migrations](http://symfony.com/doc/current/bundles/Doctrine
 
     app/console doctrine:migrations:diff &&
     app/console doctrine:migrations:migrate
+
+*Do you like this bundle? [**Leave a &#9733;**](#js-repo-pjax-container) or run `composer global require symfony/thanks && composer thanks` to say thank you to all libraries you use in your current project, this one too!*
 
 ([Go back to index](00-Index.md)) | Next step: [Start in less than 5 minutes](20-Fast-start.md)
