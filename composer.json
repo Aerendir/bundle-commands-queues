@@ -15,7 +15,7 @@
         "doctrine/common": "^2.5",
         "doctrine/orm": "^2.5",
         "doctrine/doctrine-bundle": "^1.7",
-        "pagerfanta/pagerfanta": "^1.0",
+        "pagerfanta/pagerfanta": "^2.0",
         "sensio/framework-extra-bundle": "^3.0||^5.1",
         "serendipity_hq/console-styles-bundle": "^1.1",
         "serendipity_hq/then-when": "^1.1",
