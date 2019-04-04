@@ -9,8 +9,8 @@ Using the `SHQCommandsQueuesBundle` is really simple and in a matter of minutes 
 These are the steps required to get up and running with the Serendipity HQ Commands Queues Bundle:
 
 1. [Install and activate SHQCommandsQueuesBundle](10-Installation.md)
-2. [Start in less than 5 minutes](20-Fast-start.md)
-3. [How to use SHQCommandsQueuesBundle](30-Use-the-SHQCommandsQueuesBundle.md)
+2. [Start in less than 5 minutes](20-Fast-Start.md)
+3. [How to use SHQCommandsQueuesBundle](30-Use-the-ShqCommandsQueuesBundle.md)
 4. [Configure the bundle](40-Configuration.md)
 
 *Do you like this bundle? [**Leave a &#9733;**](#js-repo-pjax-container) or run `composer global require symfony/thanks && composer thanks` to say thank you to all libraries you use in your current project, this one too!*
