@@ -1,6 +1,6 @@
 <p align="center">
     <a href="http://www.serendipityhq.com" target="_blank">
-        <img src="http://www.serendipityhq.com/wp-content/uploads/2018/07/Logo-Serendipity-HQ.png">
+        <img src="http://www.serendipityhq.com/assets/open-source-projects/Logo-SerendipityHQ-Icon-Text-Purple.png">
     </a>
 </p>
 
@@ -11,9 +11,6 @@ SHQCommandsQueuesBundle
 [![Build Status](https://travis-ci.org/Aerendir/bundle-commands_queues.svg?branch=master)](https://travis-ci.org/Aerendir/bundle-commands-queues)
 [![Total Downloads](https://poser.pugx.org/serendipity_hq/commands-queues-bundle/downloads)](https://packagist.org/packages/serendipity_hq/commands-queues-bundle)
 [![License](https://poser.pugx.org/serendipity_hq/commands-queues-bundle/license)](https://packagist.org/packages/serendipity_hq/commands-queues-bundle)
-[![Code Climate](https://codeclimate.com/github/Aerendir/bundle-commands-queues/badges/gpa.svg)](https://codeclimate.com/github/Aerendir/bundle-commands-queues)
-[![Test Coverage](https://codeclimate.com/github/Aerendir/bundle-commands-queues/badges/coverage.svg)](https://codeclimate.com/github/Aerendir/bundle-commands-queues/coverage)
-[![Issue Count](https://codeclimate.com/github/Aerendir/bundle-commands-queues/badges/issue_count.svg)](https://codeclimate.com/github/Aerendir/bundle-commands-queues)
 [![SensioLabsInsight](https://insight.sensiolabs.com/projects/2a1bcd2f-f241-4969-96e4-10ead299d57b/mini.png)](https://insight.sensiolabs.com/projects/2a1bcd2f-f241-4969-96e4-10ead299d57b)
 
 SHQCommandsQueuesBundle manages queues and processes jobs in your Symfony App.
