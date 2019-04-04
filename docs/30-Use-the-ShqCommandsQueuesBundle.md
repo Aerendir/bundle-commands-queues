@@ -22,7 +22,7 @@ memory and causing a fatal error.**
 
 To see a more detailed output of the daemon, add the `-v` argument or the `-vv` one.
 
-    app/console queues:run --env=prod
+    app/console queues:run --env=prod -vv
 
 To run the daemon on production you have to use some sort of process manager, like
  [`supervisord`](http://supervisord.org/).
