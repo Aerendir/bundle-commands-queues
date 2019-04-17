@@ -212,7 +212,7 @@ class QueuesDaemon
     {
         // If the max_concurrent_jobs number is reached, don't process one more job
         if ($this->countRunningJobs($queueName) >= $this->config->getQueue($queueName)['max_concurrent_jobs']) {
-            return;
+            return false;
         }
 
         // Get the next job to process
@@ -223,7 +223,7 @@ class QueuesDaemon
             // This queue has no more Jobs: for it the Daemon can sleep
             $this->canSleep[$queueName] = true;
 
-            return;
+            return false;
         }
 
         // This queue has another Job: for it the Daemon can't sleep as the next cycle is required to check if there are other Jobs
@@ -274,7 +274,7 @@ class QueuesDaemon
             // Check if it can be retried and if the retry were successful
             if ($job->getRetryStrategy()->canRetry() && true === $this->retryFailedJob($job, $info, "Job didn't started as its process were aborted.")) {
                 // Exit
-                return;
+                return false;
             }
 
             $cancellingJob = $this->handleChildsOfFailedJob($job);
@@ -289,7 +289,7 @@ class QueuesDaemon
                 }
             }
 
-            return;
+            return false;
         }
 
         /*
@@ -814,8 +814,8 @@ class QueuesDaemon
             $this->ioWriter->infoLineNoBg(sprintf('Found <success-nobg>%s</success-nobg> stale Jobs: start processing them.', $staleJobsCount));
         }
 
-        $stales = [];
         /** @var Job $job */
+        $stales = [];
         while (null !== $job = $this->jobsRepo->findNextStaleJob($stales)) {
             $stales[] = $job->getId();
 

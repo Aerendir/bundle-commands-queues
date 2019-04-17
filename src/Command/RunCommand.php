@@ -134,7 +134,7 @@ class RunCommand extends Command
                     }
                     for ($i = 0; $i < $jobsToLoad; ++$i) {
                         // Start processing the next Job in the queue
-                        if (null === $this->daemon->processNextJob($queueName)) {
+                        if (false === $this->daemon->processNextJob($queueName)) {
                             if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
                                 $this->ioWriter->infoLineNoBg(sprintf('Queue <success-nobg>%s</success-nobg> is empty: no more Jobs to initialize.', $queueName));
                             }
@@ -224,8 +224,8 @@ class RunCommand extends Command
             $this->ioWriter->commentLineNoBg('Daemons are "struggler" if they are not running anymore.');
         }
 
-        $strugglers = [];
         /** @var Daemon $daemon */
+        $strugglers = [];
         while (null !== $daemon = $this->entityManager->getRepository('SHQCommandsQueuesBundle:Daemon')
                 ->findNextAlive($this->daemon->getIdentity())) {
             if (false === $this->isDaemonStillRunning($daemon)) {

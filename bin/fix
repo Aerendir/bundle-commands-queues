@@ -7,4 +7,5 @@ vendor/bin/rector process src --level doctrine25 &&
 vendor/bin/rector process src --level framework-extra-bundle-30 &&
 vendor/bin/rector process src --level framework-extra-bundle-50 &&
 vendor/bin/rector process src --level php71 &&
+vendor/bin/rector process src --level phpstan &&
 vendor/bin/php-cs-fixer fix --allow-risky yes -v
