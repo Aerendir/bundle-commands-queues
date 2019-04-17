@@ -331,7 +331,8 @@ class QueuesDaemon
                 return false;
             }
         }
-        return !$this->hasRunningJobs();
+
+        return ! $this->hasRunningJobs();
     }
 
     /**

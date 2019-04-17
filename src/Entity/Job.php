@@ -39,6 +39,7 @@ class Job
      *     // First: we create a Job to push to the queue
      *     $scheduledJob = new Job('queue:test');
      *     $this->get('queues')->schedule($scheduledJob);
+     *
      * @var \string
      */
     const STATUS_NEW = 'new';
@@ -56,12 +57,14 @@ class Job
      * Think at this in this way: they were commanded to start but they are not actually started, so they are "pending".
      *
      * This situation may happen on very busy workers.
+     *
      * @var \string
      */
     const STATUS_PENDING = 'pending';
 
     /**
      * If the Job fails for some reasons and can be retried, its status is RETRIED.
+     *
      * @var \string
      */
     const STATUS_RETRIED = 'retried';
@@ -78,6 +81,7 @@ class Job
      * So they are started and when the check to see if they are still running is performed they are also already
      * finished. In this case they will skip the "running" state and get directly one of STATUS_FAILED or
      * STATUS_FINISHED.
+     *
      * @var \string
      */
     const STATUS_RUNNING = 'running';

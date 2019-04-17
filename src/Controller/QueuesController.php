@@ -21,10 +21,8 @@ use Pagerfanta\Pagerfanta;
 use Pagerfanta\View\TwitterBootstrap3View;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
-use \Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\HttpFoundation\Request;
@@ -50,6 +48,7 @@ class QueuesController extends \Symfony\Bundle\FrameworkBundle\Controller\Abstra
      * @Route("/jobs", name="queues_jobs")
      *
      * @param Request $request
+     *
      * @return array
      */
     public function jobsAction(Request $request): \Symfony\Component\HttpFoundation\Response
@@ -98,6 +97,7 @@ class QueuesController extends \Symfony\Bundle\FrameworkBundle\Controller\Abstra
      * })
      *
      * @param Job $job
+     *
      * @return array
      */
     public function jobAction(Job $job): \Symfony\Component\HttpFoundation\Response
