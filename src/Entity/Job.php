@@ -39,6 +39,7 @@ class Job
      *     // First: we create a Job to push to the queue
      *     $scheduledJob = new Job('queue:test');
      *     $this->get('queues')->schedule($scheduledJob);
+     * @var \string
      */
     const STATUS_NEW = 'new';
 
@@ -55,11 +56,13 @@ class Job
      * Think at this in this way: they were commanded to start but they are not actually started, so they are "pending".
      *
      * This situation may happen on very busy workers.
+     * @var \string
      */
     const STATUS_PENDING = 'pending';
 
     /**
      * If the Job fails for some reasons and can be retried, its status is RETRIED.
+     * @var \string
      */
     const STATUS_RETRIED = 'retried';
 
@@ -75,34 +78,44 @@ class Job
      * So they are started and when the check to see if they are still running is performed they are also already
      * finished. In this case they will skip the "running" state and get directly one of STATUS_FAILED or
      * STATUS_FINISHED.
+     * @var \string
      */
     const STATUS_RUNNING = 'running';
 
-    /** The job was processed and finished with success. */
+    /** The job was processed and finished with success.
+     * @var \string */
     const STATUS_SUCCEEDED = 'succeeded';
 
-    /** A failed Job that were retried and the retry Job were finished */
+    /** A failed Job that were retried and the retry Job were finished
+     * @var \string */
     const STATUS_RETRY_SUCCEEDED = 'retry_succeeded';
 
-    /** The $process->start() method thrown an exception. */
+    /** The $process->start() method thrown an exception.
+     * @var \string */
     const STATUS_ABORTED = 'aborted';
 
-    /** The job failed for some reasons. */
+    /** The job failed for some reasons.
+     * @var \string */
     const STATUS_FAILED = 'failed';
 
-    /** A failed Job that were retried and the retry Job failed, too */
+    /** A failed Job that were retried and the retry Job failed, too
+     * @var \string */
     const STATUS_RETRY_FAILED = 'retry_failed';
 
-    /** The parent job (on which this one depends) failed. */
+    /** The parent job (on which this one depends) failed.
+     * @var \string */
     const STATUS_CANCELLED = 'cancelled';
 
-    /** Are of this type the Jobs that mark as cancelled child Jobs of a failed one. */
+    /** Are of this type the Jobs that mark as cancelled child Jobs of a failed one.
+     * @var \string */
     const TYPE_CANCELLING = 'cancelling';
 
-    /** Are of this type all Jobs created by the developer or by other Jobs. */
+    /** Are of this type all Jobs created by the developer or by other Jobs.
+     * @var \string */
     const TYPE_JOB = 'job';
 
-    /** Are of this type Jobs created to retry failed ones. */
+    /** Are of this type Jobs created to retry failed ones.
+     * @var \string */
     const TYPE_RETRY = 'retry';
 
     /**
@@ -338,9 +351,7 @@ class Job
             $arguments = explode(' ', $arguments);
 
             // And remove leading and trailing spaces
-            $arguments = array_map(function ($value) {
-                return trim($value);
-            }, $arguments);
+            $arguments = array_map('trim', $arguments);
         }
 
         // Order arguments

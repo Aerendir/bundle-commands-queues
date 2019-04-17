@@ -35,6 +35,9 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class RunCommand extends Command
 {
+    /**
+     * @var string
+     */
     const NAME = 'queues:run';
 
     /** @var QueuesDaemon $daemon */

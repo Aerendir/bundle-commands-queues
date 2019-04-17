@@ -28,10 +28,12 @@ use SerendipityHQ\Bundle\CommandsQueuesBundle\Config\DaemonConfig;
  */
 class Daemon
 {
-    /** Used when a Daemon is killed due to a PCNTL signal */
+    /** Used when a Daemon is killed due to a PCNTL signal
+     * @var \string */
     const MORTIS_SIGNAL = 'signal';
 
-    /** Used when a Daemon is not found anymore during the check of queues:run checkAliveDamons */
+    /** Used when a Daemon is not found anymore during the check of queues:run checkAliveDamons
+     * @var \string */
     const MORTIS_STRAGGLER = 'straggler';
 
     /**

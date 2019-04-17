@@ -55,7 +55,7 @@ class FakeCommand extends ContainerAwareCommand
         // Ok, all gone well (fingers crossed? :P )
         $output->writeln([
             'Hello!',
-            'I\'m TestQueue #' . $input->getOption('id') . ', a command to test the Queue Daemon.',
+            "I'm TestQueue #" . $input->getOption('id') . ', a command to test the Queue Daemon.',
             'During my execution I will trigger some random conditions to show you how Queue Daemon will',
             'manage them.',
             '',
@@ -65,7 +65,7 @@ class FakeCommand extends ContainerAwareCommand
         // If the rand doesn't return a number divisible by two (is just a random condition)
         if (0 !== $triggerError % 2) {
             // ... Randomly throw an exception
-            throw new \RuntimeException('I\'ve just decided to throw a nice exception! Ah ah ah ah!');
+            throw new \RuntimeException("I've just decided to throw a nice exception! Ah ah ah ah!");
         }
 
         // If the rand doesn't return a number divisible by two (is just a random condition)
@@ -77,7 +77,7 @@ class FakeCommand extends ContainerAwareCommand
 
         // Emulate a duration to execute the command
         $rand = rand(0, 10);
-        $output->writeln(sprintf('I\'m so tired... I will sleep for %s seconds... Good bye, see you soon! :)', $rand));
+        $output->writeln(sprintf("I'm so tired... I will sleep for %s seconds... Good bye, see you soon! :)", $rand));
         sleep($rand);
 
         // Ok, all gone well (fingers crossed? :P )

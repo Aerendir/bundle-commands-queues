@@ -272,7 +272,7 @@ class QueuesDaemon
             $info['output_error'] = $e;
 
             // Check if it can be retried and if the retry were successful
-            if ($job->getRetryStrategy()->canRetry() && true === $this->retryFailedJob($job, $info, 'Job didn\'t started as its process were aborted.')) {
+            if ($job->getRetryStrategy()->canRetry() && true === $this->retryFailedJob($job, $info, "Job didn't started as its process were aborted.")) {
                 // Exit
                 return;
             }
@@ -281,7 +281,7 @@ class QueuesDaemon
             $this->jobsMarker->markJobAsAborted($job, $info, $this->me);
             if ($this->verbosity >= OutputInterface::VERBOSITY_NORMAL) {
                 $this->ioWriter->errorLineNoBg(sprintf(
-                    '[%s] Job <success-nobg>#%s</success-nobg> on Queue <success-nobg>%s</success-nobg>: The process didn\'t started due to some errors. See them in the'
+                    "[%s] Job <success-nobg>#%s</success-nobg> on Queue <success-nobg>%s</success-nobg>: The process didn't started due to some errors. See them in the"
                     . ' logs of the Job.', $now->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue()
                 ));
                 if (false !== $cancellingJob) {
