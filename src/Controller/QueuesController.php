@@ -36,23 +36,20 @@ class QueuesController extends Controller
 {
     /**
      * @Route("/", name="queues_index")
-     * @Template()
      */
     public function indexAction()
     {
         $jobs = $this->getDoctrine()->getRepository('SHQCommandsQueuesBundle:Daemon')->findAll();
 
-        return [
+        return $this->render('Bundle:Queues:index.html.twig', [
             'daemons' => $jobs,
-        ];
+        ]);
     }
 
     /**
      * @Route("/jobs", name="queues_jobs")
-     * @Template()
      *
      * @param Request $request
-     *
      * @return array
      */
     public function jobsAction(Request $request)
@@ -85,16 +82,15 @@ class QueuesController extends Controller
             return $router->generate('queues_jobs', $params);
         };
 
-        return [
+        return $this->render('Bundle:Queues:jobs.html.twig', [
             'jobPager'          => $pager,
             'jobPagerView'      => $pagerView,
             'jobPagerGenerator' => $routeGenerator,
-        ];
+        ]);
     }
 
     /**
      * @Route("/job/{id}", name="queues_job")
-     * @Template()
      * @ParamConverter("job", class="SHQCommandsQueuesBundle:Job", options={
      *     "repository_method" = "findOneById",
      *     "mapping": {"id": "id"},
@@ -102,14 +98,13 @@ class QueuesController extends Controller
      * })
      *
      * @param Job $job
-     *
      * @return array
      */
     public function jobAction(Job $job)
     {
-        return [
+        return $this->render('Bundle:Queues:job.html.twig', [
             'job' => $job,
-        ];
+        ]);
     }
 
     /**
