@@ -331,12 +331,7 @@ class QueuesDaemon
                 return false;
             }
         }
-
-        if ($this->hasRunningJobs()) {
-            return false;
-        }
-
-        return true;
+        return !$this->hasRunningJobs();
     }
 
     /**
@@ -366,7 +361,7 @@ class QueuesDaemon
      */
     public function hasRunningJobs(string $queueName = null): bool
     {
-        return $this->countRunningJobs($queueName) > 0 ? true : false;
+        return $this->countRunningJobs($queueName) > 0;
     }
 
     /**

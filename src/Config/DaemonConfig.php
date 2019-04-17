@@ -95,7 +95,7 @@ class DaemonConfig extends AbstractConfig
         $queues = array_keys($this->queues);
         foreach ($queues as $queue) {
             // Do not unset the default queue
-            if (false === array_search($queue, $this->daemons[$daemon]['queues']) && 'default' !== $queue) {
+            if (false === in_array($queue, $this->daemons[$daemon]['queues'], true) && 'default' !== $queue) {
                 unset($this->queues[$queue]);
             }
         }

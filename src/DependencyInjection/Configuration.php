@@ -198,7 +198,7 @@ class Configuration implements ConfigurationInterface
      */
     private function configureDaemon(array $config, array $tree)
     {
-        $return = [
+        return [
             // Daemon specific configurations
             'alive_daemons_check_interval' => $config['alive_daemons_check_interval'] ?? $tree['alive_daemons_check_interval'],
             'idle_time'                    => $config['idle_time'] ?? $tree['idle_time'],
@@ -212,8 +212,6 @@ class Configuration implements ConfigurationInterface
             'managed_entities_treshold'   => $config['managed_entities_treshold'] ?? $tree['managed_entities_treshold'],
             'queues'                      => $config['queues'],
         ];
-
-        return $return;
     }
 
     /**
@@ -224,12 +222,10 @@ class Configuration implements ConfigurationInterface
      */
     private function configureQueue(array $config, array $tree)
     {
-        $return = [
+        return [
             'max_concurrent_jobs'         => $config['max_concurrent_jobs'] ?? $tree['max_concurrent_jobs'],
             'retry_stale_jobs'            => $config['retry_stale_jobs'] ?? $tree['retry_stale_jobs'],
             'running_jobs_check_interval' => $config['running_jobs_check_interval'] ?? $tree['running_jobs_check_interval'],
         ];
-
-        return $return;
     }
 }
