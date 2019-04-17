@@ -47,7 +47,7 @@ class JobsMarker
     /**
      * @param SerendipityHQStyle $ioWriter
      */
-    public function setIoWriter(SerendipityHQStyle $ioWriter)
+    public function setIoWriter(SerendipityHQStyle $ioWriter): void
     {
         self::$ioWriter = $ioWriter;
     }
@@ -57,7 +57,7 @@ class JobsMarker
      *
      * @return \ReflectionClass
      */
-    public static function createReflectedJob(Job $job)
+    public static function createReflectedJob(Job $job): \ReflectionClass
     {
         $reflectedClass = new \ReflectionClass($job);
 
@@ -75,7 +75,7 @@ class JobsMarker
      * @param array  $info
      * @param Daemon $daemon
      */
-    public function markJobAsAborted(Job $job, array $info, Daemon $daemon)
+    public function markJobAsAborted(Job $job, array $info, Daemon $daemon): void
     {
         $this->markJobAsClosed($job, Job::STATUS_ABORTED, $info, $daemon);
     }
@@ -84,7 +84,7 @@ class JobsMarker
      * @param Job   $job
      * @param array $info
      */
-    public function markJobAsCancelled(Job $job, array $info)
+    public function markJobAsCancelled(Job $job, array $info): void
     {
         $this->markJobAsClosed($job, Job::STATUS_CANCELLED, $info);
     }
@@ -93,7 +93,7 @@ class JobsMarker
      * @param Job   $job
      * @param array $info
      */
-    public function markJobAsFailed(Job $job, array $info)
+    public function markJobAsFailed(Job $job, array $info): void
     {
         // If this Job is a retry of another one, mark also the retried as finished
         if ($job->isTypeRetrying()) {
@@ -107,7 +107,7 @@ class JobsMarker
      * @param Job   $job
      * @param array $info
      */
-    public function markJobAsFinished(Job $job, array $info)
+    public function markJobAsFinished(Job $job, array $info): void
     {
         // If this Job is a retry of another one, mark also the retried as finished
         if ($job->isTypeRetrying()) {
@@ -122,7 +122,7 @@ class JobsMarker
      * @param array  $info
      * @param Daemon $daemon
      */
-    public function markJobAsPending(Job $job, array $info, Daemon $daemon)
+    public function markJobAsPending(Job $job, array $info, Daemon $daemon): void
     {
         $this->markJob($job, Job::STATUS_PENDING, $info, $daemon);
     }
@@ -133,7 +133,7 @@ class JobsMarker
      *
      * @return Job the created retry Job
      */
-    public function markFailedJobAsRetried(Job $failedJob, array $info)
+    public function markFailedJobAsRetried(Job $failedJob, array $info): \SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job
     {
         // Create a new retry Job
         $retryingJob = $failedJob->createRetryForFailed();
@@ -147,7 +147,7 @@ class JobsMarker
      *
      * @return Job the created retry Job
      */
-    public function markStaleJobAsRetried(Job $staleJob, array $info)
+    public function markStaleJobAsRetried(Job $staleJob, array $info): \SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job
     {
         // Create a new retry Job
         $retryingJob = $staleJob->createRetryForStale();
@@ -158,7 +158,7 @@ class JobsMarker
     /**
      * @param Job $job
      */
-    public function markJobAsRunning(Job $job)
+    public function markJobAsRunning(Job $job): void
     {
         $this->markJob($job, Job::STATUS_RUNNING);
     }
@@ -169,7 +169,7 @@ class JobsMarker
      * @param array       $info
      * @param Daemon|null $daemon
      */
-    private function markJobAsClosed(Job $job, string $status, array $info, Daemon $daemon = null)
+    private function markJobAsClosed(Job $job, string $status, array $info, Daemon $daemon = null): void
     {
         $info['closed_at'] = new \DateTime();
         $this->markJob($job, $status, $info, $daemon);
@@ -182,7 +182,7 @@ class JobsMarker
      *
      * @return Job
      */
-    private function markJobAsRetried(Job $retriedJob, Job $retryingJob, array $info)
+    private function markJobAsRetried(Job $retriedJob, Job $retryingJob, array $info): \SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job
     {
         $this->updateChildDependencies($retryingJob);
 
@@ -196,7 +196,7 @@ class JobsMarker
     /**
      * @param Job $retriedJob
      */
-    private function markParentsAsRetryFailed(Job $retriedJob)
+    private function markParentsAsRetryFailed(Job $retriedJob): void
     {
         if ($retriedJob->isTypeRetrying()) {
             $this->markParentsAsRetryFailed($retriedJob->getRetryOf());
@@ -208,7 +208,7 @@ class JobsMarker
     /**
      * @param Job $retriedJob
      */
-    private function markParentsAsRetrySucceeded(Job $retriedJob)
+    private function markParentsAsRetrySucceeded(Job $retriedJob): void
     {
         if ($retriedJob->isTypeRetrying()) {
             $this->markParentsAsRetrySucceeded($retriedJob->getRetryOf());
@@ -225,7 +225,7 @@ class JobsMarker
      *
      * @throws \Exception
      */
-    private function markJob(Job $job, string $status, array $info = [], Daemon $daemon = null)
+    private function markJob(Job $job, string $status, array $info = [], Daemon $daemon = null): void
     {
         $oldStatus = $job->getStatus();
         $this->updateJob($job, $status, $info, $daemon);
@@ -293,7 +293,7 @@ class JobsMarker
      * @param array       $info
      * @param Daemon|null $daemon
      */
-    private function updateJob(Job $job, string $status, array $info = [], Daemon $daemon = null)
+    private function updateJob(Job $job, string $status, array $info = [], Daemon $daemon = null): void
     {
         $reflectedClass = self::createReflectedJob($job);
 
@@ -358,7 +358,7 @@ class JobsMarker
     /**
      * @param Job $retryJob
      */
-    private function updateChildDependencies(Job $retryJob)
+    private function updateChildDependencies(Job $retryJob): void
     {
         /** @var Job $childDependency Set the retried Job as parent dependency of the child dependencies of this retrying Job */
         foreach ($retryJob->getRetryOf()->getChildDependencies() as $childDependency) {

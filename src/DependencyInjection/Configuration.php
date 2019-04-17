@@ -35,7 +35,7 @@ class Configuration implements ConfigurationInterface
      *
      * @return array
      */
-    public static function getSupportedDrivers()
+    public static function getSupportedDrivers(): array
     {
         return ['orm'];
     }
@@ -43,7 +43,7 @@ class Configuration implements ConfigurationInterface
     /**
      * {@inheritdoc}
      */
-    public function getConfigTreeBuilder()
+    public function getConfigTreeBuilder(): \Symfony\Component\Config\Definition\Builder\TreeBuilder
     {
         $treeBuilder = new TreeBuilder();
         $rootNode    = $treeBuilder->root('shq_commands_queues');
@@ -123,7 +123,7 @@ class Configuration implements ConfigurationInterface
      *
      * @return bool
      */
-    private function validateConfiguration(array $tree)
+    private function validateConfiguration(array $tree): bool
     {
         foreach ($tree['daemons'] as $daemon => $config) {
             // A Daemon MUST HAVE at least one queue assigned
@@ -156,7 +156,7 @@ class Configuration implements ConfigurationInterface
      *
      * @return array
      */
-    private function prepareConfiguration(array $tree)
+    private function prepareConfiguration(array $tree): array
     {
         // Create the main configuration array to return
         $returnConfig = [
@@ -196,7 +196,7 @@ class Configuration implements ConfigurationInterface
      *
      * @return array
      */
-    private function configureDaemon(array $config, array $tree)
+    private function configureDaemon(array $config, array $tree): array
     {
         return [
             // Daemon specific configurations
@@ -220,7 +220,7 @@ class Configuration implements ConfigurationInterface
      *
      * @return array
      */
-    private function configureQueue(array $config, array $tree)
+    private function configureQueue(array $config, array $tree): array
     {
         return [
             'max_concurrent_jobs'         => $config['max_concurrent_jobs'] ?? $tree['max_concurrent_jobs'],

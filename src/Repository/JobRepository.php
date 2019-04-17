@@ -38,7 +38,7 @@ class JobRepository extends EntityRepository
      * @param array              $config
      * @param SerendipityHQStyle $ioWriter
      */
-    public function configure(array $config, SerendipityHQStyle $ioWriter)
+    public function configure(array $config, SerendipityHQStyle $ioWriter): void
     {
         $this->config   = $config;
         $this->ioWriter = $ioWriter;
@@ -64,7 +64,7 @@ class JobRepository extends EntityRepository
      *
      * @return Job|null
      */
-    public function findNextRunnableJob(string $queueName)
+    public function findNextRunnableJob(string $queueName): \SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job
     {
         // Collects the Jobs that have to be excluded from the next findNextJob() call
         $excludedJobs = [];
@@ -98,7 +98,7 @@ class JobRepository extends EntityRepository
     /**
      * @return int
      */
-    public function countStaleJobs()
+    public function countStaleJobs(): int
     {
         $queryBuilder = $this->getEntityManager()->createQueryBuilder();
 
@@ -127,7 +127,7 @@ class JobRepository extends EntityRepository
      *
      * @return Job|null
      */
-    public function exists(string $command, $arguments = [], string $queue = 'default')
+    public function exists(string $command, array $arguments = [], string $queue = 'default'): ?Job
     {
         $queryBuilder = $this->getEntityManager()->createQueryBuilder();
 
@@ -150,7 +150,7 @@ class JobRepository extends EntityRepository
      *
      * @return Job
      */
-    public function findNextStaleJob(array $knownAsStale)
+    public function findNextStaleJob(array $knownAsStale): Job
     {
         $queryBuilder = $this->getEntityManager()->createQueryBuilder();
         $queryBuilder->select('j')->from('SHQCommandsQueuesBundle:Job', 'j')
@@ -184,7 +184,7 @@ class JobRepository extends EntityRepository
      *
      * @return Job|null
      */
-    private function findNextJob(string $queueName, array $excludedJobs = [])
+    private function findNextJob(string $queueName, array $excludedJobs = []): ?Job
     {
         $queryBuilder = $this->getEntityManager()->createQueryBuilder();
         $queryBuilder->select('j')->from('SHQCommandsQueuesBundle:Job', 'j')
@@ -220,7 +220,7 @@ class JobRepository extends EntityRepository
      *
      * @param QueryBuilder $queryBuilder
      */
-    private function configureQueues(QueryBuilder $queryBuilder)
+    private function configureQueues(QueryBuilder $queryBuilder): void
     {
         // Set the queues to include
         if (isset($this->config['included_queues'])) {

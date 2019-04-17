@@ -29,7 +29,7 @@ class FakeCommand extends ContainerAwareCommand
     /**
      * {@inheritdoc}
      */
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->setName('queues:test:fake')
@@ -48,7 +48,7 @@ class FakeCommand extends ContainerAwareCommand
      *
      * @return bool
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): bool
     {
         $triggerError = null === $input->getOption('trigger-error') ? rand(0, 10) : 1;
         $duration     = rand(10, 10000);

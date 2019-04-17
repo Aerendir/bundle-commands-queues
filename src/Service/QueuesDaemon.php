@@ -102,7 +102,7 @@ class QueuesDaemon
      *
      * @throws \Doctrine\ORM\OptimisticLockException
      */
-    public function initialize(?string $daemon, bool $allowProd, SerendipityHQStyle $ioWriter, OutputInterface $output)
+    public function initialize(?string $daemon, bool $allowProd, SerendipityHQStyle $ioWriter, OutputInterface $output): void
     {
         $this->ioWriter  = $ioWriter;
         $this->verbosity = $this->ioWriter->getVerbosity();
@@ -157,7 +157,7 @@ class QueuesDaemon
      *
      * @throws \Doctrine\ORM\OptimisticLockException
      */
-    public function requiescantInPace()
+    public function requiescantInPace(): void
     {
         $this->me->requiescatInPace();
         $this->entityManager->persist($this->me);
@@ -208,7 +208,7 @@ class QueuesDaemon
      *
      * @return bool|void
      */
-    public function processNextJob(string $queueName)
+    public function processNextJob(string $queueName): bool
     {
         // If the max_concurrent_jobs number is reached, don't process one more job
         if ($this->countRunningJobs($queueName) >= $this->config->getQueue($queueName)['max_concurrent_jobs']) {
@@ -377,7 +377,7 @@ class QueuesDaemon
         if (null === $queueName) {
             $runningJobs = 0;
             foreach ($this->runningJobs as $currentlyRunning) {
-                $runningJobs += count($currentlyRunning);
+                $runningJobs += is_array($currentlyRunning) || $currentlyRunning instanceof \Countable ? count($currentlyRunning) : 0;
             }
 
             // Return the overall amount
@@ -393,7 +393,7 @@ class QueuesDaemon
      * @param string                                             $queueName
      * @param \Symfony\Component\Console\Helper\ProgressBar|null $progressBar
      */
-    public function checkRunningJobs(string $queueName, \Symfony\Component\Console\Helper\ProgressBar $progressBar = null)
+    public function checkRunningJobs(string $queueName, \Symfony\Component\Console\Helper\ProgressBar $progressBar = null): void
     {
         foreach ($this->runningJobs[$queueName] as $index => $runningJob) {
             $now = new \DateTime();
@@ -428,7 +428,7 @@ class QueuesDaemon
      *
      * @return bool
      */
-    public function processRunningJob(array $runningJob)
+    public function processRunningJob(array $runningJob): bool
     {
         $now = new \DateTime();
 
@@ -493,7 +493,7 @@ class QueuesDaemon
             return false;
         }
 
-        return $this->getConfig()->getManagedEntitiesTreshold() < count($this->entityManager->getUnitOfWork()->getIdentityMap()[Job::class]);
+        return $this->getConfig()->getManagedEntitiesTreshold() < (is_array($this->entityManager->getUnitOfWork()->getIdentityMap()[Job::class]) || $this->entityManager->getUnitOfWork()->getIdentityMap()[Job::class] instanceof \Countable ? count($this->entityManager->getUnitOfWork()->getIdentityMap()[Job::class]) : 0);
     }
 
     /**
@@ -507,7 +507,7 @@ class QueuesDaemon
     /**
      * Optimizes the usage of memory.
      */
-    public function optimize()
+    public function optimize(): void
     {
         $this->profiler->profile();
 
@@ -555,7 +555,7 @@ class QueuesDaemon
     /**
      * Put the Daemon in sleep.
      */
-    public function sleep()
+    public function sleep(): void
     {
         sleep($this->getConfig()->getIdleTime());
     }
@@ -568,7 +568,7 @@ class QueuesDaemon
      *
      * This method ensures a delay between writings on the database.
      */
-    public function wait()
+    public function wait(): void
     {
         $waitTimeInMs = mt_rand(500, 1000);
         usleep($waitTimeInMs * 1E3);
@@ -595,7 +595,7 @@ class QueuesDaemon
      *
      * @return int
      */
-    public function getJobsToLoad(string $queueName)
+    public function getJobsToLoad(string $queueName): int
     {
         return $this->getConfig()->getQueue($queueName)['max_concurrent_jobs'] - $this->countRunningJobs($queueName);
     }
@@ -623,7 +623,7 @@ class QueuesDaemon
      *
      * @throws \Doctrine\ORM\OptimisticLockException
      */
-    final protected function handleFailedJob(Job $job, Process $process)
+    final protected function handleFailedJob(Job $job, Process $process): void
     {
         $info = $this->jobsManager->buildDefaultInfo($process);
 
@@ -653,7 +653,7 @@ class QueuesDaemon
      * @param Job     $job
      * @param Process $process
      */
-    final protected function handleSuccessfulJob(Job $job, Process $process)
+    final protected function handleSuccessfulJob(Job $job, Process $process): void
     {
         $info = $this->jobsManager->buildDefaultInfo($process);
         $this->jobsMarker->markJobAsFinished($job, $info);
@@ -702,7 +702,7 @@ class QueuesDaemon
     /**
      * Enables Memprof if required.
      */
-    private function setupMemprof()
+    private function setupMemprof(): void
     {
         // Intialize php-memprof
         if (true === $this->ioWriter->getInput()->getOption('enable-memprof')) {
@@ -717,7 +717,7 @@ class QueuesDaemon
     /**
      * Sets the PCNTL signals handlers.
      */
-    private function setupPcntlSignals()
+    private function setupPcntlSignals(): void
     {
         // The callback to use as signal handler
         $signalHandler = function ($signo) {
@@ -766,7 +766,7 @@ class QueuesDaemon
      *
      * @return bool
      */
-    private function retryFailedJob(Job $job, array $info, string $retryReason)
+    private function retryFailedJob(Job $job, array $info, string $retryReason): bool
     {
         $retryJob = $this->jobsMarker->markFailedJobAsRetried($job, $info);
         $this->ioWriter->warningLineNoBg(sprintf(
@@ -788,7 +788,7 @@ class QueuesDaemon
      *
      * @throws \Doctrine\ORM\OptimisticLockException
      */
-    private function checkStaleJobs(OutputInterface $output)
+    private function checkStaleJobs(OutputInterface $output): void
     {
         if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
             $this->ioWriter->infoLineNoBg('Checking stale jobs...');
@@ -849,7 +849,7 @@ class QueuesDaemon
      *
      * @return bool
      */
-    private function retryStaleJob(Job $job, array $info, string $retryReason)
+    private function retryStaleJob(Job $job, array $info, string $retryReason): bool
     {
         $retryingJob = $this->jobsMarker->markStaleJobAsRetried($job, $info);
         $this->ioWriter->warningLineNoBg(sprintf(

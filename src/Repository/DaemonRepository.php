@@ -30,7 +30,7 @@ class DaemonRepository extends EntityRepository
      *
      * @return Daemon|null
      */
-    public function findNextAlive(Daemon $currentDaemon)
+    public function findNextAlive(Daemon $currentDaemon): ?Daemon
     {
         $queryBuilder = $this->_em->createQueryBuilder();
         $queryBuilder->select('d')->from('SHQCommandsQueuesBundle:Daemon', 'd')

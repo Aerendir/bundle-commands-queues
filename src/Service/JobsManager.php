@@ -55,7 +55,7 @@ class JobsManager
      * @param EntityManager      $entityManager
      * @param SerendipityHQStyle $ioWriter
      */
-    public function initialize(EntityManager $entityManager, SerendipityHQStyle $ioWriter)
+    public function initialize(EntityManager $entityManager, SerendipityHQStyle $ioWriter): void
     {
         self::$entityManager = $entityManager;
         self::$ioWriter      = $ioWriter;
@@ -70,7 +70,7 @@ class JobsManager
      *
      * @param Job $job
      */
-    public static function detach(Job $job)
+    public static function detach(Job $job): void
     {
         $tree        = self::calculateJobsTree($job);
         $detached    = [];
@@ -135,7 +135,7 @@ class JobsManager
      *
      * @param Job $job
      */
-    public function refreshTree(Job $job)
+    public function refreshTree(Job $job): void
     {
         $jobsTree = self::calculateJobsTree($job);
 
@@ -155,7 +155,7 @@ class JobsManager
      *
      * @return array
      */
-    public function buildDefaultInfo(Process $process)
+    public function buildDefaultInfo(Process $process): array
     {
         return [
             'output'    => $process->getOutput() . $process->getErrorOutput(),
@@ -179,7 +179,7 @@ class JobsManager
      *
      * @return \Symfony\Component\Process\Process
      */
-    public function createJobProcess(Job $job, bool $allowProd)
+    public function createJobProcess(Job $job, bool $allowProd): \Symfony\Component\Process\Process
     {
         $arguments = [];
 
@@ -219,7 +219,7 @@ class JobsManager
      *
      * @return string
      */
-    public static function guessJobEmState(Job $job)
+    public static function guessJobEmState(Job $job): string
     {
         switch (self::$entityManager->getUnitOfWork()->getEntityState($job)) {
             case UnitOfWork::STATE_DETACHED:
@@ -251,7 +251,7 @@ class JobsManager
      *
      * @return array
      */
-    private static function calculateJobsTree(Job $job, &$tree = [])
+    private static function calculateJobsTree(Job $job, array &$tree = []): array
     {
         if (null !== $job->getChildDependencies() && 0 < count($job->getChildDependencies())) {
             /** @var Job $childDependency Detach child deps * */

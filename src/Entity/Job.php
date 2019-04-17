@@ -339,7 +339,7 @@ class Job
      *
      * @return array
      */
-    public static function prepareArguments($arguments = [])
+    public static function prepareArguments(array $arguments = []): array
     {
         if (false === is_string($arguments) && false === is_array($arguments)) {
             throw new \InvalidArgumentException('Second parameter $arguments can be only an array or a string.');
@@ -365,7 +365,7 @@ class Job
      *
      * @return $this
      */
-    public function addArgument(string $argument)
+    public function addArgument(string $argument): self
     {
         $this->arguments[] = $argument;
 
@@ -498,7 +498,7 @@ class Job
     /**
      * @return int
      */
-    public function getId()
+    public function getId(): int
     {
         return $this->id;
     }
@@ -530,7 +530,7 @@ class Job
     /**
      * @return \DateTime|null
      */
-    public function getStartedAt()
+    public function getStartedAt(): \DateTime
     {
         return $this->startedAt;
     }
@@ -538,7 +538,7 @@ class Job
     /**
      * @return \DateTime|null
      */
-    public function getClosedAt()
+    public function getClosedAt(): \DateTime
     {
         return $this->closedAt;
     }
@@ -546,7 +546,7 @@ class Job
     /**
      * @return array|null Null if the process finished with success
      */
-    public function getDebug()
+    public function getDebug(): array
     {
         return $this->debug;
     }
@@ -554,7 +554,7 @@ class Job
     /**
      * @return \DateTime|null
      */
-    public function getExecuteAfterTime()
+    public function getExecuteAfterTime(): \DateTime
     {
         return $this->executeAfterTime;
     }
@@ -602,7 +602,7 @@ class Job
     /**
      * @return Job
      */
-    public function getCancelledBy()
+    public function getCancelledBy(): \SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job
     {
         return $this->cancelledBy;
     }
@@ -610,7 +610,7 @@ class Job
     /**
      * @return Collection
      */
-    public function getCancelledJobs()
+    public function getCancelledJobs(): \Doctrine\Common\Collections\Collection
     {
         return $this->cancelledJobs;
     }
@@ -618,7 +618,7 @@ class Job
     /**
      * @return string|null Null if no output were produced by the process
      */
-    public function getOutput()
+    public function getOutput(): string
     {
         return $this->output;
     }
@@ -626,7 +626,7 @@ class Job
     /**
      * @return int|null Null if the process was not already started
      */
-    public function getExitCode()
+    public function getExitCode(): int
     {
         return $this->exitCode;
     }
@@ -666,7 +666,7 @@ class Job
     /**
      * @return Job|null
      */
-    public function getRetryOf()
+    public function getRetryOf(): \SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job
     {
         return $this->retryOf;
     }
@@ -674,7 +674,7 @@ class Job
     /**
      * @return Job
      */
-    public function getRetriedBy()
+    public function getRetriedBy(): \SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job
     {
         return $this->retriedBy;
     }
@@ -682,7 +682,7 @@ class Job
     /**
      * @return Job|null
      */
-    public function getFirstRetriedJob()
+    public function getFirstRetriedJob(): \SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job
     {
         return $this->firstRetriedJob;
     }
@@ -1201,7 +1201,7 @@ class Job
      *
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return (string) $this->getId();
     }

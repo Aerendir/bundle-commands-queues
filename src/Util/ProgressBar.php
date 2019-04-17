@@ -47,7 +47,7 @@ class ProgressBar
      *
      * @return \Symfony\Component\Console\Helper\ProgressBar
      */
-    public static function createProgressBar(string $format, OutputInterface $output, int $howManyJobs = 0)
+    public static function createProgressBar(string $format, OutputInterface $output, int $howManyJobs = 0): \Symfony\Component\Console\Helper\ProgressBar
     {
         \Symfony\Component\Console\Helper\ProgressBar::setPlaceholderFormatterDefinition(
             'memory_nr',

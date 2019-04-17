@@ -31,7 +31,7 @@ class TestFailingJobsCommand extends ContainerAwareCommand
     /**
      * {@inheritdoc}
      */
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->setName('queues:test:failing-jobs')
@@ -50,7 +50,7 @@ class TestFailingJobsCommand extends ContainerAwareCommand
      *
      * @return bool
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): void
     {
         $job1 = new Job('queues:test', '--id=1 --trigger-error=true');
         $job1->setRetryStrategy(new LiveStrategy(3))->setQueue('queue_1');

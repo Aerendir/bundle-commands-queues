@@ -81,7 +81,7 @@ class QueuesManager
      *
      * @return bool|Job
      */
-    public function exists(string $command, $arguments = [], string $queue = 'default')
+    public function exists(string $command, array $arguments = [], string $queue = 'default')
     {
         $exists = $this->find($command, $arguments, $queue);
 
@@ -103,7 +103,7 @@ class QueuesManager
      *
      * @return Job|null
      */
-    public function find(string $command, $arguments = [], string $queue = 'default'): ?Job
+    public function find(string $command, array $arguments = [], string $queue = 'default'): ?Job
     {
         // Check and prepare arguments of the command
         $arguments = Job::prepareArguments($arguments);

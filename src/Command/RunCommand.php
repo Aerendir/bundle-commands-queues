@@ -72,7 +72,7 @@ class RunCommand extends Command
     /**
      * {@inheritdoc}
      */
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->setName(self::NAME)
@@ -92,7 +92,7 @@ class RunCommand extends Command
      *
      * @return int The status code of the command
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->output = $output;
 
@@ -217,7 +217,7 @@ class RunCommand extends Command
     /**
      * Checks that the Damons in the database without a didedOn date are still alive (running).
      */
-    private function checkAliveDaemons()
+    private function checkAliveDaemons(): void
     {
         if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
             $this->ioWriter->infoLineNoBg('Checking struggler Daemons...');
@@ -274,7 +274,7 @@ class RunCommand extends Command
      *
      * @return bool
      */
-    private function isDaemonStillRunning(Daemon $daemon)
+    private function isDaemonStillRunning(Daemon $daemon): bool
     {
         // Get the running processes with the Daemon's PID
         exec(sprintf('ps -ef | grep %s', $daemon->getPid()), $lines);
@@ -292,7 +292,7 @@ class RunCommand extends Command
     /**
      * @param string $queueName
      */
-    private function processRunningJobs(string $queueName)
+    private function processRunningJobs(string $queueName): void
     {
         $currentlyRunningProgress = null;
         if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {

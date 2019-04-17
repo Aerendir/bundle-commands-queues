@@ -44,7 +44,7 @@ abstract class AbstractQueuesCommand extends ContainerAwareCommand
      *
      * @return bool
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         // Create the Input/Output writer
         $this->ioWriter = new SerendipityHQStyle($input, $output);

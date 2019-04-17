@@ -42,7 +42,7 @@ class TestRandomJobsCommand extends AbstractQueuesCommand
     /**
      * {@inheritdoc}
      */
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->setName('queues:test:random-jobs')
@@ -64,7 +64,7 @@ class TestRandomJobsCommand extends AbstractQueuesCommand
      *
      * @return bool
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         parent::execute($input, $output);
 
@@ -94,7 +94,7 @@ class TestRandomJobsCommand extends AbstractQueuesCommand
             $scheduledJob->setQueue($this->queues[$queue]);
 
             // Set a random retry strategy
-            if (0 < count($retryStrategies)) {
+            if (0 < (is_array($retryStrategies) || $retryStrategies instanceof \Countable ? count($retryStrategies) : 0)) {
                 $scheduledJob->setRetryStrategy($this->getRandomRetryStrategy($retryStrategies, $timeUnits));
             }
 
@@ -188,7 +188,7 @@ class TestRandomJobsCommand extends AbstractQueuesCommand
      *
      * @return string
      */
-    private function getRandomTimeUnit(array $timeUnits)
+    private function getRandomTimeUnit(array $timeUnits): string
     {
         return $timeUnits[rand(0, count($timeUnits) - 1)];
     }

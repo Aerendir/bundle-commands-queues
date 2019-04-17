@@ -34,7 +34,7 @@ class MarkAsCancelledCommand extends AbstractQueuesCommand
     /**
      * {@inheritdoc}
      */
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->setName('queues:internal:mark-as-cancelled')
@@ -58,7 +58,7 @@ class MarkAsCancelledCommand extends AbstractQueuesCommand
      *
      * @return bool
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         parent::execute($input, $output);
 
@@ -83,7 +83,7 @@ class MarkAsCancelledCommand extends AbstractQueuesCommand
      *
      * @return bool
      */
-    private function cancelChildJobs(Job $markedJob, Job $cancellingJob, string $cancellationReason, array $alreadyCancelledJobs = [])
+    private function cancelChildJobs(Job $markedJob, Job $cancellingJob, string $cancellationReason, array $alreadyCancelledJobs = []): int
     {
         $this->getIoWriter()->infoLineNoBg(sprintf('Start cancelling child Jobs of Job #%s@%s.', $markedJob->getId(), $markedJob->getQueue()));
 

@@ -37,7 +37,7 @@ class QueuesController extends Controller
     /**
      * @Route("/", name="queues_index")
      */
-    public function indexAction()
+    public function indexAction(): \Symfony\Component\HttpFoundation\Response
     {
         $jobs = $this->getDoctrine()->getRepository('SHQCommandsQueuesBundle:Daemon')->findAll();
 
@@ -52,7 +52,7 @@ class QueuesController extends Controller
      * @param Request $request
      * @return array
      */
-    public function jobsAction(Request $request)
+    public function jobsAction(Request $request): \Symfony\Component\HttpFoundation\Response
     {
         /** @var EntityManager $em */
         $em = $this->getDoctrine()->getManagerForClass('SHQCommandsQueuesBundle:Job');
@@ -100,7 +100,7 @@ class QueuesController extends Controller
      * @param Job $job
      * @return array
      */
-    public function jobAction(Job $job)
+    public function jobAction(Job $job): \Symfony\Component\HttpFoundation\Response
     {
         return $this->render('Bundle:Queues:job.html.twig', [
             'job' => $job,
@@ -110,7 +110,7 @@ class QueuesController extends Controller
     /**
      * @Route("/test", name="queues_test_random")
      */
-    public function testRandomAction()
+    public function testRandomAction(): \Symfony\Component\HttpFoundation\RedirectResponse
     {
         $kernel     = $this->get('kernel');
         $appliction = new Application($kernel);
@@ -133,7 +133,7 @@ class QueuesController extends Controller
     /**
      * @Route("/test/failed", name="queues_test_failed")
      */
-    public function testFailedAction()
+    public function testFailedAction(): \Symfony\Component\HttpFoundation\RedirectResponse
     {
         $kernel     = $this->get('kernel');
         $appliction = new Application($kernel);

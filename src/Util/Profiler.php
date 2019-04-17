@@ -106,7 +106,7 @@ class Profiler
      * @param SerendipityHQStyle $ioWriter
      * @param UnitOfWork         $uow
      */
-    public static function setDependencies(SerendipityHQStyle $ioWriter, UnitOfWork $uow)
+    public static function setDependencies(SerendipityHQStyle $ioWriter, UnitOfWork $uow): void
     {
         self::$ioWriter = $ioWriter;
         self::$uow      = $uow;
@@ -115,7 +115,7 @@ class Profiler
     /**
      * @param string $where
      */
-    public static function printUnitOfWork(string $where = null)
+    public static function printUnitOfWork(string $where = null): void
     {
         if (self::$ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
             $count   = isset(self::$uow->getIdentityMap()[Job::class]) ? count(self::$uow->getIdentityMap()[Job::class]) : 0;
@@ -145,7 +145,7 @@ class Profiler
      * @param float $maxRuntime after this amount of time the Daemon MUST die
      * @param array $queues     The configured queues
      */
-    public function start(int $pid, float $maxRuntime, array $queues)
+    public function start(int $pid, float $maxRuntime, array $queues): void
     {
         $this->pid = $pid;
 
@@ -174,7 +174,7 @@ class Profiler
     /**
      * @return array
      */
-    public function profile()
+    public function profile(): array
     {
         $currentMicrotime       = microtime(true);
         $currentMemoryUsage     = memory_get_usage();
@@ -289,7 +289,7 @@ class Profiler
     /**
      * Prints the current profiling info.
      */
-    public function printProfilingInfo()
+    public function printProfilingInfo(): void
     {
         self::$ioWriter->table(
             ['', 'Profiling info'],
@@ -342,7 +342,7 @@ class Profiler
     /**
      * Sets to NOW the microtime of last check of alive damons.
      */
-    public function aliveDaemonsJustCheked()
+    public function aliveDaemonsJustCheked(): void
     {
         $this->aliveDaemonsLastCheckedAt = microtime(true);
     }
@@ -350,7 +350,7 @@ class Profiler
     /**
      * Sets to NOW the microtime of the last optimization.
      */
-    public function optimized()
+    public function optimized(): void
     {
         $this->lastOptimizationAt = microtime(true);
     }
@@ -358,7 +358,7 @@ class Profiler
     /**
      * Increment the number of iterations by 1.
      */
-    public function hitIteration()
+    public function hitIteration(): void
     {
         ++$this->iterations;
     }
@@ -366,7 +366,7 @@ class Profiler
     /**
      * @param string $queueName
      */
-    public function runningJobsJustChecked(string $queueName)
+    public function runningJobsJustChecked(string $queueName): void
     {
         $this->runningJobsLastCheckedAt[$queueName] = microtime(true);
     }
@@ -390,7 +390,7 @@ class Profiler
     /**
      * Enables Memprof if required.
      */
-    public function enableMemprof()
+    public function enableMemprof(): bool
     {
         // Intialize php-memprof
         if (true === extension_loaded('memprof')) {
@@ -407,7 +407,7 @@ class Profiler
      *
      * @return string
      */
-    private function formatTime(float $time)
+    private function formatTime(float $time): string
     {
         $date = \DateTime::createFromFormat('U.u', number_format($time, 6, '.', ''));
 

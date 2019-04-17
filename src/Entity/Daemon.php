@@ -135,7 +135,7 @@ class Daemon
     /**
      * @return \DateTime|null
      */
-    public function getDiedOn()
+    public function getDiedOn(): \DateTime
     {
         return $this->diedOn;
     }
@@ -143,7 +143,7 @@ class Daemon
     /**
      * @return string
      */
-    public function getMortisCausa()
+    public function getMortisCausa(): string
     {
         return $this->mortisCausa;
     }
@@ -179,7 +179,7 @@ class Daemon
      *
      * @param string $mortisCausa
      */
-    public function requiescatInPace(string $mortisCausa = self::MORTIS_SIGNAL)
+    public function requiescatInPace(string $mortisCausa = self::MORTIS_SIGNAL): void
     {
         $this->diedOn      = new \DateTime();
         $this->mortisCausa = $mortisCausa;
