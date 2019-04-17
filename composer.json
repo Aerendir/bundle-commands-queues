@@ -20,16 +20,29 @@
         "serendipity_hq/console-styles-bundle": "^1.1",
         "serendipity_hq/then-when": "^1.1",
         "symfony/framework-bundle": "^3.0||^4.0",
-        "symfony/process": "^3.0||^4.0"
+        "symfony/process": "^3.0||^4.0",
+        "thecodingmachine/safe": "^0.1.14"
     },
     "require-dev": {
-        "phpunit/phpunit": "^6||^7.0",
-        "sensiolabs/security-checker": "^4.1",
-        "symfony/var-dumper": "^3.0||^4.0"
+        "ext-ast": "*",
+        "drenso/phan-extensions": "^2.4",
+        "friendsofphp/php-cs-fixer": "^2",
+        "phpunit/phpunit": "^6||^7||^8",
+        "roave/security-advisories": "dev-master",
+        "sensiolabs/security-checker": "^5",
+        "symfony/var-dumper": "^3.0||^4.0",
+        "phpstan/phpstan": "@stable",
+        "phpstan/phpstan-doctrine": "@stable",
+        "phpstan/phpstan-phpunit": "@stable",
+        "phpstan/phpstan-symfony": "@stable",
+        "rector/rector": "^0.4.10"
     },
     "autoload": {
         "psr-4": {
             "SerendipityHQ\\Bundle\\CommandsQueuesBundle\\": "src"
         }
+    },
+    "config": {
+        "sort-packages": true
     }
 }
