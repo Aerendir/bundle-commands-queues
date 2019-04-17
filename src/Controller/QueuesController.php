@@ -24,7 +24,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use \Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\HttpFoundation\Request;
@@ -32,7 +32,7 @@ use Symfony\Component\HttpFoundation\Request;
 /**
  * {@inheritdoc}
  */
-class QueuesController extends Controller
+class QueuesController extends \Symfony\Bundle\FrameworkBundle\Controller\AbstractController
 {
     /**
      * @Route("/", name="queues_index")

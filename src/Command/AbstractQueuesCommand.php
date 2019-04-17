@@ -20,14 +20,14 @@ use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\JobsMarker;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\Profiler;
 use SerendipityHQ\Bundle\ConsoleStyles\Console\Formatter\SerendipityHQOutputFormatter;
 use SerendipityHQ\Bundle\ConsoleStyles\Console\Style\SerendipityHQStyle;
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use \Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * An abstract command to manage common dependencies of all other commands.
  */
-abstract class AbstractQueuesCommand extends ContainerAwareCommand
+abstract class AbstractQueuesCommand extends \Symfony\Component\Console\Command\Command
 {
     /** @var EntityManager $entityManager */
     private $entityManager;

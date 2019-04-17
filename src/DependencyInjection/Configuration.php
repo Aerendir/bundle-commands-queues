@@ -45,8 +45,8 @@ class Configuration implements ConfigurationInterface
      */
     public function getConfigTreeBuilder(): \Symfony\Component\Config\Definition\Builder\TreeBuilder
     {
-        $treeBuilder = new TreeBuilder();
-        $rootNode    = $treeBuilder->root('shq_commands_queues');
+        $treeBuilder = new TreeBuilder('shq_commands_queues');
+        $rootNode    = $treeBuilder->getRootNode();
 
         $rootNode
             ->children()
