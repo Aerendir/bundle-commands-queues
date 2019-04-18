@@ -16,6 +16,7 @@
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Service;
 
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\OptimisticLockException;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
 
 /**
@@ -116,7 +117,7 @@ class QueuesManager
      *
      * @param Job $job
      *
-     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws OptimisticLockException
      */
     public function schedule(Job $job): void
     {

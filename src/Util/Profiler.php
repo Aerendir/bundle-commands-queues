@@ -15,6 +15,7 @@
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Util;
 
+use DateTime;
 use Doctrine\ORM\UnitOfWork;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Service\JobsManager;
@@ -276,7 +277,7 @@ class Profiler
             $callgrind = \Safe\fopen(
                 \Safe\sprintf(
                     'app/logs/callgrind/callgrind.out.%s.%s.%s',
-                    (new \DateTime())->format('Y-m-d'), $this->pid, $this->getCurrentIteration()
+                    (new DateTime())->format('Y-m-d'), $this->pid, $this->getCurrentIteration()
                 ), 'w');
             memprof_dump_callgrind($callgrind);
             \Safe\fwrite($callgrind, \Safe\stream_get_contents($callgrind));
@@ -409,7 +410,7 @@ class Profiler
      */
     private function formatTime(float $time): string
     {
-        $date = \DateTime::createFromFormat('U.u', number_format($time, 6, '.', ''));
+        $date = DateTime::createFromFormat('U.u', number_format($time, 6, '.', ''));
 
         return $date->format('Y-m-d H:i:s.u');
     }

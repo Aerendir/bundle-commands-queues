@@ -15,9 +15,14 @@
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Util;
 
+use DateTime;
 use Doctrine\Common\Persistence\Proxy;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\ORMInvalidArgumentException;
+use Exception;
+use InvalidArgumentException;
+use ReflectionClass;
+use RuntimeException;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Daemon;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
 use SerendipityHQ\Bundle\ConsoleStyles\Console\Style\SerendipityHQStyle;
@@ -55,11 +60,11 @@ class JobsMarker
     /**
      * @param Job $job
      *
-     * @return \ReflectionClass
+     * @return ReflectionClass
      */
-    public static function createReflectedJob(Job $job): \ReflectionClass
+    public static function createReflectedJob(Job $job): ReflectionClass
     {
-        $reflectedClass = new \ReflectionClass($job);
+        $reflectedClass = new ReflectionClass($job);
 
         // If the $job is a Doctrine proxy...
         if ($job instanceof Proxy) {
@@ -133,7 +138,7 @@ class JobsMarker
      *
      * @return Job the created retry Job
      */
-    public function markFailedJobAsRetried(Job $failedJob, array $info): \SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job
+    public function markFailedJobAsRetried(Job $failedJob, array $info): Job
     {
         // Create a new retry Job
         $retryingJob = $failedJob->createRetryForFailed();
@@ -147,7 +152,7 @@ class JobsMarker
      *
      * @return Job the created retry Job
      */
-    public function markStaleJobAsRetried(Job $staleJob, array $info): \SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job
+    public function markStaleJobAsRetried(Job $staleJob, array $info): Job
     {
         // Create a new retry Job
         $retryingJob = $staleJob->createRetryForStale();
@@ -171,7 +176,7 @@ class JobsMarker
      */
     private function markJobAsClosed(Job $job, string $status, array $info, Daemon $daemon = null): void
     {
-        $info['closed_at'] = new \DateTime();
+        $info['closed_at'] = new DateTime();
         $this->markJob($job, $status, $info, $daemon);
     }
 
@@ -182,7 +187,7 @@ class JobsMarker
      *
      * @return Job
      */
-    private function markJobAsRetried(Job $retriedJob, Job $retryingJob, array $info): \SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job
+    private function markJobAsRetried(Job $retriedJob, Job $retryingJob, array $info): Job
     {
         $this->updateChildDependencies($retryingJob);
 
@@ -223,7 +228,7 @@ class JobsMarker
      * @param array       $info
      * @param Daemon|null $daemon
      *
-     * @throws \Exception
+     * @throws Exception
      */
     private function markJob(Job $job, string $status, array $info = [], Daemon $daemon = null): void
     {
@@ -234,7 +239,7 @@ class JobsMarker
         $tryAgainBuilder = ThenWhen::createRetryStrategyBuilder();
         $tryAgainBuilder
             ->setStrategyForException([
-                ORMInvalidArgumentException::class, \InvalidArgumentException::class,
+                ORMInvalidArgumentException::class, InvalidArgumentException::class,
             ], new LiveStrategy(100))
             // May happen that a Job is detached to keep the memory consumption low but then it is required to flush the
             // current Job.
@@ -242,11 +247,11 @@ class JobsMarker
             // This is a required trade-off between the memory consumption and the queries to the database: we chose to
             // the sacrifice queries to the databse in favor of a minor memory consumption.
             ->setMiddleHandlerForException([
-                ORMInvalidArgumentException::class, \InvalidArgumentException::class,
-            ], function (\Exception $e) use ($job, $status, $info, $daemon, $ioWriter) {
+                ORMInvalidArgumentException::class, InvalidArgumentException::class,
+            ], function (Exception $e) use ($job, $status, $info, $daemon, $ioWriter) {
                 if (
                     ! $e instanceof ORMInvalidArgumentException
-                    && $e instanceof \InvalidArgumentException
+                    && $e instanceof InvalidArgumentException
                     && false === strpos($e->getMessage(), 'Entity has to be managed or scheduled for removal for single computation')
                 ) {
                     throw $e;
@@ -261,8 +266,8 @@ class JobsMarker
                 self::updateJob($job, $status, $info, $daemon);
             })
             ->setFinalHandlerForException([
-                ORMInvalidArgumentException::class, \InvalidArgumentException::class,
-            ], function (\Exception $e) use ($job, $oldStatus, $ioWriter) {
+                ORMInvalidArgumentException::class, InvalidArgumentException::class,
+            ], function (Exception $e) use ($job, $oldStatus, $ioWriter) {
                 self::$ioWriter->error(sprintf('Error trying to flush Job #%s (%s => %s).', $job->getId(), $oldStatus, $job->getStatus()));
                 if ($ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
                     Profiler::printUnitOfWork();
@@ -343,7 +348,7 @@ class JobsMarker
                     $reflectedProperty = $reflectedClass->getProperty('cancellationReason');
                     break;
                 default:
-                    throw new \RuntimeException(\Safe\sprintf(
+                    throw new RuntimeException(\Safe\sprintf(
                         'The property %s is not managed. Manage it or verify its spelling is correct.',
                         $property
                     ));

@@ -15,6 +15,7 @@
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Repository;
 
+use DateTime;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\QueryBuilder;
@@ -64,7 +65,7 @@ class JobRepository extends EntityRepository
      *
      * @return Job|null
      */
-    public function findNextRunnableJob(string $queueName): \SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job
+    public function findNextRunnableJob(string $queueName): Job
     {
         // Collects the Jobs that have to be excluded from the next findNextJob() call
         $excludedJobs = [];
@@ -199,7 +200,7 @@ class JobRepository extends EntityRepository
                     $queryBuilder->expr()->isNull('j.executeAfterTime'),
                     $queryBuilder->expr()->lt('j.executeAfterTime', ':now')
                 )
-            )->setParameter('now', new \DateTime(), 'datetime')
+            )->setParameter('now', new DateTime(), 'datetime')
             ->andWhere($queryBuilder->expr()->eq('j.queue', ':queue'))->setParameter('queue', $queueName);
 
         // If there are excluded Jobs...

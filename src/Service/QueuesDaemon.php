@@ -15,7 +15,10 @@
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Service;
 
+use Countable;
+use DateTime;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\OptimisticLockException;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Config\DaemonConfig;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Daemon;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
@@ -26,6 +29,7 @@ use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\ProgressBar;
 use SerendipityHQ\Bundle\ConsoleStyles\Console\Style\SerendipityHQStyle;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\Process;
+use Throwable;
 
 /**
  * The Daemon that listens for new jobs to process.
@@ -100,7 +104,7 @@ class QueuesDaemon
      * @param SerendipityHQStyle $ioWriter
      * @param OutputInterface    $output
      *
-     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws OptimisticLockException
      */
     public function initialize(?string $daemon, bool $allowProd, SerendipityHQStyle $ioWriter, OutputInterface $output): void
     {
@@ -155,7 +159,7 @@ class QueuesDaemon
      *
      * Requiescant In Pace (May it Rest In Pace).
      *
-     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws OptimisticLockException
      */
     public function requiescantInPace(): void
     {
@@ -204,7 +208,7 @@ class QueuesDaemon
      *
      * @param string $queueName
      *
-     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws OptimisticLockException
      *
      * @return bool|void
      */
@@ -230,7 +234,7 @@ class QueuesDaemon
         $this->canSleep[$queueName] = false;
 
         // Start processing the Job
-        $now  = new \DateTime();
+        $now  = new DateTime();
         $info = [
             'started_at' => $now,
         ];
@@ -266,7 +270,7 @@ class QueuesDaemon
         // Try to start the process
         try {
             $process->start();
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             // Something went wrong starting the process: close it as failed
             $info['output']       = 'Failing start the process.';
             $info['output_error'] = $e;
@@ -378,7 +382,7 @@ class QueuesDaemon
         if (null === $queueName) {
             $runningJobs = 0;
             foreach ($this->runningJobs as $currentlyRunning) {
-                $runningJobs += is_array($currentlyRunning) || $currentlyRunning instanceof \Countable ? count($currentlyRunning) : 0;
+                $runningJobs += is_array($currentlyRunning) || $currentlyRunning instanceof Countable ? count($currentlyRunning) : 0;
             }
 
             // Return the overall amount
@@ -397,7 +401,7 @@ class QueuesDaemon
     public function checkRunningJobs(string $queueName, \Symfony\Component\Console\Helper\ProgressBar $progressBar = null): void
     {
         foreach ($this->runningJobs[$queueName] as $index => $runningJob) {
-            $now = new \DateTime();
+            $now = new DateTime();
 
             /** @var Job $checkingJob */
             $checkingJob = $runningJob['job'];
@@ -431,7 +435,7 @@ class QueuesDaemon
      */
     public function processRunningJob(array $runningJob): bool
     {
-        $now = new \DateTime();
+        $now = new DateTime();
 
         /** @var Job $job */
         $job = $runningJob['job'];
@@ -494,7 +498,7 @@ class QueuesDaemon
             return false;
         }
 
-        return $this->getConfig()->getManagedEntitiesTreshold() < (is_array($this->entityManager->getUnitOfWork()->getIdentityMap()[Job::class]) || $this->entityManager->getUnitOfWork()->getIdentityMap()[Job::class] instanceof \Countable ? count($this->entityManager->getUnitOfWork()->getIdentityMap()[Job::class]) : 0);
+        return $this->getConfig()->getManagedEntitiesTreshold() < (is_array($this->entityManager->getUnitOfWork()->getIdentityMap()[Job::class]) || $this->entityManager->getUnitOfWork()->getIdentityMap()[Job::class] instanceof Countable ? count($this->entityManager->getUnitOfWork()->getIdentityMap()[Job::class]) : 0);
     }
 
     /**
@@ -622,7 +626,7 @@ class QueuesDaemon
      * @param Job     $job
      * @param Process $process
      *
-     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws OptimisticLockException
      */
     final protected function handleFailedJob(Job $job, Process $process): void
     {
@@ -667,7 +671,7 @@ class QueuesDaemon
     /**
      * @param Job $job
      *
-     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws OptimisticLockException
      *
      * @return bool|Job Returns false or the Job object
      */
@@ -677,7 +681,7 @@ class QueuesDaemon
             if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
                 $this->ioWriter->noteLineNoBg(\Safe\sprintf(
                     '[%s] Job <success-nobg>#%s</success-nobg> on Queue <success-nobg>%s</success-nobg>: Creating a Job to mark childs as as CANCELLED.',
-                    (new \DateTime())->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue()
+                    (new DateTime())->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue()
                 ));
             }
 
@@ -693,7 +697,7 @@ class QueuesDaemon
         if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
             $this->ioWriter->noteLineNoBg(\Safe\sprintf(
                 '[%s] Job <success-nobg>#%s</success-nobg> on Queue <success-nobg>%s</success-nobg>: No childs found. The Job to mark childs as CANCELLED will not be created.',
-                (new \DateTime())->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue()
+                (new DateTime())->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue()
             ));
         }
 
@@ -787,7 +791,7 @@ class QueuesDaemon
     /**
      * @param OutputInterface $output
      *
-     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws OptimisticLockException
      */
     private function checkStaleJobs(OutputInterface $output): void
     {

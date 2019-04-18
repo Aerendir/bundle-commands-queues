@@ -15,6 +15,7 @@
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Command;
 
+use RuntimeException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
@@ -24,7 +25,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * A Fake command to use as fake Job.
  */
-class FakeCommand extends \Symfony\Component\Console\Command\Command
+class FakeCommand extends Command
 {
     /**
      * {@inheritdoc}
@@ -65,7 +66,7 @@ class FakeCommand extends \Symfony\Component\Console\Command\Command
         // If the rand doesn't return a number divisible by two (is just a random condition)
         if (0 !== $triggerError % 2) {
             // ... Randomly throw an exception
-            throw new \RuntimeException("I've just decided to throw a nice exception! Ah ah ah ah!");
+            throw new RuntimeException("I've just decided to throw a nice exception! Ah ah ah ah!");
         }
 
         // If the rand doesn't return a number divisible by two (is just a random condition)

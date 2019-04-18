@@ -17,6 +17,7 @@ namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Service;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\UnitOfWork;
+use RuntimeException;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
 use SerendipityHQ\Bundle\ConsoleStyles\Console\Style\SerendipityHQStyle;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -177,9 +178,9 @@ class JobsManager
      * @param Job  $job
      * @param bool $allowProd
      *
-     * @return \Symfony\Component\Process\Process
+     * @return Process
      */
-    public function createJobProcess(Job $job, bool $allowProd): \Symfony\Component\Process\Process
+    public function createJobProcess(Job $job, bool $allowProd): Process
     {
         $arguments = [];
 
@@ -344,7 +345,7 @@ class JobsManager
     /**
      * Finds the path to the console file.
      *
-     * @throws \RuntimeException if the console file cannot be found
+     * @throws RuntimeException if the console file cannot be found
      *
      * @return string
      */
@@ -358,7 +359,7 @@ class JobsManager
             return $this->kernelRootDir . '/../bin/console';
         }
 
-        throw new \RuntimeException('Unable to find the console file. You should check your Symfony installation. The console file should be in /app/ folder or in /bin/ folder.');
+        throw new RuntimeException('Unable to find the console file. You should check your Symfony installation. The console file should be in /app/ folder or in /bin/ folder.');
     }
 
     /**

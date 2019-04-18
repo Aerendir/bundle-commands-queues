@@ -15,6 +15,8 @@
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Command;
 
+use Countable;
+use DateTime;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\ProgressBar;
 use SerendipityHQ\Component\ThenWhen\Strategy\ConstantStrategy;
@@ -94,7 +96,7 @@ class TestRandomJobsCommand extends AbstractQueuesCommand
             $scheduledJob->setQueue($this->queues[$queue]);
 
             // Set a random retry strategy
-            if (0 < (is_array($retryStrategies) || $retryStrategies instanceof \Countable ? count($retryStrategies) : 0)) {
+            if (0 < (is_array($retryStrategies) || $retryStrategies instanceof Countable ? count($retryStrategies) : 0)) {
                 $scheduledJob->setRetryStrategy($this->getRandomRetryStrategy($retryStrategies, $timeUnits));
             }
 
@@ -103,7 +105,7 @@ class TestRandomJobsCommand extends AbstractQueuesCommand
                 $condition = rand(0, 10);
                 if (7 <= $condition) {
                     $days   = rand(1, 10);
-                    $future = new \DateTime();
+                    $future = new DateTime();
                     $future->modify('+' . $days . ' day');
                     $scheduledJob->setExecuteAfterTime($future);
                 }

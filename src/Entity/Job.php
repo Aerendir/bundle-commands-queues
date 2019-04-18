@@ -15,10 +15,14 @@
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Entity;
 
+use BadMethodCallException;
+use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\PersistentCollection;
+use InvalidArgumentException;
+use LogicException;
 use SerendipityHQ\Component\ThenWhen\Strategy\LiveStrategy;
 use SerendipityHQ\Component\ThenWhen\Strategy\NeverRetryStrategy;
 use SerendipityHQ\Component\ThenWhen\Strategy\StrategyInterface;
@@ -40,7 +44,7 @@ class Job
      *     $scheduledJob = new Job('queue:test');
      *     $this->get('queues')->schedule($scheduledJob);
      *
-     * @var \string
+     * @var string
      */
     const STATUS_NEW = 'new';
 
@@ -58,14 +62,14 @@ class Job
      *
      * This situation may happen on very busy workers.
      *
-     * @var \string
+     * @var string
      */
     const STATUS_PENDING = 'pending';
 
     /**
      * If the Job fails for some reasons and can be retried, its status is RETRIED.
      *
-     * @var \string
+     * @var string
      */
     const STATUS_RETRIED = 'retried';
 
@@ -82,44 +86,54 @@ class Job
      * finished. In this case they will skip the "running" state and get directly one of STATUS_FAILED or
      * STATUS_FINISHED.
      *
-     * @var \string
+     * @var string
      */
     const STATUS_RUNNING = 'running';
 
     /** The job was processed and finished with success.
-     * @var \string */
+     *
+     * @var string
+     */
     const STATUS_SUCCEEDED = 'succeeded';
 
     /** A failed Job that were retried and the retry Job were finished
-     * @var \string */
+     *
+     * @var string */
     const STATUS_RETRY_SUCCEEDED = 'retry_succeeded';
 
     /** The $process->start() method thrown an exception.
-     * @var \string */
+     *
+     * @var string */
     const STATUS_ABORTED = 'aborted';
 
     /** The job failed for some reasons.
-     * @var \string */
+     *
+     * @var string */
     const STATUS_FAILED = 'failed';
 
     /** A failed Job that were retried and the retry Job failed, too
-     * @var \string */
+     *
+     * @var string */
     const STATUS_RETRY_FAILED = 'retry_failed';
 
     /** The parent job (on which this one depends) failed.
-     * @var \string */
+     *
+     * @var string */
     const STATUS_CANCELLED = 'cancelled';
 
     /** Are of this type the Jobs that mark as cancelled child Jobs of a failed one.
-     * @var \string */
+     *
+     * @var string */
     const TYPE_CANCELLING = 'cancelling';
 
     /** Are of this type all Jobs created by the developer or by other Jobs.
-     * @var \string */
+     *
+     * @var string */
     const TYPE_JOB = 'job';
 
     /** Are of this type Jobs created to retry failed ones.
-     * @var \string */
+     *
+     * @var string */
     const TYPE_RETRY = 'retry';
 
     /**
@@ -153,28 +167,28 @@ class Job
     private $awareOfJob = false;
 
     /**
-     * @var \DateTime
+     * @var DateTime
      *
      * @ORM\Column(name="execute_after_time", type="datetime", nullable=true)
      */
     private $executeAfterTime;
 
     /**
-     * @var \DateTime
+     * @var DateTime
      *
      * @ORM\Column(name="created_at", type="datetime", nullable=false)
      */
     private $createdAt;
 
     /**
-     * @var \DateTime
+     * @var DateTime
      *
      * @ORM\Column(name="started_at", type="datetime", nullable=true)
      */
     private $startedAt;
 
     /**
-     * @var \DateTime when the Job is marked as Finished, Failed or Terminated
+     * @var DateTime when the Job is marked as Finished, Failed or Terminated
      *
      * @ORM\Column(name="closed_at", type="datetime", nullable=true)
      */
@@ -327,7 +341,7 @@ class Job
         $this->priority           = 1;
         $this->queue              = $queue;
         $this->status             = self::STATUS_NEW;
-        $this->createdAt          = new \DateTime();
+        $this->createdAt          = new DateTime();
         $this->childDependencies  = new ArrayCollection();
         $this->parentDependencies = new ArrayCollection();
         $this->retryStrategy      = new NeverRetryStrategy();
@@ -346,7 +360,7 @@ class Job
     public static function prepareArguments(array $arguments = []): array
     {
         if (false === is_string($arguments) && false === is_array($arguments)) {
-            throw new \InvalidArgumentException('Second parameter $arguments can be only an array or a string.');
+            throw new InvalidArgumentException('Second parameter $arguments can be only an array or a string.');
         }
 
         // If is a String...
@@ -384,14 +398,14 @@ class Job
     public function addChildDependency(self $job): self
     {
         if ($this === $job) {
-            throw new \LogicException(
+            throw new LogicException(
                 'You cannot add as dependency the object itself.'
                 . ' Check your addParentDependency() and addChildDependency() method.'
             );
         }
 
         if ($this->parentDependencies->contains($job)) {
-            throw new \LogicException(
+            throw new LogicException(
                 'You cannot add a child dependecy that is already a parent dependency.'
                 . ' This will create an unresolvable circular reference.'
             );
@@ -413,7 +427,7 @@ class Job
     public function addParentDependency(self $job): self
     {
         if ($this === $job) {
-            throw new \LogicException(
+            throw new LogicException(
                 'You cannot add as dependency the object itself.'
                 . ' Check your addParentDependency() and addChildDependency() method.'
             );
@@ -421,7 +435,7 @@ class Job
 
         // This Job is already started...
         if (self::STATUS_PENDING === $this->getStatus() || self::STATUS_RUNNING === $this->getStatus()) {
-            throw new \LogicException(
+            throw new LogicException(
                 \Safe\sprintf(
                     'The Job %s has already started. You cannot add the parent dependency %s.',
                     $this->getId(), $job->getId()
@@ -430,7 +444,7 @@ class Job
         }
 
         if (true === $this->childDependencies->contains($job)) {
-            throw new \LogicException(\Safe\sprintf(
+            throw new LogicException(\Safe\sprintf(
                 'You cannot add a parent dependecy (%s) that is already a child dependency.'
                 . ' This will create an unresolvable circular reference.',
                 $job->getId()
@@ -524,25 +538,25 @@ class Job
     }
 
     /**
-     * @return \DateTime
+     * @return DateTime
      */
-    public function getCreatedAt(): \DateTime
+    public function getCreatedAt(): DateTime
     {
         return $this->createdAt;
     }
 
     /**
-     * @return \DateTime|null
+     * @return DateTime|null
      */
-    public function getStartedAt(): \DateTime
+    public function getStartedAt(): DateTime
     {
         return $this->startedAt;
     }
 
     /**
-     * @return \DateTime|null
+     * @return DateTime|null
      */
-    public function getClosedAt(): \DateTime
+    public function getClosedAt(): DateTime
     {
         return $this->closedAt;
     }
@@ -556,9 +570,9 @@ class Job
     }
 
     /**
-     * @return \DateTime|null
+     * @return DateTime|null
      */
-    public function getExecuteAfterTime(): \DateTime
+    public function getExecuteAfterTime(): DateTime
     {
         return $this->executeAfterTime;
     }
@@ -606,7 +620,7 @@ class Job
     /**
      * @return Job
      */
-    public function getCancelledBy(): \SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job
+    public function getCancelledBy(): Job
     {
         return $this->cancelledBy;
     }
@@ -614,7 +628,7 @@ class Job
     /**
      * @return Collection
      */
-    public function getCancelledJobs(): \Doctrine\Common\Collections\Collection
+    public function getCancelledJobs(): Collection
     {
         return $this->cancelledJobs;
     }
@@ -670,7 +684,7 @@ class Job
     /**
      * @return Job|null
      */
-    public function getRetryOf(): \SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job
+    public function getRetryOf(): Job
     {
         return $this->retryOf;
     }
@@ -678,7 +692,7 @@ class Job
     /**
      * @return Job
      */
-    public function getRetriedBy(): \SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job
+    public function getRetriedBy(): Job
     {
         return $this->retriedBy;
     }
@@ -686,7 +700,7 @@ class Job
     /**
      * @return Job|null
      */
-    public function getFirstRetriedJob(): \SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job
+    public function getFirstRetriedJob(): Job
     {
         return $this->firstRetriedJob;
     }
@@ -720,7 +734,7 @@ class Job
     public function getProcessedJobId()
     {
         if (false === $this->isTypeInternal()) {
-            throw new \BadMethodCallException(
+            throw new BadMethodCallException(
                 \Safe\sprintf(
                     'This Job #%s is not internal, so you cannot call the method Job::getProcessedJobId().',
                     $this->getId()
@@ -1111,11 +1125,11 @@ class Job
     }
 
     /**
-     * @param \DateTime $executeAfter
+     * @param DateTime $executeAfter
      *
      * @return Job
      */
-    public function setExecuteAfterTime(\DateTime $executeAfter): self
+    public function setExecuteAfterTime(DateTime $executeAfter): self
     {
         $this->executeAfterTime = $executeAfter;
 

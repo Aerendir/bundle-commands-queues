@@ -15,6 +15,7 @@
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Entity;
 
+use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -29,11 +30,14 @@ use SerendipityHQ\Bundle\CommandsQueuesBundle\Config\DaemonConfig;
 class Daemon
 {
     /** Used when a Daemon is killed due to a PCNTL signal
-     * @var \string */
+     *
+     * @var string
+     */
     const MORTIS_SIGNAL = 'signal';
 
     /** Used when a Daemon is not found anymore during the check of queues:run checkAliveDamons
-     * @var \string */
+     *
+     * @var string */
     const MORTIS_STRAGGLER = 'straggler';
 
     /**
@@ -67,14 +71,14 @@ class Daemon
     private $pid;
 
     /**
-     * @var \DateTime
+     * @var DateTime
      *
      * @ORM\Column(name="born_on", type="datetime", nullable=false)
      */
     private $bornOn;
 
     /**
-     * @var \DateTime
+     * @var DateTime
      *
      * @ORM\Column(name="died_on", type="datetime", nullable=true)
      */
@@ -101,7 +105,7 @@ class Daemon
      */
     public function __construct(string $host, int $pid, DaemonConfig $config)
     {
-        $this->bornOn        = new \DateTime();
+        $this->bornOn        = new DateTime();
         $this->config        = $config;
         $this->host          = $host;
         $this->pid           = $pid;
@@ -117,9 +121,9 @@ class Daemon
     }
 
     /**
-     * @return \DateTime
+     * @return DateTime
      */
-    public function getBornOn(): \DateTime
+    public function getBornOn(): DateTime
     {
         return $this->bornOn;
     }
@@ -133,9 +137,9 @@ class Daemon
     }
 
     /**
-     * @return \DateTime|null
+     * @return DateTime|null
      */
-    public function getDiedOn(): \DateTime
+    public function getDiedOn(): DateTime
     {
         return $this->diedOn;
     }
@@ -181,7 +185,7 @@ class Daemon
      */
     public function requiescatInPace(string $mortisCausa = self::MORTIS_SIGNAL): void
     {
-        $this->diedOn      = new \DateTime();
+        $this->diedOn      = new DateTime();
         $this->mortisCausa = $mortisCausa;
     }
 

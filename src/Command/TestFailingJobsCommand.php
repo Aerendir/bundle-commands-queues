@@ -17,6 +17,7 @@ namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Command;
 
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
 use SerendipityHQ\Component\ThenWhen\Strategy\LiveStrategy;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -25,7 +26,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * Creates some failing Jobs.
  */
-class TestFailingJobsCommand extends \Symfony\Component\Console\Command\Command
+class TestFailingJobsCommand extends Command
 {
     /**
      * {@inheritdoc}

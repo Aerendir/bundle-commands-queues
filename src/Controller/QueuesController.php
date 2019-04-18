@@ -23,19 +23,22 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\NullOutput;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * {@inheritdoc}
  */
-class QueuesController extends \Symfony\Bundle\FrameworkBundle\Controller\AbstractController
+class QueuesController extends AbstractController
 {
     /**
      * @Route("/", name="queues_index")
      */
-    public function indexAction(): \Symfony\Component\HttpFoundation\Response
+    public function indexAction(): Response
     {
         $jobs = $this->getDoctrine()->getRepository('SHQCommandsQueuesBundle:Daemon')->findAll();
 
@@ -51,7 +54,7 @@ class QueuesController extends \Symfony\Bundle\FrameworkBundle\Controller\Abstra
      *
      * @return array
      */
-    public function jobsAction(Request $request): \Symfony\Component\HttpFoundation\Response
+    public function jobsAction(Request $request): Response
     {
         /** @var EntityManager $em */
         $em = $this->getDoctrine()->getManagerForClass('SHQCommandsQueuesBundle:Job');
@@ -100,7 +103,7 @@ class QueuesController extends \Symfony\Bundle\FrameworkBundle\Controller\Abstra
      *
      * @return array
      */
-    public function jobAction(Job $job): \Symfony\Component\HttpFoundation\Response
+    public function jobAction(Job $job): Response
     {
         return $this->render('Bundle:Queues:job.html.twig', [
             'job' => $job,
@@ -110,7 +113,7 @@ class QueuesController extends \Symfony\Bundle\FrameworkBundle\Controller\Abstra
     /**
      * @Route("/test", name="queues_test_random")
      */
-    public function testRandomAction(): \Symfony\Component\HttpFoundation\RedirectResponse
+    public function testRandomAction(): RedirectResponse
     {
         $kernel     = $this->get('kernel');
         $appliction = new Application($kernel);
@@ -133,7 +136,7 @@ class QueuesController extends \Symfony\Bundle\FrameworkBundle\Controller\Abstra
     /**
      * @Route("/test/failed", name="queues_test_failed")
      */
-    public function testFailedAction(): \Symfony\Component\HttpFoundation\RedirectResponse
+    public function testFailedAction(): RedirectResponse
     {
         $kernel     = $this->get('kernel');
         $appliction = new Application($kernel);

@@ -15,6 +15,8 @@
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Config;
 
+use InvalidArgumentException;
+
 /**
  * Manages the configuration of a Daemon.
  */
@@ -71,7 +73,7 @@ class DaemonConfig extends AbstractConfig
     {
         if (null === $daemon) {
             if (count($this->daemons) > 1) {
-                throw new \InvalidArgumentException(
+                throw new InvalidArgumentException(
                     'More than one Daemon is configured: you MUST specify the Daemon you want to run using the "--daemon"'
                     . ' argument'
                 );

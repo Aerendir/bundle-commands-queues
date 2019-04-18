@@ -27,7 +27,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * An abstract command to manage common dependencies of all other commands.
  */
-abstract class AbstractQueuesCommand extends \Symfony\Component\Console\Command\Command
+abstract class AbstractQueuesCommand extends Command
 {
     /** @var EntityManager $entityManager */
     private $entityManager;
