@@ -18,11 +18,17 @@ declare(strict_types=1);
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Command;
 
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\ORMException;
+use Exception;
+use RuntimeException;
+use Safe\Exceptions\StringsException;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Daemon;
+use SerendipityHQ\Bundle\CommandsQueuesBundle\Repository\DaemonRepository;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Service\QueuesDaemon;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\JobsMarker;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\Profiler;
-use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\ProgressBar;
+use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\ProgressBarFactory;
 use SerendipityHQ\Bundle\ConsoleStyles\Console\Formatter\SerendipityHQOutputFormatter;
 use SerendipityHQ\Bundle\ConsoleStyles\Console\Style\SerendipityHQStyle;
 use Symfony\Component\Console\Command\Command;
@@ -40,7 +46,7 @@ class RunCommand extends Command
     /**
      * @var string
      */
-    const NAME = 'queues:run';
+    protected static $defaultName = 'queues:run';
 
     /** @var QueuesDaemon $daemon */
     private $daemon;
@@ -77,7 +83,6 @@ class RunCommand extends Command
     protected function configure(): void
     {
         $this
-            ->setName(self::NAME)
             ->setDescription('Start the daemon to continuously process the queue.')
             ->setDefinition(
                 new InputDefinition([
@@ -92,6 +97,10 @@ class RunCommand extends Command
      * @param InputInterface  $input
      * @param OutputInterface $output
      *
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @throws StringsException
+     *
      * @return int The status code of the command
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -105,7 +114,22 @@ class RunCommand extends Command
         $this->jobsMarker->setIoWriter($this->ioWriter);
 
         // Do the initializing operations
-        $this->daemon->initialize($input->getArgument('daemon'), $input->getOption('allow-prod'), $this->ioWriter, $output);
+        $daemon    = $input->getArgument('daemon');
+        $allowProd = $input->getOption('allow-prod');
+
+        if (null !== $daemon && false === is_string($daemon)) {
+            $this->ioWriter->errorLineNoBg('The passed daemon is not valid.');
+
+            return 1;
+        }
+
+        if (false === is_bool($allowProd)) {
+            $this->ioWriter->errorLineNoBg('The --allow-prod value is not valid.');
+
+            return 1;
+        }
+
+        $this->daemon->initialize($daemon, $allowProd, $this->ioWriter, $output);
 
         // Check that the Daemons in the database that are still running are really still running
         $this->checkAliveDaemons();
@@ -132,7 +156,7 @@ class RunCommand extends Command
                 if (0 < $jobsToLoad) {
                     if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
                         $this->ioWriter->infoLineNoBg(\Safe\sprintf('Trying to initialize <success-nobg>%s</success-nobg> new Jobs for queue <success-nobg>%s</success-nobg>...', $jobsToLoad, $queueName));
-                        $initializingJobs = ProgressBar::createProgressBar(ProgressBar::FORMAT_INITIALIZING_JOBS, $output, $jobsToLoad);
+                        $initializingJobs = ProgressBarFactory::createProgressBar(ProgressBarFactory::FORMAT_INITIALIZING_JOBS, $output, $jobsToLoad);
                     }
                     for ($i = 0; $i < $jobsToLoad; ++$i) {
                         // Start processing the next Job in the queue
@@ -218,18 +242,25 @@ class RunCommand extends Command
 
     /**
      * Checks that the Damons in the database without a didedOn date are still alive (running).
+     *
+     * @throws OptimisticLockException
+     * @throws StringsException
+     * @throws ORMException
+     * @throws Exception
      */
     private function checkAliveDaemons(): void
     {
+        /** @var DaemonRepository $daemonRepo */
+        $daemonRepo = $this->entityManager->getRepository(Daemon::class);
+
         if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
             $this->ioWriter->infoLineNoBg('Checking struggler Daemons...');
             $this->ioWriter->commentLineNoBg('Daemons are "struggler" if they are not running anymore.');
         }
 
-        /** @var Daemon $daemon */
+        /** @var Daemon[] $strugglers */
         $strugglers = [];
-        while (null !== $daemon = $this->entityManager->getRepository('SHQCommandsQueuesBundle:Daemon')
-                ->findNextAlive($this->daemon->getIdentity())) {
+        while (null !== $daemon = $daemonRepo->findNextAlive($this->daemon->getIdentity())) {
             if (false === $this->isDaemonStillRunning($daemon)) {
                 $daemon->requiescatInPace(Daemon::MORTIS_STRAGGLER);
                 $this->entityManager->flush();
@@ -248,15 +279,20 @@ class RunCommand extends Command
         $this->ioWriter->commentLineNoBg('Their "diedOn" date is set to NOW and mortisCausa is "struggler".');
 
         $table = [];
-        /** @var Daemon $strugglerDaemon */
         foreach ($strugglers as $strugglerDaemon) {
-            $age     = $strugglerDaemon->getDiedOn()->diff($strugglerDaemon->getBornOn());
+            $strugglerDaemonDieOn = $strugglerDaemon->getDiedOn();
+
+            if (null === $strugglerDaemonDieOn) {
+                throw new RuntimeException(\Safe\sprintf("The daemon %s is being processed as struggler, but it hasn't a die date.", $strugglerDaemon->getId()));
+            }
+
+            $age     = $strugglerDaemonDieOn->diff($strugglerDaemon->getBornOn());
             $table[] = [
                 \Safe\sprintf('<%s>%s</>', 'success-nobg', "\xE2\x9C\x94"),
                 $strugglerDaemon->getPid(),
                 $strugglerDaemon->getHost(),
                 $strugglerDaemon->getBornOn()->format('Y-m-d H:i:s'),
-                $strugglerDaemon->getDiedOn()->format('Y-m-d H:i:s'),
+                $strugglerDaemonDieOn->format('Y-m-d H:i:s'),
                 $age->format('%h hours, %i minutes and %s seconds.'),
                 $strugglerDaemon->getMortisCausa(),
             ];
@@ -273,6 +309,8 @@ class RunCommand extends Command
      * Checks a Daemon is still running checking its process still exists.
      *
      * @param Daemon $daemon
+     *
+     * @throws StringsException
      *
      * @return bool
      */
@@ -293,6 +331,8 @@ class RunCommand extends Command
 
     /**
      * @param string $queueName
+     *
+     * @throws StringsException
      */
     private function processRunningJobs(string $queueName): void
     {
@@ -302,7 +342,7 @@ class RunCommand extends Command
                 'Checking <success-nobg>%s</success-nobg> running jobs on queue "%s"...',
                 $this->daemon->countRunningJobs($queueName), $queueName
             ));
-            $currentlyRunningProgress = ProgressBar::createProgressBar(ProgressBar::FORMAT_PROCESS_RUNNING_JOBS, $this->output, $this->daemon->countRunningJobs($queueName));
+            $currentlyRunningProgress = ProgressBarFactory::createProgressBar(ProgressBarFactory::FORMAT_PROCESS_RUNNING_JOBS, $this->output, $this->daemon->countRunningJobs($queueName));
         }
         $this->daemon->checkRunningJobs($queueName, $currentlyRunningProgress);
     }

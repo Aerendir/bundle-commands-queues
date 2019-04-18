@@ -20,11 +20,15 @@ namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Util;
 use DateTime;
 use Doctrine\Common\Persistence\Proxy;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\ORMException;
 use Doctrine\ORM\ORMInvalidArgumentException;
 use Exception;
 use InvalidArgumentException;
 use ReflectionClass;
+use ReflectionException;
 use RuntimeException;
+use Safe\Exceptions\ArrayException;
+use Safe\Exceptions\StringsException;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Daemon;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
 use SerendipityHQ\Bundle\ConsoleStyles\Console\Style\SerendipityHQStyle;
@@ -62,6 +66,8 @@ class JobsMarker
     /**
      * @param Job $job
      *
+     * @throws ReflectionException
+     *
      * @return ReflectionClass
      */
     public static function createReflectedJob(Job $job): ReflectionClass
@@ -72,6 +78,10 @@ class JobsMarker
         if ($job instanceof Proxy) {
             // ... This gets the real object, the one that the Proxy extends
             $reflectedClass = $reflectedClass->getParentClass();
+
+            if ( ! $reflectedClass instanceof ReflectionClass) {
+                throw new RuntimeException("Impossible to get the reflected Job class from the Doctrine's proxy.");
+            }
         }
 
         return $reflectedClass;
@@ -81,6 +91,8 @@ class JobsMarker
      * @param Job    $job
      * @param array  $info
      * @param Daemon $daemon
+     *
+     * @throws Exception
      */
     public function markJobAsAborted(Job $job, array $info, Daemon $daemon): void
     {
@@ -90,6 +102,8 @@ class JobsMarker
     /**
      * @param Job   $job
      * @param array $info
+     *
+     * @throws Exception
      */
     public function markJobAsCancelled(Job $job, array $info): void
     {
@@ -99,12 +113,20 @@ class JobsMarker
     /**
      * @param Job   $job
      * @param array $info
+     *
+     * @throws Exception
      */
     public function markJobAsFailed(Job $job, array $info): void
     {
         // If this Job is a retry of another one, mark also the retried as finished
         if ($job->isTypeRetrying()) {
-            $this->markParentsAsRetryFailed($job->getRetryOf());
+            $retryOf = $job->getRetryOf();
+
+            if ( ! $retryOf instanceof Job) {
+                throw new RuntimeException('The job of which this is a retry is not set.');
+            }
+
+            $this->markParentsAsRetryFailed($retryOf);
         }
 
         $this->markJobAsClosed($job, Job::STATUS_FAILED, $info);
@@ -113,12 +135,20 @@ class JobsMarker
     /**
      * @param Job   $job
      * @param array $info
+     *
+     * @throws Exception
      */
     public function markJobAsFinished(Job $job, array $info): void
     {
         // If this Job is a retry of another one, mark also the retried as finished
         if ($job->isTypeRetrying()) {
-            $this->markParentsAsRetrySucceeded($job->getRetryOf());
+            $retryOf = $job->getRetryOf();
+
+            if ( ! $retryOf instanceof Job) {
+                throw new RuntimeException('The job of which this is a retry is not set.');
+            }
+
+            $this->markParentsAsRetrySucceeded($retryOf);
         }
 
         $this->markJobAsClosed($job, Job::STATUS_SUCCEEDED, $info);
@@ -128,6 +158,8 @@ class JobsMarker
      * @param Job    $job
      * @param array  $info
      * @param Daemon $daemon
+     *
+     * @throws Exception
      */
     public function markJobAsPending(Job $job, array $info, Daemon $daemon): void
     {
@@ -137,6 +169,10 @@ class JobsMarker
     /**
      * @param Job   $failedJob
      * @param array $info
+     *
+     * @throws ArrayException
+     * @throws ORMException
+     * @throws StringsException
      *
      * @return Job the created retry Job
      */
@@ -152,6 +188,10 @@ class JobsMarker
      * @param Job   $staleJob
      * @param array $info
      *
+     * @throws ORMException
+     * @throws StringsException
+     * @throws ArrayException
+     *
      * @return Job the created retry Job
      */
     public function markStaleJobAsRetried(Job $staleJob, array $info): Job
@@ -164,6 +204,8 @@ class JobsMarker
 
     /**
      * @param Job $job
+     *
+     * @throws Exception
      */
     public function markJobAsRunning(Job $job): void
     {
@@ -175,6 +217,8 @@ class JobsMarker
      * @param string      $status
      * @param array       $info
      * @param Daemon|null $daemon
+     *
+     * @throws Exception
      */
     private function markJobAsClosed(Job $job, string $status, array $info, Daemon $daemon = null): void
     {
@@ -186,6 +230,10 @@ class JobsMarker
      * @param Job   $retriedJob
      * @param Job   $retryingJob
      * @param array $info
+     *
+     * @throws ORMException
+     * @throws StringsException
+     * @throws Exception
      *
      * @return Job
      */
@@ -202,11 +250,19 @@ class JobsMarker
 
     /**
      * @param Job $retriedJob
+     *
+     * @throws Exception
      */
     private function markParentsAsRetryFailed(Job $retriedJob): void
     {
         if ($retriedJob->isTypeRetrying()) {
-            $this->markParentsAsRetryFailed($retriedJob->getRetryOf());
+            $retryOf = $retriedJob->getRetryOf();
+
+            if ( ! $retryOf instanceof Job) {
+                throw new RuntimeException('The job of which this is a retry is not set.');
+            }
+
+            $this->markParentsAsRetryFailed($retryOf);
         }
 
         $this->markJob($retriedJob, Job::STATUS_RETRY_FAILED);
@@ -214,11 +270,19 @@ class JobsMarker
 
     /**
      * @param Job $retriedJob
+     *
+     * @throws Exception
      */
     private function markParentsAsRetrySucceeded(Job $retriedJob): void
     {
         if ($retriedJob->isTypeRetrying()) {
-            $this->markParentsAsRetrySucceeded($retriedJob->getRetryOf());
+            $retryOf = $retriedJob->getRetryOf();
+
+            if ( ! $retryOf instanceof Job) {
+                throw new RuntimeException('The job of which this is a retry is not set.');
+            }
+
+            $this->markParentsAsRetrySucceeded($retryOf);
         }
 
         $this->markJob($retriedJob, Job::STATUS_RETRY_SUCCEEDED);
@@ -250,7 +314,7 @@ class JobsMarker
             // the sacrifice queries to the databse in favor of a minor memory consumption.
             ->setMiddleHandlerForException([
                 ORMInvalidArgumentException::class, InvalidArgumentException::class,
-            ], function (Exception $e) use ($job, $status, $info, $daemon, $ioWriter) {
+            ], static function (Exception $e) use ($job, $status, $info, $daemon, $ioWriter) {
                 if (
                     ! $e instanceof ORMInvalidArgumentException
                     && $e instanceof InvalidArgumentException
@@ -269,7 +333,7 @@ class JobsMarker
             })
             ->setFinalHandlerForException([
                 ORMInvalidArgumentException::class, InvalidArgumentException::class,
-            ], function (Exception $e) use ($job, $oldStatus, $ioWriter) {
+            ], static function (Exception $e) use ($job, $oldStatus, $ioWriter) {
                 self::$ioWriter->error(sprintf('Error trying to flush Job #%s (%s => %s).', $job->getId(), $oldStatus, $job->getStatus()));
                 if ($ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
                     Profiler::printUnitOfWork();
@@ -278,7 +342,7 @@ class JobsMarker
             });
 
         $tryAgainBuilder->initializeRetryStrategy()
-            ->try(function () use ($job) {
+            ->try(static function () use ($job) {
                 /*
              * Flush now to be sure editings aren't cleared during optimizations.
              *
@@ -299,6 +363,10 @@ class JobsMarker
      * @param string      $status
      * @param array       $info
      * @param Daemon|null $daemon
+     *
+     * @throws StringsException
+     * @throws ReflectionException
+     * @throws ORMException
      */
     private function updateJob(Job $job, string $status, array $info = [], Daemon $daemon = null): void
     {
@@ -364,11 +432,19 @@ class JobsMarker
 
     /**
      * @param Job $retryJob
+     *
+     * @throws StringsException
      */
     private function updateChildDependencies(Job $retryJob): void
     {
-        /** @var Job $childDependency Set the retried Job as parent dependency of the child dependencies of this retrying Job */
-        foreach ($retryJob->getRetryOf()->getChildDependencies() as $childDependency) {
+        $retryOf = $retryJob->getRetryOf();
+
+        if ( ! $retryOf instanceof Job) {
+            throw new RuntimeException('The retry of Job is not set.');
+        }
+
+        // Set the retried Job as parent dependency of the child dependencies of this retrying Job
+        foreach ($retryOf->getChildDependencies() as $childDependency) {
             // Add child dependencies of the retried Job
             $retryJob->addChildDependency($childDependency);
         }

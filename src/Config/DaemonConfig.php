@@ -82,7 +82,7 @@ class DaemonConfig extends AbstractConfig
             }
 
             // Use as Daemon the only one configured
-            $daemon = key($this->daemons);
+            $daemon = (string) key($this->daemons);
         }
 
         $this->name = $daemon;
@@ -99,12 +99,12 @@ class DaemonConfig extends AbstractConfig
         $queues = array_keys($this->queues);
         foreach ($queues as $queue) {
             // Do not unset the default queue
-            if (false === in_array($queue, $this->daemons[$daemon]['queues'], true) && 'default' !== $queue) {
+            if ('default' !== $queue && false === in_array($queue, $this->daemons[$daemon]['queues'], true)) {
                 unset($this->queues[$queue]);
             }
         }
 
-        $this->daemons = null;
+        $this->daemons = [];
     }
 
     /**

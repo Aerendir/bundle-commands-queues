@@ -21,9 +21,9 @@ use Symfony\Component\Console\Helper\Helper;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * Creates a ProgressBar to display Jobs processing advancing.
+ * Creates a ProgressBarFactory to display Jobs processing advancing.
  */
-class ProgressBar
+class ProgressBarFactory
 {
     /**
      * @var string

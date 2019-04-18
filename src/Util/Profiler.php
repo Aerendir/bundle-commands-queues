@@ -19,6 +19,10 @@ namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Util;
 
 use DateTime;
 use Doctrine\ORM\UnitOfWork;
+use Safe\Exceptions\ArrayException;
+use Safe\Exceptions\FilesystemException;
+use Safe\Exceptions\StreamException;
+use Safe\Exceptions\StringsException;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Service\JobsManager;
 use SerendipityHQ\Bundle\ConsoleStyles\Console\Style\SerendipityHQStyle;
@@ -85,6 +89,8 @@ class Profiler
     private static $ioWriter;
 
     /**
+     * @throws ArrayException
+     *
      * @return string
      */
     public static function buildJobsList(): string
@@ -117,6 +123,9 @@ class Profiler
 
     /**
      * @param string $where
+     *
+     * @throws ArrayException
+     * @throws StringsException
      */
     public static function printUnitOfWork(string $where = null): void
     {
@@ -175,6 +184,10 @@ class Profiler
     }
 
     /**
+     * @throws FilesystemException
+     * @throws StreamException
+     * @throws StringsException
+     *
      * @return array
      */
     public function profile(): array
@@ -280,7 +293,8 @@ class Profiler
                 \Safe\sprintf(
                     'app/logs/callgrind/callgrind.out.%s.%s.%s',
                     (new DateTime())->format('Y-m-d'), $this->pid, $this->getCurrentIteration()
-                ), 'w');
+                    // "w": writing only; "b": binary safe
+                ), 'wb');
             memprof_dump_callgrind($callgrind);
             \Safe\fwrite($callgrind, \Safe\stream_get_contents($callgrind));
             \Safe\fclose($callgrind);
@@ -413,6 +427,10 @@ class Profiler
     private function formatTime(float $time): string
     {
         $date = DateTime::createFromFormat('U.u', number_format($time, 6, '.', ''));
+
+        if ( ! $date instanceof DateTime) {
+            throw new \RuntimeException('Impossible to parse the string into a valid DateTime object.');
+        }
 
         return $date->format('Y-m-d H:i:s.u');
     }

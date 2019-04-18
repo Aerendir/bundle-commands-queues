@@ -21,6 +21,7 @@ use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Exception;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Config\DaemonConfig;
 
 /**
@@ -31,16 +32,17 @@ use SerendipityHQ\Bundle\CommandsQueuesBundle\Config\DaemonConfig;
  */
 class Daemon
 {
-    /** Used when a Daemon is killed due to a PCNTL signal
+    /**
+     * Used when a Daemon is killed due to a PCNTL signal.
      *
      * @var string
      */
-    const MORTIS_SIGNAL = 'signal';
+    public const MORTIS_SIGNAL = 'signal';
 
     /** Used when a Daemon is not found anymore during the check of queues:run checkAliveDamons
      *
      * @var string */
-    const MORTIS_STRAGGLER = 'straggler';
+    public const MORTIS_STRAGGLER = 'straggler';
 
     /**
      * @var int
@@ -56,7 +58,7 @@ class Daemon
      *
      * @ORM\Column(name="config", type="array", nullable=false)
      */
-    private $config = [];
+    private $config;
 
     /**
      * @var string
@@ -80,7 +82,7 @@ class Daemon
     private $bornOn;
 
     /**
-     * @var DateTime
+     * @var DateTime|null
      *
      * @ORM\Column(name="died_on", type="datetime", nullable=true)
      */
@@ -101,9 +103,13 @@ class Daemon
     private $processedJobs;
 
     /**
+     * Daemon constructor.
+     *
      * @param string       $host
      * @param int          $pid
      * @param DaemonConfig $config
+     *
+     * @throws Exception
      */
     public function __construct(string $host, int $pid, DaemonConfig $config)
     {
@@ -141,7 +147,7 @@ class Daemon
     /**
      * @return DateTime|null
      */
-    public function getDiedOn(): DateTime
+    public function getDiedOn(): ? DateTime
     {
         return $this->diedOn;
     }
@@ -184,6 +190,8 @@ class Daemon
      * Requiescat In Pace (I'm Resting In Pace).
      *
      * @param string $mortisCausa
+     *
+     * @throws Exception
      */
     public function requiescatInPace(string $mortisCausa = self::MORTIS_SIGNAL): void
     {

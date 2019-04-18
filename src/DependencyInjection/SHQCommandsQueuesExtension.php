@@ -17,6 +17,8 @@ declare(strict_types=1);
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\DependencyInjection;
 
+use Exception;
+use Safe\Exceptions\StringsException;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Command\RunCommand;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Config\DaemonConfig;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Service\JobsManager;
@@ -36,6 +38,9 @@ class SHQCommandsQueuesExtension extends Extension
 {
     /**
      * {@inheritdoc}
+     *
+     * @throws StringsException
+     * @throws Exception
      */
     public function load(array $configs, ContainerBuilder $container): void
     {
@@ -59,7 +64,7 @@ class SHQCommandsQueuesExtension extends Extension
         // The Jobs Marker
         $jobsMarkerDefinition = (new Definition(JobsMarker::class, [
             $container->findDefinition('shq_commands_queues.do_not_use.entity_manager'),
-        ]));
+        ]))->setPublic(false);
         $container->setDefinition('shq_commands_queues.do_not_use.jobs_marker', $jobsMarkerDefinition);
 
         // The Profiler

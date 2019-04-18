@@ -19,16 +19,30 @@ namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Service;
 
 use Countable;
 use DateTime;
+use Doctrine\Common\Persistence\Mapping\MappingException;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\ORMException;
+use Doctrine\ORM\ORMInvalidArgumentException;
+use Doctrine\ORM\TransactionRequiredException;
+use Exception;
+use RuntimeException;
+use Safe\Exceptions\ArrayException;
+use Safe\Exceptions\InfoException;
+use Safe\Exceptions\MiscException;
+use Safe\Exceptions\PcntlException;
+use Safe\Exceptions\StringsException;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Config\DaemonConfig;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Daemon;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Repository\JobRepository;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\JobsMarker;
+use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\JobsUtil;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\Profiler;
-use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\ProgressBar;
+use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\ProgressBarFactory;
 use SerendipityHQ\Bundle\ConsoleStyles\Console\Style\SerendipityHQStyle;
+use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\Process;
 use Throwable;
@@ -44,7 +58,7 @@ class QueuesDaemon
     /** @var array $canSleep */
     private $canSleep = [];
 
-    /** @var array $config */
+    /** @var DaemonConfig $config */
     private $config;
 
     /** @var EntityManager $entityManager */
@@ -78,7 +92,7 @@ class QueuesDaemon
     /** @var array $runningJobs Keeps track of the started jobs in the queue. */
     private $runningJobs = [];
 
-    /** @var bool $verbosity */
+    /** @var int $verbosity */
     private $verbosity;
 
     /**
@@ -90,11 +104,13 @@ class QueuesDaemon
      */
     public function __construct(DaemonConfig $config, EntityManager $entityManager, JobsManager $jobsManager, JobsMarker $jobsMarker, Profiler $profiler)
     {
+        /** @var JobRepository $jobsRepo */
+        $jobsRepo            = $this->entityManager->getRepository(Job::class);
         $this->config        = $config;
         $this->entityManager = $entityManager;
         $this->jobsManager   = $jobsManager;
         $this->jobsMarker    = $jobsMarker;
-        $this->jobsRepo      = $this->entityManager->getRepository('SHQCommandsQueuesBundle:Job');
+        $this->jobsRepo      = $jobsRepo;
         $this->profiler      = $profiler;
     }
 
@@ -107,6 +123,9 @@ class QueuesDaemon
      * @param OutputInterface    $output
      *
      * @throws OptimisticLockException
+     * @throws Exception
+     * @throws InfoException
+     * @throws StringsException
      */
     public function initialize(?string $daemon, bool $allowProd, SerendipityHQStyle $ioWriter, OutputInterface $output): void
     {
@@ -120,7 +139,11 @@ class QueuesDaemon
         $this->config->initialize($daemon, $allowProd);
 
         // Save the Daemon to the Database
-        $this->me = new Daemon(gethostname(), \Safe\getmypid(), $this->config);
+        $hostname = gethostname();
+        if (false === is_string($hostname)) {
+            throw new RuntimeException('Impossible to get the host name.');
+        }
+        $this->me = new Daemon($hostname, \Safe\getmypid(), $this->config);
         $this->entityManager->persist($this->me);
         $this->entityManager->flush($this->me);
         $ioWriter->successLineNoBg(\Safe\sprintf(
@@ -140,7 +163,7 @@ class QueuesDaemon
         $this->jobsManager->initialize($this->entityManager, $ioWriter);
 
         // Disable logging in Doctrine
-        $this->entityManager->getConfiguration()->setSQLLogger(null);
+        $this->entityManager->getConfiguration()->setSQLLogger();
         $this->entityManager->getConfiguration()->setSecondLevelCacheEnabled(false);
 
         // Configure the repository
@@ -162,6 +185,8 @@ class QueuesDaemon
      * Requiescant In Pace (May it Rest In Pace).
      *
      * @throws OptimisticLockException
+     * @throws ORMException
+     * @throws Exception
      */
     public function requiescantInPace(): void
     {
@@ -174,6 +199,9 @@ class QueuesDaemon
      * Whil this returns true, the Daemon will continue to run.
      *
      * This service is not meant to be retrieved outside of RunCommand.
+     *
+     * @throws PcntlException
+     * @throws StringsException
      *
      * @return bool
      */
@@ -210,9 +238,12 @@ class QueuesDaemon
      *
      * @param string $queueName
      *
+     * @throws ORMException
      * @throws OptimisticLockException
+     * @throws StringsException
+     * @throws Exception
      *
-     * @return bool|void
+     * @return bool
      */
     public function processNextJob(string $queueName): bool
     {
@@ -259,10 +290,14 @@ class QueuesDaemon
             $job->addArgument(\Safe\sprintf('--cancelling-job-id=%s', $job->getId()));
         }
 
+        $jobRetryOf = $job->getRetryOf();
+        if (null === $jobRetryOf) {
+            throw new RuntimeException(\Safe\sprintf('The job of which this one (ID: %s) is a retry is not set.', $job->getId()));
+        }
         if ($job->isTypeRetrying() && $this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
             $this->ioWriter->noteLineNoBg(\Safe\sprintf(
                 '[%s] Job <success-nobg>#%s</success-nobg> on Queue <success-nobg>%s</success-nobg>: This is a retry of original Job <success-nobg>#%s</success-nobg> (Childs: %s).',
-                $now->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue(), $job->getRetryOf()->getId(), $job->getChildDependencies()->count()
+                $now->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue(), $jobRetryOf->getId(), $job->getChildDependencies()->count()
             ));
         }
 
@@ -278,9 +313,9 @@ class QueuesDaemon
             $info['output_error'] = $e;
 
             // Check if it can be retried and if the retry were successful
-            if ($job->getRetryStrategy()->canRetry() && true === $this->retryFailedJob($job, $info, "Job didn't started as its process were aborted.")) {
+            if ($job->getRetryStrategy()->canRetry()) {
                 // Exit
-                return false;
+                return ! $this->retryFailedJob($job, $info, "Job didn't started as its process were aborted.");
             }
 
             $cancellingJob = $this->handleChildsOfFailedJob($job);
@@ -290,7 +325,7 @@ class QueuesDaemon
                     "[%s] Job <success-nobg>#%s</success-nobg> on Queue <success-nobg>%s</success-nobg>: The process didn't started due to some errors. See them in the"
                     . ' logs of the Job.', $now->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue()
                 ));
-                if (false !== $cancellingJob) {
+                if ($cancellingJob instanceof Job) {
                     $this->ioWriter->errorLineNoBg(\Safe\sprintf('The Job #%s will mark its childs as cancelled.', $cancellingJob->getId()));
                 }
             }
@@ -307,8 +342,7 @@ class QueuesDaemon
          * Marking it as pending now allows us to save its PID in the database later, when we will process again this
          * Job as a running one.
          *
-         * At that time, if it recognized as a running job, its process is really started and itt will have a PID for
-         * sure.
+         * At that time, if it recognized as a running job, its process is really started and it will have a PID for sure.
          */
         $this->jobsMarker->markJobAsPending($job, $info, $this->me);
 
@@ -397,10 +431,16 @@ class QueuesDaemon
     /**
      * Processes the Jobs already running or pending.
      *
-     * @param string                                             $queueName
-     * @param \Symfony\Component\Console\Helper\ProgressBar|null $progressBar
+     * @param string      $queueName
+     * @param ProgressBar $progressBar
+     *
+     * @throws StringsException
+     * @throws OptimisticLockException
+     * @throws ORMInvalidArgumentException
+     * @throws TransactionRequiredException
+     * @throws ORMException
      */
-    public function checkRunningJobs(string $queueName, \Symfony\Component\Console\Helper\ProgressBar $progressBar = null): void
+    public function checkRunningJobs(string $queueName, ProgressBar $progressBar = null): void
     {
         foreach ($this->runningJobs[$queueName] as $index => $runningJob) {
             $now = new DateTime();
@@ -417,7 +457,7 @@ class QueuesDaemon
 
             if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
                 $this->ioWriter->infoLineNoBg(\Safe\sprintf(
-                    '[%s] Job <success-nobg>#%s</success-nobg> on Queue <success-nobg>%s</success-nobg>: Checking status...',
+                    '[%s] Job <success-nobg>#%s [%s]</success-nobg> on Queue <success-nobg>%s</success-nobg>: Checking status...',
                     $now->format('Y-m-d H:i:s'), $checkingJob->getId(), $checkingJob->getQueue(), $checkingProcess->getPid()
                     ));
             }
@@ -432,6 +472,13 @@ class QueuesDaemon
 
     /**
      * @param array $runningJob
+     *
+     * @throws StringsException
+     * @throws OptimisticLockException
+     * @throws ORMInvalidArgumentException
+     * @throws TransactionRequiredException
+     * @throws ORMException
+     * @throws Exception
      *
      * @return bool
      */
@@ -454,7 +501,7 @@ class QueuesDaemon
             }
 
             // And print its PID (available only if the process is already running)
-            if ($process->isStarted() && $this->verbosity >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
+            if ($this->verbosity >= OutputInterface::VERBOSITY_VERY_VERBOSE && $process->isStarted()) {
                 $this->ioWriter->infoLineNoBg(\Safe\sprintf(
                         '[%s] Job <success-nobg>#%s</success-nobg> on Queue <success-nobg>%s</success-nobg>: Process is currently running with PID "%s".',
                         $now->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue(), $process->getPid())
@@ -476,7 +523,18 @@ class QueuesDaemon
         // If this is a cancelling Job or a retrying one, refresh the entire tree
         if ($job->isTypeCancelling()) {
             $startJobId = str_replace('--id=', '', $job->getArguments()[0]);
-            $this->jobsManager->refreshTree($this->entityManager->getRepository('SHQCommandsQueuesBundle:Job')->findOneById($startJobId));
+
+            if (false === is_numeric($startJobId)) {
+                throw new RuntimeException('Impossible to obtain the start Job ID.');
+            }
+
+            $startJob = $this->jobsRepo->findOneById((int) $startJobId);
+
+            if ( ! $startJob instanceof Job) {
+                throw new RuntimeException(\Safe\sprintf('Impossible to find the job with ID %s', $startJobId));
+            }
+
+            $this->jobsManager->refreshTree($startJob);
         }
 
         if ($job->isStatusFinished() && false === $job->isTypeCancelling()) {
@@ -513,6 +571,13 @@ class QueuesDaemon
 
     /**
      * Optimizes the usage of memory.
+     *
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @throws StringsException
+     * @throws TransactionRequiredException
+     * @throws MappingException
+     * @throws Exception
      */
     public function optimize(): void
     {
@@ -561,6 +626,8 @@ class QueuesDaemon
 
     /**
      * Put the Daemon in sleep.
+     *
+     * @throws MiscException
      */
     public function sleep(): void
     {
@@ -574,11 +641,16 @@ class QueuesDaemon
      * closed.
      *
      * This method ensures a delay between writings on the database.
+     *
+     * @throws Exception
      */
     public function wait(): void
     {
-        $waitTimeInMs = mt_rand(500, 1000);
-        usleep($waitTimeInMs * 1E3);
+        // 1E3 = 10 to the power of 3 = 1000.
+        // This returns a type double and not an int as it may be expected.
+        // https://stackoverflow.com/q/55772858/1399706
+        $waitTimeInMs = random_int(500, 1000) * 1E3;
+        usleep((int) $waitTimeInMs);
     }
 
     /**
@@ -616,6 +688,8 @@ class QueuesDaemon
     }
 
     /**
+     * This is used as error handler, so it will result as dead code: DO NOT REMOVE!
+     *
      * @todo Those methods can be used to better define the failure cause:
      *
      * - $process->getIdleTimeout()
@@ -629,6 +703,9 @@ class QueuesDaemon
      * @param Process $process
      *
      * @throws OptimisticLockException
+     * @throws StringsException
+     * @throws ArrayException
+     * @throws ORMException
      */
     final protected function handleFailedJob(Job $job, Process $process): void
     {
@@ -646,10 +723,10 @@ class QueuesDaemon
 
         $message = \Safe\sprintf(
             '[%s] Job <success-nobg>#%s</success-nobg> on Queue <success-nobg>%s</success-nobg>: Job failed (no retries allowed).',
-            $job->getClosedAt()->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue()
+            JobsUtil::getFormattedTime($job, 'getClosedAt'), $job->getId(), $job->getQueue()
         );
 
-        if (false !== $cancellingJob) {
+        if ($cancellingJob instanceof Job) {
             $message = \Safe\sprintf('%s The Job #%s will mark its childs as cancelled.', $message, $cancellingJob->getId());
         }
 
@@ -659,6 +736,8 @@ class QueuesDaemon
     /**
      * @param Job     $job
      * @param Process $process
+     *
+     * @throws StringsException
      */
     final protected function handleSuccessfulJob(Job $job, Process $process): void
     {
@@ -667,13 +746,16 @@ class QueuesDaemon
 
         $this->ioWriter->successLineNoBg(\Safe\sprintf(
             '[%s] Job <success-nobg>#%s</success-nobg> on Queue <success-nobg>%s</success-nobg>: Process succeded.',
-            $job->getClosedAt()->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue()));
+            JobsUtil::getFormattedTime($job, 'getClosedAt'), $job->getId(), $job->getQueue()));
     }
 
     /**
      * @param Job $job
      *
      * @throws OptimisticLockException
+     * @throws StringsException
+     * @throws ArrayException
+     * @throws ORMException
      *
      * @return bool|Job Returns false or the Job object
      */
@@ -771,6 +853,8 @@ class QueuesDaemon
      * @param array  $info
      * @param string $retryReason
      *
+     * @throws StringsException
+     *
      * @return bool
      */
     private function retryFailedJob(Job $job, array $info, string $retryReason): bool
@@ -778,12 +862,12 @@ class QueuesDaemon
         $retryJob = $this->jobsMarker->markFailedJobAsRetried($job, $info);
         $this->ioWriter->warningLineNoBg(\Safe\sprintf(
                 '[%s] Job <success-nobg>#%s</success-nobg> on Queue <success-nobg>%s</success-nobg>: %s.',
-                $job->getClosedAt()->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue(), $retryReason)
+                JobsUtil::getFormattedTime($job, 'getClosedAt'), $job->getId(), $job->getQueue(), $retryReason)
         );
         if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
             $this->ioWriter->noteLineNoBg(\Safe\sprintf(
                 '[%s] Job <success-nobg>#%s</success-nobg> on Queue "%s": Retry with Job "#%s" (Attempt #%s/%s).',
-                    $job->getClosedAt()->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue(), $retryJob->getId(), $retryJob->getRetryStrategy()->getAttempts(), $retryJob->getRetryStrategy()->getMaxAttempts())
+                    JobsUtil::getFormattedTime($job, 'getClosedAt'), $job->getId(), $job->getQueue(), $retryJob->getId(), $retryJob->getRetryStrategy()->getAttempts(), $retryJob->getRetryStrategy()->getMaxAttempts())
             );
         }
 
@@ -794,6 +878,10 @@ class QueuesDaemon
      * @param OutputInterface $output
      *
      * @throws OptimisticLockException
+     * @throws NonUniqueResultException
+     * @throws StringsException
+     * @throws ArrayException
+     * @throws ORMException
      */
     private function checkStaleJobs(OutputInterface $output): void
     {
@@ -813,7 +901,7 @@ class QueuesDaemon
 
         $progressBar = null;
         if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
-            $progressBar = ProgressBar::createProgressBar(ProgressBar::FORMAT_PROCESS_STALE_JOBS, $output, $staleJobsCount);
+            $progressBar = ProgressBarFactory::createProgressBar(ProgressBarFactory::FORMAT_PROCESS_STALE_JOBS, $output, $staleJobsCount);
         }
 
         // There are stale Jobs
@@ -827,7 +915,9 @@ class QueuesDaemon
             $stales[] = $job->getId();
 
             if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
-                $progressBar->advance();
+                if (null !== $progressBar) {
+                    $progressBar->advance();
+                }
                 $this->ioWriter->writeln('');
             }
 
@@ -842,7 +932,7 @@ class QueuesDaemon
             $this->jobsMarker->markJobAsFailed($job, $info);
             $this->ioWriter->errorLineNoBg(\Safe\sprintf(
                 '[%s] Job <success-nobg>#%s</success-nobg> on Queue <success-nobg>%s</success-nobg>: Process were stale so it were marked as FAILED.',
-                $job->getClosedAt()->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue()
+                JobsUtil::getFormattedTime($job, 'getClosedAt'), $job->getId(), $job->getQueue()
             ));
 
             $this->handleChildsOfFailedJob($job);
@@ -854,6 +944,8 @@ class QueuesDaemon
      * @param array  $info
      * @param string $retryReason
      *
+     * @throws StringsException
+     *
      * @return bool
      */
     private function retryStaleJob(Job $job, array $info, string $retryReason): bool
@@ -861,11 +953,11 @@ class QueuesDaemon
         $retryingJob = $this->jobsMarker->markStaleJobAsRetried($job, $info);
         $this->ioWriter->warningLineNoBg(\Safe\sprintf(
                 '[%s] Job <success-nobg>#%s</success-nobg> on Queue <success-nobg>%s</success-nobg>: %s.',
-                $job->getClosedAt()->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue(), $retryReason)
+                JobsUtil::getFormattedTime($job, 'getClosedAt'), $job->getId(), $job->getQueue(), $retryReason)
         );
         $this->ioWriter->noteLineNoBg(\Safe\sprintf(
-                '[%s] Job <success-nobg>#%s</success-nobg> on Queue "%s": This will be retried with Job <success-nobg>#%s</success-nobg>.',
-                $job->getClosedAt()->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue(), $retryingJob->getId(), $retryingJob->getRetryStrategy()->getAttempts(), $retryingJob->getRetryStrategy()->getMaxAttempts())
+                '[%s] Job <success-nobg>#%s</success-nobg> on Queue "%s": This will be retried with Job <success-nobg>#%s</success-nobg> (already retried %s times of %s).',
+                JobsUtil::getFormattedTime($job, 'getClosedAt'), $job->getId(), $job->getQueue(), $retryingJob->getId(), $retryingJob->getRetryStrategy()->getAttempts(), $retryingJob->getRetryStrategy()->getMaxAttempts())
         );
 
         return true;

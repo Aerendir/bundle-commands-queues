@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the SHQCommandsQueuesBundle.
  *
@@ -16,6 +18,7 @@
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Command;
 
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\JobsMarker;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\Profiler;
 use SerendipityHQ\Bundle\ConsoleStyles\Console\Formatter\SerendipityHQOutputFormatter;
@@ -29,7 +32,7 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 abstract class AbstractQueuesCommand extends Command
 {
-    /** @var EntityManager $entityManager */
+    /** @var EntityManagerInterface $entityManager */
     private $entityManager;
 
     /** @var SerendipityHQStyle */
@@ -39,10 +42,21 @@ abstract class AbstractQueuesCommand extends Command
     private $jobsMarker;
 
     /**
+     * @param EntityManagerInterface $doNotUseEntityManager
+     * @param JobsMarker             $doNotUseJobsMarker
+     */
+    public function __construct(EntityManagerInterface $doNotUseEntityManager, JobsMarker $doNotUseJobsMarker)
+    {
+        parent::__construct();
+        $this->entityManager = $doNotUseEntityManager;
+        $this->jobsMarker    = $doNotUseJobsMarker;
+    }
+
+    /**
      * @param InputInterface  $input
      * @param OutputInterface $output
      *
-     * @return bool
+     * @return int
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
@@ -50,17 +64,15 @@ abstract class AbstractQueuesCommand extends Command
         $this->ioWriter = new SerendipityHQStyle($input, $output);
         $this->ioWriter->setFormatter(new SerendipityHQOutputFormatter(true));
 
-        $this->entityManager = $this->getContainer()->get('shq_commands_queues.do_not_use.entity_manager');
-
         Profiler::setDependencies($this->getIoWriter(), $this->getEntityManager()->getUnitOfWork());
 
         return 0;
     }
 
     /**
-     * @return EntityManager
+     * @return EntityManagerInterface
      */
-    final protected function getEntityManager(): EntityManager
+    final protected function getEntityManager(): EntityManagerInterface
     {
         return $this->entityManager;
     }
@@ -70,11 +82,6 @@ abstract class AbstractQueuesCommand extends Command
      */
     final protected function getJobsMarker(): JobsMarker
     {
-        if (null === $this->jobsMarker) {
-            $this->jobsMarker = $this->getContainer()->get('shq_commands_queues.do_not_use.jobs_marker');
-            $this->jobsMarker->setIoWriter($this->getIoWriter());
-        }
-
         return $this->jobsMarker;
     }
 

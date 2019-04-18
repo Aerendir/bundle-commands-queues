@@ -17,7 +17,11 @@ declare(strict_types=1);
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Command;
 
+use Doctrine\ORM\OptimisticLockException;
+use Safe\Exceptions\ArrayException;
+use Safe\Exceptions\StringsException;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
+use SerendipityHQ\Bundle\CommandsQueuesBundle\Service\QueuesManager;
 use SerendipityHQ\Component\ThenWhen\Strategy\LiveStrategy;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputDefinition;
@@ -30,13 +34,27 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class TestFailingJobsCommand extends Command
 {
+    /** @var string $defaultName */
+    protected static $defaultName = 'queues:test:failing-jobs';
+
+    /** @var QueuesManager $queuesManager */
+    private $queuesManager;
+
+    /**
+     * @param QueuesManager $queuesManager
+     */
+    public function __construct(QueuesManager $queuesManager)
+    {
+        parent::__construct();
+        $this->queuesManager = $queuesManager;
+    }
+
     /**
      * {@inheritdoc}
      */
     protected function configure(): void
     {
         $this
-            ->setName('queues:test:failing-jobs')
             ->setDescription('[INTERNAL] Generates some linked failing Jobs.')
             ->setDefinition(
                 new InputDefinition([
@@ -50,21 +68,27 @@ class TestFailingJobsCommand extends Command
      * @param InputInterface  $input
      * @param OutputInterface $output
      *
-     * @return bool
+     * @throws OptimisticLockException
+     * @throws StringsException
+     * @throws ArrayException
+     *
+     * @return int
      */
-    protected function execute(InputInterface $input, OutputInterface $output): void
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $job1 = new Job('queues:test', '--id=1 --trigger-error=true');
         $job1->setRetryStrategy(new LiveStrategy(3))->setQueue('queue_1');
-        $this->getContainer()->get('queues')->schedule($job1);
+        $this->queuesManager->schedule($job1);
 
         $job2 = new Job('queues:test', '--id=2 --trigger-error=true');
         $job2->setQueue('queue_1')->addParentDependency($job1);
-        $this->getContainer()->get('queues')->schedule($job2);
+        $this->queuesManager->schedule($job2);
 
         $job3 = new Job('queues:test', '--id=3 --trigger-error=true');
         $job3->setQueue('queue_1');
         $job2->addChildDependency($job3);
-        $this->getContainer()->get('queues')->schedule($job3);
+        $this->queuesManager->schedule($job3);
+
+        return 0;
     }
 }

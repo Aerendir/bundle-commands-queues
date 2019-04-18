@@ -18,11 +18,12 @@ declare(strict_types=1);
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Controller;
 
 use Doctrine\ORM\EntityManager;
+use Exception;
 use Pagerfanta\Adapter\DoctrineORMAdapter;
 use Pagerfanta\Pagerfanta;
 use Pagerfanta\View\TwitterBootstrap3View;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Daemon;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -31,18 +32,37 @@ use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\KernelInterface;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\RouterInterface;
 
 /**
  * {@inheritdoc}
  */
 class QueuesController extends AbstractController
 {
+    /** @var KernelInterface $kernel */
+    private $kernel;
+
+    /** @var RouterInterface $router */
+    private $router;
+
+    /**
+     * @param KernelInterface $kernel
+     * @param RouterInterface $router
+     */
+    public function __construct(KernelInterface $kernel, RouterInterface $router)
+    {
+        $this->kernel = $kernel;
+        $this->router = $router;
+    }
+
     /**
      * @Route("/", name="queues_index")
      */
     public function indexAction(): Response
     {
-        $jobs = $this->getDoctrine()->getRepository('SHQCommandsQueuesBundle:Daemon')->findAll();
+        $jobs = $this->getDoctrine()->getRepository(Daemon::class)->findAll();
 
         return $this->render('SHQCommandsQueuesBundle:Queues:index.html.twig', [
             'daemons' => $jobs,
@@ -54,18 +74,18 @@ class QueuesController extends AbstractController
      *
      * @param Request $request
      *
-     * @return array
+     * @return Response
      */
     public function jobsAction(Request $request): Response
     {
         /** @var EntityManager $em */
-        $em = $this->getDoctrine()->getManagerForClass('SHQCommandsQueuesBundle:Job');
+        $em = $this->getDoctrine()->getManagerForClass(Job::class);
         $qb = $em->createQueryBuilder();
         $qb->select('j')->from('SHQCommandsQueuesBundle:Job', 'j')
            ->orderBy('j.priority', 'ASC')
            ->addOrderBy('j.executeAfterTime', 'DESC');
 
-        $status = $request->query->get('status', null);
+        $status = $request->query->get('status');
         if (null !== $status) {
             $qb->where($qb->expr()->eq('j.status', ':status'))->setParameter('status', 'new');
         }
@@ -75,8 +95,8 @@ class QueuesController extends AbstractController
         $pager->setMaxPerPage(max(5, min(50, (int) $request->query->get('per_page', 20))));
 
         $pagerView      = new TwitterBootstrap3View();
-        $router         = $this->get('router');
-        $routeGenerator = function ($page) use ($router, $pager, $status) {
+        $router         = $this->router;
+        $routeGenerator = static function ($page) use ($router, $pager, $status) {
             $params = ['page' => $page, 'per_page' => $pager->getMaxPerPage()];
 
             if (null !== $status) {
@@ -103,7 +123,7 @@ class QueuesController extends AbstractController
      *
      * @param Job $job
      *
-     * @return array
+     * @return Response
      */
     public function jobAction(Job $job): Response
     {
@@ -114,11 +134,14 @@ class QueuesController extends AbstractController
 
     /**
      * @Route("/test", name="queues_test_random")
+     *
+     * @throws Exception
+     *
+     * @return RedirectResponse
      */
     public function testRandomAction(): RedirectResponse
     {
-        $kernel     = $this->get('kernel');
-        $appliction = new Application($kernel);
+        $appliction = new Application($this->kernel);
         $appliction->setAutoExit(false);
 
         $input = new ArrayInput([
@@ -137,11 +160,14 @@ class QueuesController extends AbstractController
 
     /**
      * @Route("/test/failed", name="queues_test_failed")
+     *
+     * @throws Exception
+     *
+     * @return RedirectResponse
      */
     public function testFailedAction(): RedirectResponse
     {
-        $kernel     = $this->get('kernel');
-        $appliction = new Application($kernel);
+        $appliction = new Application($this->kernel);
         $appliction->setAutoExit(false);
 
         $input = new ArrayInput([

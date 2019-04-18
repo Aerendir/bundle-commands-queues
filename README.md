@@ -23,6 +23,7 @@ Requirements
 ------------
 
 1. PHP ^7.1
+2. Symfony ^4
 
 Status: ACTIVE DEVELOPMENT
 --------------------------

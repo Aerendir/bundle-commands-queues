@@ -18,8 +18,12 @@ declare(strict_types=1);
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Service;
 
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\ORMException;
+use Safe\Exceptions\ArrayException;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
+use SerendipityHQ\Bundle\CommandsQueuesBundle\Repository\JobRepository;
 
 /**
  * Manages the commands_queues.
@@ -48,7 +52,10 @@ class QueuesManager
      *
      * @param Job $job
      *
-     * @return false|Job
+     * @throws ArrayException
+     * @throws NonUniqueResultException
+     *
+     * @return bool|Job
      */
     public function jobExists(Job $job)
     {
@@ -66,6 +73,9 @@ class QueuesManager
      *
      * @param Job $job
      *
+     * @throws ArrayException
+     * @throws NonUniqueResultException
+     *
      * @return Job|null
      */
     public function findJob(Job $job): ?Job
@@ -81,6 +91,9 @@ class QueuesManager
      * @param string $command
      * @param array  $arguments
      * @param string $queue
+     *
+     * @throws ArrayException
+     * @throws NonUniqueResultException
      *
      * @return bool|Job
      */
@@ -104,14 +117,20 @@ class QueuesManager
      * @param array  $arguments
      * @param string $queue
      *
+     * @throws ArrayException
+     * @throws NonUniqueResultException
+     *
      * @return Job|null
      */
     public function find(string $command, array $arguments = [], string $queue = 'default'): ?Job
     {
+        /** @var JobRepository $jobsRepo */
+        $jobsRepo = $this->entityManager->getRepository(Job::class);
+
         // Check and prepare arguments of the command
         $arguments = Job::prepareArguments($arguments);
 
-        return $this->entityManager->getRepository('SHQCommandsQueuesBundle:Job')->exists($command, $arguments, $queue);
+        return $jobsRepo->exists($command, $arguments, $queue);
     }
 
     /**
@@ -120,6 +139,7 @@ class QueuesManager
      * @param Job $job
      *
      * @throws OptimisticLockException
+     * @throws ORMException
      */
     public function schedule(Job $job): void
     {
