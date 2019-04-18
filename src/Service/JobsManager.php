@@ -83,7 +83,7 @@ class JobsManager
                 if (self::$ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_DEBUG) {
                     // Add the current Job to the already detached
                     $detached[$jobInTree->getId()] = '#' . $jobInTree->getId();
-                    self::$ioWriter->successLineNoBg(sprintf(
+                    self::$ioWriter->successLineNoBg(\Safe\sprintf(
                         'Job <info-nobg>#%s</info-nobg> is not managed and so it will not has to be detached.',
                         $jobInTree->getId()
                     ));
@@ -93,7 +93,7 @@ class JobsManager
 
             if (false === $jobInTree->canBeDetached()) {
                 if (self::$ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_DEBUG) {
-                    self::$ioWriter->infoLineNoBg(sprintf(
+                    self::$ioWriter->infoLineNoBg(\Safe\sprintf(
                         'Skipping detaching Job <success-nobg>#%s</success-nobg> [Em: %s] because <success-nobg>%s</success-nobg>.',
                         $jobInTree->getId(), self::guessJobEmState($jobInTree), $jobInTree->getCannotBeDetachedBecause()
                     ));
@@ -107,25 +107,25 @@ class JobsManager
             // Now detach the Job
             self::$entityManager->detach($jobInTree);
             if (self::$ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_DEBUG) {
-                self::$ioWriter->successLineNoBg(sprintf('Job <info-nobg>#%s</info-nobg> detached.', $jobInTree->getId()));
+                self::$ioWriter->successLineNoBg(\Safe\sprintf('Job <info-nobg>#%s</info-nobg> detached.', $jobInTree->getId()));
             }
             // Add the current Job to the already detached
             $detached[$jobInTree->getId()] = '#' . $jobInTree->getId();
         }
 
         if (self::$ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
-            self::$ioWriter->infoLineNoBg(sprintf(
+            self::$ioWriter->infoLineNoBg(\Safe\sprintf(
                 'Job <success-nobg>#%s</success-nobg> and its linked Jobs detached.', $job->getId()
             ));
 
             // Print detached
             if (false === empty($detached)) {
-                self::$ioWriter->commentLineNoBg(sprintf('Detached: %s', implode(', ', $detached)));
+                self::$ioWriter->commentLineNoBg(\Safe\sprintf('Detached: %s', implode(', ', $detached)));
             }
 
             // Print not detached
             if (false === empty($notDetached)) {
-                self::$ioWriter->commentLineNoBg(sprintf('Not Detached: %s', implode(', ', $notDetached)));
+                self::$ioWriter->commentLineNoBg(\Safe\sprintf('Not Detached: %s', implode(', ', $notDetached)));
             }
         }
     }

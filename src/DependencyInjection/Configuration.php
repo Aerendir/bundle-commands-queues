@@ -128,7 +128,7 @@ class Configuration implements ConfigurationInterface
         foreach ($tree['daemons'] as $daemon => $config) {
             // A Daemon MUST HAVE at least one queue assigned
             if (empty($config['queues'])) {
-                throw new InvalidConfigurationException(sprintf(
+                throw new InvalidConfigurationException(\Safe\sprintf(
                     'The "%s" daemon MUST specify at least one queue to process.', $daemon
                 ));
             }
@@ -136,7 +136,7 @@ class Configuration implements ConfigurationInterface
             // Check the queue is not already assigned
             foreach ($config['queues'] as $queue) {
                 if (array_key_exists($queue, $this->foundQueues)) {
-                    throw new InvalidConfigurationException(sprintf(
+                    throw new InvalidConfigurationException(\Safe\sprintf(
                         'Queue "%s" already assigned to daemon "%s". You cannot assign this queue also to daemon "%s".',
                         $queue, $this->foundQueues[$queue], $daemon
                     ));
@@ -180,7 +180,7 @@ class Configuration implements ConfigurationInterface
         }
 
         // Sort queues alphabetically
-        ksort($returnConfig['queues']);
+        \Safe\ksort($returnConfig['queues']);
 
         // Now configure the queues
         foreach ($returnConfig['queues'] as $queue => $config) {

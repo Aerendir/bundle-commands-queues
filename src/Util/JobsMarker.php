@@ -343,7 +343,7 @@ class JobsMarker
                     $reflectedProperty = $reflectedClass->getProperty('cancellationReason');
                     break;
                 default:
-                    throw new \RuntimeException(sprintf(
+                    throw new \RuntimeException(\Safe\sprintf(
                         'The property %s is not managed. Manage it or verify its spelling is correct.',
                         $property
                     ));

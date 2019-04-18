@@ -359,7 +359,7 @@ class Job
         }
 
         // Order arguments
-        asort($arguments);
+        \Safe\asort($arguments);
 
         return $arguments;
     }
@@ -422,7 +422,7 @@ class Job
         // This Job is already started...
         if (self::STATUS_PENDING === $this->getStatus() || self::STATUS_RUNNING === $this->getStatus()) {
             throw new \LogicException(
-                sprintf(
+                \Safe\sprintf(
                     'The Job %s has already started. You cannot add the parent dependency %s.',
                     $this->getId(), $job->getId()
                 )
@@ -430,7 +430,7 @@ class Job
         }
 
         if (true === $this->childDependencies->contains($job)) {
-            throw new \LogicException(sprintf(
+            throw new \LogicException(\Safe\sprintf(
                 'You cannot add a parent dependecy (%s) that is already a child dependency.'
                 . ' This will create an unresolvable circular reference.',
                 $job->getId()
@@ -451,7 +451,7 @@ class Job
     public function createCancelChildsJob(): self
     {
         // If the Job as child Jobs, create a process to mark them as cancelled
-        return (new self('queues:internal:mark-as-cancelled', [sprintf('--id=%s', $this->getId())]))
+        return (new self('queues:internal:mark-as-cancelled', [\Safe\sprintf('--id=%s', $this->getId())]))
             ->setQueue($this->getQueue())
             // This Job has to be successful!
             ->setRetryStrategy(new LiveStrategy(100000))
@@ -721,7 +721,7 @@ class Job
     {
         if (false === $this->isTypeInternal()) {
             throw new \BadMethodCallException(
-                sprintf(
+                \Safe\sprintf(
                     'This Job #%s is not internal, so you cannot call the method Job::getProcessedJobId().',
                     $this->getId()
                 )
@@ -772,7 +772,7 @@ class Job
         // Is being retried
         if ($this->isStatusRetried()) {
             // It has to be flushed at the end
-            $this->cannotBeDetachedBecause = sprintf('is being retried by Job #%s (%s)', $this->getRetriedBy()->getId(), $this->getRetriedBy()->getStatus());
+            $this->cannotBeDetachedBecause = \Safe\sprintf('is being retried by Job #%s (%s)', $this->getRetriedBy()->getId(), $this->getRetriedBy()->getStatus());
 
             return false;
         }
@@ -782,7 +782,7 @@ class Job
             switch ($parentJob->getStatus()) {
                 // Waiting dependencies
                 case self::STATUS_NEW:
-                    $this->cannotBeDetachedBecause = sprintf(
+                    $this->cannotBeDetachedBecause = \Safe\sprintf(
                         'has parent Job #%s@%s that has to be processed (%s)',
                         $parentJob->getId(), $parentJob->getQueue(), $parentJob->getStatus()
                     );
@@ -790,7 +790,7 @@ class Job
                     return false;
                     break;
                 case self::STATUS_RETRIED:
-                    $this->cannotBeDetachedBecause = sprintf(
+                    $this->cannotBeDetachedBecause = \Safe\sprintf(
                         'has parent Job #%s@%s that were retried (%s)',
                         $parentJob->getId(), $parentJob->getQueue(), $parentJob->getStatus()
                     );
@@ -800,14 +800,14 @@ class Job
 
                 // Working dependencies
                 case self::STATUS_PENDING:
-                    $this->cannotBeDetachedBecause = sprintf(
+                    $this->cannotBeDetachedBecause = \Safe\sprintf(
                         'has parent Job #%s@%s that is being processed (%s)',
                         $parentJob->getId(), $parentJob->getQueue(), $parentJob->getStatus()
                     );
 
                     return false;
                 case self::STATUS_RUNNING:
-                    $this->cannotBeDetachedBecause = sprintf(
+                    $this->cannotBeDetachedBecause = \Safe\sprintf(
                         'has parent Job #%s@%s that is running (%s)',
                         $parentJob->getId(), $parentJob->getQueue(), $parentJob->getStatus()
                     );
@@ -836,7 +836,7 @@ class Job
             switch ($parentJob->getStatus()) {
                 // Waiting dependencies
                 case self::STATUS_NEW:
-                    $this->cannotRunReason = sprintf(
+                    $this->cannotRunReason = \Safe\sprintf(
                         'has parent Job #%s@%s that has to be processed (%s)',
                         $parentJob->getId(), $parentJob->getQueue(), $parentJob->getStatus()
                     );
@@ -844,7 +844,7 @@ class Job
                     return false;
                     break;
                 case self::STATUS_RETRIED:
-                    $this->cannotRunReason = sprintf(
+                    $this->cannotRunReason = \Safe\sprintf(
                         'has parent Job #%s@%s that were retried (%s)',
                         $parentJob->getId(), $parentJob->getQueue(), $parentJob->getStatus()
                     );
@@ -854,14 +854,14 @@ class Job
 
                 // Working dependencies
                 case self::STATUS_PENDING:
-                    $this->cannotRunReason = sprintf(
+                    $this->cannotRunReason = \Safe\sprintf(
                         'has parent Job #%s@%s that is being processed (%s)',
                         $parentJob->getId(), $parentJob->getQueue(), $parentJob->getStatus()
                     );
 
                     return false;
                 case self::STATUS_RUNNING:
-                    $this->cannotRunReason = sprintf(
+                    $this->cannotRunReason = \Safe\sprintf(
                         'has parent Job #%s@%s that is running (%s)',
                         $parentJob->getId(), $parentJob->getQueue(), $parentJob->getStatus()
                     );

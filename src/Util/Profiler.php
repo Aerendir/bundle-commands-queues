@@ -97,7 +97,7 @@ class Profiler
             $managedEntities[] = '<success-nobg>#' . $job->getId() . '</success-nobg> (' . $job->getStatus() . ') [Em: ' . JobsManager::guessJobEmState($job) . ']';
         }
 
-        asort($managedEntities);
+        \Safe\asort($managedEntities);
 
         return implode(', ', $managedEntities);
     }
@@ -119,13 +119,13 @@ class Profiler
     {
         if (self::$ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
             $count   = isset(self::$uow->getIdentityMap()[Job::class]) ? count(self::$uow->getIdentityMap()[Job::class]) : 0;
-            $message = sprintf(
+            $message = \Safe\sprintf(
                 'Currently there are <success-nobg>%s</success-nobg> Jobs managed <comment-nobg>(%s of %s)</comment-nobg>',
                 $count, Helper::formatMemory(memory_get_usage(false)), Helper::formatMemory(memory_get_usage(true))
             );
 
             if (null !== $where) {
-                $message = sprintf('[%s] %s', $where, $message);
+                $message = \Safe\sprintf('[%s] %s', $where, $message);
             }
 
             self::$ioWriter->noteLineNoBg($message);
@@ -215,14 +215,14 @@ class Profiler
             [
                 // If the difference is negative, then this is an increase in memory consumption
                 $memoryDifferenceReal >= 0
-                    ? sprintf('<%s>%s</>', 'success-nobg', "\xE2\x9C\x94")
-                    : sprintf('<%s>%s</>', 'error-nobg', "\xE2\x9C\x96"), 'Allocated Memory',
+                    ? \Safe\sprintf('<%s>%s</>', 'success-nobg', "\xE2\x9C\x94")
+                    : \Safe\sprintf('<%s>%s</>', 'error-nobg', "\xE2\x9C\x96"), 'Allocated Memory',
                 Helper::formatMemory($this->lastMemoryUsageReal) . ' => ' . Helper::formatMemory($currentMemoryUsageReal) . ' (' . ($memoryDifferenceReal <= 0 ? '+' : '-') . abs($memoryDifferenceReal) . '%)',
             ],
             [
                 $memoryPeakDifferenceReal >= 0
-                    ? sprintf('<%s>%s</>', 'success-nobg', "\xE2\x9C\x94")
-                    : sprintf('<%s>%s</>', 'error-nobg', "\xE2\x9C\x96"),
+                    ? \Safe\sprintf('<%s>%s</>', 'success-nobg', "\xE2\x9C\x94")
+                    : \Safe\sprintf('<%s>%s</>', 'error-nobg', "\xE2\x9C\x96"),
                 'Allocated Memory Peak',
                 Helper::formatMemory($this->highestMemoryPeakReal) . ' => ' . Helper::formatMemory($currentMemoryPeakReal) . ' (' . ($memoryPeakDifferenceReal <= 0 ? '+' : '-') . abs($memoryPeakDifferenceReal) . '%)',
             ],
@@ -230,15 +230,15 @@ class Profiler
             ['', '<success-nobg>Memory info (memory_get_*(false))</success-nobg>'],
             [
                 $memoryDifference >= 0
-                    ? sprintf('<%s>%s</>', 'success-nobg', "\xE2\x9C\x94")
-                    : sprintf('<%s>%s</>', 'error-nobg', "\xE2\x9C\x96"),
+                    ? \Safe\sprintf('<%s>%s</>', 'success-nobg', "\xE2\x9C\x94")
+                    : \Safe\sprintf('<%s>%s</>', 'error-nobg', "\xE2\x9C\x96"),
                 'Memory Actually Used',
                 Helper::formatMemory($this->lastMemoryUsage) . ' => ' . Helper::formatMemory($currentMemoryUsage) . ' (' . ($memoryDifference <= 0 ? '+' : '-') . abs($memoryDifference) . '%)',
             ],
             [
                 $memoryPeakDifference >= 0
-                    ? sprintf('<%s>%s</>', 'success-nobg', "\xE2\x9C\x94")
-                    : sprintf('<%s>%s</>', 'error-nobg', "\xE2\x9C\x96"),
+                    ? \Safe\sprintf('<%s>%s</>', 'success-nobg', "\xE2\x9C\x94")
+                    : \Safe\sprintf('<%s>%s</>', 'error-nobg', "\xE2\x9C\x96"),
                 'Memory Actual Peak',
                 Helper::formatMemory($this->highestMemoryPeak) . ' => ' . Helper::formatMemory($currentMemoryPeak) . ' (' . ($memoryPeakDifference <= 0 ? '+' : '-') . abs($memoryPeakDifference) . '%)',
             ],
@@ -246,15 +246,15 @@ class Profiler
             ['', '<success-nobg>UnitOfWork info</success-nobg>'],
             [
                 $uowSizeDifference >= 0
-                    ? sprintf('<%s>%s</>', 'success-nobg', "\xE2\x9C\x94")
-                    : sprintf('<%s>%s</>', 'error-nobg', "\xE2\x9C\x96"),
+                    ? \Safe\sprintf('<%s>%s</>', 'success-nobg', "\xE2\x9C\x94")
+                    : \Safe\sprintf('<%s>%s</>', 'error-nobg', "\xE2\x9C\x96"),
                 'Uow size',
                 $this->lastUowSize . ' => ' . $currentUowSize . ' (' . ($uowSizeDifference <= 0 ? '+' : '-') . abs($uowSizeDifference) . '%)',
             ],
             [
                 $uowHighestSizeDifference >= 0
-                    ? sprintf('<%s>%s</>', 'success-nobg', "\xE2\x9C\x94")
-                    : sprintf('<%s>%s</>', 'error-nobg', "\xE2\x9C\x96"),
+                    ? \Safe\sprintf('<%s>%s</>', 'success-nobg', "\xE2\x9C\x94")
+                    : \Safe\sprintf('<%s>%s</>', 'error-nobg', "\xE2\x9C\x96"),
                 'Uow peak size',
                 $this->highestUowSize . ' => ' . $currentHighestUowSize . ' (' . ($uowHighestSizeDifference <= 0 ? '+' : '-') . abs($uowHighestSizeDifference) . '%)',
             ],
@@ -271,16 +271,16 @@ class Profiler
         if ($this->isMemprofEnabled()) {
             // Create the directory if it doesn't exist
             if (false === file_exists('app/logs/callgrind')) {
-                mkdir('app/logs/callgrind', 0777, true);
+                \Safe\mkdir('app/logs/callgrind', 0777, true);
             }
-            $callgrind = fopen(
-                sprintf(
+            $callgrind = \Safe\fopen(
+                \Safe\sprintf(
                     'app/logs/callgrind/callgrind.out.%s.%s.%s',
                     (new \DateTime())->format('Y-m-d'), $this->pid, $this->getCurrentIteration()
                 ), 'w');
             memprof_dump_callgrind($callgrind);
-            fwrite($callgrind, stream_get_contents($callgrind));
-            fclose($callgrind);
+            \Safe\fwrite($callgrind, \Safe\stream_get_contents($callgrind));
+            \Safe\fclose($callgrind);
         }
 
         return $this->profilingInfo;

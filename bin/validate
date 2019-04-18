@@ -9,6 +9,7 @@ vendor/bin/rector process src --level framework-extra-bundle-50 --dry-run &&
 vendor/bin/rector process src --level php71 --dry-run &&
 vendor/bin/rector process src --level phpstan --dry-run &&
 vendor/bin/rector process src --level symfony42 --dry-run &&
+vendor/bin/rector process src --config vendor/thecodingmachine/safe/rector-migrate.yml --dry-run &&
 vendor/bin/php-cs-fixer fix --allow-risky yes --dry-run -v &&
 vendor/bin/phpstan analyse src -c phpstan.neon --level max &&
 vendor/bin/phan --progress-bar &&

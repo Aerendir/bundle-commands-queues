@@ -75,7 +75,7 @@ class TestRandomJobsCommand extends AbstractQueuesCommand
         $noFutureJobs    = $input->getOption('no-future-jobs');
 
         $this->getIoWriter()->title('SerendipityHQ Queue Bundle Daemon');
-        $this->getIoWriter()->info(sprintf('Starting generating %s random jobs...', $howManyJobs));
+        $this->getIoWriter()->info(\Safe\sprintf('Starting generating %s random jobs...', $howManyJobs));
 
         // Generate the random jobs
         $progress = ProgressBar::createProgressBar(ProgressBar::FORMAT_CREATE_JOBS, $output, $howManyJobs);
@@ -138,7 +138,7 @@ class TestRandomJobsCommand extends AbstractQueuesCommand
         $progress->finish();
 
         $this->getIoWriter()->write("\n\n");
-        $this->getIoWriter()->success(sprintf('All done: %s random jobs generated!', $howManyJobs));
+        $this->getIoWriter()->success(\Safe\sprintf('All done: %s random jobs generated!', $howManyJobs));
 
         return 0;
     }

@@ -47,7 +47,7 @@ class SHQCommandsQueuesExtension extends Extension
         $loader->load('services.yml');
 
         // load db_driver container configuration
-        $loader->load(sprintf('%s.yml', $config['db_driver']));
+        $loader->load(\Safe\sprintf('%s.yml', $config['db_driver']));
 
         // The Jobs Manager
         $jobsManagerDefinition = (new Definition(JobsManager::class, [

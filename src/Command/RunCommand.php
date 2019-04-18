@@ -129,14 +129,14 @@ class RunCommand extends Command
                 $jobsToLoad = $this->daemon->getJobsToLoad($queueName);
                 if (0 < $jobsToLoad) {
                     if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
-                        $this->ioWriter->infoLineNoBg(sprintf('Trying to initialize <success-nobg>%s</success-nobg> new Jobs for queue <success-nobg>%s</success-nobg>...', $jobsToLoad, $queueName));
+                        $this->ioWriter->infoLineNoBg(\Safe\sprintf('Trying to initialize <success-nobg>%s</success-nobg> new Jobs for queue <success-nobg>%s</success-nobg>...', $jobsToLoad, $queueName));
                         $initializingJobs = ProgressBar::createProgressBar(ProgressBar::FORMAT_INITIALIZING_JOBS, $output, $jobsToLoad);
                     }
                     for ($i = 0; $i < $jobsToLoad; ++$i) {
                         // Start processing the next Job in the queue
                         if (false === $this->daemon->processNextJob($queueName)) {
                             if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
-                                $this->ioWriter->infoLineNoBg(sprintf('Queue <success-nobg>%s</success-nobg> is empty: no more Jobs to initialize.', $queueName));
+                                $this->ioWriter->infoLineNoBg(\Safe\sprintf('Queue <success-nobg>%s</success-nobg> is empty: no more Jobs to initialize.', $queueName));
                             }
                             // The next Job is null: exit this queue and pass to the next one
                             break;
@@ -181,7 +181,7 @@ class RunCommand extends Command
             // If the daemon can sleep, make it sleep
             if ($this->daemon->canSleep()) {
                 if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
-                    $this->ioWriter->infoLineNoBg(sprintf(
+                    $this->ioWriter->infoLineNoBg(\Safe\sprintf(
                         'No Jobs to process. Idling for <success-nobg>%s seconds<success-nobg>...', $this->daemon->getConfig()->getIdleTime()
                     ));
                 }
@@ -242,7 +242,7 @@ class RunCommand extends Command
             return;
         }
 
-        $this->ioWriter->infoLineNoBg(sprintf('Found <success-nobg>%s</success-nobg> struggler Daemon(s).', count($strugglers)));
+        $this->ioWriter->infoLineNoBg(\Safe\sprintf('Found <success-nobg>%s</success-nobg> struggler Daemon(s).', count($strugglers)));
         $this->ioWriter->commentLineNoBg('Their "diedOn" date is set to NOW and mortisCausa is "struggler".');
 
         $table = [];
@@ -250,7 +250,7 @@ class RunCommand extends Command
         foreach ($strugglers as $strugglerDaemon) {
             $age     = $strugglerDaemon->getDiedOn()->diff($strugglerDaemon->getBornOn());
             $table[] = [
-                sprintf('<%s>%s</>', 'success-nobg', "\xE2\x9C\x94"),
+                \Safe\sprintf('<%s>%s</>', 'success-nobg', "\xE2\x9C\x94"),
                 $strugglerDaemon->getPid(),
                 $strugglerDaemon->getHost(),
                 $strugglerDaemon->getBornOn()->format('Y-m-d H:i:s'),
@@ -277,7 +277,7 @@ class RunCommand extends Command
     private function isDaemonStillRunning(Daemon $daemon): bool
     {
         // Get the running processes with the Daemon's PID
-        exec(sprintf('ps -ef | grep %s', $daemon->getPid()), $lines);
+        exec(\Safe\sprintf('ps -ef | grep %s', $daemon->getPid()), $lines);
 
         // Search the line with this command name: this indicates the process is still running
         foreach ($lines as $line) {
@@ -296,7 +296,7 @@ class RunCommand extends Command
     {
         $currentlyRunningProgress = null;
         if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
-            $this->ioWriter->infoLineNoBg(sprintf(
+            $this->ioWriter->infoLineNoBg(\Safe\sprintf(
                 'Checking <success-nobg>%s</success-nobg> running jobs on queue "%s"...',
                 $this->daemon->countRunningJobs($queueName), $queueName
             ));

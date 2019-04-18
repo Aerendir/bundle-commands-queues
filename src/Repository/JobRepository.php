@@ -76,7 +76,7 @@ class JobRepository extends EntityRepository
                 $this->getEntityManager()->refresh($job);
 
                 if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
-                    $this->ioWriter->infoLineNoBg(sprintf('Job <success-nobg>#%s</success-nobg> ready to run.', $job->getId()));
+                    $this->ioWriter->infoLineNoBg(\Safe\sprintf('Job <success-nobg>#%s</success-nobg> ready to run.', $job->getId()));
                 }
 
                 // ... Return it
@@ -84,7 +84,7 @@ class JobRepository extends EntityRepository
             }
 
             if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
-                $this->ioWriter->infoLineNoBg(sprintf('Job <success-nobg>#%s</success-nobg> cannot run because <success-nobg>%s</success-nobg>.', $job->getId(), $job->getCannotRunReason()));
+                $this->ioWriter->infoLineNoBg(\Safe\sprintf('Job <success-nobg>#%s</success-nobg> cannot run because <success-nobg>%s</success-nobg>.', $job->getId(), $job->getCannotRunReason()));
             }
 
             // The Job cannot be run

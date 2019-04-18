@@ -77,8 +77,8 @@ class FakeCommand extends \Symfony\Component\Console\Command\Command
 
         // Emulate a duration to execute the command
         $rand = rand(0, 10);
-        $output->writeln(sprintf("I'm so tired... I will sleep for %s seconds... Good bye, see you soon! :)", $rand));
-        sleep($rand);
+        $output->writeln(\Safe\sprintf("I'm so tired... I will sleep for %s seconds... Good bye, see you soon! :)", $rand));
+        \Safe\sleep($rand);
 
         // Ok, all gone well (fingers crossed? :P )
         $output->writeln('Hello! I just woke up! :) ... Finito.');
