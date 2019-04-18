@@ -44,7 +44,7 @@ class QueuesController extends AbstractController
     {
         $jobs = $this->getDoctrine()->getRepository('SHQCommandsQueuesBundle:Daemon')->findAll();
 
-        return $this->render('Bundle:Queues:index.html.twig', [
+        return $this->render('SHQCommandsQueuesBundle:Queues:index.html.twig', [
             'daemons' => $jobs,
         ]);
     }
@@ -62,8 +62,8 @@ class QueuesController extends AbstractController
         $em = $this->getDoctrine()->getManagerForClass('SHQCommandsQueuesBundle:Job');
         $qb = $em->createQueryBuilder();
         $qb->select('j')->from('SHQCommandsQueuesBundle:Job', 'j')
-            ->orderBy('j.priority', 'ASC')
-            ->addOrderBy('j.executeAfterTime', 'DESC');
+           ->orderBy('j.priority', 'ASC')
+           ->addOrderBy('j.executeAfterTime', 'DESC');
 
         $status = $request->query->get('status', null);
         if (null !== $status) {
@@ -86,7 +86,7 @@ class QueuesController extends AbstractController
             return $router->generate('queues_jobs', $params);
         };
 
-        return $this->render('Bundle:Queues:jobs.html.twig', [
+        return $this->render('SHQCommandsQueuesBundle:Queues:jobs.html.twig', [
             'jobPager'          => $pager,
             'jobPagerView'      => $pagerView,
             'jobPagerGenerator' => $routeGenerator,
@@ -107,7 +107,7 @@ class QueuesController extends AbstractController
      */
     public function jobAction(Job $job): Response
     {
-        return $this->render('Bundle:Queues:job.html.twig', [
+        return $this->render('SHQCommandsQueuesBundle:Queues:job.html.twig', [
             'job' => $job,
         ]);
     }
