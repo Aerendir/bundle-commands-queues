@@ -58,8 +58,8 @@ class QueuesController extends AbstractController
     public function __construct(EntityManagerInterface $entityManager, KernelInterface $kernel, RouterInterface $router)
     {
         $this->entityManager = $entityManager;
-        $this->kernel = $kernel;
-        $this->router = $router;
+        $this->kernel        = $kernel;
+        $this->router        = $router;
     }
 
     /**

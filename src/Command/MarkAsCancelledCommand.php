@@ -47,7 +47,10 @@ class MarkAsCancelledCommand extends AbstractQueuesCommand
     public function __construct(EntityManagerInterface $doNotUseEntityManager, JobsMarker $doNotUseJobsMarker)
     {
         parent::__construct($doNotUseEntityManager, $doNotUseJobsMarker);
-        $this->jobsRepo = $this->getEntityManager()->getRepository(Job::class);
+
+        /** @var JobRepository $jobsRepo */
+        $jobsRepo       = $this->getEntityManager()->getRepository(Job::class);
+        $this->jobsRepo = $jobsRepo;
     }
 
     /**
