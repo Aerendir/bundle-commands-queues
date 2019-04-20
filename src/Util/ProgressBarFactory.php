@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the SHQCommandsQueuesBundle.
  *
@@ -19,13 +21,25 @@ use Symfony\Component\Console\Helper\Helper;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * Creates a ProgressBar to display Jobs processing advancing.
+ * Creates a ProgressBarFactory to display Jobs processing advancing.
  */
-class ProgressBar
+class ProgressBarFactory
 {
+    /**
+     * @var string
+     */
     const FORMAT_CREATE_JOBS          = '<success-nobg>%current%</success-nobg>/%max% [%bar%] %percent:3s%% %elapsed:6s%/%estimated:-6s% (%memory_nr:6s% of %memory:6s%)';
+    /**
+     * @var string
+     */
     const FORMAT_INITIALIZING_JOBS    = '<info-nobg>[>] Job <success-nobg>%current%</success-nobg>/%max% initialized (%percent:3s%% )</info-nobg><comment-nobg> %elapsed:6s%/%estimated:-6s% (%memory_nr:6s% of %memory:6s%)</comment-nobg>';
+    /**
+     * @var string
+     */
     const FORMAT_PROCESS_RUNNING_JOBS = '<info-nobg>[>] Processing job <success-nobg>%current%</success-nobg>/%max% (%percent:3s%% )</info-nobg><comment-nobg> %elapsed:6s%/%estimated:-6s% (%memory_nr:6s% of %memory:6s%)</comment-nobg>';
+    /**
+     * @var string
+     */
     const FORMAT_PROCESS_STALE_JOBS   = '<info-nobg>[>] Processing job <success-nobg>%current%</success-nobg>/%max% (%percent%%)</info-nobg><comment-nobg> %elapsed:6s%/%estimated:-6s%  (%memory_nr:6s% of %memory:6s%)</comment-nobg>';
 
     /**
@@ -35,7 +49,7 @@ class ProgressBar
      *
      * @return \Symfony\Component\Console\Helper\ProgressBar
      */
-    public static function createProgressBar(string $format, OutputInterface $output, int $howManyJobs = 0)
+    public static function createProgressBar(string $format, OutputInterface $output, int $howManyJobs = 0): \Symfony\Component\Console\Helper\ProgressBar
     {
         \Symfony\Component\Console\Helper\ProgressBar::setPlaceholderFormatterDefinition(
             'memory_nr',

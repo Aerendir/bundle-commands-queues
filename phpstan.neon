@@ -2,3 +2,14 @@ parameters:
     level: max
     paths:
         - src
+    includes:
+        - vendor/thecodingmachine/phpstan-safe-rule/phpstan-safe-rule.neon
+    excludes_analyse:
+        - %rootDir%/../../../src/DependencyInjection/Configuration.php
+    ignoreErrors:
+        -
+            message: '#Function memprof_dump_callgrind not found.#'
+            path: %currentWorkingDirectory%/src/Util/Profiler
+        -
+            message: '#Function memprof_enable not found.#'
+            path: %currentWorkingDirectory%/src/Util/Profiler

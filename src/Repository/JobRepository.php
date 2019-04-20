@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the SHQCommandsQueuesBundle.
  *
@@ -15,9 +17,14 @@
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Repository;
 
+use DateTime;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\ORMException;
 use Doctrine\ORM\QueryBuilder;
+use RuntimeException;
+use Safe\Exceptions\StringsException;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Service\JobsManager;
 use SerendipityHQ\Bundle\ConsoleStyles\Console\Style\SerendipityHQStyle;
@@ -38,7 +45,7 @@ class JobRepository extends EntityRepository
      * @param array              $config
      * @param SerendipityHQStyle $ioWriter
      */
-    public function configure(array $config, SerendipityHQStyle $ioWriter)
+    public function configure(array $config, SerendipityHQStyle $ioWriter): void
     {
         $this->config   = $config;
         $this->ioWriter = $ioWriter;
@@ -47,11 +54,16 @@ class JobRepository extends EntityRepository
     /**
      * @param int $id
      *
-     * @return Job|object|null
+     * @return Job|null
      */
-    public function findOneById(int $id)
+    public function findOneById(int $id): ?Job
     {
-        return parent::findOneBy(['id' => $id]);
+        $job = $this->findOneBy(['id' => $id]);
+        if (null !== $job && ! $job instanceof Job) {
+            throw new RuntimeException('The returned result is not null and is not a Job: this is not possible, investigate further.');
+        }
+
+        return $job;
     }
 
     /**
@@ -62,9 +74,12 @@ class JobRepository extends EntityRepository
      *
      * @param string $queueName
      *
+     * @throws StringsException
+     * @throws ORMException
+     *
      * @return Job|null
      */
-    public function findNextRunnableJob(string $queueName)
+    public function findNextRunnableJob(string $queueName): ? Job
     {
         // Collects the Jobs that have to be excluded from the next findNextJob() call
         $excludedJobs = [];
@@ -76,7 +91,7 @@ class JobRepository extends EntityRepository
                 $this->getEntityManager()->refresh($job);
 
                 if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
-                    $this->ioWriter->infoLineNoBg(sprintf('Job <success-nobg>#%s</success-nobg> ready to run.', $job->getId()));
+                    $this->ioWriter->infoLineNoBg(\Safe\sprintf('Job <success-nobg>#%s</success-nobg> ready to run.', $job->getId()));
                 }
 
                 // ... Return it
@@ -84,7 +99,7 @@ class JobRepository extends EntityRepository
             }
 
             if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
-                $this->ioWriter->infoLineNoBg(sprintf('Job <success-nobg>#%s</success-nobg> cannot run because <success-nobg>%s</success-nobg>.', $job->getId(), $job->getCannotRunReason()));
+                $this->ioWriter->infoLineNoBg(\Safe\sprintf('Job <success-nobg>#%s</success-nobg> cannot run because <success-nobg>%s</success-nobg>.', $job->getId(), $job->getCannotRunReason()));
             }
 
             // The Job cannot be run
@@ -93,29 +108,33 @@ class JobRepository extends EntityRepository
             // Remove it from the Entity Manager to free some memory
             JobsManager::detach($job);
         }
+
+        return null;
     }
 
     /**
+     * @throws NonUniqueResultException
+     *
      * @return int
      */
-    public function countStaleJobs()
+    public function countStaleJobs(): int
     {
         $queryBuilder = $this->getEntityManager()->createQueryBuilder();
 
         $queryBuilder->select('COUNT(j)')->from('SHQCommandsQueuesBundle:Job', 'j')
-            ->where(
-                $queryBuilder->expr()->orX(
-                    $queryBuilder->expr()->eq('j.status', ':running'),
-                    $queryBuilder->expr()->eq('j.status', ':pending')
-                )
-            )
-            ->setParameter('running', Job::STATUS_PENDING)->setParameter('pending', Job::STATUS_RUNNING);
+                     ->where(
+                         $queryBuilder->expr()->orX(
+                             $queryBuilder->expr()->eq('j.status', ':running'),
+                             $queryBuilder->expr()->eq('j.status', ':pending')
+                         )
+                     )
+                     ->setParameter('running', Job::STATUS_PENDING)->setParameter('pending', Job::STATUS_RUNNING);
 
         // Configure the queues to include or to exclude
         $this->configureQueues($queryBuilder);
 
         return (int) $queryBuilder->getQuery()
-            ->getOneOrNullResult()['1'];
+                                  ->getOneOrNullResult()['1'];
     }
 
     /**
@@ -125,18 +144,20 @@ class JobRepository extends EntityRepository
      * @param array  $arguments
      * @param string $queue
      *
+     * @throws NonUniqueResultException
+     *
      * @return Job|null
      */
-    public function exists(string $command, $arguments = [], string $queue = 'default')
+    public function exists(string $command, array $arguments = [], string $queue = 'default'): ?Job
     {
         $queryBuilder = $this->getEntityManager()->createQueryBuilder();
 
         $queryBuilder->select('j')->from('SHQCommandsQueuesBundle:Job', 'j')
-            ->where($queryBuilder->expr()->eq('j.command', ':command'))
-            ->setParameter('command', $command)
-            ->andWhere($queryBuilder->expr()->eq('j.queue', ':queue'))
-            ->setParameter('queue', $queue)
-            ->andWhere($queryBuilder->expr()->isNull('j.startedAt'));
+                     ->where($queryBuilder->expr()->eq('j.command', ':command'))
+                     ->setParameter('command', $command)
+                     ->andWhere($queryBuilder->expr()->eq('j.queue', ':queue'))
+                     ->setParameter('queue', $queue)
+                     ->andWhere($queryBuilder->expr()->isNull('j.startedAt'));
 
         foreach ($arguments as $argument) {
             $queryBuilder->andWhere($queryBuilder->expr()->like('j.arguments', $queryBuilder->expr()->literal('%' . $argument . '%')));
@@ -148,20 +169,22 @@ class JobRepository extends EntityRepository
     /**
      * @param array $knownAsStale
      *
-     * @return Job
+     * @throws NonUniqueResultException
+     *
+     * @return Job|null
      */
-    public function findNextStaleJob(array $knownAsStale)
+    public function findNextStaleJob(array $knownAsStale): ? Job
     {
         $queryBuilder = $this->getEntityManager()->createQueryBuilder();
         $queryBuilder->select('j')->from('SHQCommandsQueuesBundle:Job', 'j')
             // The status MUST be NEW (just inserted) or PENDING (waiting for the process to start)
-            ->where(
+                     ->where(
                 $queryBuilder->expr()->orX(
                     $queryBuilder->expr()->eq('j.status', ':running'),
                     $queryBuilder->expr()->eq('j.status', ':pending')
                 )
             )
-            ->setParameter('running', Job::STATUS_PENDING)->setParameter('pending', Job::STATUS_RUNNING);
+                     ->setParameter('running', Job::STATUS_PENDING)->setParameter('pending', Job::STATUS_RUNNING);
 
         // If there are already known stale Jobs...
         if (false === empty($knownAsStale)) {
@@ -182,25 +205,27 @@ class JobRepository extends EntityRepository
      * @param string $queueName
      * @param array  $excludedJobs The Jobs that have to be excluded from the SELECT
      *
+     * @throws NonUniqueResultException
+     *
      * @return Job|null
      */
-    private function findNextJob(string $queueName, array $excludedJobs = [])
+    private function findNextJob(string $queueName, array $excludedJobs = []): ?Job
     {
         $queryBuilder = $this->getEntityManager()->createQueryBuilder();
         $queryBuilder->select('j')->from('SHQCommandsQueuesBundle:Job', 'j')
-            ->orderBy('j.priority', 'ASC')
-            ->addOrderBy('j.createdAt', 'ASC')
-            ->addOrderBy('j.id', 'ASC')
+                     ->orderBy('j.priority', 'ASC')
+                     ->addOrderBy('j.createdAt', 'ASC')
+                     ->addOrderBy('j.id', 'ASC')
             // The status MUST be NEW
-            ->where($queryBuilder->expr()->eq('j.status', ':status'))->setParameter('status', Job::STATUS_NEW)
+                     ->where($queryBuilder->expr()->eq('j.status', ':status'))->setParameter('status', Job::STATUS_NEW)
             // It hasn't an executeAfterTime set or the set time is in the past
-            ->andWhere(
+                     ->andWhere(
                 $queryBuilder->expr()->orX(
                     $queryBuilder->expr()->isNull('j.executeAfterTime'),
                     $queryBuilder->expr()->lt('j.executeAfterTime', ':now')
                 )
-            )->setParameter('now', new \DateTime(), 'datetime')
-            ->andWhere($queryBuilder->expr()->eq('j.queue', ':queue'))->setParameter('queue', $queueName);
+            )->setParameter('now', new DateTime(), 'datetime')
+                     ->andWhere($queryBuilder->expr()->eq('j.queue', ':queue'))->setParameter('queue', $queueName);
 
         // If there are excluded Jobs...
         if (false === empty($excludedJobs)) {
@@ -220,12 +245,12 @@ class JobRepository extends EntityRepository
      *
      * @param QueryBuilder $queryBuilder
      */
-    private function configureQueues(QueryBuilder $queryBuilder)
+    private function configureQueues(QueryBuilder $queryBuilder): void
     {
         // Set the queues to include
         if (isset($this->config['included_queues'])) {
             $queryBuilder->andWhere($queryBuilder->expr()->in('j.queue', ':includedQueues'))
-                ->setParameter('includedQueues', $this->config['included_queues'], Connection::PARAM_STR_ARRAY);
+                         ->setParameter('includedQueues', $this->config['included_queues'], Connection::PARAM_STR_ARRAY);
         }
     }
 }

@@ -42,6 +42,7 @@ return PhpCsFixer\Config::create()
         'array_syntax' => ['syntax' => 'short'],
         'blank_line_before_return' => true,
         'combine_consecutive_unsets' => true,
+        'declare_strict_types' => true,
         'linebreak_after_opening_tag' => true,
         'list_syntax' => ['syntax' => 'short'],
         'no_multiline_whitespace_before_semicolons' => true,

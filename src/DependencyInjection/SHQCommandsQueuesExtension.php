@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the SHQCommandsQueuesBundle.
  *
@@ -15,6 +17,8 @@
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\DependencyInjection;
 
+use Exception;
+use Safe\Exceptions\StringsException;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Command\RunCommand;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Config\DaemonConfig;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Service\JobsManager;
@@ -34,8 +38,11 @@ class SHQCommandsQueuesExtension extends Extension
 {
     /**
      * {@inheritdoc}
+     *
+     * @throws StringsException
+     * @throws Exception
      */
-    public function load(array $configs, ContainerBuilder $container)
+    public function load(array $configs, ContainerBuilder $container): void
     {
         $configuration = new Configuration();
         $config        = $this->processConfiguration($configuration, $configs);
@@ -47,7 +54,7 @@ class SHQCommandsQueuesExtension extends Extension
         $loader->load('services.yml');
 
         // load db_driver container configuration
-        $loader->load(sprintf('%s.yml', $config['db_driver']));
+        $loader->load(\Safe\sprintf('%s.yml', $config['db_driver']));
 
         // The Jobs Manager
         $jobsManagerDefinition = (new Definition(JobsManager::class, [
@@ -57,7 +64,7 @@ class SHQCommandsQueuesExtension extends Extension
         // The Jobs Marker
         $jobsMarkerDefinition = (new Definition(JobsMarker::class, [
             $container->findDefinition('shq_commands_queues.do_not_use.entity_manager'),
-        ]));
+        ]))->setPublic(false);
         $container->setDefinition('shq_commands_queues.do_not_use.jobs_marker', $jobsMarkerDefinition);
 
         // The Profiler

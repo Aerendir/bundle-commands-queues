@@ -1,0 +1,5 @@
+parameters:
+    exclude_rectors:
+        - 'Rector\CodeQuality\Rector\Identical\SimplifyBoolIdenticalTrueRector'
+        - 'Rector\CodeQuality\Rector\Concat\JoinStringConcatRector'
+        - 'Rector\CodingStyle\Rector\Identical\IdenticalFalseToBooleanNotRector'

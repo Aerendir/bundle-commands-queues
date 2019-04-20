@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the SHQCommandsQueuesBundle.
  *
@@ -14,6 +16,8 @@
  */
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Config;
+
+use InvalidArgumentException;
 
 /**
  * Manages the configuration of a Daemon.
@@ -67,18 +71,18 @@ class DaemonConfig extends AbstractConfig
      * @param string|null $daemon
      * @param bool        $allowProd
      */
-    public function initialize(?string $daemon, bool $allowProd)
+    public function initialize(?string $daemon, bool $allowProd): void
     {
         if (null === $daemon) {
             if (count($this->daemons) > 1) {
-                throw new \InvalidArgumentException(
+                throw new InvalidArgumentException(
                     'More than one Daemon is configured: you MUST specify the Daemon you want to run using the "--daemon"'
                     . ' argument'
                 );
             }
 
             // Use as Daemon the only one configured
-            $daemon = key($this->daemons);
+            $daemon = (string) key($this->daemons);
         }
 
         $this->name = $daemon;
@@ -95,12 +99,12 @@ class DaemonConfig extends AbstractConfig
         $queues = array_keys($this->queues);
         foreach ($queues as $queue) {
             // Do not unset the default queue
-            if (false === array_search($queue, $this->daemons[$daemon]['queues']) && 'default' !== $queue) {
+            if ('default' !== $queue && false === in_array($queue, $this->daemons[$daemon]['queues'], true)) {
                 unset($this->queues[$queue]);
             }
         }
 
-        $this->daemons = null;
+        $this->daemons = [];
     }
 
     /**
@@ -237,7 +241,7 @@ class DaemonConfig extends AbstractConfig
     /**
      * @param int $aliveDaemonsCheckInterval
      */
-    private function setAliveDaemonsCheckInterval(int $aliveDaemonsCheckInterval)
+    private function setAliveDaemonsCheckInterval(int $aliveDaemonsCheckInterval): void
     {
         $this->aliveDaemonsCheckInterval = $aliveDaemonsCheckInterval;
     }
@@ -245,7 +249,7 @@ class DaemonConfig extends AbstractConfig
     /**
      * @param int $idleTime
      */
-    private function setIdleTime(int $idleTime)
+    private function setIdleTime(int $idleTime): void
     {
         $this->idleTime = $idleTime;
     }
@@ -253,7 +257,7 @@ class DaemonConfig extends AbstractConfig
     /**
      * @param int $managedEntitiesTreshold
      */
-    private function setManagedEntitiesTreshold(int $managedEntitiesTreshold)
+    private function setManagedEntitiesTreshold(int $managedEntitiesTreshold): void
     {
         $this->managedEntitiesTreshold = $managedEntitiesTreshold;
     }
@@ -261,7 +265,7 @@ class DaemonConfig extends AbstractConfig
     /**
      * @param int $maxRuntime
      */
-    private function setMaxRuntime(int $maxRuntime)
+    private function setMaxRuntime(int $maxRuntime): void
     {
         $this->maxRuntime = $maxRuntime;
     }
@@ -269,7 +273,7 @@ class DaemonConfig extends AbstractConfig
     /**
      * @param int $optimizationInterval
      */
-    private function setOptimizationInterval(int $optimizationInterval)
+    private function setOptimizationInterval(int $optimizationInterval): void
     {
         $this->optimizationInterval = $optimizationInterval;
     }
@@ -277,7 +281,7 @@ class DaemonConfig extends AbstractConfig
     /**
      * @param int $printProfilingInfoInterval
      */
-    private function setProfilingInfoInterval(int $printProfilingInfoInterval)
+    private function setProfilingInfoInterval(int $printProfilingInfoInterval): void
     {
         $this->profilingInfoInterval = $printProfilingInfoInterval;
     }
@@ -285,7 +289,7 @@ class DaemonConfig extends AbstractConfig
     /**
      * @param bool $printProfilingInfo
      */
-    private function setPrintProfilingInfo(bool $printProfilingInfo)
+    private function setPrintProfilingInfo(bool $printProfilingInfo): void
     {
         $this->printProfilingInfo = $printProfilingInfo;
     }

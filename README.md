@@ -23,19 +23,7 @@ Requirements
 ------------
 
 1. PHP ^7.1
-
-Status: ACTIVE DEVELOPMENT
---------------------------
-
-This bundle is currently in development mode. We use it in our live projects and so we try to maintain it in good health.
-
-It is as stable as possible. If you, using it, find bugs or scenarios not covered, please, open an issue describing the problem.
-
-All issues are reviewd and fixed.
-
-If you have a feature request, equally, please, open an issue and we will review it and evaluate if it may be implemented.
-
-Thank you for your collaboration.
+2. Symfony ^4
 
 DOCUMENTATION
 =============

@@ -12,24 +12,40 @@
     ],
     "require": {
         "php": "^7.1",
+        "ext-pcntl": "*",
         "doctrine/common": "^2.5",
-        "doctrine/orm": "^2.5",
         "doctrine/doctrine-bundle": "^1.7",
+        "doctrine/orm": "^2.5",
         "pagerfanta/pagerfanta": "^2.0",
-        "sensio/framework-extra-bundle": "^3.0||^5.1",
+        "sensio/framework-extra-bundle": "^5.1",
         "serendipity_hq/console-styles-bundle": "^1.1",
         "serendipity_hq/then-when": "^1.1",
-        "symfony/framework-bundle": "^3.0||^4.0",
-        "symfony/process": "^3.0||^4.0"
+        "symfony/framework-bundle": "^4.0",
+        "symfony/process": "^4.0",
+        "thecodingmachine/safe": "^0.1.15"
     },
     "require-dev": {
-        "phpunit/phpunit": "^6||^7.0",
-        "sensiolabs/security-checker": "^4.1",
-        "symfony/var-dumper": "^3.0||^4.0"
+        "ext-ast": "*",
+        "drenso/phan-extensions": "^2.4",
+        "friendsofphp/php-cs-fixer": "^2",
+        "phan/phan": "^1.3",
+        "phpstan/phpstan": "@stable",
+        "phpstan/phpstan-doctrine": "@stable",
+        "phpstan/phpstan-phpunit": "@stable",
+        "phpstan/phpstan-symfony": "@stable",
+        "phpunit/phpunit": "^6||^7||^8",
+        "rector/rector": "^0.4.11",
+        "roave/security-advisories": "dev-master",
+        "sensiolabs/security-checker": "^5",
+        "symfony/var-dumper": "^4.0",
+        "thecodingmachine/phpstan-safe-rule": "^0.1.3"
     },
     "autoload": {
         "psr-4": {
             "SerendipityHQ\\Bundle\\CommandsQueuesBundle\\": "src"
         }
+    },
+    "config": {
+        "sort-packages": true
     }
 }

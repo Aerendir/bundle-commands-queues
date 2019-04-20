@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the SHQCommandsQueuesBundle.
  *
@@ -35,7 +37,7 @@ class Configuration implements ConfigurationInterface
      *
      * @return array
      */
-    public static function getSupportedDrivers()
+    public static function getSupportedDrivers(): array
     {
         return ['orm'];
     }
@@ -43,10 +45,10 @@ class Configuration implements ConfigurationInterface
     /**
      * {@inheritdoc}
      */
-    public function getConfigTreeBuilder()
+    public function getConfigTreeBuilder(): TreeBuilder
     {
-        $treeBuilder = new TreeBuilder();
-        $rootNode    = $treeBuilder->root('shq_commands_queues');
+        $treeBuilder = new TreeBuilder('shq_commands_queues');
+        $rootNode    = $treeBuilder->getRootNode();
 
         $rootNode
             ->children()
@@ -123,12 +125,12 @@ class Configuration implements ConfigurationInterface
      *
      * @return bool
      */
-    private function validateConfiguration(array $tree)
+    private function validateConfiguration(array $tree): bool
     {
         foreach ($tree['daemons'] as $daemon => $config) {
             // A Daemon MUST HAVE at least one queue assigned
             if (empty($config['queues'])) {
-                throw new InvalidConfigurationException(sprintf(
+                throw new InvalidConfigurationException(\Safe\sprintf(
                     'The "%s" daemon MUST specify at least one queue to process.', $daemon
                 ));
             }
@@ -136,7 +138,7 @@ class Configuration implements ConfigurationInterface
             // Check the queue is not already assigned
             foreach ($config['queues'] as $queue) {
                 if (array_key_exists($queue, $this->foundQueues)) {
-                    throw new InvalidConfigurationException(sprintf(
+                    throw new InvalidConfigurationException(\Safe\sprintf(
                         'Queue "%s" already assigned to daemon "%s". You cannot assign this queue also to daemon "%s".',
                         $queue, $this->foundQueues[$queue], $daemon
                     ));
@@ -156,7 +158,7 @@ class Configuration implements ConfigurationInterface
      *
      * @return array
      */
-    private function prepareConfiguration(array $tree)
+    private function prepareConfiguration(array $tree): array
     {
         // Create the main configuration array to return
         $returnConfig = [
@@ -180,7 +182,7 @@ class Configuration implements ConfigurationInterface
         }
 
         // Sort queues alphabetically
-        ksort($returnConfig['queues']);
+        \Safe\ksort($returnConfig['queues']);
 
         // Now configure the queues
         foreach ($returnConfig['queues'] as $queue => $config) {
@@ -196,9 +198,9 @@ class Configuration implements ConfigurationInterface
      *
      * @return array
      */
-    private function configureDaemon(array $config, array $tree)
+    private function configureDaemon(array $config, array $tree): array
     {
-        $return = [
+        return [
             // Daemon specific configurations
             'alive_daemons_check_interval' => $config['alive_daemons_check_interval'] ?? $tree['alive_daemons_check_interval'],
             'idle_time'                    => $config['idle_time'] ?? $tree['idle_time'],
@@ -212,8 +214,6 @@ class Configuration implements ConfigurationInterface
             'managed_entities_treshold'   => $config['managed_entities_treshold'] ?? $tree['managed_entities_treshold'],
             'queues'                      => $config['queues'],
         ];
-
-        return $return;
     }
 
     /**
@@ -222,14 +222,12 @@ class Configuration implements ConfigurationInterface
      *
      * @return array
      */
-    private function configureQueue(array $config, array $tree)
+    private function configureQueue(array $config, array $tree): array
     {
-        $return = [
+        return [
             'max_concurrent_jobs'         => $config['max_concurrent_jobs'] ?? $tree['max_concurrent_jobs'],
             'retry_stale_jobs'            => $config['retry_stale_jobs'] ?? $tree['retry_stale_jobs'],
             'running_jobs_check_interval' => $config['running_jobs_check_interval'] ?? $tree['running_jobs_check_interval'],
         ];
-
-        return $return;
     }
 }
