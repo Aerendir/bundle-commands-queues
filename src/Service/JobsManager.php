@@ -161,10 +161,9 @@ class JobsManager
         $jobsTree = self::calculateJobsTree($job);
 
         foreach ($jobsTree as $jobId) {
-            /** @var Job|null $jobInTree */
             $jobInTree = self::$entityManager->find(Job::class, $jobId);
 
-            if (null !== $jobInTree && false === $jobInTree->isStatusWorking()) {
+            if ($jobInTree instanceof Job && false === $jobInTree->isStatusWorking()) {
                 self::$entityManager->refresh($jobInTree);
             }
         }
@@ -184,7 +183,6 @@ class JobsManager
                 'exit_code_text'    => $process->getExitCodeText(),
                 'complete_command'  => $process->getCommandLine(),
                 'input'             => $process->getInput(),
-                'options'           => method_exists($process, 'getOptions') ? $process->getOptions() : 'You are using Symfony 4 and options are not available in this version.',
                 'env'               => $process->getEnv(),
                 'working_directory' => $process->getWorkingDirectory(),
             ],

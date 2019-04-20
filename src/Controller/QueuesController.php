@@ -17,7 +17,7 @@ declare(strict_types=1);
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Controller;
 
-use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Pagerfanta\Adapter\DoctrineORMAdapter;
 use Pagerfanta\Pagerfanta;
@@ -41,6 +41,9 @@ use Symfony\Component\Routing\RouterInterface;
  */
 class QueuesController extends AbstractController
 {
+    /** @var EntityManagerInterface $entityManager */
+    private $entityManager;
+
     /** @var KernelInterface $kernel */
     private $kernel;
 
@@ -48,11 +51,13 @@ class QueuesController extends AbstractController
     private $router;
 
     /**
-     * @param KernelInterface $kernel
-     * @param RouterInterface $router
+     * @param EntityManagerInterface $entityManager
+     * @param KernelInterface        $kernel
+     * @param RouterInterface        $router
      */
-    public function __construct(KernelInterface $kernel, RouterInterface $router)
+    public function __construct(EntityManagerInterface $entityManager, KernelInterface $kernel, RouterInterface $router)
     {
+        $this->entityManager = $entityManager;
         $this->kernel = $kernel;
         $this->router = $router;
     }
@@ -78,10 +83,8 @@ class QueuesController extends AbstractController
      */
     public function jobsAction(Request $request): Response
     {
-        /** @var EntityManager $em */
-        $em = $this->getDoctrine()->getManagerForClass(Job::class);
-        $qb = $em->createQueryBuilder();
-        $qb->select('j')->from('SHQCommandsQueuesBundle:Job', 'j')
+        $qb = $this->entityManager->createQueryBuilder();
+        $qb->select('j')->from(Job::class, 'j')
            ->orderBy('j.priority', 'ASC')
            ->addOrderBy('j.executeAfterTime', 'DESC');
 

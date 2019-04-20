@@ -19,6 +19,7 @@ namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Util;
 
 use DateTime;
 use Doctrine\ORM\UnitOfWork;
+use RuntimeException;
 use Safe\Exceptions\ArrayException;
 use Safe\Exceptions\FilesystemException;
 use Safe\Exceptions\StreamException;
@@ -122,7 +123,7 @@ class Profiler
     }
 
     /**
-     * @param string $where
+     * @param string|null $where
      *
      * @throws ArrayException
      * @throws StringsException
@@ -189,6 +190,8 @@ class Profiler
      * @throws StringsException
      *
      * @return array
+     *
+     * @suppress PhanUndeclaredFunction
      */
     public function profile(): array
     {
@@ -284,7 +287,7 @@ class Profiler
         $this->highestMemoryPeakReal = $this->highestMemoryPeakReal < $currentMemoryPeakReal ? $currentMemoryPeakReal : $this->highestMemoryPeakReal;
         $this->highestUowSize        = $currentHighestUowSize;
 
-        if ($this->isMemprofEnabled()) {
+        if (function_exists('memprof_dump_callgrind') && $this->isMemprofEnabled()) {
             // Create the directory if it doesn't exist
             if (false === file_exists('app/logs/callgrind')) {
                 \Safe\mkdir('app/logs/callgrind', 0777, true);
@@ -406,11 +409,13 @@ class Profiler
 
     /**
      * Enables Memprof if required.
+     *
+     * @suppress PhanUndeclaredFunction
      */
     public function enableMemprof(): bool
     {
         // Intialize php-memprof
-        if (true === extension_loaded('memprof')) {
+        if (function_exists('memprof_enable') && true === extension_loaded('memprof')) {
             memprof_enable();
 
             return $this->memprofEnabled = true;
@@ -429,7 +434,7 @@ class Profiler
         $date = DateTime::createFromFormat('U.u', number_format($time, 6, '.', ''));
 
         if ( ! $date instanceof DateTime) {
-            throw new \RuntimeException('Impossible to parse the string into a valid DateTime object.');
+            throw new RuntimeException('Impossible to parse the string into a valid DateTime object.');
         }
 
         return $date->format('Y-m-d H:i:s.u');

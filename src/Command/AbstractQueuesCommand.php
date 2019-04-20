@@ -17,7 +17,6 @@ declare(strict_types=1);
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Command;
 
-use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\JobsMarker;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\Profiler;

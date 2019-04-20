@@ -17,9 +17,12 @@ declare(strict_types=1);
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Command;
 
+use Doctrine\ORM\EntityManagerInterface;
+use Exception;
 use Safe\Exceptions\StringsException;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Repository\JobRepository;
+use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\JobsMarker;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\JobsUtil;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -34,6 +37,19 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class MarkAsCancelledCommand extends AbstractQueuesCommand
 {
+    /** @var JobRepository $jobsRepo */
+    private $jobsRepo;
+
+    /**
+     * @param EntityManagerInterface $doNotUseEntityManager
+     * @param JobsMarker             $doNotUseJobsMarker
+     */
+    public function __construct(EntityManagerInterface $doNotUseEntityManager, JobsMarker $doNotUseJobsMarker)
+    {
+        parent::__construct($doNotUseEntityManager, $doNotUseJobsMarker);
+        $this->jobsRepo = $this->getEntityManager()->getRepository(Job::class);
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -77,11 +93,8 @@ class MarkAsCancelledCommand extends AbstractQueuesCommand
             return 1;
         }
 
-        /** @var JobRepository $jobRepo */
-        $jobRepo = $this->getEntityManager()->getRepository(Job::class);
-
-        $failedJob     = $jobRepo->findOneById((int) $jobId);
-        $cancellingJob = $jobRepo->findOneById((int) $cancellingJobId);
+        $failedJob     = $this->jobsRepo->findOneById((int) $jobId);
+        $cancellingJob = $this->jobsRepo->findOneById((int) $cancellingJobId);
 
         if (null === $failedJob) {
             $this->getIoWriter()->error('Impossible to find the failed Job.');
@@ -109,6 +122,7 @@ class MarkAsCancelledCommand extends AbstractQueuesCommand
      * @param array  $alreadyCancelledJobs
      *
      * @throws StringsException
+     * @throws Exception
      *
      * @return int
      */

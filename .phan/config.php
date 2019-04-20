@@ -35,7 +35,19 @@ return [
     //       should be added to both the `directory_list`
     //       and `exclude_analysis_directory_list` arrays.
     'exclude_analysis_directory_list' => [
-        'vendor/', 'docs/',
+        'vendor/',
+        'docs/',
+        'src/DependencyInjection/Configuration.php',
+    ],
+
+    // A file list that defines files that will be excluded
+    // from parsing and analysis and will not be read at all.
+    //
+    // This is useful for excluding hopelessly unanalyzable
+    // files that can't be removed for whatever reason.
+    'exclude_file_list' => [
+        // Explicitly exclude until is fixed https://github.com/phan/phan/issues/972
+        'vendor/pagerfanta/pagerfanta/src/Pagerfanta/PagerfantaInterface.php',
     ],
 
     'quick_mode' => false,

@@ -169,7 +169,7 @@ class TestRandomJobsCommand extends AbstractQueuesCommand
             $this->getEntityManager()->persist($scheduledJob);
             $jobs[] = $scheduledJob;
 
-            if (0 === $i % $input->getOption('batch')) {
+            if (0 === $i % $batch) {
                 $this->getEntityManager()->flush();
                 $jobs = [];
                 $this->getEntityManager()->clear();

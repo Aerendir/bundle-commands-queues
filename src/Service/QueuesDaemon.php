@@ -396,7 +396,7 @@ class QueuesDaemon
     }
 
     /**
-     * @param string $queueName
+     * @param string|null $queueName
      *
      * @return bool
      */
@@ -408,7 +408,7 @@ class QueuesDaemon
     /**
      * Returns the number of currently running Jobs.
      *
-     * @param string $queueName
+     * @param string|null $queueName
      *
      * @return int
      */
@@ -432,7 +432,7 @@ class QueuesDaemon
      * Processes the Jobs already running or pending.
      *
      * @param string      $queueName
-     * @param ProgressBar $progressBar
+     * @param ProgressBar|null $progressBar
      *
      * @throws StringsException
      * @throws OptimisticLockException
@@ -706,6 +706,7 @@ class QueuesDaemon
      * @throws StringsException
      * @throws ArrayException
      * @throws ORMException
+     * @throws Exception
      */
     final protected function handleFailedJob(Job $job, Process $process): void
     {
@@ -738,6 +739,7 @@ class QueuesDaemon
      * @param Process $process
      *
      * @throws StringsException
+     * @throws Exception
      */
     final protected function handleSuccessfulJob(Job $job, Process $process): void
     {
@@ -853,9 +855,10 @@ class QueuesDaemon
      * @param array  $info
      * @param string $retryReason
      *
-     * @throws StringsException
-     *
      * @return bool
+     * @throws ArrayException
+     * @throws ORMException
+     * @throws StringsException
      */
     private function retryFailedJob(Job $job, array $info, string $retryReason): bool
     {
@@ -882,6 +885,7 @@ class QueuesDaemon
      * @throws StringsException
      * @throws ArrayException
      * @throws ORMException
+     * @throws Exception
      */
     private function checkStaleJobs(OutputInterface $output): void
     {
@@ -909,9 +913,10 @@ class QueuesDaemon
             $this->ioWriter->infoLineNoBg(\Safe\sprintf('Found <success-nobg>%s</success-nobg> stale Jobs: start processing them.', $staleJobsCount));
         }
 
-        /** @var Job $job */
         $stales = [];
+        /** @var Job $job */
         while (null !== $job = $this->jobsRepo->findNextStaleJob($stales)) {
+            $info = [];
             $stales[] = $job->getId();
 
             if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
@@ -944,9 +949,10 @@ class QueuesDaemon
      * @param array  $info
      * @param string $retryReason
      *
-     * @throws StringsException
-     *
      * @return bool
+     * @throws ArrayException
+     * @throws ORMException
+     * @throws StringsException
      */
     private function retryStaleJob(Job $job, array $info, string $retryReason): bool
     {

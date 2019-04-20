@@ -671,7 +671,7 @@ class Job
     }
 
     /**
-     * @return Collection|Job[]
+     * @return Collection
      */
     public function getChildDependencies(): Collection
     {
