@@ -30,7 +30,6 @@ before_install:
 
 install:
     - composer update ${COMPOSER_FLAGS} --prefer-dist --prefer-stable
-    - cat vendor/thecodingmachine/safe/rector-migrate.yml
 
 script:
     - if [[ $FULL_CHECK == true ]]; then bin/validate; fi
