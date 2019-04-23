@@ -1,0 +1,5 @@
+#!/usr/bin/env sh
+
+vendor/bin/phpstan analyse src -c phpstan.neon --level max &&
+vendor/bin/phan --progress-bar &&
+vendor/bin/security-checker security:check
