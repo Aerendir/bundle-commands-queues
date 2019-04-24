@@ -69,58 +69,58 @@ file that was distributed with this source code.
                     {% set retryingJobs = {} %}
                     {% for retryingJob in object.retryingJobs %}
                         {% set status = '' %}
-                        {% if 'running' == retryingobject.status %}
+                        {% if 'running' == retryingJob.status %}
                             {% set status = 'active' %}
                         {% endif %}
-                        {% if 'retried' == retryingobject.status %}
+                        {% if 'retried' == retryingJob.status %}
                             {% set status = 'warning' %}
                         {% endif %}
-                        {% if 'failed' == retryingobject.status or 'retry_failed' == retryingobject.status %}
+                        {% if 'failed' == retryingJob.status or 'retry_failed' == retryingJob.status %}
                             {% set status = 'danger' %}
                         {% endif %}
-                        {% if 'succeeded' == retryingobject.status or 'retry_succeeded' == retryingobject.status %}
+                        {% if 'succeeded' == retryingJob.status or 'retry_succeeded' == retryingJob.status %}
                             {% set status = 'success' %}
                         {% endif %}
-                        {% if 'cancelled' == retryingobject.status %}
+                        {% if 'cancelled' == retryingJob.status %}
                             {% set status = 'danger' %}
                         {% endif %}
-                        {% if 'pending' == retryingobject.status or 'running' == retryingobject.status %}
+                        {% if 'pending' == retryingJob.status or 'running' == retryingJob.status %}
                             {% set status = 'info' %}
                         {% endif %}
-                        {% if 'new' == retryingobject.status %}
+                        {% if 'new' == retryingJob.status %}
                             {% set status = 'default' %}
                         {% endif %}
-                        {% set linkedretryingJob = '<code style="white-space:nowrap;padding: 5px;"><a href="' ~ path('queues_job', {'id': retryingobject.id}) ~ '">#' ~ retryingobject.id ~ '</a> (' ~ retryingobject.priority ~ ') <span class="label label-' ~ status ~ '">' ~ retryingobject.status %}
+                        {% set linkedretryingJob = '<code style="white-space:nowrap;padding: 5px;"><a href="' ~ path('queues_job', {'id': retryingJob.id}) ~ '">#' ~ retryingJob.id ~ '</a> (' ~ retryingJob.priority ~ ') <span class="label label-' ~ status ~ '">' ~ retryingJob.status %}
                         {% if object.exitCode %}
                             {% set linkedretryingJob = linkedretryingJob ~ ' [' ~ object.retriedBy.exitCode ~ ']' %}
                         {% endif %}
                         {% set linkedretryingJob = linkedretryingJob ~ '</span></code>' %}
-                        {% set retryingJobs = retryingJobs|merge({ ('_' ~ retryingobject.id ~ '-'): linkedretryingJob}) %}
+                        {% set retryingJobs = retryingJobs|merge({ ('_' ~ retryingJob.id ~ '-'): linkedretryingJob}) %}
                     {% endfor %}
                     <p><small class="text-muted">{{ retryingJobs|join(' ')|raw }}</small></p>
                 {% endif %}
             {% endif %}
             {% if object.firstRetriedJob %}
                 {% set status = '' %}
-                {% if 'running' == object.firstRetriedobject.status %}
+                {% if 'running' == object.firstRetriedJob.status %}
                     {% set status = 'active' %}
                 {% endif %}
-                {% if 'retried' == object.firstRetriedobject.status %}
+                {% if 'retried' == object.firstRetriedJob.status %}
                     {% set status = 'warning' %}
                 {% endif %}
-                {% if 'failed' == object.firstRetriedobject.status or 'retry_failed' == object.firstRetriedobject.status %}
+                {% if 'failed' == object.firstRetriedJob.status or 'retry_failed' == object.firstRetriedJob.status %}
                     {% set status = 'danger' %}
                 {% endif %}
-                {% if 'succeeded' == object.firstRetriedobject.status or 'retry_succeeded' == object.firstRetriedobject.status %}
+                {% if 'succeeded' == object.firstRetriedJob.status or 'retry_succeeded' == object.firstRetriedJob.status %}
                     {% set status = 'success' %}
                 {% endif %}
-                {% if 'cancelled' == object.firstRetriedobject.status %}
+                {% if 'cancelled' == object.firstRetriedJob.status %}
                     {% set status = 'danger' %}
                 {% endif %}
-                {% if 'pending' == object.firstRetriedobject.status or 'running' == object.firstRetriedobject.status %}
+                {% if 'pending' == object.firstRetriedJob.status or 'running' == object.firstRetriedJob.status %}
                     {% set status = 'info' %}
                 {% endif %}
-                <p><small class="text-muted">First retried job <code style="white-space:nowrap;padding: 5px;"><a href="{{ path('queues_job', {'id': object.firstRetriedobject.id}) }}">#{{ object.firstRetriedobject.id }}</a> ({{ object.firstRetriedobject.priority }}) @{{ object.firstRetriedobject.queue }} <span class="label label-{{ status }}">{{ object.firstRetriedobject.status }}{% if object.firstRetriedobject.exitCode %} [{{ object.firstRetriedobject.exitCode}}]{% endif %}</span></code></small></p>
+                <p><small class="text-muted">First retried job <code style="white-space:nowrap;padding: 5px;"><a href="{{ path('queues_job', {'id': object.firstRetriedJob.id}) }}">#{{ object.firstRetriedJob.id }}</a> ({{ object.firstRetriedJob.priority }}) @{{ object.firstRetriedJob.queue }} <span class="label label-{{ status }}">{{ object.firstRetriedJob.status }}{% if object.firstRetriedJob.exitCode %} [{{ object.firstRetriedJob.exitCode}}]{% endif %}</span></code></small></p>
             {% endif %}
             {% if 'cancelled' == object.status %}
                 {% set status = '' %}
@@ -218,33 +218,33 @@ file that was distributed with this source code.
                 {% set childJobs = {} %}
                 {% for childJob in object.childDependencies %}
                     {% set status = '' %}
-                    {% if 'running' == childobject.status %}
+                    {% if 'running' == childJob.status %}
                         {% set status = 'active' %}
                     {% endif %}
-                    {% if 'retried' == childobject.status %}
+                    {% if 'retried' == childJob.status %}
                         {% set status = 'warning' %}
                     {% endif %}
-                    {% if 'failed' == childobject.status or 'retry_failed' == childobject.status %}
+                    {% if 'failed' == childJob.status or 'retry_failed' == childJob.status %}
                         {% set status = 'danger' %}
                     {% endif %}
-                    {% if 'succeeded' == childobject.status or 'retry_succeeded' == childobject.status %}
+                    {% if 'succeeded' == childJob.status or 'retry_succeeded' == childJob.status %}
                         {% set status = 'success' %}
                     {% endif %}
-                    {% if 'cancelled' == childobject.status %}
+                    {% if 'cancelled' == childJob.status %}
                         {% set status = 'danger' %}
                     {% endif %}
-                    {% if 'pending' == childobject.status or 'running' == childobject.status %}
+                    {% if 'pending' == childJob.status or 'running' == childJob.status %}
                         {% set status = 'info' %}
                     {% endif %}
-                    {% if 'new' == childobject.status %}
+                    {% if 'new' == childJob.status %}
                         {% set status = 'default' %}
                     {% endif %}
-                    {% set linkedChildJob = '<code style="white-space:nowrap;padding: 5px;"><a href="' ~ path('queues_job', {'id': childobject.id}) ~ '">#' ~ childobject.id ~ '</a> (' ~ childobject.priority ~ ') <span class="label label-' ~ status ~ '">' ~ childobject.status %}
-                    {% if childobject.exitCode %}
-                        {% set linkedChildJob = linkedChildJob ~ ' [' ~ childobject.exitCode ~ ']' %}
+                    {% set linkedChildJob = '<code style="white-space:nowrap;padding: 5px;"><a href="' ~ path('queues_job', {'id': childJob.id}) ~ '">#' ~ childJob.id ~ '</a> (' ~ childJob.priority ~ ') <span class="label label-' ~ status ~ '">' ~ childJob.status %}
+                    {% if childJob.exitCode %}
+                        {% set linkedChildJob = linkedChildJob ~ ' [' ~ childJob.exitCode ~ ']' %}
                     {% endif %}
                     {% set linkedChildJob = linkedChildJob ~ '</span></code>' %}
-                    {% set childJobs = childJobs|merge({ ('_' ~ childobject.id ~ '-'): linkedChildJob}) %}
+                    {% set childJobs = childJobs|merge({ ('_' ~ childJob.id ~ '-'): linkedChildJob}) %}
                 {% endfor %}
                 <p>{{ childJobs|join(' ')|raw }}</p>
             {% endif %}
