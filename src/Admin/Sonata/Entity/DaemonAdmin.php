@@ -18,17 +18,16 @@ declare(strict_types=1);
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Admin\Sonata\Entity;
 
 use Sonata\AdminBundle\Admin\AbstractAdmin;
-use Sonata\AdminBundle\Datagrid\DatagridMapper;
 use Sonata\AdminBundle\Datagrid\ListMapper;
 use Sonata\AdminBundle\Route\RouteCollection;
 
 /**
  * {@inheritdoc}
  */
-class JobAdmin extends AbstractAdmin
+class DaemonAdmin extends AbstractAdmin
 {
     /** @var string $baseRoutePattern */
-    protected $baseRoutePattern = 'jobs';
+    protected $baseRoutePattern = 'daemons';
 
     /**
      * {@inheritdoc}
@@ -37,28 +36,11 @@ class JobAdmin extends AbstractAdmin
     {
         $listMapper
             ->addIdentifier('id')
-            ->add('command')
-            ->add('dependencies');
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function configureDatagridFilters(DatagridMapper $datagridMapper)
-    {
-        $datagridMapper->add('status');
-
-        /*
-        $datagridMapper->add('status', 'doctrine_orm_choice',[], ChoiceType::class, [
-            'operator_type' => HiddenType::class,
-            'field_options' => [
-                'choices' => [
-                    'New' => Job::STATUS_NEW,
-                    'Aborted' => Job::STATUS_ABORTED,
-                ]
-            ],
-        ]);
-        */
+            ->add('host')
+            ->add('pid')
+            ->add('bornOn')
+            ->add('diedOn')
+            ->add('mortisCausa');
     }
 
     /**

@@ -12,7 +12,7 @@ file that was distributed with this source code.
 {% extends base_template %}
 
 {% block title %}
-    {{ "title_show"|trans({'%name%': admin.toString(object)|truncate(15) }, 'domain_admin') }}
+    {{ "job_title_show"|trans({'%name%': admin.toString(object)|truncate(15) }, 'shq_commands_queues') }}
 {% endblock %}
 
 {% block navbar_title %}

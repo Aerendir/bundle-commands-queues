@@ -1,0 +1,80 @@
+{#
+
+This file is part of the Serendipity HQ Commands Queues package.
+
+(c) Adamo Aerendir Crespi <hello@aerendir.me>
+
+For the full copyright and license information, please view the LICENSE
+file that was distributed with this source code.
+
+#}
+
+{% extends base_template %}
+
+{% block title %}
+    {{ "daemon_title_show"|trans({'%name%': admin.toString(object)|truncate(15) }, 'shq_commands_queues') }}
+{% endblock %}
+
+{% block navbar_title %}
+    {{ block('title') }}
+{% endblock %}
+
+{%- block actions -%}
+    {% include 'SonataAdminBundle:CRUD:action_buttons.html.twig' %}
+{%- endblock -%}
+
+{% block tab_menu %}
+    {{ knp_menu_render(admin.sidemenu(action), {
+        'currentClass' : 'active',
+        'template': sonata_admin.adminPool.getTemplate('tab_menu_template')
+    }, 'twig') }}
+{% endblock %}
+
+{% block show %}
+    {% set status = 'success' %}
+    {% set statusLabel = 'alive' %}
+    {% if object.mortisCausa %}
+        {% set status = 'danger' %}
+        {% set statusLabel = object.mortisCausa %}
+    {% endif %}
+    {% import '@SHQCommandsQueues/Admin/print_debug.html.twig' as m %}
+<div class="sonata-ba-view">
+    <div class="row">
+        <div class="col-lg-12">
+            #{{ object.id }} {{ object.pid }}@{{ object.host }}
+            <p><strong>#{{ object.id }}</strong> <span class="label label-{{ status }}">{{ statusLabel }}</span> <code>{{ object.pid }}@{{ object.host }}</code></p>
+            <p>Born on: {{ object.bornOn|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }} {% if object.diedOn %} - Died on: {{ object.diedOn|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }}{% endif %}</p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-6">
+            <h2>Queues</h2>
+<pre>
+{% for queue in object.config.queues %}
+<strong>{{ queue }}</strong>:
+<code style="padding: 2px 4px;font-size: 90%;color: #4f4f4f;background-color: #f9f2f4;border-radius: 4px;">max_concurrent_jobs</code>: {{ object.config.queue(queue).max_concurrent_jobs }}
+<code style="padding: 2px 4px;font-size: 90%;color: #4f4f4f;background-color: #f9f2f4;border-radius: 4px;">retry_stale_jobs</code>: {% if 'true' == object.config.queue(queue).retry_stale_jobs %}<small>boolean</small> true{% else %}<small>boolean</small> false{% endif %}
+
+<code style="padding: 2px 4px;font-size: 90%;color: #4f4f4f;background-color: #f9f2f4;border-radius: 4px;">running_jobs_check_interval</code>: {{ object.config.queue(queue).running_jobs_check_interval }}
+
+{% endfor %}
+</pre>
+        </div>
+        <div class="col-lg-6">
+            <h2>Config</h2>
+<pre>
+<code style="padding: 2px 4px;font-size: 90%;color: #4f4f4f;background-color: #f9f2f4;border-radius: 4px;">name</code>: {{ object.config.name }}
+<code style="padding: 2px 4px;font-size: 90%;color: #4f4f4f;background-color: #f9f2f4;border-radius: 4px;">prodAllowed</code>: {% if 'true' == object.config.prodAllowed %}<small>boolean</small> true{% else %}<small>boolean</small> false{% endif %}
+
+<code style="padding: 2px 4px;font-size: 90%;color: #4f4f4f;background-color: #f9f2f4;border-radius: 4px;">aliveDaemonsCheckInterval</code>: {{ object.config.aliveDaemonsCheckInterval }}
+<code style="padding: 2px 4px;font-size: 90%;color: #4f4f4f;background-color: #f9f2f4;border-radius: 4px;">idleTime</code>: {{ object.config.idleTime }}
+<code style="padding: 2px 4px;font-size: 90%;color: #4f4f4f;background-color: #f9f2f4;border-radius: 4px;">managedEntitiesTreshold</code>: {{ object.config.managedEntitiesTreshold }}
+<code style="padding: 2px 4px;font-size: 90%;color: #4f4f4f;background-color: #f9f2f4;border-radius: 4px;">maxRuntime</code>: {{ object.config.maxRuntime }}
+<code style="padding: 2px 4px;font-size: 90%;color: #4f4f4f;background-color: #f9f2f4;border-radius: 4px;">optimizationInterval</code>: {{ object.config.optimizationInterval }}
+<code style="padding: 2px 4px;font-size: 90%;color: #4f4f4f;background-color: #f9f2f4;border-radius: 4px;">profilingInfoInterval</code>: {{ object.config.profilingInfoInterval }}
+<code style="padding: 2px 4px;font-size: 90%;color: #4f4f4f;background-color: #f9f2f4;border-radius: 4px;">printProfilingInfo</code>: {% if 'true' == object.config.printProfilingInfo %}<small>boolean</small> true{% else %}<small>boolean</small> false{% endif %}
+</pre>
+        </div>
+    </div>
+</div>
+{% endblock %}
