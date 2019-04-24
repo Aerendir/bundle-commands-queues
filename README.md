@@ -17,6 +17,8 @@ SHQCommandsQueuesBundle manages queues and processes jobs in your Symfony App.
 
 It is possible to run a single job or start a daemon that listens for new jobs and processes them as they are pushed into the queue.
 
+It automatically integrates with SonataAdminBundle for an easier administration.
+
 Do you like this bundle? [**Leave a &#9733;**](#js-repo-pjax-container)!
 
 Requirements
