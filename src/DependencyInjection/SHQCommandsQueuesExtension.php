@@ -25,6 +25,7 @@ use SerendipityHQ\Bundle\CommandsQueuesBundle\Service\JobsManager;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Service\QueuesDaemon;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\JobsMarker;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\Profiler;
+use Sonata\AdminBundle\SonataAdminBundle;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
@@ -89,5 +90,10 @@ class SHQCommandsQueuesExtension extends Extension
             $jobsMarkerDefinition,
         ]))->addTag('console.command');
         $container->setDefinition('commands_queues.command.run', $runCommandDefinition);
+
+        if (class_exists(SonataAdminBundle::class)) {
+            $sonataLoader = new YamlFileLoader($container, new FileLocator(__DIR__ . '/../Admin/Sonata/Resources/config'));
+            $sonataLoader->load('sonata_admin.yaml');
+        }
     }
 }

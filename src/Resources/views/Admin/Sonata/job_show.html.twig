@@ -1,0 +1,133 @@
+{#
+
+This file is part of the Serendipity HQ Commands Queues package.
+
+(c) Adamo Aerendir Crespi <hello@aerendir.me>
+
+For the full copyright and license information, please view the LICENSE
+file that was distributed with this source code.
+
+#}
+
+{% extends base_template %}
+
+{% block title %}
+    {{ "title_show"|trans({'%name%': admin.toString(object)|truncate(15) }, 'domain_admin') }}
+{% endblock %}
+
+{% block navbar_title %}
+    {{ block('title') }}
+{% endblock %}
+
+{%- block actions -%}
+    {% include 'SonataAdminBundle:CRUD:action_buttons.html.twig' %}
+{%- endblock -%}
+
+{% block tab_menu %}
+    {{ knp_menu_render(admin.sidemenu(action), {
+        'currentClass' : 'active',
+        'template': sonata_admin.adminPool.getTemplate('tab_menu_template')
+    }, 'twig') }}
+{% endblock %}
+
+{% block show %}
+<div class="sonata-ba-view">
+    <div class="row">
+        <div class="col-lg-12">
+            {% set status = '' %}
+            {% if 'running' == object.status %}
+                {% set status = 'active' %}
+            {% endif %}
+            {% if 'retried' == object.status %}
+                {% set status = 'warning' %}
+            {% endif %}
+            {% if 'failed' == object.status or 'retry_failed' == object.status %}
+                {% set status = 'danger' %}
+            {% endif %}
+            {% if 'succeeded' == object.status or 'retry_succeeded' == object.status %}
+                {% set status = 'success' %}
+            {% endif %}
+            {% if 'cancelled' == object.status %}
+                {% set status = 'danger' %}
+            {% endif %}
+            {% if 'pending' == object.status or 'running' == object.status %}
+                {% set status = 'info' %}
+            {% endif %}
+            {% if 'new' == object.status %}
+                {% set status = 'default' %}
+            {% endif %}
+            <p><strong>#{{ object.id }}</strong> <span class="label label-{{ status }}">{{ object.status }}</span> <code>@{{ object.queue }}</code> (<code>{{ object.priority }}</code>)</p>
+            <pre>>: {{ object.command }}{% if object.arguments %} {{ object.arguments|join(' ') }}{% endif %}</pre>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-4">
+            <p>Created At: {% if object.createdAt %}{{ object.createdAt|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }}{% endif %}</p>
+            <p>Started At: {% if object.startedAt %}{{ object.startedAt|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }}{% endif %}</p>
+            <p>Closed at: {% if object.closedAt %}{{ object.closedAt|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }}{% endif %}</p>
+            <p>Exit code: {{ object.exitCode }}</p>
+
+            {% if object.isTypeRetrying %}
+                <p><small class="text-muted">Is retry of <a href="{{ path('admin_serendipityhq_commandsqueues_job_show', {'id': object.retryOf.id}) }}">#{{ object.retryOf.id }}</a></small></p>
+            {% endif %}
+            {% if object.isTypeRetried %}
+                <p><small class="text-muted">Retried by <br /><a href="{{ path('admin_serendipityhq_commandsqueues_job_show', {'id': object.retriedBy.id}) }}">#{{ object.retriedBy.id }}</a> ({{ object.retriedBy.status }})</small></p>
+                {% if 0 < object.retryingJobs.count %}
+                    <small class="text-muted">All retrying Jobs:</small>
+                    {% set retryingJobs = {} %}
+                    {% for retryingJob in object.retryingJobs %}
+                        {% set linkedretryingJob = '<a href="' ~ path('admin_serendipityhq_commandsqueues_job_show', {'id': retryingobject.id}) ~ '">#' ~ retryingobject.id ~ '</a> (' ~ retryingobject.status ~ ')' %}
+                        {% set retryingJobs = retryingJobs|merge({ ('_' ~ retryingobject.id ~ '-'): linkedretryingJob}) %}
+                    {% endfor %}
+                    <p><small class="text-muted">{{ retryingJobs|join(', ')|raw }}</small></p>
+                {% endif %}
+            {% endif %}
+            {% if object.firstRetriedJob %}
+                <p><small class="text-muted">First retried job:<br /><a href="{{ path('admin_serendipityhq_commandsqueues_job_show', {'id': object.firstRetriedobject.id}) }}">#{{ object.firstRetriedobject.id }} ({{ object.firstRetriedobject.status }})</a></small></p>
+            {% endif %}
+            {% if 'cancelled' == object.status %}
+                <p><small class="text-muted">{{ object.debug.cancellation_reason }}</small></p>
+                <p><small class="text-muted">Cancelled by <a href="{{ path('admin_serendipityhq_commandsqueues_job_show', {'id': object.cancelledBy}) }}">#{{ object.cancelledBy }}</a></small></p>
+            {% endif %}
+        </div>
+        <div class="col-lg-4">
+            {% if false == object.hasParentDependencies %}
+                {% if false == object.isTypeRetrying %}No parent Jobs{% endif %}
+            {% else %}
+                <p>Parent Jobs:</p>
+                {% set parentJobs = {} %}
+                {% for parentJob in object.parentDependencies %}
+                    {% set linkedParentJob = '<a href="' ~ path('admin_serendipityhq_commandsqueues_job_show', {'id': parentobject.id}) ~ '">#' ~ parentobject.id ~ '</a> (' ~ parentobject.status ~ ')' %}
+                    {% set parentJobs = parentJobs|merge({ ('_' ~ parentobject.id ~ '-'): linkedParentJob}) %}
+                {% endfor %}
+                <p>{{ parentJobs|join(', ')|raw }}</p>
+            {% endif %}
+        </div>
+        <div class="col-lg-4">
+            {% if false == object.hasChildDependencies %}
+                No child Jobs
+            {% else %}
+                <p>Child Jobs:</p>
+                {% set childJobs = {} %}
+                {% for childJob in object.childDependencies %}
+                    {% set linkedChildJob = '<a href="' ~ path('admin_serendipityhq_commandsqueues_job_show', {'id': childobject.id}) ~ '">#' ~ childobject.id ~ '</a> (' ~ childobject.status ~ ')' %}
+                    {% set childJobs = childJobs|merge({ ('_' ~ childobject.id ~ '-'): linkedChildJob}) %}
+                {% endfor %}
+                <p>{{ childJobs|join(', ')|raw }}</p>
+            {% endif %}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-12">
+            <h2>Debug</h2>
+            {% import 'SHQCommandsQueuesBundle:Admin:print_debug.html.twig' as m %}
+            <pre>{{ m.print_debug(object.debug) }}</pre>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-12">
+            <pre>{{ object.output }}</pre>
+        </div>
+    </div>
+</div>
+{% endblock %}
