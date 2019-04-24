@@ -41,7 +41,6 @@ class JobAdmin extends AbstractAdmin
      * {@inheritdoc}
      */
     protected $datagridValues = [
-
         // display the first page (default = 1)
         '_page' => 1,
 
@@ -70,7 +69,17 @@ class JobAdmin extends AbstractAdmin
      */
     protected function configureDatagridFilters(DatagridMapper $datagridMapper)
     {
-        $datagridMapper->add('status');
+        $datagridMapper
+            ->add('status')
+            ->add('command')
+            ->add('arguments')
+            ->add('queue')
+            ->add('exitCode')
+            ->add('priority')
+            ->add('createdAt', 'doctrine_orm_date_range')
+            ->add('startedAt', 'doctrine_orm_date_range')
+            ->add('closedAt', 'doctrine_orm_date_range')
+            ->add('executeAfterTime', 'doctrine_orm_date_range');
 
         /*
         $datagridMapper->add('status', 'doctrine_orm_choice',[], ChoiceType::class, [
