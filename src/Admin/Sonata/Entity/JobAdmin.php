@@ -27,8 +27,32 @@ use Sonata\AdminBundle\Route\RouteCollection;
  */
 class JobAdmin extends AbstractAdmin
 {
-    /** @var string $baseRoutePattern */
+    /**
+     * {@inheritdoc}
+     */
+    protected $translationDomain = 'shq_commands_queues';
+
+    /**
+     * {@inheritdoc}
+     */
     protected $baseRoutePattern = 'jobs';
+
+    /**
+     * {@inheritdoc}
+     */
+    protected $datagridValues = [
+
+        // display the first page (default = 1)
+        '_page' => 1,
+
+        '_per_page' => 100,
+
+        // reverse order (default = 'ASC')
+        '_sort_order' => 'DESC',
+
+        // name of the ordered field (default = the model's id field, if any)
+        '_sort_by' => 'id',
+    ];
 
     /**
      * {@inheritdoc}
