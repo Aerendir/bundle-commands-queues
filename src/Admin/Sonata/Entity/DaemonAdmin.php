@@ -26,7 +26,14 @@ use Sonata\AdminBundle\Route\RouteCollection;
  */
 class DaemonAdmin extends AbstractAdmin
 {
-    /** @var string $baseRoutePattern */
+    /**
+     * {@inheritdoc}
+     */
+    protected $translationDomain = 'shq_commands_queues';
+
+    /**
+     * {@inheritdoc}
+     */
     protected $baseRoutePattern = 'daemons';
 
     /**
