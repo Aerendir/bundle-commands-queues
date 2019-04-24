@@ -17,7 +17,11 @@ declare(strict_types=1);
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Admin\Sonata\Entity;
 
+use Knp\Menu\ItemInterface;
+use RuntimeException;
+use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
 use Sonata\AdminBundle\Admin\AbstractAdmin;
+use Sonata\AdminBundle\Admin\AdminInterface;
 use Sonata\AdminBundle\Datagrid\DatagridMapper;
 use Sonata\AdminBundle\Datagrid\ListMapper;
 use Sonata\AdminBundle\Route\RouteCollection;
@@ -92,6 +96,51 @@ class JobAdmin extends AbstractAdmin
             ],
         ]);
         */
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function configureTabMenu(ItemInterface $menu, $action, AdminInterface $childAdmin = null): void
+    {
+        $admin = $this->isChild() ? $this->getParent() : $this;
+
+        if (null === $admin) {
+            throw new RuntimeException('Impossible to get the $admin.');
+        }
+
+        $menu->addChild('New', [
+            'uri' => $admin->generateUrl('list', ['filter[status][value]' => Job::STATUS_NEW]),
+        ]);
+        $menu->addChild('Pending', [
+            'uri' => $admin->generateUrl('list', ['filter[status][value]' => Job::STATUS_PENDING]),
+        ]);
+        $menu->addChild('Running', [
+            'uri' => $admin->generateUrl('list', ['filter[status][value]' => Job::STATUS_RUNNING]),
+        ]);
+        $menu->addChild('Succeeded', [
+            'uri' => $admin->generateUrl('list', ['filter[status][value]' => Job::STATUS_SUCCEEDED]),
+        ]);
+        $menu->addChild('Failed', [
+            'uri' => $admin->generateUrl('list', ['filter[status][value]' => Job::STATUS_FAILED]),
+        ]);
+        $menu->addChild('Aborted', [
+            'uri' => $admin->generateUrl('list', ['filter[status][value]' => Job::STATUS_ABORTED]),
+        ]);
+        $menu->addChild('Cancelled', [
+            'uri' => $admin->generateUrl('list', ['filter[status][value]' => Job::STATUS_CANCELLED]),
+        ]);
+        $menu->addChild('Retried', [
+            'uri' => $admin->generateUrl('list', ['filter[status][value]' => Job::STATUS_RETRIED]),
+        ]);
+        $menu->addChild('Retry Succeeded', [
+            'uri' => $admin->generateUrl('list', ['filter[status][value]' => Job::STATUS_RETRY_SUCCEEDED]),
+        ]);
+        $menu->addChild('Retry Failed', [
+            'uri' => $admin->generateUrl('list', ['filter[status][value]' => Job::STATUS_RETRY_FAILED]),
+        ]);
+
+        parent::configureTabMenu($menu, $action, $childAdmin);
     }
 
     /**
