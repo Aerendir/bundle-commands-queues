@@ -95,7 +95,7 @@ class Daemon
     private $diedOn;
 
     /**
-     * @var string
+     * @var string|null
      *
      * @ORM\Column(name="mortis_causa", type="string", length=255, nullable=true)
      */
@@ -159,9 +159,9 @@ class Daemon
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getMortisCausa(): string
+    public function getMortisCausa(): ? string
     {
         return $this->mortisCausa;
     }
