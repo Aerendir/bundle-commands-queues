@@ -36,7 +36,7 @@ file that was distributed with this source code.
                 {% if 'new' == object.retryOf.status %}
                     {% set status = 'default' %}
                 {% endif %}
-                <p><small class="text-muted">{% trans %}Is retry of{% endtrans %} <code style="white-space:nowrap;padding: 5px;"><a href="{{ path('queues_job', {'id': object.retryOf.id}) }}">#{{ object.retryOf.id }}</a> ({{ object.retryOf.priority }}) @{{ object.retryOf.queue }} <span class="label label-{{ status }}">{{ object.retryOf.status }}{% if object.retryOf.exitCode %} [{{ object.retryOf.exitCode}}]{% endif %}</span></code></small></p>
+                <p><small class="text-muted">{% trans %}Is retry of{% endtrans %} <code style="white-space:nowrap;padding: 5px;"><a href="{{ path('admin_serendipityhq_commandsqueues_job_show', {'id': object.retryOf.id}) }}">#{{ object.retryOf.id }}</a> ({{ object.retryOf.priority }}) @{{ object.retryOf.queue }} <span class="label label-{{ status }}">{{ object.retryOf.status }}{% if object.retryOf.exitCode %} [{{ object.retryOf.exitCode}}]{% endif %}</span></code></small></p>
             {% endif %}
             {% if object.isTypeRetried %}
                 {% set status = '' %}
@@ -63,7 +63,7 @@ file that was distributed with this source code.
                 {% endif %}
                 <p><small class="text-muted">
                         {% trans %}Retried by{% endtrans %} <br />
-                        <code style="white-space:nowrap;padding: 5px;"><a href="{{ path('queues_job', {'id': object.retriedBy.id}) }}">#{{ object.retriedBy.id }}</a> ({{ object.retriedBy.priority }}) <span class="label label-{{ status }}">{{ object.retriedBy.status }}{% if object.retriedBy.exitCode %} [{{ object.retriedBy.exitCode}}]{% endif %}</span></code>
+                        <code style="white-space:nowrap;padding: 5px;"><a href="{{ path('admin_serendipityhq_commandsqueues_job_show', {'id': object.retriedBy.id}) }}">#{{ object.retriedBy.id }}</a> ({{ object.retriedBy.priority }}) <span class="label label-{{ status }}">{{ object.retriedBy.status }}{% if object.retriedBy.exitCode %} [{{ object.retriedBy.exitCode}}]{% endif %}</span></code>
                     </small></p>
                 {% if 0 < object.retryingJobs.count %}
                     <small class="text-muted">{% trans %}All retrying Jobs{% endtrans %}:</small>
@@ -91,7 +91,7 @@ file that was distributed with this source code.
                         {% if 'new' == retryingJob.status %}
                             {% set status = 'default' %}
                         {% endif %}
-                        {% set linkedretryingJob = '<code style="white-space:nowrap;padding: 5px;"><a href="' ~ path('queues_job', {'id': retryingJob.id}) ~ '">#' ~ retryingJob.id ~ '</a> (' ~ retryingJob.priority ~ ') <span class="label label-' ~ status ~ '">' ~ retryingJob.status %}
+                        {% set linkedretryingJob = '<code style="white-space:nowrap;padding: 5px;"><a href="' ~ path('admin_serendipityhq_commandsqueues_job_show', {'id': retryingJob.id}) ~ '">#' ~ retryingJob.id ~ '</a> (' ~ retryingJob.priority ~ ') <span class="label label-' ~ status ~ '">' ~ retryingJob.status %}
                         {% if object.exitCode %}
                             {% set linkedretryingJob = linkedretryingJob ~ ' [' ~ object.retriedBy.exitCode ~ ']' %}
                         {% endif %}
@@ -121,7 +121,7 @@ file that was distributed with this source code.
                 {% if 'pending' == object.firstRetriedJob.status or 'running' == object.firstRetriedJob.status %}
                     {% set status = 'info' %}
                 {% endif %}
-                <p><small class="text-muted">{% trans %}First retried job{% endtrans %} <code style="white-space:nowrap;padding: 5px;"><a href="{{ path('queues_job', {'id': object.firstRetriedJob.id}) }}">#{{ object.firstRetriedJob.id }}</a> ({{ object.firstRetriedJob.priority }}) @{{ object.firstRetriedJob.queue }} <span class="label label-{{ status }}">{{ object.firstRetriedJob.status }}{% if object.firstRetriedJob.exitCode %} [{{ object.firstRetriedJob.exitCode}}]{% endif %}</span></code></small></p>
+                <p><small class="text-muted">{% trans %}First retried job{% endtrans %} <code style="white-space:nowrap;padding: 5px;"><a href="{{ path('admin_serendipityhq_commandsqueues_job_show', {'id': object.firstRetriedJob.id}) }}">#{{ object.firstRetriedJob.id }}</a> ({{ object.firstRetriedJob.priority }}) @{{ object.firstRetriedJob.queue }} <span class="label label-{{ status }}">{{ object.firstRetriedJob.status }}{% if object.firstRetriedJob.exitCode %} [{{ object.firstRetriedJob.exitCode}}]{% endif %}</span></code></small></p>
             {% endif %}
             {% if 'cancelled' == object.status %}
                 {% set status = '' %}
@@ -144,7 +144,7 @@ file that was distributed with this source code.
                     {% set status = 'info' %}
                 {% endif %}
                 <p><small class="text-muted"><b>{% trans %}Cancellation Reason{% endtrans %}</b>: <i>{{ object.debug.cancellation_reason }}</i></small></p>
-                <p><small class="text-muted">{% trans %}Cancelled by{% endtrans %} <code style="white-space:nowrap;padding: 5px;"><a href="{{ path('queues_job', {'id': object.cancelledBy.id}) }}">#{{ object.cancelledBy.id }}</a> ({{ object.cancelledBy.priority }}) @{{ object.cancelledBy.queue }} <span class="label label-{{ status }}">{{ object.cancelledBy.status }}{% if object.cancelledBy.exitCode %} [{{ object.cancelledBy.exitCode}}]{% endif %}</span></code></small></p>
+                <p><small class="text-muted">{% trans %}Cancelled by{% endtrans %} <code style="white-space:nowrap;padding: 5px;"><a href="{{ path('admin_serendipityhq_commandsqueues_job_show', {'id': object.cancelledBy.id}) }}">#{{ object.cancelledBy.id }}</a> ({{ object.cancelledBy.priority }}) @{{ object.cancelledBy.queue }} <span class="label label-{{ status }}">{{ object.cancelledBy.status }}{% if object.cancelledBy.exitCode %} [{{ object.cancelledBy.exitCode}}]{% endif %}</span></code></small></p>
             {% endif %}
         </td>
     {% elseif 'command' == field_description.name %}
@@ -202,7 +202,7 @@ file that was distributed with this source code.
                     {% if 'new' == parentobject.status %}
                         {% set status = 'default' %}
                     {% endif %}
-                    {% set linkedParentJob = '<code style="white-space:nowrap;padding: 5px;"><a href="' ~ path('queues_job', {'id': parentobject.id}) ~ '">#' ~ parentobject.id ~ '</a> (' ~ parentobject.priority ~ ') <span class="label label-' ~ status ~ '">' ~ parentobject.status %}
+                    {% set linkedParentJob = '<code style="white-space:nowrap;padding: 5px;"><a href="' ~ path('admin_serendipityhq_commandsqueues_job_show', {'id': parentobject.id}) ~ '">#' ~ parentobject.id ~ '</a> (' ~ parentobject.priority ~ ') <span class="label label-' ~ status ~ '">' ~ parentobject.status %}
                     {% if parentobject.exitCode %}
                         {% set linkedParentJob = linkedParentJob ~ ' [' ~ parentobject.exitCode ~ ']' %}
                     {% endif %}
@@ -240,7 +240,7 @@ file that was distributed with this source code.
                     {% if 'new' == childJob.status %}
                         {% set status = 'default' %}
                     {% endif %}
-                    {% set linkedChildJob = '<code style="white-space:nowrap;padding: 5px;"><a href="' ~ path('queues_job', {'id': childJob.id}) ~ '">#' ~ childJob.id ~ '</a> (' ~ childJob.priority ~ ') <span class="label label-' ~ status ~ '">' ~ childJob.status %}
+                    {% set linkedChildJob = '<code style="white-space:nowrap;padding: 5px;"><a href="' ~ path('admin_serendipityhq_commandsqueues_job_show', {'id': childJob.id}) ~ '">#' ~ childJob.id ~ '</a> (' ~ childJob.priority ~ ') <span class="label label-' ~ status ~ '">' ~ childJob.status %}
                     {% if childJob.exitCode %}
                         {% set linkedChildJob = linkedChildJob ~ ' [' ~ childJob.exitCode ~ ']' %}
                     {% endif %}
