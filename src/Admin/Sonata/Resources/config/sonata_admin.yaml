@@ -15,3 +15,12 @@ services:
         tags:
             - { name: sonata.admin, manager_type: orm, group: 'CommandsQueues', label: Jobs, show_mosaic_button: false }
         public: true
+
+    # Register Ansi to HTML converter in Twig
+    SerendipityHQ\Bundle\CommandsQueuesBundle\Admin\Sonata\SHQAnsiTheme: ~
+    SensioLabs\AnsiConverter\AnsiToHtmlConverter:
+        arguments: ['@SerendipityHQ\Bundle\CommandsQueuesBundle\Admin\Sonata\SHQAnsiTheme', true]
+    SensioLabs\AnsiConverter\Bridge\Twig\AnsiExtension:
+        arguments: ['@SensioLabs\AnsiConverter\AnsiToHtmlConverter']
+        tags:
+            - { name: twig.extension }

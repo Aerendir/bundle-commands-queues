@@ -19,6 +19,7 @@
         "doctrine/orm": "^2.6.3",
         "pagerfanta/pagerfanta": "^2.0",
         "sensio/framework-extra-bundle": "^5.1",
+        "sensiolabs/ansi-to-html": "^1.1",
         "serendipity_hq/console-styles-bundle": "^1.1",
         "serendipity_hq/then-when": "^1.1",
         "symfony/console": "^4.2.3",
