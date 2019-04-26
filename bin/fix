@@ -1,14 +1,4 @@
 #!/usr/bin/env sh
 
-vendor/bin/rector process src --level code-quality &&
-vendor/bin/rector process src --level coding-style &&
-vendor/bin/rector process src --level doctrine &&
-vendor/bin/rector process src --level doctrine25 &&
-vendor/bin/rector process src --level framework-extra-bundle-30 &&
-vendor/bin/rector process src --level framework-extra-bundle-50 &&
-vendor/bin/rector process src --level php71 &&
-vendor/bin/rector process src --level phpstan &&
-vendor/bin/rector process src --level symfony42 &&
-# Temporary disabled until https://github.com/thecodingmachine/safe/issues/116 is resolved
-# vendor/bin/rector process src --config vendor/thecodingmachine/safe/rector-migrate.yml &&
+vendor/bin/rector process src &&
 vendor/bin/php-cs-fixer fix --allow-risky yes -v

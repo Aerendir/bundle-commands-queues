@@ -1,0 +1,38 @@
+{#
+
+This file is part of the Serendipity HQ Commands Queues package.
+
+(c) Adamo Aerendir Crespi <hello@aerendir.me>
+
+For the full copyright and license information, please view the LICENSE
+file that was distributed with this source code.
+
+#}
+
+{% for object in admin.datagrid.results %}
+    {% set status = '' %}
+    {% if 'running' == object.status %}
+        {% set status = 'active' %}
+    {% endif %}
+    {% if 'retried' == object.status %}
+        {% set status = 'warning' %}
+    {% endif %}
+    {% if 'failed' == object.status or 'retry_failed' == object.status %}
+        {% set status = 'danger' %}
+    {% endif %}
+    {% if 'succeeded' == object.status or 'retry_succeeded' == object.status %}
+        {% set status = 'success' %}
+    {% endif %}
+    {% if 'cancelled' == object.status %}
+        {% set status = 'danger' %}
+    {% endif %}
+    {% if 'pending' == object.status or 'running' == object.status %}
+        {% set status = 'info' %}
+    {% endif %}
+    {% if 'new' == object.status %}
+        {% set status = 'default' %}
+    {% endif %}
+    <tr{% if '' != status %} class="{{ status }}"{% endif %}>
+        {% include get_admin_template('inner_list_row', admin.code) %}
+    </tr>
+{% endfor %}

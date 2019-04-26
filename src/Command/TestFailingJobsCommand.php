@@ -18,6 +18,7 @@ declare(strict_types=1);
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Command;
 
 use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\ORMException;
 use Safe\Exceptions\ArrayException;
 use Safe\Exceptions\StringsException;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
@@ -68,9 +69,10 @@ class TestFailingJobsCommand extends Command
      * @param InputInterface  $input
      * @param OutputInterface $output
      *
+     * @throws ArrayException
      * @throws OptimisticLockException
      * @throws StringsException
-     * @throws ArrayException
+     * @throws ORMException
      *
      * @return int
      */

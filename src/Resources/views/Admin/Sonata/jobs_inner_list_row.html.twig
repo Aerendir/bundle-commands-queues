@@ -1,0 +1,255 @@
+{#
+
+This file is part of the Serendipity HQ Commands Queues package.
+
+(c) Adamo Aerendir Crespi <hello@aerendir.me>
+
+For the full copyright and license information, please view the LICENSE
+file that was distributed with this source code.
+
+#}
+{% trans_default_domain 'shq_commands_queues' %}
+{% for field_description in admin.list.elements %}
+    {% if 'id' == field_description.name %}
+        <td id="{{ object.id }}" style="line-height: 1.9;">
+            <p><code style="white-space:nowrap;padding: 5px;"><a href="{{ path('admin_serendipityhq_commandsqueues_job_show', {id: object.id}) }}">#{{ object.id }}</a> ({{ object.priority }}) @{{ object.queue }} <span class="label label-{{ status }}">{{ object.status }}{% if object.exitCode %} [{{ object.exitCode}}]{% endif %}</span></code></p>
+            {% if object.isTypeRetrying %}
+                {% set status = '' %}
+                {% if 'running' == object.retryOf.status %}
+                    {% set status = 'active' %}
+                {% endif %}
+                {% if 'retried' == object.retryOf.status %}
+                    {% set status = 'warning' %}
+                {% endif %}
+                {% if 'failed' == object.retryOf.status or 'retry_failed' == object.retryOf.status %}
+                    {% set status = 'danger' %}
+                {% endif %}
+                {% if 'succeeded' == object.retryOf.status or 'retry_succeeded' == object.retryOf.status %}
+                    {% set status = 'success' %}
+                {% endif %}
+                {% if 'cancelled' == object.retryOf.status %}
+                    {% set status = 'danger' %}
+                {% endif %}
+                {% if 'pending' == object.retryOf.status or 'running' == object.retryOf.status %}
+                    {% set status = 'info' %}
+                {% endif %}
+                {% if 'new' == object.retryOf.status %}
+                    {% set status = 'default' %}
+                {% endif %}
+                <p><small class="text-muted">{% trans %}Is retry of{% endtrans %} <code style="white-space:nowrap;padding: 5px;"><a href="{{ path('queues_job', {'id': object.retryOf.id}) }}">#{{ object.retryOf.id }}</a> ({{ object.retryOf.priority }}) @{{ object.retryOf.queue }} <span class="label label-{{ status }}">{{ object.retryOf.status }}{% if object.retryOf.exitCode %} [{{ object.retryOf.exitCode}}]{% endif %}</span></code></small></p>
+            {% endif %}
+            {% if object.isTypeRetried %}
+                {% set status = '' %}
+                {% if 'running' == object.retriedBy.status %}
+                    {% set status = 'active' %}
+                {% endif %}
+                {% if 'retried' == object.retriedBy.status %}
+                    {% set status = 'warning' %}
+                {% endif %}
+                {% if 'failed' == object.retriedBy.status or 'retry_failed' == object.retriedBy.status %}
+                    {% set status = 'danger' %}
+                {% endif %}
+                {% if 'succeeded' == object.retriedBy.status or 'retry_succeeded' == object.retriedBy.status %}
+                    {% set status = 'success' %}
+                {% endif %}
+                {% if 'cancelled' == object.retriedBy.status %}
+                    {% set status = 'danger' %}
+                {% endif %}
+                {% if 'pending' == object.retriedBy.status or 'running' == object.retriedBy.status %}
+                    {% set status = 'info' %}
+                {% endif %}
+                {% if 'new' == object.retriedBy.status %}
+                    {% set status = 'default' %}
+                {% endif %}
+                <p><small class="text-muted">
+                        {% trans %}Retried by{% endtrans %} <br />
+                        <code style="white-space:nowrap;padding: 5px;"><a href="{{ path('queues_job', {'id': object.retriedBy.id}) }}">#{{ object.retriedBy.id }}</a> ({{ object.retriedBy.priority }}) <span class="label label-{{ status }}">{{ object.retriedBy.status }}{% if object.retriedBy.exitCode %} [{{ object.retriedBy.exitCode}}]{% endif %}</span></code>
+                    </small></p>
+                {% if 0 < object.retryingJobs.count %}
+                    <small class="text-muted">{% trans %}All retrying Jobs{% endtrans %}:</small>
+                    {% set retryingJobs = {} %}
+                    {% for retryingJob in object.retryingJobs %}
+                        {% set status = '' %}
+                        {% if 'running' == retryingJob.status %}
+                            {% set status = 'active' %}
+                        {% endif %}
+                        {% if 'retried' == retryingJob.status %}
+                            {% set status = 'warning' %}
+                        {% endif %}
+                        {% if 'failed' == retryingJob.status or 'retry_failed' == retryingJob.status %}
+                            {% set status = 'danger' %}
+                        {% endif %}
+                        {% if 'succeeded' == retryingJob.status or 'retry_succeeded' == retryingJob.status %}
+                            {% set status = 'success' %}
+                        {% endif %}
+                        {% if 'cancelled' == retryingJob.status %}
+                            {% set status = 'danger' %}
+                        {% endif %}
+                        {% if 'pending' == retryingJob.status or 'running' == retryingJob.status %}
+                            {% set status = 'info' %}
+                        {% endif %}
+                        {% if 'new' == retryingJob.status %}
+                            {% set status = 'default' %}
+                        {% endif %}
+                        {% set linkedretryingJob = '<code style="white-space:nowrap;padding: 5px;"><a href="' ~ path('queues_job', {'id': retryingJob.id}) ~ '">#' ~ retryingJob.id ~ '</a> (' ~ retryingJob.priority ~ ') <span class="label label-' ~ status ~ '">' ~ retryingJob.status %}
+                        {% if object.exitCode %}
+                            {% set linkedretryingJob = linkedretryingJob ~ ' [' ~ object.retriedBy.exitCode ~ ']' %}
+                        {% endif %}
+                        {% set linkedretryingJob = linkedretryingJob ~ '</span></code>' %}
+                        {% set retryingJobs = retryingJobs|merge({ ('_' ~ retryingJob.id ~ '-'): linkedretryingJob}) %}
+                    {% endfor %}
+                    <p><small class="text-muted">{{ retryingJobs|join(' ')|raw }}</small></p>
+                {% endif %}
+            {% endif %}
+            {% if object.firstRetriedJob %}
+                {% set status = '' %}
+                {% if 'running' == object.firstRetriedJob.status %}
+                    {% set status = 'active' %}
+                {% endif %}
+                {% if 'retried' == object.firstRetriedJob.status %}
+                    {% set status = 'warning' %}
+                {% endif %}
+                {% if 'failed' == object.firstRetriedJob.status or 'retry_failed' == object.firstRetriedJob.status %}
+                    {% set status = 'danger' %}
+                {% endif %}
+                {% if 'succeeded' == object.firstRetriedJob.status or 'retry_succeeded' == object.firstRetriedJob.status %}
+                    {% set status = 'success' %}
+                {% endif %}
+                {% if 'cancelled' == object.firstRetriedJob.status %}
+                    {% set status = 'danger' %}
+                {% endif %}
+                {% if 'pending' == object.firstRetriedJob.status or 'running' == object.firstRetriedJob.status %}
+                    {% set status = 'info' %}
+                {% endif %}
+                <p><small class="text-muted">{% trans %}First retried job{% endtrans %} <code style="white-space:nowrap;padding: 5px;"><a href="{{ path('queues_job', {'id': object.firstRetriedJob.id}) }}">#{{ object.firstRetriedJob.id }}</a> ({{ object.firstRetriedJob.priority }}) @{{ object.firstRetriedJob.queue }} <span class="label label-{{ status }}">{{ object.firstRetriedJob.status }}{% if object.firstRetriedJob.exitCode %} [{{ object.firstRetriedJob.exitCode}}]{% endif %}</span></code></small></p>
+            {% endif %}
+            {% if 'cancelled' == object.status %}
+                {% set status = '' %}
+                {% if 'running' == object.cancelledBy.status %}
+                    {% set status = 'active' %}
+                {% endif %}
+                {% if 'retried' == object.cancelledBy.status %}
+                    {% set status = 'warning' %}
+                {% endif %}
+                {% if 'failed' == object.cancelledBy.status or 'retry_failed' == object.cancelledBy.status %}
+                    {% set status = 'danger' %}
+                {% endif %}
+                {% if 'succeeded' == object.cancelledBy.status or 'retry_succeeded' == object.cancelledBy.status %}
+                    {% set status = 'success' %}
+                {% endif %}
+                {% if 'cancelled' == object.cancelledBy.status %}
+                    {% set status = 'danger' %}
+                {% endif %}
+                {% if 'pending' == object.cancelledBy.status or 'running' == object.cancelledBy.status %}
+                    {% set status = 'info' %}
+                {% endif %}
+                <p><small class="text-muted"><b>{% trans %}Cancellation Reason{% endtrans %}</b>: <i>{{ object.debug.cancellation_reason }}</i></small></p>
+                <p><small class="text-muted">{% trans %}Cancelled by{% endtrans %} <code style="white-space:nowrap;padding: 5px;"><a href="{{ path('queues_job', {'id': object.cancelledBy.id}) }}">#{{ object.cancelledBy.id }}</a> ({{ object.cancelledBy.priority }}) @{{ object.cancelledBy.queue }} <span class="label label-{{ status }}">{{ object.cancelledBy.status }}{% if object.cancelledBy.exitCode %} [{{ object.cancelledBy.exitCode}}]{% endif %}</span></code></small></p>
+            {% endif %}
+        </td>
+    {% elseif 'command' == field_description.name %}
+        <td>
+            <p>
+                <code style="width:300px; overflow:hidden; white-space:nowrap;">{{ object.command }}
+                    {% if object.arguments %}
+                        <span class="text-muted">{{ object.arguments|join(' ') }}</span>
+                    {% endif %}
+                </code>
+            </p>
+            <p>
+                <b>{% trans %}Created At{% endtrans %}</b>: {% if object.createdAt %}{{ object.createdAt|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }}{% endif %}<br />
+                <b>{% trans %}Execute After{% endtrans %}</b>: {% if object.executeAfterTime %}{{ object.executeAfterTime|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }}{% endif %}<br />
+                <b>{% trans %}Started At{% endtrans %}</b>: {% if object.startedAt %}{{ object.startedAt|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }}{% endif %}<br />
+                <b>{% trans %}Closed At{% endtrans %}</b>: {% if object.closedAt %}{{ object.closedAt|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }}{% endif %}<br />
+            </p>
+            <p><small>
+                    <b>{% trans %}Retry strategy{% endtrans %}: {{ object.retryStrategy.strategyName }}</b><br />
+                    {% if object.retryStrategy.canRetry %}Will be retried on: {{ object.retryStrategy.retryOn|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }}<br />{% endif %}
+                    <span class="text-muted">
+                        {% trans %}Current attempt{% endtrans %}: {{ object.retryStrategy.attempts }}, {% trans %}Max attempts{% endtrans %}: {{ object.retryStrategy.maxAttempts }},
+                        {% trans %}Increment by{% endtrans %}: {{ object.retryStrategy.incrementBy }} {{ object.retryStrategy.timeUnit }},
+                        {% if 'exponential' == object.retryStrategy.strategyName %}{% trans %}Exponential base{% endtrans %}: {{ object.retryStrategy.exponentialBase }}, {% endif %}
+                    </span>
+                </small></p>
+        </td>
+    {% elseif 'dependencies' == field_description.name %}
+        <td style="line-height: 2;">
+            {% if false == object.hasParentDependencies %}
+                {% if false == object.isTypeRetrying %}<p><span class="text-muted">{% trans %}No parent Jobs{% endtrans %}</span></p>{% endif %}
+            {% else %}
+                <p><b>{% trans %}Parent Jobs{% endtrans %}</b></p>
+                {% set parentJobs = {} %}
+                {% for parentJob in object.parentDependencies %}
+                    {% set status = '' %}
+                    {% if 'running' == parentobject.status %}
+                        {% set status = 'active' %}
+                    {% endif %}
+                    {% if 'retried' == parentobject.status %}
+                        {% set status = 'warning' %}
+                    {% endif %}
+                    {% if 'failed' == parentobject.status or 'retry_failed' == parentobject.status %}
+                        {% set status = 'danger' %}
+                    {% endif %}
+                    {% if 'succeeded' == parentobject.status or 'retry_succeeded' == parentobject.status %}
+                        {% set status = 'success' %}
+                    {% endif %}
+                    {% if 'cancelled' == parentobject.status %}
+                        {% set status = 'danger' %}
+                    {% endif %}
+                    {% if 'pending' == parentobject.status or 'running' == parentobject.status %}
+                        {% set status = 'info' %}
+                    {% endif %}
+                    {% if 'new' == parentobject.status %}
+                        {% set status = 'default' %}
+                    {% endif %}
+                    {% set linkedParentJob = '<code style="white-space:nowrap;padding: 5px;"><a href="' ~ path('queues_job', {'id': parentobject.id}) ~ '">#' ~ parentobject.id ~ '</a> (' ~ parentobject.priority ~ ') <span class="label label-' ~ status ~ '">' ~ parentobject.status %}
+                    {% if parentobject.exitCode %}
+                        {% set linkedParentJob = linkedParentJob ~ ' [' ~ parentobject.exitCode ~ ']' %}
+                    {% endif %}
+                    {% set linkedParentJob = linkedParentJob ~ '</span></code>' %}
+                    {% set parentJobs = parentJobs|merge({ ('_' ~ parentobject.id ~ '-'): linkedParentJob}) %}
+                {% endfor %}
+                <p>{{ parentJobs|join(' ')|raw }}</p>
+            {% endif %}
+
+            {% if false == object.hasChildDependencies %}
+                <p><span class="text-muted">No child Jobs</span></p>
+            {% else %}
+                <p><b>{% trans %}Child Jobs{% endtrans %}</b></p>
+                {% set childJobs = {} %}
+                {% for childJob in object.childDependencies %}
+                    {% set status = '' %}
+                    {% if 'running' == childJob.status %}
+                        {% set status = 'active' %}
+                    {% endif %}
+                    {% if 'retried' == childJob.status %}
+                        {% set status = 'warning' %}
+                    {% endif %}
+                    {% if 'failed' == childJob.status or 'retry_failed' == childJob.status %}
+                        {% set status = 'danger' %}
+                    {% endif %}
+                    {% if 'succeeded' == childJob.status or 'retry_succeeded' == childJob.status %}
+                        {% set status = 'success' %}
+                    {% endif %}
+                    {% if 'cancelled' == childJob.status %}
+                        {% set status = 'danger' %}
+                    {% endif %}
+                    {% if 'pending' == childJob.status or 'running' == childJob.status %}
+                        {% set status = 'info' %}
+                    {% endif %}
+                    {% if 'new' == childJob.status %}
+                        {% set status = 'default' %}
+                    {% endif %}
+                    {% set linkedChildJob = '<code style="white-space:nowrap;padding: 5px;"><a href="' ~ path('queues_job', {'id': childJob.id}) ~ '">#' ~ childJob.id ~ '</a> (' ~ childJob.priority ~ ') <span class="label label-' ~ status ~ '">' ~ childJob.status %}
+                    {% if childJob.exitCode %}
+                        {% set linkedChildJob = linkedChildJob ~ ' [' ~ childJob.exitCode ~ ']' %}
+                    {% endif %}
+                    {% set linkedChildJob = linkedChildJob ~ '</span></code>' %}
+                    {% set childJobs = childJobs|merge({ ('_' ~ childJob.id ~ '-'): linkedChildJob}) %}
+                {% endfor %}
+                <p>{{ childJobs|join(' ')|raw }}</p>
+            {% endif %}
+        </td>
+    {% endif %}
+{% endfor %}
+

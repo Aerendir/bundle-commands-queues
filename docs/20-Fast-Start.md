@@ -127,6 +127,12 @@ or
 
 **Remember the `--env=prod` argument to not consume too much memory and the `--allow-prod` flag when running CommandsQueues in production!**
 
+You can also test the behavior of failing jobs:
+
+    app/console queues:test:failing-jobs --env=prod
+
+This will create some failing jobs linked between them, so you can test the behavior of the bundle.
+
 *Do you like this bundle? [**Leave a &#9733;**](#js-repo-pjax-container) or run `composer global require symfony/thanks && composer thanks` to say thank you to all libraries you use in your current project, this one too!*
 
 ([Go back to index](00-Index.md)) | Next step: [How to use the SHQCommandsQueuesBundle](30-Use-the-ShqCommandsQueuesBundle.md)

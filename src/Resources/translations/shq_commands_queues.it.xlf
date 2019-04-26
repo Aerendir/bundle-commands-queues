@@ -1,0 +1,356 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:2.0" version="2.0" srcLang="it" trgLang="it">
+  <file id="shq_commands_queues.it">
+    <unit name="tab_status_new">
+      <segment>
+        <source>tab_status_new</source>
+        <target>Nuovi</target>
+      </segment>
+    </unit>
+    <unit name="tab_status_pending">
+      <segment>
+        <source>tab_status_pending</source>
+        <target>In Attesa</target>
+      </segment>
+    </unit>
+    <unit name="tab_status_running">
+      <segment>
+        <source>tab_status_running</source>
+        <target>In Esecuzione</target>
+      </segment>
+    </unit>
+    <unit name="tab_status_succeeded">
+      <segment>
+        <source>tab_status_succeeded</source>
+        <target>Riusciti</target>
+      </segment>
+    </unit>
+    <unit name="tab_status_failed">
+      <segment>
+        <source>tab_status_failed</source>
+        <target>Falliti</target>
+      </segment>
+    </unit>
+    <unit name="tab_status_aborted">
+      <segment>
+        <source>tab_status_aborted</source>
+        <target>Abortiti</target>
+      </segment>
+    </unit>
+    <unit name="tab_status_cancelled">
+      <segment>
+        <source>tab_status_cancelled</source>
+        <target>Cancellati</target>
+      </segment>
+    </unit>
+    <unit name="tab_status_retried">
+      <segment>
+        <source>tab_status_retried</source>
+        <target>Riprovati</target>
+      </segment>
+    </unit>
+    <unit name="tab_status_retry_succeeded">
+      <segment>
+        <source>tab_status_retry_succeeded</source>
+        <target>Riprovati e Riusciti</target>
+      </segment>
+    </unit>
+    <unit name="tab_status_retry_failed">
+      <segment>
+        <source>tab_status_retry_failed</source>
+        <target>Riprovati e Falliti</target>
+      </segment>
+    </unit>
+    <unit name="Job List">
+      <segment>
+        <source>Job List</source>
+        <target>Lista dei comandi in coda</target>
+      </segment>
+    </unit>
+    <unit name="Daemons">
+      <segment>
+        <source>Daemons</source>
+        <target>Demoni</target>
+      </segment>
+    </unit>
+    <unit name="Jobs">
+      <segment>
+        <source>Jobs</source>
+        <target>Comandi</target>
+      </segment>
+    </unit>
+    <unit name="job_title_show">
+      <segment>
+        <source>job_title_show</source>
+        <target>Mostra Comando</target>
+      </segment>
+    </unit>
+    <unit name="daemon_title_show">
+      <segment>
+        <source>daemon_title_show</source>
+        <target>Mostra Demone</target>
+      </segment>
+    </unit>
+    <unit name="Daemon List">
+      <segment>
+        <source>Daemon List</source>
+        <target>Lista dei Demoni</target>
+      </segment>
+    </unit>
+    <unit name="Id">
+      <segment>
+        <source>Id</source>
+        <target>Id</target>
+      </segment>
+    </unit>
+    <unit name="Host">
+      <segment>
+        <source>Host</source>
+        <target>Host</target>
+      </segment>
+    </unit>
+    <unit name="Pid">
+      <segment>
+        <source>Pid</source>
+        <target>Pid</target>
+      </segment>
+    </unit>
+    <unit name="Born On">
+      <segment>
+        <source>Born On</source>
+        <target>Nato Il</target>
+      </segment>
+    </unit>
+    <unit name="Died On">
+      <segment>
+        <source>Died On</source>
+        <target>Morto Il</target>
+      </segment>
+    </unit>
+    <unit name="Mortis Causa">
+      <segment>
+        <source>Mortis Causa</source>
+        <target>Mortis Causa</target>
+      </segment>
+    </unit>
+    <unit name="Command">
+      <segment>
+        <source>Command</source>
+        <target>Comando</target>
+      </segment>
+    </unit>
+    <unit name="Dependencies">
+      <segment>
+        <source>Dependencies</source>
+        <target>Dipendenze</target>
+      </segment>
+    </unit>
+    <unit name="Status">
+      <segment>
+        <source>Status</source>
+        <target>Status</target>
+      </segment>
+    </unit>
+    <unit name="Arguments">
+      <segment>
+        <source>Arguments</source>
+        <target>Argomenti</target>
+      </segment>
+    </unit>
+    <unit name="Queue">
+      <segment>
+        <source>Queue</source>
+        <target>Coda</target>
+      </segment>
+    </unit>
+    <unit name="Exit Code">
+
+      <segment>
+        <source>Exit Code</source>
+        <target>Codice di uscita</target>
+      </segment>
+    </unit>
+    <unit name="Priority">
+
+      <segment>
+        <source>Priority</source>
+        <target>Priorità</target>
+      </segment>
+    </unit>
+    <unit name="Created At">
+
+      <segment>
+        <source>Created At</source>
+        <target>Creato il</target>
+      </segment>
+    </unit>
+    <unit name="Started At">
+
+      <segment>
+        <source>Started At</source>
+        <target>Avviato il</target>
+      </segment>
+    </unit>
+    <unit name="Closed At">
+
+      <segment>
+        <source>Closed At</source>
+        <target>Chiuso il</target>
+      </segment>
+    </unit>
+    <unit name="Execute After Time">
+
+      <segment>
+        <source>Execute After Time</source>
+        <target>Esegui dopo il</target>
+      </segment>
+    </unit>
+    <unit name="Queues">
+
+      <segment>
+        <source>Queues</source>
+        <target>Code</target>
+      </segment>
+    </unit>
+    <unit name="Created On">
+
+      <segment>
+        <source>Created On</source>
+        <target>Creato il</target>
+      </segment>
+    </unit>
+    <unit name="Started On">
+
+      <segment>
+        <source>Started On</source>
+        <target>Avviato il</target>
+      </segment>
+    </unit>
+    <unit name="Closed On">
+
+      <segment>
+        <source>Closed On</source>
+        <target>Chiuso il</target>
+      </segment>
+    </unit>
+    <unit name="Exit code">
+
+      <segment>
+        <source>Exit code</source>
+        <target>Codice di Uscita</target>
+      </segment>
+    </unit>
+    <unit name="Is retry of">
+
+      <segment>
+        <source>Is retry of</source>
+        <target>È un ritentativo di</target>
+      </segment>
+    </unit>
+    <unit name="Retried by">
+
+      <segment>
+        <source>Retried by</source>
+        <target>Ritentato da</target>
+      </segment>
+    </unit>
+    <unit name="All retrying Jobs">
+
+      <segment>
+        <source>All retrying Jobs</source>
+        <target>Tutti i ritentativi</target>
+      </segment>
+    </unit>
+    <unit name="First retried job">
+
+      <segment>
+        <source>First retried job</source>
+        <target>Primo ritentativo</target>
+      </segment>
+    </unit>
+    <unit name="Cancelled by">
+
+      <segment>
+        <source>Cancelled by</source>
+        <target>Cancellato da</target>
+      </segment>
+    </unit>
+    <unit name="No parent Jobs">
+
+      <segment>
+        <source>No parent Jobs</source>
+        <target>Nessun Job genitore</target>
+      </segment>
+    </unit>
+    <unit name="Parent Jobs">
+
+      <segment>
+        <source>Parent Jobs</source>
+        <target>Job genitore</target>
+      </segment>
+    </unit>
+    <unit name="No child Jobs">
+
+      <segment>
+        <source>No child Jobs</source>
+        <target>Nessun job figlio</target>
+      </segment>
+    </unit>
+    <unit name="Child Jobs">
+
+      <segment>
+        <source>Child Jobs</source>
+        <target>Job figli</target>
+      </segment>
+    </unit>
+    <unit name="Cancellation Reason">
+
+      <segment>
+        <source>Cancellation Reason</source>
+        <target>Causa della cancellazione</target>
+      </segment>
+    </unit>
+    <unit name="Execute After">
+
+      <segment>
+        <source>Execute After</source>
+        <target>Esegui dopo il</target>
+      </segment>
+    </unit>
+    <unit name="Retry strategy">
+
+      <segment>
+        <source>Retry strategy</source>
+        <target>Strategia per ritentare</target>
+      </segment>
+    </unit>
+    <unit name="Current attempt">
+
+      <segment>
+        <source>Current attempt</source>
+        <target>Ritentativo attuale</target>
+      </segment>
+    </unit>
+    <unit name="Max attempts">
+
+      <segment>
+        <source>Max attempts</source>
+        <target>Numero massimo di ritentativi</target>
+      </segment>
+    </unit>
+    <unit name="Increment by">
+
+      <segment>
+        <source>Increment by</source>
+        <target>Incrementa di</target>
+      </segment>
+    </unit>
+    <unit name="Exponential base">
+
+      <segment>
+        <source>Exponential base</source>
+        <target>Base esponenziale</target>
+      </segment>
+    </unit>
+  </file>
+</xliff>

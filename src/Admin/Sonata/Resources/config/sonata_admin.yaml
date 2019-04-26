@@ -1,0 +1,17 @@
+services:
+    SerendipityHQ\Bundle\CommandsQueuesBundle\Admin\Sonata\Entity\DaemonAdmin:
+        arguments: [~, SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Daemon, ~]
+        calls:
+            - [ setTemplate, ['show', 'SHQCommandsQueuesBundle:Admin/Sonata:daemon_show.html.twig']]
+        tags:
+            - { name: sonata.admin, manager_type: orm, group: 'CommandsQueues', label: Daemons, show_mosaic_button: false }
+        public: true
+    SerendipityHQ\Bundle\CommandsQueuesBundle\Admin\Sonata\Entity\JobAdmin:
+        arguments: [~, SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job, ~]
+        calls:
+            - [ setTemplate, ['inner_list_row', 'SHQCommandsQueuesBundle:Admin/Sonata:jobs_inner_list_row.html.twig']]
+            - [ setTemplate, ['outer_list_rows_list', 'SHQCommandsQueuesBundle:Admin/Sonata:jobs_list_outer_rows_list.html.twig']]
+            - [ setTemplate, ['show', 'SHQCommandsQueuesBundle:Admin/Sonata:job_show.html.twig']]
+        tags:
+            - { name: sonata.admin, manager_type: orm, group: 'CommandsQueues', label: Jobs, show_mosaic_button: false }
+        public: true
