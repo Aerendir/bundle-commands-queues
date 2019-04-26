@@ -4,8 +4,3 @@ services:
         arguments: ["@shq_commands_queues.do_not_use.entity_manager"]
     Doctrine\ORM\EntityManagerInterface $doNotUseEntityManager: "@shq_commands_queues.do_not_use.entity_manager"
     SerendipityHQ\Bundle\CommandsQueuesBundle\Util\JobsMarker $doNotUseJobsMarker: "@shq_commands_queues.do_not_use.jobs_marker"
-
-    SerendipityHQ\Bundle\CommandsQueuesBundle\Controller\QueuesController:
-        class: SerendipityHQ\Bundle\CommandsQueuesBundle\Controller\QueuesController
-        arguments: ['@shq_commands_queues.do_not_use.entity_manager', '@kernel', '@router']
-        tags: ['controller.service_arguments']
