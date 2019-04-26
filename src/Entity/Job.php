@@ -338,7 +338,7 @@ class Job
      *
      * @throws ArrayException
      */
-    public function __construct(string $command, $arguments = [], string $queue = 'default')
+    public function __construct(string $command, $arguments = [], string $queue = Daemon::DEFAULT_QUEUE_NAME)
     {
         $this->command            = $command;
         $this->arguments          = self::prepareArguments($arguments);

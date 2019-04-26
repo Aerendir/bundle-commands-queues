@@ -104,14 +104,15 @@ class QueuesDaemon
      */
     public function __construct(DaemonConfig $config, EntityManager $entityManager, JobsManager $jobsManager, JobsMarker $jobsMarker, Profiler $profiler)
     {
-        /** @var JobRepository $jobsRepo */
-        $jobsRepo            = $this->entityManager->getRepository(Job::class);
         $this->config        = $config;
         $this->entityManager = $entityManager;
         $this->jobsManager   = $jobsManager;
         $this->jobsMarker    = $jobsMarker;
-        $this->jobsRepo      = $jobsRepo;
         $this->profiler      = $profiler;
+
+        /** @var JobRepository $jobsRepo */
+        $jobsRepo       = $this->entityManager->getRepository(Job::class);
+        $this->jobsRepo = $jobsRepo;
     }
 
     /**
@@ -147,7 +148,7 @@ class QueuesDaemon
         $this->entityManager->persist($this->me);
         $this->entityManager->flush($this->me);
         $ioWriter->successLineNoBg(\Safe\sprintf(
-            'I\'m Daemon "%s@%s" (ID: %s).', $this->me->getPid(), $this->me->getHost(), $this->me->getId())
+                'I\'m Daemon "%s@%s" (ID: %s).', $this->me->getPid(), $this->me->getHost(), $this->me->getId())
         );
 
         // First of all setup Memprof if required
@@ -392,7 +393,7 @@ class QueuesDaemon
     {
         // The number of iterations is reached and the queue has currently running Jobs
         return microtime(true) - $this->getProfiler()->getRunningJobsLastCheckedAt($queueName) >= $this->getConfig()->getRunningJobsCheckInterval($queueName)
-            && $this->hasRunningJobs($queueName);
+               && $this->hasRunningJobs($queueName);
     }
 
     /**
@@ -459,7 +460,7 @@ class QueuesDaemon
                 $this->ioWriter->infoLineNoBg(\Safe\sprintf(
                     '[%s] Job <success-nobg>#%s [%s]</success-nobg> on Queue <success-nobg>%s</success-nobg>: Checking status...',
                     $now->format('Y-m-d H:i:s'), $checkingJob->getId(), $checkingJob->getQueue(), $checkingProcess->getPid()
-                    ));
+                ));
             }
 
             // If the running job is processed correctly...
@@ -870,7 +871,7 @@ class QueuesDaemon
         );
         if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
             $this->ioWriter->noteLineNoBg(\Safe\sprintf(
-                '[%s] Job <success-nobg>#%s</success-nobg> on Queue "%s": Retry with Job "#%s" (Attempt #%s/%s).',
+                    '[%s] Job <success-nobg>#%s</success-nobg> on Queue "%s": Retry with Job "#%s" (Attempt #%s/%s).',
                     JobsUtil::getFormattedTime($job, 'getClosedAt'), $job->getId(), $job->getQueue(), $retryJob->getId(), $retryJob->getRetryStrategy()->getAttempts(), $retryJob->getRetryStrategy()->getMaxAttempts())
             );
         }

@@ -32,6 +32,12 @@ use SerendipityHQ\Bundle\CommandsQueuesBundle\Config\DaemonConfig;
  */
 class Daemon
 {
+    /** @var string */
+    public const DEFAULT_DAEMON_NAME = 'default';
+
+    /** @var string */
+    public const DEFAULT_QUEUE_NAME = 'default';
+
     /**
      * Used when a Daemon is killed due to a PCNTL signal.
      *

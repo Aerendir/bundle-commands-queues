@@ -17,6 +17,9 @@ declare(strict_types=1);
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\DependencyInjection;
 
+use Safe\Exceptions\ArrayException;
+use Safe\Exceptions\StringsException;
+use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Daemon;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
@@ -43,7 +46,7 @@ class Configuration implements ConfigurationInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @return TreeBuilder
      */
     public function getConfigTreeBuilder(): TreeBuilder
     {
@@ -124,6 +127,7 @@ class Configuration implements ConfigurationInterface
      * @param array $tree
      *
      * @return bool
+     * @throws StringsException
      */
     private function validateConfiguration(array $tree): bool
     {
@@ -157,6 +161,7 @@ class Configuration implements ConfigurationInterface
      * @param array $tree
      *
      * @return array
+     * @throws ArrayException
      */
     private function prepareConfiguration(array $tree): array
     {
@@ -167,6 +172,10 @@ class Configuration implements ConfigurationInterface
             'daemons'            => $tree['daemons'],
             'queues'             => $tree['queues'],
         ];
+
+        if (0 === count($returnConfig['daemons'])) {
+            $returnConfig['daemons'][Daemon::DEFAULT_DAEMON_NAME] = [];
+        }
 
         // Configure each daemon
         foreach ($returnConfig['daemons'] as $daemon => $config) {
@@ -200,6 +209,11 @@ class Configuration implements ConfigurationInterface
      */
     private function configureDaemon(array $config, array $tree): array
     {
+        if (false === isset($config['queues'])) {
+            $config['queues'][] = Daemon::DEFAULT_QUEUE_NAME;
+            $this->foundQueues[Daemon::DEFAULT_QUEUE_NAME] = Daemon::DEFAULT_QUEUE_NAME;
+        }
+
         return [
             // Daemon specific configurations
             'alive_daemons_check_interval' => $config['alive_daemons_check_interval'] ?? $tree['alive_daemons_check_interval'],

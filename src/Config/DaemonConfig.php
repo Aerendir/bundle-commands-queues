@@ -18,6 +18,7 @@ declare(strict_types=1);
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Config;
 
 use InvalidArgumentException;
+use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Daemon;
 
 /**
  * Manages the configuration of a Daemon.
@@ -83,6 +84,10 @@ class DaemonConfig extends AbstractConfig
 
             // Use as Daemon the only one configured
             $daemon = (string) key($this->daemons);
+        }
+        
+        if (empty($daemon)) {
+            $daemon = Daemon::DEFAULT_DAEMON_NAME;
         }
 
         $this->name = $daemon;
