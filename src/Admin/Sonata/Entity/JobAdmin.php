@@ -109,34 +109,34 @@ class JobAdmin extends AbstractAdmin
             throw new RuntimeException('Impossible to get the $admin.');
         }
 
-        $menu->addChild('New', [
+        $menu->addChild('tab_status_new', [
             'uri' => $admin->generateUrl('list', ['filter[status][value]' => Job::STATUS_NEW]),
         ]);
-        $menu->addChild('Pending', [
+        $menu->addChild('tab_status_pending', [
             'uri' => $admin->generateUrl('list', ['filter[status][value]' => Job::STATUS_PENDING]),
         ]);
-        $menu->addChild('Running', [
+        $menu->addChild('tab_status_running', [
             'uri' => $admin->generateUrl('list', ['filter[status][value]' => Job::STATUS_RUNNING]),
         ]);
-        $menu->addChild('Succeeded', [
+        $menu->addChild('tab_status_succeeded', [
             'uri' => $admin->generateUrl('list', ['filter[status][value]' => Job::STATUS_SUCCEEDED]),
         ]);
-        $menu->addChild('Failed', [
+        $menu->addChild('tab_status_failed', [
             'uri' => $admin->generateUrl('list', ['filter[status][value]' => Job::STATUS_FAILED]),
         ]);
-        $menu->addChild('Aborted', [
+        $menu->addChild('tab_status_aborted', [
             'uri' => $admin->generateUrl('list', ['filter[status][value]' => Job::STATUS_ABORTED]),
         ]);
-        $menu->addChild('Cancelled', [
+        $menu->addChild('tab_status_cancelled', [
             'uri' => $admin->generateUrl('list', ['filter[status][value]' => Job::STATUS_CANCELLED]),
         ]);
-        $menu->addChild('Retried', [
+        $menu->addChild('tab_status_retried', [
             'uri' => $admin->generateUrl('list', ['filter[status][value]' => Job::STATUS_RETRIED]),
         ]);
-        $menu->addChild('Retry Succeeded', [
+        $menu->addChild('tab_status_retry_succeeded', [
             'uri' => $admin->generateUrl('list', ['filter[status][value]' => Job::STATUS_RETRY_SUCCEEDED]),
         ]);
-        $menu->addChild('Retry Failed', [
+        $menu->addChild('tab_status_retry_failed', [
             'uri' => $admin->generateUrl('list', ['filter[status][value]' => Job::STATUS_RETRY_FAILED]),
         ]);
 

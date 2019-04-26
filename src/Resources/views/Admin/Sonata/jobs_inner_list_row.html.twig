@@ -8,6 +8,7 @@ For the full copyright and license information, please view the LICENSE
 file that was distributed with this source code.
 
 #}
+{% trans_default_domain 'shq_commands_queues' %}
 {% for field_description in admin.list.elements %}
     {% if 'id' == field_description.name %}
         <td id="{{ object.id }}" style="line-height: 1.9;">
@@ -35,7 +36,7 @@ file that was distributed with this source code.
                 {% if 'new' == object.retryOf.status %}
                     {% set status = 'default' %}
                 {% endif %}
-                <p><small class="text-muted">Is retry of <code style="white-space:nowrap;padding: 5px;"><a href="{{ path('queues_job', {'id': object.retryOf.id}) }}">#{{ object.retryOf.id }}</a> ({{ object.retryOf.priority }}) @{{ object.retryOf.queue }} <span class="label label-{{ status }}">{{ object.retryOf.status }}{% if object.retryOf.exitCode %} [{{ object.retryOf.exitCode}}]{% endif %}</span></code></small></p>
+                <p><small class="text-muted">{% trans %}Is retry of{% endtrans %} <code style="white-space:nowrap;padding: 5px;"><a href="{{ path('queues_job', {'id': object.retryOf.id}) }}">#{{ object.retryOf.id }}</a> ({{ object.retryOf.priority }}) @{{ object.retryOf.queue }} <span class="label label-{{ status }}">{{ object.retryOf.status }}{% if object.retryOf.exitCode %} [{{ object.retryOf.exitCode}}]{% endif %}</span></code></small></p>
             {% endif %}
             {% if object.isTypeRetried %}
                 {% set status = '' %}
@@ -61,11 +62,11 @@ file that was distributed with this source code.
                     {% set status = 'default' %}
                 {% endif %}
                 <p><small class="text-muted">
-                        Retried by <br />
+                        {% trans %}Retried by{% endtrans %} <br />
                         <code style="white-space:nowrap;padding: 5px;"><a href="{{ path('queues_job', {'id': object.retriedBy.id}) }}">#{{ object.retriedBy.id }}</a> ({{ object.retriedBy.priority }}) <span class="label label-{{ status }}">{{ object.retriedBy.status }}{% if object.retriedBy.exitCode %} [{{ object.retriedBy.exitCode}}]{% endif %}</span></code>
                     </small></p>
                 {% if 0 < object.retryingJobs.count %}
-                    <small class="text-muted">All retrying Jobs:</small>
+                    <small class="text-muted">{% trans %}All retrying Jobs{% endtrans %}:</small>
                     {% set retryingJobs = {} %}
                     {% for retryingJob in object.retryingJobs %}
                         {% set status = '' %}
@@ -120,7 +121,7 @@ file that was distributed with this source code.
                 {% if 'pending' == object.firstRetriedJob.status or 'running' == object.firstRetriedJob.status %}
                     {% set status = 'info' %}
                 {% endif %}
-                <p><small class="text-muted">First retried job <code style="white-space:nowrap;padding: 5px;"><a href="{{ path('queues_job', {'id': object.firstRetriedJob.id}) }}">#{{ object.firstRetriedJob.id }}</a> ({{ object.firstRetriedJob.priority }}) @{{ object.firstRetriedJob.queue }} <span class="label label-{{ status }}">{{ object.firstRetriedJob.status }}{% if object.firstRetriedJob.exitCode %} [{{ object.firstRetriedJob.exitCode}}]{% endif %}</span></code></small></p>
+                <p><small class="text-muted">{% trans %}First retried job{% endtrans %} <code style="white-space:nowrap;padding: 5px;"><a href="{{ path('queues_job', {'id': object.firstRetriedJob.id}) }}">#{{ object.firstRetriedJob.id }}</a> ({{ object.firstRetriedJob.priority }}) @{{ object.firstRetriedJob.queue }} <span class="label label-{{ status }}">{{ object.firstRetriedJob.status }}{% if object.firstRetriedJob.exitCode %} [{{ object.firstRetriedJob.exitCode}}]{% endif %}</span></code></small></p>
             {% endif %}
             {% if 'cancelled' == object.status %}
                 {% set status = '' %}
@@ -142,8 +143,8 @@ file that was distributed with this source code.
                 {% if 'pending' == object.cancelledBy.status or 'running' == object.cancelledBy.status %}
                     {% set status = 'info' %}
                 {% endif %}
-                <p><small class="text-muted"><b>Cancellation Reason</b>: <i>{{ object.debug.cancellation_reason }}</i></small></p>
-                <p><small class="text-muted">Cancelled by <code style="white-space:nowrap;padding: 5px;"><a href="{{ path('queues_job', {'id': object.cancelledBy.id}) }}">#{{ object.cancelledBy.id }}</a> ({{ object.cancelledBy.priority }}) @{{ object.cancelledBy.queue }} <span class="label label-{{ status }}">{{ object.cancelledBy.status }}{% if object.cancelledBy.exitCode %} [{{ object.cancelledBy.exitCode}}]{% endif %}</span></code></small></p>
+                <p><small class="text-muted"><b>{% trans %}Cancellation Reason{% endtrans %}</b>: <i>{{ object.debug.cancellation_reason }}</i></small></p>
+                <p><small class="text-muted">{% trans %}Cancelled by{% endtrans %} <code style="white-space:nowrap;padding: 5px;"><a href="{{ path('queues_job', {'id': object.cancelledBy.id}) }}">#{{ object.cancelledBy.id }}</a> ({{ object.cancelledBy.priority }}) @{{ object.cancelledBy.queue }} <span class="label label-{{ status }}">{{ object.cancelledBy.status }}{% if object.cancelledBy.exitCode %} [{{ object.cancelledBy.exitCode}}]{% endif %}</span></code></small></p>
             {% endif %}
         </td>
     {% elseif 'command' == field_description.name %}
@@ -156,27 +157,27 @@ file that was distributed with this source code.
                 </code>
             </p>
             <p>
-                <b>Created at</b>: {% if object.createdAt %}{{ object.createdAt|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }}{% endif %}<br />
-                <b>Execute after</b>: {% if object.executeAfterTime %}{{ object.executeAfterTime|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }}{% endif %}<br />
-                <b>Started at</b>: {% if object.startedAt %}{{ object.startedAt|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }}{% endif %}<br />
-                <b>Closed At</b>: {% if object.closedAt %}{{ object.closedAt|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }}{% endif %}<br />
+                <b>{% trans %}Created At{% endtrans %}</b>: {% if object.createdAt %}{{ object.createdAt|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }}{% endif %}<br />
+                <b>{% trans %}Execute After{% endtrans %}</b>: {% if object.executeAfterTime %}{{ object.executeAfterTime|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }}{% endif %}<br />
+                <b>{% trans %}Started At{% endtrans %}</b>: {% if object.startedAt %}{{ object.startedAt|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }}{% endif %}<br />
+                <b>{% trans %}Closed At{% endtrans %}</b>: {% if object.closedAt %}{{ object.closedAt|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }}{% endif %}<br />
             </p>
             <p><small>
-                    <b>Retry strategy: {{ object.retryStrategy.strategyName }}</b><br />
+                    <b>{% trans %}Retry strategy{% endtrans %}: {{ object.retryStrategy.strategyName }}</b><br />
                     {% if object.retryStrategy.canRetry %}Will be retried on: {{ object.retryStrategy.retryOn|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }}<br />{% endif %}
                     <span class="text-muted">
-                        Current attempt: {{ object.retryStrategy.attempts }}, Max attempts: {{ object.retryStrategy.maxAttempts }},
-                        Increment by: {{ object.retryStrategy.incrementBy }} {{ object.retryStrategy.timeUnit }},
-                        {% if 'exponential' == object.retryStrategy.strategyName %}Exponential base: {{ object.retryStrategy.exponentialBase }}, {% endif %}
+                        {% trans %}Current attempt{% endtrans %}: {{ object.retryStrategy.attempts }}, {% trans %}Max attempts{% endtrans %}: {{ object.retryStrategy.maxAttempts }},
+                        {% trans %}Increment by{% endtrans %}: {{ object.retryStrategy.incrementBy }} {{ object.retryStrategy.timeUnit }},
+                        {% if 'exponential' == object.retryStrategy.strategyName %}{% trans %}Exponential base{% endtrans %}: {{ object.retryStrategy.exponentialBase }}, {% endif %}
                     </span>
                 </small></p>
         </td>
     {% elseif 'dependencies' == field_description.name %}
         <td style="line-height: 2;">
             {% if false == object.hasParentDependencies %}
-                {% if false == object.isTypeRetrying %}<p><span class="text-muted">No parent Jobs</span></p>{% endif %}
+                {% if false == object.isTypeRetrying %}<p><span class="text-muted">{% trans %}No parent Jobs{% endtrans %}</span></p>{% endif %}
             {% else %}
-                <p><b>Parent Jobs</b></p>
+                <p><b>{% trans %}Parent Jobs{% endtrans %}</b></p>
                 {% set parentJobs = {} %}
                 {% for parentJob in object.parentDependencies %}
                     {% set status = '' %}
@@ -214,7 +215,7 @@ file that was distributed with this source code.
             {% if false == object.hasChildDependencies %}
                 <p><span class="text-muted">No child Jobs</span></p>
             {% else %}
-                <p><b>Child Jobs</b></p>
+                <p><b>{% trans %}Child Jobs{% endtrans %}</b></p>
                 {% set childJobs = {} %}
                 {% for childJob in object.childDependencies %}
                     {% set status = '' %}

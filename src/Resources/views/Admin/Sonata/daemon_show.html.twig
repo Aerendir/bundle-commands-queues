@@ -8,7 +8,7 @@ For the full copyright and license information, please view the LICENSE
 file that was distributed with this source code.
 
 #}
-
+{% trans_default_domain 'shq_commands_queues' %}
 {% extends base_template %}
 
 {% block title %}
@@ -43,12 +43,12 @@ file that was distributed with this source code.
         <div class="col-lg-12">
             #{{ object.id }} {{ object.pid }}@{{ object.host }}
             <p><strong>#{{ object.id }}</strong> <span class="label label-{{ status }}">{{ statusLabel }}</span> <code>{{ object.pid }}@{{ object.host }}</code></p>
-            <p>Born on: {{ object.bornOn|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }} {% if object.diedOn %} - Died on: {{ object.diedOn|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }}{% endif %}</p>
+            <p>{% trans %}Born On{% endtrans %}: {{ object.bornOn|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }} {% if object.diedOn %} - {% trans %}Died On{% endtrans %}: {{ object.diedOn|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }}{% endif %}</p>
         </div>
     </div>
     <div class="row">
         <div class="col-lg-6">
-            <h2>Queues</h2>
+            <h2>{% trans %}Queues{% endtrans %}</h2>
 <pre>
 {% for queue in object.config.queues %}
 <strong>{{ queue }}</strong>:
