@@ -17,11 +17,19 @@ declare(strict_types=1);
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Command;
 
+use Doctrine\Common\Persistence\Mapping\MappingException;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
+use Doctrine\ORM\TransactionRequiredException;
 use Exception;
 use RuntimeException;
+use Safe\Exceptions\ArrayException;
+use Safe\Exceptions\FilesystemException;
+use Safe\Exceptions\InfoException;
+use Safe\Exceptions\MiscException;
+use Safe\Exceptions\PcntlException;
+use Safe\Exceptions\StreamException;
 use Safe\Exceptions\StringsException;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Daemon;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Repository\DaemonRepository;
@@ -97,11 +105,19 @@ class RunCommand extends Command
      * @param InputInterface  $input
      * @param OutputInterface $output
      *
+     * @return int The status code of the command
      * @throws ORMException
      * @throws OptimisticLockException
      * @throws StringsException
-     *
-     * @return int The status code of the command
+     * @throws MappingException
+     * @throws TransactionRequiredException
+     * @throws ArrayException
+     * @throws FilesystemException
+     * @throws InfoException
+     * @throws MiscException
+     * @throws PcntlException
+     * @throws StreamException
+     * @throws Exception
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
@@ -332,7 +348,10 @@ class RunCommand extends Command
     /**
      * @param string $queueName
      *
+     * @throws ORMException
+     * @throws OptimisticLockException
      * @throws StringsException
+     * @throws TransactionRequiredException
      */
     private function processRunningJobs(string $queueName): void
     {
