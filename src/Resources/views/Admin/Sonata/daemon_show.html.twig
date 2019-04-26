@@ -41,7 +41,6 @@ file that was distributed with this source code.
 <div class="sonata-ba-view">
     <div class="row">
         <div class="col-lg-12">
-            #{{ object.id }} {{ object.pid }}@{{ object.host }}
             <p><strong>#{{ object.id }}</strong> <span class="label label-{{ status }}">{{ statusLabel }}</span> <code>{{ object.pid }}@{{ object.host }}</code></p>
             <p>{% trans %}Born On{% endtrans %}: {{ object.bornOn|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }} {% if object.diedOn %} - {% trans %}Died On{% endtrans %}: {{ object.diedOn|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }}{% endif %}</p>
         </div>
