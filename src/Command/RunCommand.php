@@ -105,7 +105,6 @@ class RunCommand extends Command
      * @param InputInterface  $input
      * @param OutputInterface $output
      *
-     * @return int The status code of the command
      * @throws ORMException
      * @throws OptimisticLockException
      * @throws StringsException
@@ -118,6 +117,8 @@ class RunCommand extends Command
      * @throws PcntlException
      * @throws StreamException
      * @throws Exception
+     *
+     * @return int The status code of the command
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
