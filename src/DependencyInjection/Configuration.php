@@ -73,8 +73,6 @@ class Configuration implements ConfigurationInterface
                 // In seconds (3 minutes)
                 ->integerNode('max_runtime')->defaultValue(90)->end()
                 // In seconds (5 minutes)
-                ->integerNode('optimization_interval')->defaultValue(350)->end()
-                // In seconds (5 minutes)
                 ->integerNode('profiling_info_interval')->defaultValue(350)->end()
                 ->booleanNode('print_profiling_info')->defaultFalse()->end()
                 ->scalarNode('retry_stale_jobs')->defaultTrue()->end()
@@ -87,7 +85,6 @@ class Configuration implements ConfigurationInterface
                         ->children()
                             ->integerNode('idle_time')->defaultNull()->end()
                             ->integerNode('max_runtime')->defaultNull()->end()
-                            ->integerNode('optimization_interval')->defaultNull()->end()
                             ->integerNode('profiling_info_interval')->defaultNull()->end()
                             ->integerNode('print_profiling_info')->defaultNull()->end()
                             ->scalarNode('retry_stale_jobs')->defaultNull()->end()
@@ -219,7 +216,6 @@ class Configuration implements ConfigurationInterface
             'alive_daemons_check_interval' => $config['alive_daemons_check_interval'] ?? $tree['alive_daemons_check_interval'],
             'idle_time'                    => $config['idle_time'] ?? $tree['idle_time'],
             'max_runtime'                  => $config['max_runtime'] ?? $tree['max_runtime'],
-            'optimization_interval'        => $config['optimization_interval'] ?? $tree['optimization_interval'],
             'profiling_info_interval'      => $config['profiling_info_interval'] ?? $tree['profiling_info_interval'],
             'print_profiling_info'         => $config['print_profiling_info'] ?? $tree['print_profiling_info'],
             // Queues specific configurations

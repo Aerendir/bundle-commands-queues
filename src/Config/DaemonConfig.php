@@ -49,9 +49,6 @@ class DaemonConfig extends AbstractConfig
     /** @var int $maxRuntime */
     private $maxRuntime;
 
-    /** @var int $optimizationInterval */
-    private $optimizationInterval;
-
     /** @var int $profilingInfoInterval */
     private $profilingInfoInterval;
 
@@ -85,7 +82,7 @@ class DaemonConfig extends AbstractConfig
             // Use as Daemon the only one configured
             $daemon = (string) key($this->daemons);
         }
-        
+
         if (empty($daemon)) {
             $daemon = Daemon::DEFAULT_DAEMON_NAME;
         }
@@ -96,7 +93,6 @@ class DaemonConfig extends AbstractConfig
         $this->setIdleTime($this->daemons[$daemon]['idle_time']);
         $this->setManagedEntitiesTreshold($this->daemons[$daemon]['managed_entities_treshold']);
         $this->setMaxRuntime($this->daemons[$daemon]['max_runtime']);
-        $this->setOptimizationInterval($this->daemons[$daemon]['optimization_interval']);
         $this->setProfilingInfoInterval($this->daemons[$daemon]['profiling_info_interval']);
         $this->setPrintProfilingInfo($this->daemons[$daemon]['print_profiling_info']);
 
@@ -170,14 +166,6 @@ class DaemonConfig extends AbstractConfig
     public function getMaxRuntime(): int
     {
         return $this->maxRuntime;
-    }
-
-    /**
-     * @return int
-     */
-    public function getOptimizationInterval(): int
-    {
-        return $this->optimizationInterval;
     }
 
     /**
@@ -273,14 +261,6 @@ class DaemonConfig extends AbstractConfig
     private function setMaxRuntime(int $maxRuntime): void
     {
         $this->maxRuntime = $maxRuntime;
-    }
-
-    /**
-     * @param int $optimizationInterval
-     */
-    private function setOptimizationInterval(int $optimizationInterval): void
-    {
-        $this->optimizationInterval = $optimizationInterval;
     }
 
     /**
