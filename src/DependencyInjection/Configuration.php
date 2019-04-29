@@ -32,6 +32,9 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
  */
 class Configuration implements ConfigurationInterface
 {
+    /** @var int The maximum amount of days after which the finished jobs are deleted */
+    private const MAX_RETENTION_DAYS = 0;
+
     /** @var array $foundQueues The queues found processing the Daemons */
     private $foundQueues = [];
 
@@ -74,7 +77,9 @@ class Configuration implements ConfigurationInterface
                 ->integerNode('max_runtime')->defaultValue(90)->end()
                 // In seconds (5 minutes)
                 ->integerNode('profiling_info_interval')->defaultValue(350)->end()
-                ->booleanNode('print_profiling_info')->defaultFalse()->end()
+                ->booleanNode('print_profiling_info')->defaultTrue()->end()
+                // The maximum amount of days after which the finished jobs are deleted
+                ->scalarNode('max_retention_days')->defaultValue(self::MAX_RETENTION_DAYS)->end()
                 ->scalarNode('retry_stale_jobs')->defaultTrue()->end()
                 // In seconds
                 ->integerNode('running_jobs_check_interval')->defaultValue(10)->end()
@@ -90,6 +95,8 @@ class Configuration implements ConfigurationInterface
                             ->scalarNode('retry_stale_jobs')->defaultNull()->end()
                             ->integerNode('running_jobs_check_interval')->defaultNull()->end()
                             ->integerNode('managed_entities_treshold')->defaultValue(100)->end()
+                            // The maximum amount of days after which the finished jobs are deleted
+                            ->scalarNode('max_retention_days')->defaultValue(self::MAX_RETENTION_DAYS)->end()
                             ->arrayNode('queues')
                                 ->prototype('scalar')->end()
                             ->end()
@@ -101,6 +108,8 @@ class Configuration implements ConfigurationInterface
                     ->prototype('array')
                         ->children()
                             ->integerNode('max_concurrent_jobs')->defaultNull()->end()
+                            // The maximum amount of days after which the finished jobs are deleted
+                            ->scalarNode('max_retention_days')->defaultValue(self::MAX_RETENTION_DAYS)->end()
                             ->scalarNode('retry_stale_jobs')->defaultNull()->end()
                         ->end()
                     ->end()
@@ -123,8 +132,9 @@ class Configuration implements ConfigurationInterface
     /**
      * @param array $tree
      *
-     * @return bool
      * @throws StringsException
+     *
+     * @return bool
      */
     private function validateConfiguration(array $tree): bool
     {
@@ -157,8 +167,9 @@ class Configuration implements ConfigurationInterface
      *
      * @param array $tree
      *
-     * @return array
      * @throws ArrayException
+     *
+     * @return array
      */
     private function prepareConfiguration(array $tree): array
     {
@@ -207,7 +218,7 @@ class Configuration implements ConfigurationInterface
     private function configureDaemon(array $config, array $tree): array
     {
         if (false === isset($config['queues'])) {
-            $config['queues'][] = Daemon::DEFAULT_QUEUE_NAME;
+            $config['queues'][]                            = Daemon::DEFAULT_QUEUE_NAME;
             $this->foundQueues[Daemon::DEFAULT_QUEUE_NAME] = Daemon::DEFAULT_QUEUE_NAME;
         }
 
@@ -222,6 +233,7 @@ class Configuration implements ConfigurationInterface
             'retry_stale_jobs'            => $config['retry_stale_jobs'] ?? $tree['retry_stale_jobs'],
             'running_jobs_check_interval' => $config['running_jobs_check_interval'] ?? $tree['running_jobs_check_interval'],
             'managed_entities_treshold'   => $config['managed_entities_treshold'] ?? $tree['managed_entities_treshold'],
+            'max_retention_days'          => $config['max_retention_days'] ?? $tree['max_retention_days'],
             'queues'                      => $config['queues'],
         ];
     }
@@ -236,6 +248,7 @@ class Configuration implements ConfigurationInterface
     {
         return [
             'max_concurrent_jobs'         => $config['max_concurrent_jobs'] ?? $tree['max_concurrent_jobs'],
+            'max_retention_days'          => $config['max_retention_days'] ?? $tree['max_retention_days'],
             'retry_stale_jobs'            => $config['retry_stale_jobs'] ?? $tree['retry_stale_jobs'],
             'running_jobs_check_interval' => $config['running_jobs_check_interval'] ?? $tree['running_jobs_check_interval'],
         ];

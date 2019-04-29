@@ -17,6 +17,7 @@ declare(strict_types=1);
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Service;
 
+use Carbon\Carbon;
 use Countable;
 use DateTime;
 use Doctrine\Common\Persistence\Mapping\MappingException;
@@ -291,11 +292,11 @@ class QueuesDaemon
             $job->addArgument(\Safe\sprintf('--cancelling-job-id=%s', $job->getId()));
         }
 
-        $jobRetryOf = $job->getRetryOf();
-        if (null === $jobRetryOf) {
-            throw new RuntimeException(\Safe\sprintf('The job of which this one (ID: %s) is a retry is not set.', $job->getId()));
-        }
         if ($job->isTypeRetrying() && $this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
+            $jobRetryOf = $job->getRetryOf();
+            if (null === $jobRetryOf) {
+                throw new RuntimeException(\Safe\sprintf('The job of which this one (ID: %s) is a retry is not set.', $job->getId()));
+            }
             $this->ioWriter->noteLineNoBg(\Safe\sprintf(
                 '[%s] Job <success-nobg>#%s</success-nobg> on Queue <success-nobg>%s</success-nobg>: This is a retry of original Job <success-nobg>#%s</success-nobg> (Childs: %s).',
                 $now->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue(), $jobRetryOf->getId(), $job->getChildDependencies()->count()
@@ -532,7 +533,10 @@ class QueuesDaemon
             $startJob = $this->jobsRepo->findOneById((int) $startJobId);
 
             if ( ! $startJob instanceof Job) {
-                throw new RuntimeException(\Safe\sprintf('Impossible to find the job with ID %s', $startJobId));
+                // The job may not exist anymore if it expired and so was deleted
+                $this->ioWriter->infoLineNoBg(\Safe\sprintf("The starting job <success-nobg>%s</success-nobg> doesn't exist anymore: nothing more to do...", $startJobId));
+
+                return true;
             }
 
             $this->jobsManager->refreshTree($startJob);
@@ -559,7 +563,12 @@ class QueuesDaemon
             return false;
         }
 
-        return $this->getConfig()->getManagedEntitiesTreshold() < (is_array($this->entityManager->getUnitOfWork()->getIdentityMap()[Job::class]) || $this->entityManager->getUnitOfWork()->getIdentityMap()[Job::class] instanceof Countable ? count($this->entityManager->getUnitOfWork()->getIdentityMap()[Job::class]) : 0);
+        return $this->getConfig()->getManagedEntitiesTreshold() < (
+            is_array($this->entityManager->getUnitOfWork()->getIdentityMap()[Job::class]) ||
+            $this->entityManager->getUnitOfWork()->getIdentityMap()[Job::class] instanceof Countable
+                ? count($this->entityManager->getUnitOfWork()->getIdentityMap()[Job::class])
+                : 0
+            );
     }
 
     /**
@@ -585,8 +594,11 @@ class QueuesDaemon
         $this->profiler->profile();
 
         // First try a soft detach
-        foreach ($this->entityManager->getUnitOfWork()->getIdentityMap()[Job::class] as $job) {
-            JobsManager::detach($job);
+        $identityMap = $this->entityManager->getUnitOfWork()->getIdentityMap();
+        if (isset($identityMap[Job::class])) {
+            foreach ($identityMap[Job::class] as $job) {
+                JobsManager::detach($job);
+            }
         }
 
         // Check if the optimization worked
@@ -607,7 +619,18 @@ class QueuesDaemon
                 $this->wait();
             }
 
-            // Comepletely clear the entity manager
+            // Clear now the entity manager to make it completely free of Jobs
+            $this->entityManager->clear();
+
+            // We need to be sure that there are no jobs running, so it is possible to flush safely
+            foreach ($this->getConfig()->getQueues() as $queueName) {
+                // Remove jobs that are older than max_retention_days
+                $this->purgeExpiredJobs($queueName);
+            }
+
+            $this->entityManager->flush();
+
+            // Clear again the EntityManager to free up all the memory
             $this->entityManager->clear();
         }
 
@@ -970,5 +993,40 @@ class QueuesDaemon
         );
 
         return true;
+    }
+
+    /**
+     * Removes from the queue all the Jobs older than max_retention_days.
+     *
+     * @param string $queueName
+     *
+     * @throws ORMException
+     * @throws StringsException
+     */
+    private function purgeExpiredJobs(string $queueName):void
+    {
+        // @todo move this to the creating QueueConfig object
+        $maxRetentionDays = $this->config->getQueue($queueName)['max_retention_days'];
+        $maxRetentionDate = new Carbon();
+        $maxRetentionDate = $maxRetentionDate->subDays($maxRetentionDays);
+        if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
+            $this->ioWriter->infoLineNoBg('Expired jobs: removing...');
+            $this->ioWriter->commentLineNoBg(\Safe\sprintf('Removing expired jobs (older than %s days - before %s...', $maxRetentionDays, $maxRetentionDate->format(JobsUtil::TIME_FORMAT)));
+        }
+
+        $removingJobs = $this->jobsRepo->findExpiredJobs($queueName, $maxRetentionDate);
+
+        /** @var Job $removingJob */
+        foreach ($removingJobs as $removingJob) {
+            $this->ioWriter->infoLineNoBg(\Safe\sprintf('Job <success-nobg>%s</success-nobg>: removing...', $removingJob->getId()));
+
+            if (false === $removingJob->canBeRemoved()) {
+                $this->ioWriter->infoLineNoBg(\Safe\sprintf('Job <success-nobg>%s</success-nobg>: cannot be removed because %s. Skipping', $removingJob->getId(), $removingJob->getCannotBeRemovedBecause()));
+
+                continue;
+            }
+
+            $this->jobsManager->remove($removingJob);
+        }
     }
 }

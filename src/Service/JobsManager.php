@@ -99,7 +99,7 @@ class JobsManager
                     // Add the current Job to the already detached
                     $detached[$jobInTreeId] = '#' . $jobInTreeId;
                     self::$ioWriter->successLineNoBg(\Safe\sprintf(
-                        "Job <info-nobg>#%s</info-nobg> is not managed and so it hasn't be detached.",
+                        "Job <info-nobg>#%s</info-nobg> is not managed and so it hasn't been detached.",
                         $jobInTreeId
                     ));
                 }
@@ -147,7 +147,39 @@ class JobsManager
     }
 
     /**
+     * @param Job $removingJob
+     *
+     * @throws ORMException
+     */
+    public function remove(Job $removingJob):void
+    {
+        // When the Job is being removed from the database, it has to first
+        // be removed from its parent dependencies to avoid foreign key errors.
+        /** @var Job $parentDependency */
+        foreach ($removingJob->getParentDependencies() as $parentDependency) {
+            $parentDependency->removeChildDependency($removingJob);
+        }
+
+        // If this is a cancelling Job, we need to first remove the association
+        // with the cancelled Jobs
+        /** @var Job $cancelledJob */
+        foreach ($removingJob->getCancelledJobs() as $cancelledJob) {
+            $cancelledJob->removeCancelledBy();
+        }
+
+        $removingJob->removeFirstRetriedJob();
+        $removingJob->removeRetriedBy();
+        $removingJob->removeRetryOf();
+
+        self::$entityManager->remove($removingJob);
+    }
+
+    /**
      * Refreshes the entire tree of Jobs.
+     *
+     * This has to be used to be sure that all the Job that are
+     * in any way linked with the given Job are managed by the Entitymanager
+     * to avoid errors about new not managed entities.
      *
      * @param Job $job
      *
@@ -301,7 +333,7 @@ class JobsManager
         }
 
         /* @var Job $retryingDependency Detach cancelled Jobs **/
-        if (null !== $job->getCancelledJobs() && 0 < count($job->getCancelledJobs())) {
+        if (0 < $job->getCancelledJobs()->count()) {
             foreach ($job->getCancelledJobs() as $cancelledJob) {
                 if (false === in_array($cancelledJob->getId(), $tree, true)) {
                     // Add it to the tree

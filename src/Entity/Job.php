@@ -314,7 +314,7 @@ class Job
      * @var Job|null If this Job is a retry of another retried job, here there is the first retried Job
      *
      * @ORM\ManyToOne(targetEntity="SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job", inversedBy="retryingJobs")
-     * @ORM\JoinColumn(name="first_retried_job", referencedColumnName="id")
+     * @ORM\JoinColumn(name="first_retried_job", referencedColumnName="id", nullable=true)
      */
     private $firstRetriedJob;
 
@@ -328,8 +328,11 @@ class Job
     /** @var string $cannotBeDetachedBecause This is not persisted. It is used to give the reason why the Job cannot be detached. */
     private $cannotBeDetachedBecause;
 
-    /** @var string $cannotRunReason This is not persisted. It is used to give the reason why the Job cannot run. */
-    private $cannotRunReason;
+    /** @var string $cannotBeRemovedBecause This is not persisted. It is used to give the reason why the Job cannot be removed. */
+    private $cannotBeRemovedBecause;
+
+    /** @var string $cannotRunBecause This is not persisted. It is used to give the reason why the Job cannot run. */
+    private $cannotRunBecause;
 
     /**
      * @param string       $command
@@ -346,6 +349,7 @@ class Job
         $this->queue              = $queue;
         $this->status             = self::STATUS_NEW;
         $this->createdAt          = new DateTime();
+        $this->cancelledJobs      = new ArrayCollection();
         $this->childDependencies  = new ArrayCollection();
         $this->parentDependencies = new ArrayCollection();
         $this->retryStrategy      = new NeverRetryStrategy();
@@ -788,9 +792,17 @@ class Job
     /**
      * @return string
      */
-    public function getCannotRunReason(): string
+    public function getCannotBeRemovedBecause() : string
     {
-        return $this->cannotRunReason;
+        return $this->cannotBeRemovedBecause;
+    }
+
+    /**
+     * @return string
+     */
+    public function getCannotRunBecause(): string
+    {
+        return $this->cannotRunBecause;
     }
 
     /**
@@ -867,6 +879,30 @@ class Job
     }
 
     /**
+     * @return bool
+     * @throws StringsException
+     */
+    public function canBeRemoved():bool
+    {
+        // Until this Job has retrying Jobs not still deleted, it cannot be deleted, too
+        if ($this->getRetryingJobs()->count() > 0) {
+            $this->cannotBeRemovedBecause = 'has retrying Jobs not still deleted';
+            return false;
+        }
+
+        // Until this Job is referenced by a cancelling Job, it cannot be removed
+        if ($this->getCancelledBy() instanceof self) {
+            $this->cannotBeRemovedBecause = \Safe\sprintf(
+                'is referenced by cancelling Job <success-nobg>%s</success-nobg>',
+                $this->getCancelledBy()->getId()
+            );
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
      * @throws StringsException
      *
      * @return bool
@@ -874,7 +910,7 @@ class Job
     public function canRun(): bool
     {
         if ($this->isStatusFinished()) {
-            $this->cannotRunReason = 'is already finished';
+            $this->cannotRunBecause = 'is already finished';
 
             return false;
         }
@@ -884,7 +920,7 @@ class Job
             switch ($parentJob->getStatus()) {
                 // Waiting dependencies
                 case self::STATUS_NEW:
-                    $this->cannotRunReason = \Safe\sprintf(
+                    $this->cannotRunBecause = \Safe\sprintf(
                         'has parent Job #%s@%s that has to be processed (%s)',
                         $parentJob->getId(), $parentJob->getQueue(), $parentJob->getStatus()
                     );
@@ -892,7 +928,7 @@ class Job
                     return false;
                     break;
                 case self::STATUS_RETRIED:
-                    $this->cannotRunReason = \Safe\sprintf(
+                    $this->cannotRunBecause = \Safe\sprintf(
                         'has parent Job #%s@%s that were retried (%s)',
                         $parentJob->getId(), $parentJob->getQueue(), $parentJob->getStatus()
                     );
@@ -902,14 +938,14 @@ class Job
 
                 // Working dependencies
                 case self::STATUS_PENDING:
-                    $this->cannotRunReason = \Safe\sprintf(
+                    $this->cannotRunBecause = \Safe\sprintf(
                         'has parent Job #%s@%s that is being processed (%s)',
                         $parentJob->getId(), $parentJob->getQueue(), $parentJob->getStatus()
                     );
 
                     return false;
                 case self::STATUS_RUNNING:
-                    $this->cannotRunReason = \Safe\sprintf(
+                    $this->cannotRunBecause = \Safe\sprintf(
                         'has parent Job #%s@%s that is running (%s)',
                         $parentJob->getId(), $parentJob->getQueue(), $parentJob->getStatus()
                     );
@@ -1156,6 +1192,77 @@ class Job
         }
 
         return $this;
+    }
+
+    /**
+     * @return Job
+     */
+    public function removeCancelledBy():Job
+    {
+        $cancelledBy = $this->getCancelledBy();
+
+        if ($cancelledBy instanceof self) {
+            $this->cancelledBy = null;
+            $cancelledBy->removeCancelledJob($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param Job $job
+     *
+     * @return Job
+     */
+    public function removeCancelledJob(Job $job): Job
+    {
+        if ($this->cancelledJobs->contains($job)) {
+            $this->cancelledJobs->removeElement($job);
+            $job->removeCancelledBy();
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Job
+     */
+    public function removeRetriedBy(): Job
+    {
+        $retriedBy = $this->getRetriedBy();
+
+        if ($retriedBy instanceof self) {
+            $this->retriedBy = null;
+            $retriedBy->removeRetryOf();
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Job
+     */
+    public function removeRetryOf():Job
+    {
+        $retryOf = $this->getRetryOf();
+
+        if ($retryOf instanceof self) {
+            $this->retryOf = null;
+            $retryOf->removeRetriedBy();
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Job
+     */
+    public function removeFirstRetriedJob():Job
+    {
+        $this->firstRetriedJob = null;
+
+        return $this;
+
     }
 
     /**

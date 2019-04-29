@@ -19,9 +19,11 @@ namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Repository;
 
 use DateTime;
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\ORMException;
+use Doctrine\ORM\Query;
 use Doctrine\ORM\QueryBuilder;
 use RuntimeException;
 use Safe\Exceptions\StringsException;
@@ -99,7 +101,7 @@ class JobRepository extends EntityRepository
             }
 
             if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
-                $this->ioWriter->infoLineNoBg(\Safe\sprintf('Job <success-nobg>#%s</success-nobg> cannot run because <success-nobg>%s</success-nobg>.', $job->getId(), $job->getCannotRunReason()));
+                $this->ioWriter->infoLineNoBg(\Safe\sprintf('Job <success-nobg>#%s</success-nobg> cannot run because <success-nobg>%s</success-nobg>.', $job->getId(), $job->getCannotRunBecause()));
             }
 
             // The Job cannot be run
@@ -121,7 +123,7 @@ class JobRepository extends EntityRepository
     {
         $queryBuilder = $this->getEntityManager()->createQueryBuilder();
 
-        $queryBuilder->select('COUNT(j)')->from('SHQCommandsQueuesBundle:Job', 'j')
+        $queryBuilder->select('COUNT(j)')->from(Job::class, 'j')
                      ->where(
                          $queryBuilder->expr()->orX(
                              $queryBuilder->expr()->eq('j.status', ':running'),
@@ -135,6 +137,46 @@ class JobRepository extends EntityRepository
 
         return (int) $queryBuilder->getQuery()
                                   ->getOneOrNullResult()['1'];
+    }
+
+    /**
+     * @param string   $queueName
+     * @param DateTime $maxRetentionDate
+     *
+     * @return array
+     */
+    public function findExpiredJobs(string $queueName, DateTime $maxRetentionDate):array
+    {
+        $queryBuilder = $this->getEntityManager()->createQueryBuilder();
+
+        $queryBuilder->select('j')->from(Job::class, 'j')
+            ->where(
+                $queryBuilder->expr()->orX(
+                    $queryBuilder->expr()->eq('j.status', ':succeeded'),
+                    $queryBuilder->expr()->eq('j.status', ':retry_succeeded'),
+                    $queryBuilder->expr()->eq('j.status', ':aborted'),
+                    $queryBuilder->expr()->eq('j.status', ':failed'),
+                    $queryBuilder->expr()->eq('j.status', ':retry_failed'),
+                    $queryBuilder->expr()->eq('j.status', ':cancelled'),
+                    $queryBuilder->expr()->eq('j.status', ':retry_failed'),
+                    $queryBuilder->expr()->eq('j.status', ':cancelled')
+                ))
+            ->setParameter('succeeded', Job::STATUS_SUCCEEDED)
+            ->setParameter('retry_succeeded', Job::STATUS_RETRY_SUCCEEDED)
+            ->setParameter('aborted', Job::STATUS_ABORTED)
+            ->setParameter('failed', Job::STATUS_FAILED)
+            ->setParameter('retry_failed', Job::STATUS_RETRY_FAILED)
+            ->setParameter('cancelled', Job::STATUS_CANCELLED)
+            ->setParameter('retry_failed', Job::STATUS_RETRY_FAILED)
+            ->setParameter('cancelled', Job::STATUS_CANCELLED)
+            ->andWhere($queryBuilder->expr()->eq('j.queue', ':queue_name'))
+            ->setParameter('queue_name', $queueName)
+            ->andWhere($queryBuilder->expr()->lt('j.closedAt', ':max_date'))
+            ->andWhere($queryBuilder->expr()->isNotNull('j.startedAt'))
+            ->setParameter('max_date', $maxRetentionDate, Type::DATETIME)
+            ->orderBy('j.closedAt', 'DESC');
+
+        return $queryBuilder->getQuery()->getResult();
     }
 
     /**
@@ -152,7 +194,7 @@ class JobRepository extends EntityRepository
     {
         $queryBuilder = $this->getEntityManager()->createQueryBuilder();
 
-        $queryBuilder->select('j')->from('SHQCommandsQueuesBundle:Job', 'j')
+        $queryBuilder->select('j')->from(Job::class, 'j')
                      ->where($queryBuilder->expr()->eq('j.command', ':command'))
                      ->setParameter('command', $command)
                      ->andWhere($queryBuilder->expr()->eq('j.queue', ':queue'))
@@ -176,7 +218,7 @@ class JobRepository extends EntityRepository
     public function findNextStaleJob(array $knownAsStale): ? Job
     {
         $queryBuilder = $this->getEntityManager()->createQueryBuilder();
-        $queryBuilder->select('j')->from('SHQCommandsQueuesBundle:Job', 'j')
+        $queryBuilder->select('j')->from(Job::class, 'j')
             // The status MUST be NEW (just inserted) or PENDING (waiting for the process to start)
                      ->where(
                 $queryBuilder->expr()->orX(
@@ -212,7 +254,7 @@ class JobRepository extends EntityRepository
     private function findNextJob(string $queueName, array $excludedJobs = []): ?Job
     {
         $queryBuilder = $this->getEntityManager()->createQueryBuilder();
-        $queryBuilder->select('j')->from('SHQCommandsQueuesBundle:Job', 'j')
+        $queryBuilder->select('j')->from(Job::class, 'j')
                      ->orderBy('j.priority', 'ASC')
                      ->addOrderBy('j.createdAt', 'ASC')
                      ->addOrderBy('j.id', 'ASC')
