@@ -145,7 +145,7 @@ class JobRepository extends EntityRepository
      *
      * @return array
      */
-    public function findExpiredJobs(string $queueName, DateTime $maxRetentionDate):array
+    public function findExpiredJobs(string $queueName, DateTime $maxRetentionDate): array
     {
         $queryBuilder = $this->getEntityManager()->createQueryBuilder();
 

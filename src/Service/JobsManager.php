@@ -151,7 +151,7 @@ class JobsManager
      *
      * @throws ORMException
      */
-    public function remove(Job $removingJob):void
+    public function remove(Job $removingJob): void
     {
         // When the Job is being removed from the database, it has to first
         // be removed from its parent dependencies to avoid foreign key errors.

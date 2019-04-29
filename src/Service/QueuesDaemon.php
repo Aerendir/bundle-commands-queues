@@ -1003,7 +1003,7 @@ class QueuesDaemon
      * @throws ORMException
      * @throws StringsException
      */
-    private function purgeExpiredJobs(string $queueName):void
+    private function purgeExpiredJobs(string $queueName): void
     {
         // @todo move this to the creating QueueConfig object
         $maxRetentionDays = $this->config->getQueue($queueName)['max_retention_days'];

@@ -792,7 +792,7 @@ class Job
     /**
      * @return string
      */
-    public function getCannotBeRemovedBecause() : string
+    public function getCannotBeRemovedBecause(): string
     {
         return $this->cannotBeRemovedBecause;
     }
@@ -879,14 +879,16 @@ class Job
     }
 
     /**
-     * @return bool
      * @throws StringsException
+     *
+     * @return bool
      */
-    public function canBeRemoved():bool
+    public function canBeRemoved(): bool
     {
         // Until this Job has retrying Jobs not still deleted, it cannot be deleted, too
         if ($this->getRetryingJobs()->count() > 0) {
             $this->cannotBeRemovedBecause = 'has retrying Jobs not still deleted';
+
             return false;
         }
 
@@ -896,6 +898,7 @@ class Job
                 'is referenced by cancelling Job <success-nobg>%s</success-nobg>',
                 $this->getCancelledBy()->getId()
             );
+
             return false;
         }
 
@@ -1197,7 +1200,7 @@ class Job
     /**
      * @return Job
      */
-    public function removeCancelledBy():Job
+    public function removeCancelledBy(): Job
     {
         $cancelledBy = $this->getCancelledBy();
 
@@ -1242,7 +1245,7 @@ class Job
     /**
      * @return Job
      */
-    public function removeRetryOf():Job
+    public function removeRetryOf(): Job
     {
         $retryOf = $this->getRetryOf();
 
@@ -1257,12 +1260,11 @@ class Job
     /**
      * @return Job
      */
-    public function removeFirstRetriedJob():Job
+    public function removeFirstRetriedJob(): Job
     {
         $this->firstRetriedJob = null;
 
         return $this;
-
     }
 
     /**
