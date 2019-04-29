@@ -19,7 +19,11 @@ namespace SerendipityHQ\Bundle\CommandsQueuesBundle\DependencyInjection;
 
 use Exception;
 use Safe\Exceptions\StringsException;
+use SerendipityHQ\Bundle\CommandsQueuesBundle\Command\FakeCommand;
+use SerendipityHQ\Bundle\CommandsQueuesBundle\Command\MarkAsCancelledCommand;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Command\RunCommand;
+use SerendipityHQ\Bundle\CommandsQueuesBundle\Command\TestFailingJobsCommand;
+use SerendipityHQ\Bundle\CommandsQueuesBundle\Command\TestRandomJobsCommand;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Config\DaemonConfig;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Service\JobsManager;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Service\QueuesDaemon;
@@ -89,7 +93,25 @@ class SHQCommandsQueuesExtension extends Extension
             $container->findDefinition('shq_commands_queues.do_not_use.entity_manager'),
             $jobsMarkerDefinition,
         ]))->addTag('console.command');
-        $container->setDefinition('commands_queues.command.run', $runCommandDefinition);
+        $container->setDefinition(RunCommand::class, $runCommandDefinition);
+
+        // The queues:test:failing-jobs command
+        $testFailingJobsCommandDefinition = (new Definition(TestFailingJobsCommand::class, [
+            $container->findDefinition('queues'),
+        ]))->addTag('console.command');
+        $container->setDefinition(TestFailingJobsCommand::class, $testFailingJobsCommandDefinition);
+
+        // The queues:test:random-jobs command
+        $testRandomJobsCommandDefinition = (new Definition(TestRandomJobsCommand::class))->addTag('console.command')->setAutowired(true);
+        $container->setDefinition(TestRandomJobsCommand::class, $testRandomJobsCommandDefinition);
+
+        // The queues:test:fake command
+        $testFakeCommandDefinition = (new Definition(FakeCommand::class))->addTag('console.command')->setAutowired(true);
+        $container->setDefinition(FakeCommand::class, $testFakeCommandDefinition);
+
+        // The queues:internal:mark-as-cancelled command
+        $internalMarkAsCancelledCommandDefinition = (new Definition(MarkAsCancelledCommand::class))->addTag('console.command')->setAutowired(true);
+        $container->setDefinition(MarkAsCancelledCommand::class, $internalMarkAsCancelledCommandDefinition);
 
         if (class_exists(SonataAdminBundle::class)) {
             $sonataLoader = new YamlFileLoader($container, new FileLocator(__DIR__ . '/../Admin/Sonata/Resources/config'));
