@@ -49,12 +49,12 @@ class TestRandomJobsCommand extends AbstractQueuesCommand
     private $queues;
 
     /**
-     * @param EntityManagerInterface $doNotUseEntityManager
+     * @param EntityManagerInterface $entityManager
      * @param JobsMarker             $doNotUseJobsMarker
      */
-    public function __construct(EntityManagerInterface $doNotUseEntityManager, JobsMarker $doNotUseJobsMarker)
+    public function __construct(EntityManagerInterface $entityManager, JobsMarker $doNotUseJobsMarker)
     {
-        parent::__construct($doNotUseEntityManager, $doNotUseJobsMarker);
+        parent::__construct($entityManager, $doNotUseJobsMarker);
         $this->queues = [
             'queue_1', 'queue_2', 'queue_3', 'queue_4', 'queue_5',
         ];

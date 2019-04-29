@@ -18,6 +18,7 @@ declare(strict_types=1);
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Service;
 
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
@@ -34,10 +35,15 @@ class QueuesManager
     private $entityManager;
 
     /**
-     * @param EntityManager $entityManager
+     * @param EntityManagerInterface $entityManager
      */
-    public function __construct(EntityManager $entityManager)
+    public function __construct(EntityManagerInterface $entityManager)
     {
+        // This is to make static analysis pass
+        if ( ! $entityManager instanceof EntityManager) {
+            throw new \RuntimeException('You need to pass an EntityManager instance.');
+        }
+
         $this->entityManager = $entityManager;
     }
 

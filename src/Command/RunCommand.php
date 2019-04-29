@@ -19,6 +19,7 @@ namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Command;
 
 use Doctrine\Common\Persistence\Mapping\MappingException;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Doctrine\ORM\TransactionRequiredException;
@@ -70,12 +71,17 @@ class RunCommand extends Command
     private $output;
 
     /**
-     * @param QueuesDaemon  $daemon
-     * @param EntityManager $entityManager
-     * @param JobsMarker    $jobsMarker
+     * @param QueuesDaemon           $daemon
+     * @param EntityManagerInterface $entityManager
+     * @param JobsMarker             $jobsMarker
      */
-    public function __construct(QueuesDaemon $daemon, EntityManager $entityManager, JobsMarker $jobsMarker)
+    public function __construct(QueuesDaemon $daemon, EntityManagerInterface $entityManager, JobsMarker $jobsMarker)
     {
+        // This is to make static analysis pass
+        if ( ! $entityManager instanceof EntityManager) {
+            throw new \RuntimeException('You need to pass an EntityManager instance.');
+        }
+
         $this->daemon        = $daemon;
         $this->entityManager = $entityManager;
         $this->jobsMarker    = $jobsMarker;

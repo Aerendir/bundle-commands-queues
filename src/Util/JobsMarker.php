@@ -20,6 +20,7 @@ namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Util;
 use DateTime;
 use Doctrine\Common\Persistence\Proxy;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\ORMException;
 use Doctrine\ORM\ORMInvalidArgumentException;
 use Exception;
@@ -48,10 +49,15 @@ class JobsMarker
     private static $ioWriter;
 
     /**
-     * @param EntityManager $entityManager
+     * @param EntityManagerInterface $entityManager
      */
-    public function __construct(EntityManager $entityManager)
+    public function __construct(EntityManagerInterface $entityManager)
     {
+        // This is to make static analysis pass
+        if ( ! $entityManager instanceof EntityManager) {
+            throw new \RuntimeException('You need to pass an EntityManager instance.');
+        }
+
         self::$entityManager = $entityManager;
     }
 

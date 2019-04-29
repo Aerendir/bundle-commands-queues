@@ -22,6 +22,7 @@ use Countable;
 use DateTime;
 use Doctrine\Common\Persistence\Mapping\MappingException;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
@@ -97,14 +98,19 @@ class QueuesDaemon
     private $verbosity;
 
     /**
-     * @param DaemonConfig  $config
-     * @param EntityManager $entityManager
-     * @param JobsManager   $jobsManager
-     * @param JobsMarker    $jobsMarker
-     * @param Profiler      $profiler
+     * @param DaemonConfig           $config
+     * @param EntityManagerInterface $entityManager
+     * @param JobsManager            $jobsManager
+     * @param JobsMarker             $jobsMarker
+     * @param Profiler               $profiler
      */
-    public function __construct(DaemonConfig $config, EntityManager $entityManager, JobsManager $jobsManager, JobsMarker $jobsMarker, Profiler $profiler)
+    public function __construct(DaemonConfig $config, EntityManagerInterface $entityManager, JobsManager $jobsManager, JobsMarker $jobsMarker, Profiler $profiler)
     {
+        // This is to make static analysis pass
+        if ( ! $entityManager instanceof EntityManager) {
+            throw new \RuntimeException('You need to pass an EntityManager instance.');
+        }
+
         $this->config        = $config;
         $this->entityManager = $entityManager;
         $this->jobsManager   = $jobsManager;
@@ -853,7 +859,7 @@ class QueuesDaemon
             }
 
             if ($this->verbosity >= OutputInterface::VERBOSITY_NORMAL) {
-                $this->ioWriter->warning(\Safe\sprintf('<success-nobg>%s</success-nobg> signal received.', $signal));
+                $this->ioWriter->warning(\Safe\sprintf('%s signal received.', $signal));
             }
         };
 

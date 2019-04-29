@@ -18,6 +18,7 @@ declare(strict_types=1);
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Service;
 
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Doctrine\ORM\ORMInvalidArgumentException;
@@ -59,11 +60,16 @@ class JobsManager
     }
 
     /**
-     * @param EntityManager      $entityManager
-     * @param SerendipityHQStyle $ioWriter
+     * @param EntityManagerInterface $entityManager
+     * @param SerendipityHQStyle     $ioWriter
      */
-    public function initialize(EntityManager $entityManager, SerendipityHQStyle $ioWriter): void
+    public function initialize(EntityManagerInterface $entityManager, SerendipityHQStyle $ioWriter): void
     {
+        // This is to make static analysis pass
+        if ( ! $entityManager instanceof EntityManager) {
+            throw new \RuntimeException('You need to pass an EntityManager instance.');
+        }
+
         $env                 = $ioWriter->getInput()->getOption('env');
         self::$entityManager = $entityManager;
         self::$ioWriter      = $ioWriter;

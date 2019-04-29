@@ -59,6 +59,7 @@ class Configuration implements ConfigurationInterface
         $rootNode
             ->children()
                 ->scalarNode('db_driver')
+                    ->info('The Doctrine driver to use. Currently supports only "orm". Don not use this parameter for the moment.')
                     ->validate()
                         ->ifNotInArray(self::getSupportedDrivers())
                         ->thenInvalid('The driver %s is not supported. Please choose one of ' . json_encode(self::getSupportedDrivers()))
@@ -67,7 +68,6 @@ class Configuration implements ConfigurationInterface
                     ->defaultValue('orm')
                     ->cannotBeEmpty()
                 ->end()
-                ->scalarNode('model_manager_name')->defaultNull()->end()
                 // In seconds (1 hour)
                 ->integerNode('alive_daemons_check_interval')->defaultValue(3600)->end()
                 // In seconds
@@ -176,7 +176,6 @@ class Configuration implements ConfigurationInterface
         // Create the main configuration array to return
         $returnConfig = [
             'db_driver'          => $tree['db_driver'],
-            'model_manager_name' => $tree['model_manager_name'],
             'daemons'            => $tree['daemons'],
             'queues'             => $tree['queues'],
         ];

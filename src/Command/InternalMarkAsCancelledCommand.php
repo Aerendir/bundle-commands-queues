@@ -44,12 +44,12 @@ class InternalMarkAsCancelledCommand extends AbstractQueuesCommand
     private $jobsRepo;
 
     /**
-     * @param EntityManagerInterface $doNotUseEntityManager
+     * @param EntityManagerInterface $entityManager
      * @param JobsMarker             $doNotUseJobsMarker
      */
-    public function __construct(EntityManagerInterface $doNotUseEntityManager, JobsMarker $doNotUseJobsMarker)
+    public function __construct(EntityManagerInterface $entityManager, JobsMarker $doNotUseJobsMarker)
     {
-        parent::__construct($doNotUseEntityManager, $doNotUseJobsMarker);
+        parent::__construct($entityManager, $doNotUseJobsMarker);
 
         /** @var JobRepository $jobsRepo */
         $jobsRepo       = $this->getEntityManager()->getRepository(Job::class);

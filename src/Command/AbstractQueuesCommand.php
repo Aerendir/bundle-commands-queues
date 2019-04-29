@@ -41,13 +41,13 @@ abstract class AbstractQueuesCommand extends Command
     private $jobsMarker;
 
     /**
-     * @param EntityManagerInterface $doNotUseEntityManager
+     * @param EntityManagerInterface $entityManager
      * @param JobsMarker             $doNotUseJobsMarker
      */
-    public function __construct(EntityManagerInterface $doNotUseEntityManager, JobsMarker $doNotUseJobsMarker)
+    public function __construct(EntityManagerInterface $entityManager, JobsMarker $doNotUseJobsMarker)
     {
         parent::__construct();
-        $this->entityManager = $doNotUseEntityManager;
+        $this->entityManager = $entityManager;
         $this->jobsMarker    = $doNotUseJobsMarker;
     }
 

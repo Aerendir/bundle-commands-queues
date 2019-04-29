@@ -52,47 +52,32 @@ class SHQCommandsQueuesExtension extends Extension
         $configuration = new Configuration();
         $config        = $this->processConfiguration($configuration, $configs);
 
-        // Set parameters in the container
-        $container->setParameter('commands_queues.model_manager_name', $config['model_manager_name']);
-
         $loader = new YamlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
         $loader->load('services.yml');
-
-        // load db_driver container configuration
-        $loader->load(\Safe\sprintf('%s.yml', $config['db_driver']));
 
         // The Jobs Manager
         $jobsManagerDefinition = (new Definition(JobsManager::class, [
             $container->getParameter('kernel.root_dir'),
         ]))->setPublic(false);
+        $container->setDefinition(JobsManager::class, $jobsManagerDefinition);
 
         // The Jobs Marker
-        $jobsMarkerDefinition = (new Definition(JobsMarker::class, [
-            $container->findDefinition('shq_commands_queues.do_not_use.entity_manager'),
-        ]))->setPublic(false);
-        $container->setDefinition('shq_commands_queues.do_not_use.jobs_marker', $jobsMarkerDefinition);
+        $jobsMarkerDefinition = (new Definition(JobsMarker::class))->setPublic(false)->setAutowired(true);
+        $container->setDefinition(JobsMarker::class, $jobsMarkerDefinition);
 
         // The Profiler
         $profilerDefinition = (new Definition(Profiler::class))->setPublic(false);
+        $container->setDefinition(Profiler::class, $profilerDefinition);
 
         // The Daemon
         $daemonConfigDefinition = (new Definition(DaemonConfig::class, [$config['daemons'], $config['queues']]))
             ->setPublic(false);
 
-        $daemonDefinition = (new Definition(QueuesDaemon::class, [
-            $daemonConfigDefinition,
-            $container->findDefinition('shq_commands_queues.do_not_use.entity_manager'),
-            $jobsManagerDefinition,
-            $jobsMarkerDefinition,
-            $profilerDefinition,
-        ]))->setPublic(false);
+        $daemonDefinition = (new Definition(QueuesDaemon::class, [$daemonConfigDefinition]))->setPublic(false)->setAutowired(true);
+        $container->setDefinition(QueuesDaemon::class, $daemonDefinition);
 
         // The queues:run command
-        $runCommandDefinition = (new Definition(RunCommand::class, [
-            $daemonDefinition,
-            $container->findDefinition('shq_commands_queues.do_not_use.entity_manager'),
-            $jobsMarkerDefinition,
-        ]))->addTag('console.command');
+        $runCommandDefinition = (new Definition(RunCommand::class))->addTag('console.command')->setAutowired(true);
         $container->setDefinition(RunCommand::class, $runCommandDefinition);
 
         // The queues:test:failing-jobs command
