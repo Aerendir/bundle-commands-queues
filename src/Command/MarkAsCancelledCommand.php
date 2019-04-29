@@ -37,6 +37,9 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class MarkAsCancelledCommand extends AbstractQueuesCommand
 {
+    /** @var string */
+    protected static $defaultName = 'queues:internal:mark-as-cancelled';
+
     /** @var JobRepository $jobsRepo */
     private $jobsRepo;
 
@@ -59,7 +62,6 @@ class MarkAsCancelledCommand extends AbstractQueuesCommand
     protected function configure(): void
     {
         $this
-            ->setName('queues:internal:mark-as-cancelled')
             ->setDescription('[INTERNAL] Marks the given Job and its childs as CANCELLED.')
             ->addOption('id', 'id', InputOption::VALUE_REQUIRED)
             ->addOption('cancelling-job-id', 'cancelling-job-id', InputOption::VALUE_REQUIRED);
@@ -100,9 +102,10 @@ class MarkAsCancelledCommand extends AbstractQueuesCommand
         $cancellingJob = $this->jobsRepo->findOneById((int) $cancellingJobId);
 
         if (null === $failedJob) {
-            $this->getIoWriter()->error('Impossible to find the failed Job.');
+            // The job may not exist anymore if it expired and so was deleted
+            $this->getIoWriter()->infoLineNoBg(\Safe\sprintf("The job <success-nobg>%s</success-nobg> doesn't exist anymore.", $failedJob));
 
-            return 1;
+            return 0;
         }
 
         if (null === $cancellingJob) {
