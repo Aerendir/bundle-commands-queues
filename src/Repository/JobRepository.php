@@ -172,7 +172,16 @@ class JobRepository extends EntityRepository
             ->andWhere($queryBuilder->expr()->eq('j.queue', ':queue_name'))
             ->setParameter('queue_name', $queueName)
             ->andWhere($queryBuilder->expr()->lt('j.closedAt', ':max_date'))
-            ->andWhere($queryBuilder->expr()->isNotNull('j.startedAt'))
+            ->andWhere($queryBuilder->expr()->orX(
+                $queryBuilder->expr()->andX(
+                    $queryBuilder->expr()->isNotNull('j.startedAt'),
+                    $queryBuilder->expr()->neq('j.status', ':cancelled')
+                ),
+                $queryBuilder->expr()->andX(
+                    $queryBuilder->expr()->isNull('j.startedAt'),
+                    $queryBuilder->expr()->eq('j.status', ':cancelled')
+                )
+            ))
             ->setParameter('max_date', $maxRetentionDate, Type::DATETIME)
             ->orderBy('j.closedAt', 'DESC');
 
