@@ -181,33 +181,33 @@ file that was distributed with this source code.
                 {% set parentJobs = {} %}
                 {% for parentJob in object.parentDependencies %}
                     {% set status = '' %}
-                    {% if 'running' == parentobject.status %}
+                    {% if 'running' == parentJob.status %}
                         {% set status = 'active' %}
                     {% endif %}
-                    {% if 'retried' == parentobject.status %}
+                    {% if 'retried' == parentJob.status %}
                         {% set status = 'warning' %}
                     {% endif %}
-                    {% if 'failed' == parentobject.status or 'retry_failed' == parentobject.status %}
+                    {% if 'failed' == parentJob.status or 'retry_failed' == parentJob.status %}
                         {% set status = 'danger' %}
                     {% endif %}
-                    {% if 'succeeded' == parentobject.status or 'retry_succeeded' == parentobject.status %}
+                    {% if 'succeeded' == parentJob.status or 'retry_succeeded' == parentJob.status %}
                         {% set status = 'success' %}
                     {% endif %}
-                    {% if 'cancelled' == parentobject.status %}
+                    {% if 'cancelled' == parentJob.status %}
                         {% set status = 'danger' %}
                     {% endif %}
-                    {% if 'pending' == parentobject.status or 'running' == parentobject.status %}
+                    {% if 'pending' == parentJob.status or 'running' == parentJob.status %}
                         {% set status = 'info' %}
                     {% endif %}
-                    {% if 'new' == parentobject.status %}
+                    {% if 'new' == parentJob.status %}
                         {% set status = 'default' %}
                     {% endif %}
-                    {% set linkedParentJob = '<code style="white-space:nowrap;padding: 5px;"><a href="' ~ path('admin_serendipityhq_commandsqueues_job_show', {'id': parentobject.id}) ~ '">#' ~ parentobject.id ~ '</a> (' ~ parentobject.priority ~ ') <span class="label label-' ~ status ~ '">' ~ parentobject.status %}
-                    {% if parentobject.exitCode %}
-                        {% set linkedParentJob = linkedParentJob ~ ' [' ~ parentobject.exitCode ~ ']' %}
+                    {% set linkedParentJob = '<code style="white-space:nowrap;padding: 5px;"><a href="' ~ path('admin_serendipityhq_commandsqueues_job_show', {'id': parentJob.id}) ~ '">#' ~ parentJob.id ~ '</a> (' ~ parentJob.priority ~ ') <span class="label label-' ~ status ~ '">' ~ parentJob.status %}
+                    {% if parentJob.exitCode %}
+                        {% set linkedParentJob = linkedParentJob ~ ' [' ~ parentJob.exitCode ~ ']' %}
                     {% endif %}
                     {% set linkedParentJob = linkedParentJob ~ '</span></code>' %}
-                    {% set parentJobs = parentJobs|merge({ ('_' ~ parentobject.id ~ '-'): linkedParentJob}) %}
+                    {% set parentJobs = parentJobs|merge({ ('_' ~ parentJob.id ~ '-'): linkedParentJob}) %}
                 {% endfor %}
                 <p>{{ parentJobs|join(' ')|raw }}</p>
             {% endif %}
