@@ -299,7 +299,7 @@ class JobsMarker
     private function markJob(Job $job, string $status, array $info = [], Daemon $daemon = null): void
     {
         $oldStatus = $job->getStatus();
-        $this->updateJob($job, $status, $info, $daemon);
+        self::updateJob($job, $status, $info, $daemon);
 
         $ioWriter        = self::$ioWriter;
         $tryAgainBuilder = ThenWhen::createRetryStrategyBuilder();
@@ -368,7 +368,7 @@ class JobsMarker
      * @throws ReflectionException
      * @throws ORMException
      */
-    private function updateJob(Job $job, string $status, array $info = [], Daemon $daemon = null): void
+    private static function updateJob(Job $job, string $status, array $info = [], Daemon $daemon = null): void
     {
         $reflectedClass = self::createReflectedJob($job);
 
