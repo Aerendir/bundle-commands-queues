@@ -156,7 +156,7 @@ class TestRandomJobsCommand extends AbstractQueuesCommand
             // Decide if this has a dependency on another job
             $condition = random_int(0, 10);
             // Be sure there is at least one already created Job!!!
-            if (7 <= $condition && 0 < count($jobs)) {
+            if (7 <= $condition && 1 < count($jobs)) {
                 // Decide how many dependencies it has
                 $howManyDeps = random_int(1, count($jobs) - 1);
 
