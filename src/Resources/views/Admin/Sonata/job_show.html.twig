@@ -76,14 +76,14 @@ file that was distributed with this source code.
                     <small class="text-muted">{% trans %}All retrying Jobs{% endtrans %}:</small>
                     {% set retryingJobs = {} %}
                     {% for retryingJob in object.retryingJobs %}
-                        {% set linkedretryingJob = '<a href="' ~ path('admin_serendipityhq_commandsqueues_job_show', {'id': retryingobject.id}) ~ '">#' ~ retryingobject.id ~ '</a> (' ~ retryingobject.status ~ ')' %}
-                        {% set retryingJobs = retryingJobs|merge({ ('_' ~ retryingobject.id ~ '-'): linkedretryingJob}) %}
+                        {% set linkedretryingJob = '<a href="' ~ path('admin_serendipityhq_commandsqueues_job_show', {'id': retryingJob.id}) ~ '">#' ~ retryingJob.id ~ '</a> (' ~ retryingJob.status ~ ')' %}
+                        {% set retryingJobs = retryingJobs|merge({ ('_' ~ retryingJob.id ~ '-'): linkedretryingJob}) %}
                     {% endfor %}
                     <p><small class="text-muted">{{ retryingJobs|join(', ')|raw }}</small></p>
                 {% endif %}
             {% endif %}
             {% if object.firstRetriedJob %}
-                <p><small class="text-muted">{% trans %}First retried job{% endtrans %}:<br /><a href="{{ path('admin_serendipityhq_commandsqueues_job_show', {'id': object.firstRetriedobject.id}) }}">#{{ object.firstRetriedobject.id }} ({{ object.firstRetriedobject.status }})</a></small></p>
+                <p><small class="text-muted">{% trans %}First retried job{% endtrans %}:<br /><a href="{{ path('admin_serendipityhq_commandsqueues_job_show', {'id': object.firstRetriedJob.id}) }}">#{{ object.firstRetriedJob.id }} ({{ object.firstRetriedJob.status }})</a></small></p>
             {% endif %}
             {% if 'cancelled' == object.status %}
                 <p><small class="text-muted">{{ object.debug.cancellation_reason }}</small></p>
@@ -110,8 +110,8 @@ file that was distributed with this source code.
                 <p>{% trans %}Child Jobs{% endtrans %}:</p>
                 {% set childJobs = {} %}
                 {% for childJob in object.childDependencies %}
-                    {% set linkedChildJob = '<a href="' ~ path('admin_serendipityhq_commandsqueues_job_show', {'id': childobject.id}) ~ '">#' ~ childobject.id ~ '</a> (' ~ childobject.status ~ ')' %}
-                    {% set childJobs = childJobs|merge({ ('_' ~ childobject.id ~ '-'): linkedChildJob}) %}
+                    {% set linkedChildJob = '<a href="' ~ path('admin_serendipityhq_commandsqueues_job_show', {'id': childJob.id}) ~ '">#' ~ childJob.id ~ '</a> (' ~ childJob.status ~ ')' %}
+                    {% set childJobs = childJobs|merge({ ('_' ~ childJob.id ~ '-'): linkedChildJob}) %}
                 {% endfor %}
                 <p>{{ childJobs|join(', ')|raw }}</p>
             {% endif %}
