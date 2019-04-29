@@ -71,7 +71,7 @@ class Profiler
     /** @var int $iterations How many times Daemon::mustRun() was called in the "while(Daemon::mustRun())" */
     private $iterations = 0;
 
-    /** @var float $maxRuntime After this amount of time the Daemon MUST die */
+    /** @var int $maxRuntime After this amount of time the Daemon MUST die */
     private $maxRuntime;
 
     /** @var bool $memprofEnabled */
@@ -155,10 +155,10 @@ class Profiler
      * Start the profiler.
      *
      * @param int   $pid
-     * @param float $maxRuntime after this amount of time the Daemon MUST die
+     * @param int   $maxRuntime after this amount of time the Daemon MUST die
      * @param array $queues     The configured queues
      */
-    public function start(int $pid, float $maxRuntime, array $queues): void
+    public function start(int $pid, int $maxRuntime, array $queues): void
     {
         $this->pid = $pid;
 
@@ -396,6 +396,10 @@ class Profiler
      */
     public function isMaxRuntimeReached(): bool
     {
+        if (0 === $this->maxRuntime) {
+            return false;
+        }
+
         return microtime(true) - $this->startTime > $this->maxRuntime;
     }
 

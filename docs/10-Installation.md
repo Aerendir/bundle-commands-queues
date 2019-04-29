@@ -9,11 +9,9 @@ Step 1: Download the Bundle
 Open a command console, go to your project directory and execute the
 following command to download the latest stable version of this bundle:
 
-```bash
-$ composer require serendipity_hq/commands-queues-bundle "*"
+```console
+$ composer require serendipity_hq/commands-queues-bundle
 ```
-
-_Note: Use the version you like. Add `@dev` to get the last development version. This version may not be stable._
 
 This command requires you to have Composer installed globally, as explained in the
  [installation chapter](https://getcomposer.org/doc/00-intro.md) of the Composer documentation.
@@ -21,28 +19,16 @@ This command requires you to have Composer installed globally, as explained in t
 Step 2: Enable the SHQCommandsQueuesBundle
 ------------------------------------------
 
-Then, enable the bundle by adding the following line in the `app/AppKernel.php` file of your project:
+Then, enable the bundle by adding the following line in the `config/bundles.php` file of your project:
 
 ```php
 <?php
-// app/AppKernel.php
 
-// ...
-class AppKernel extends Kernel
-{
-    public function registerBundles()
-    {
-        $bundles = array(
-            // ...
-
-            new SerendipityHQ\Bundle\CommandsQueuesBundle\SHQCommandsQueuesBundle(),
-        );
-
-        // ...
-    }
-
+return [
     // ...
-}
+    SerendipityHQ\Bundle\CommandsQueuesBundle\SHQCommandsQueuesBundle::class => ['all' => true],
+    //...
+];
 ```
 
 Step 3: Update your database schema
@@ -50,13 +36,26 @@ Step 3: Update your database schema
 
 Last thing you have to do is to update your database schema to make `SHQCommandsQueuesBundle` able to work on your app:
 
-    app/console doctrine:schema:update --force
+    bin/console doctrine:schema:update --force
 
 If you use [Doctrine Migrations](http://symfony.com/doc/current/bundles/DoctrineMigrationsBundle/index.html):
 
-    app/console doctrine:migrations:diff &&
-    app/console doctrine:migrations:migrate
+    bin/console doctrine:migrations:diff &&
+    bin/console doctrine:migrations:migrate
 
 *Do you like this bundle? [**Leave a &#9733;**](#js-repo-pjax-container) or run `composer global require symfony/thanks && composer thanks` to say thank you to all libraries you use in your current project, this one too!*
 
-([Go back to index](00-Index.md)) | Next step: [Start in less than 5 minutes](20-Fast-start.md)
+Step 4: Test the bundle
+-----------------------
+
+Before you can use the bundle, you need to create also a configuration file for it in `config/packages/shq_commands_queues.yaml`.
+
+The best way to understand how to configure the bundle is to test it.
+
+For this reason we have prepared a fast start tutorial to help you test the bundle with real jobs.
+
+The next chapter is dedicated to the automatic creation of some Jobs that will help you understand the behaviors of the `SHQCommandsQueuesBundle`.
+
+Read the next chapter [Start in less than 5 minutes](20-Fast-Start.md) to create hundreds (or thusands!) of fake jobs to test the bundle: then you will be guided through the steps required to make your app able to use the queues.
+
+([Go back to index](00-Index.md)) | Next step: [Start in less than 5 minutes](20-Fast-Start.md)

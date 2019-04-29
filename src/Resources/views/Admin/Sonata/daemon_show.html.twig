@@ -51,10 +51,11 @@ file that was distributed with this source code.
 <pre>
 {% for queue in object.config.queues %}
 <strong>{{ queue }}</strong>:
-<code style="padding: 2px 4px;font-size: 90%;color: #4f4f4f;background-color: #f9f2f4;border-radius: 4px;">max_concurrent_jobs</code>: {{ object.config.queue(queue).max_concurrent_jobs }}
-<code style="padding: 2px 4px;font-size: 90%;color: #4f4f4f;background-color: #f9f2f4;border-radius: 4px;">retry_stale_jobs</code>: {% if 'true' == object.config.queue(queue).retry_stale_jobs %}<small>boolean</small> true{% else %}<small>boolean</small> false{% endif %}
+<code style="padding: 2px 4px;font-size: 90%;color: #4f4f4f;background-color: #f9f2f4;border-radius: 4px;">{{ constant('SerendipityHQ\\Bundle\\CommandsQueuesBundle\\DependencyInjection\\Configuration::QUEUE_MAX_CONCURRENT_JOBS_KEY') }}</code>: {{ object.config.queue(queue).max_concurrent_jobs }}
+<code style="padding: 2px 4px;font-size: 90%;color: #4f4f4f;background-color: #f9f2f4;border-radius: 4px;">{{ constant('SerendipityHQ\\Bundle\\CommandsQueuesBundle\\DependencyInjection\\Configuration::QUEUE_MAX_RETENTION_DAYS_KEY') }}</code>: {{ object.config.queue(queue).max_retention_days }}
+<code style="padding: 2px 4px;font-size: 90%;color: #4f4f4f;background-color: #f9f2f4;border-radius: 4px;">{{ constant('SerendipityHQ\\Bundle\\CommandsQueuesBundle\\DependencyInjection\\Configuration::QUEUE_RETRY_STALE_JOBS_KEY') }}</code>: {% if 'true' == object.config.queue(queue).retry_stale_jobs %}<small>boolean</small> true{% else %}<small>boolean</small> false{% endif %}
 
-<code style="padding: 2px 4px;font-size: 90%;color: #4f4f4f;background-color: #f9f2f4;border-radius: 4px;">running_jobs_check_interval</code>: {{ object.config.queue(queue).running_jobs_check_interval }}
+<code style="padding: 2px 4px;font-size: 90%;color: #4f4f4f;background-color: #f9f2f4;border-radius: 4px;">{{ constant('SerendipityHQ\\Bundle\\CommandsQueuesBundle\\DependencyInjection\\Configuration::QUEUE_RUNNING_JOBS_CHECK_INTERVAL_KEY') }}</code>: {{ object.config.queue(queue).running_jobs_check_interval }}
 
 {% endfor %}
 </pre>
@@ -65,12 +66,13 @@ file that was distributed with this source code.
 <code style="padding: 2px 4px;font-size: 90%;color: #4f4f4f;background-color: #f9f2f4;border-radius: 4px;">name</code>: {{ object.config.name }}
 <code style="padding: 2px 4px;font-size: 90%;color: #4f4f4f;background-color: #f9f2f4;border-radius: 4px;">prodAllowed</code>: {% if 'true' == object.config.prodAllowed %}<small>boolean</small> true{% else %}<small>boolean</small> false{% endif %}
 
-<code style="padding: 2px 4px;font-size: 90%;color: #4f4f4f;background-color: #f9f2f4;border-radius: 4px;">aliveDaemonsCheckInterval</code>: {{ object.config.aliveDaemonsCheckInterval }}
-<code style="padding: 2px 4px;font-size: 90%;color: #4f4f4f;background-color: #f9f2f4;border-radius: 4px;">idleTime</code>: {{ object.config.idleTime }}
-<code style="padding: 2px 4px;font-size: 90%;color: #4f4f4f;background-color: #f9f2f4;border-radius: 4px;">managedEntitiesTreshold</code>: {{ object.config.managedEntitiesTreshold }}
-<code style="padding: 2px 4px;font-size: 90%;color: #4f4f4f;background-color: #f9f2f4;border-radius: 4px;">maxRuntime</code>: {{ object.config.maxRuntime }}
-<code style="padding: 2px 4px;font-size: 90%;color: #4f4f4f;background-color: #f9f2f4;border-radius: 4px;">profilingInfoInterval</code>: {{ object.config.profilingInfoInterval }}
-<code style="padding: 2px 4px;font-size: 90%;color: #4f4f4f;background-color: #f9f2f4;border-radius: 4px;">printProfilingInfo</code>: {% if 'true' == object.config.printProfilingInfo %}<small>boolean</small> true{% else %}<small>boolean</small> false{% endif %}
+<code style="padding: 2px 4px;font-size: 90%;color: #4f4f4f;background-color: #f9f2f4;border-radius: 4px;">{{ constant('SerendipityHQ\\Bundle\\CommandsQueuesBundle\\DependencyInjection\\Configuration::DAEMON_ALIVE_DAEMONS_CHECK_INTERVAL_KEY') }}</code>: {{ object.config.aliveDaemonsCheckInterval }}
+<code style="padding: 2px 4px;font-size: 90%;color: #4f4f4f;background-color: #f9f2f4;border-radius: 4px;">{{ constant('SerendipityHQ\\Bundle\\CommandsQueuesBundle\\DependencyInjection\\Configuration::DAEMON_MANAGED_ENTITIES_TRESHOLD_KEY') }}</code>: {{ object.config.managedEntitiesTreshold }}
+<code style="padding: 2px 4px;font-size: 90%;color: #4f4f4f;background-color: #f9f2f4;border-radius: 4px;">{{ constant('SerendipityHQ\\Bundle\\CommandsQueuesBundle\\DependencyInjection\\Configuration::DAEMON_MAX_RUNTIME_KEY') }}</code>: {{ object.config.maxRuntime }}
+<code style="padding: 2px 4px;font-size: 90%;color: #4f4f4f;background-color: #f9f2f4;border-radius: 4px;">{{ constant('SerendipityHQ\\Bundle\\CommandsQueuesBundle\\DependencyInjection\\Configuration::DAEMON_PROFILING_INFO_INTERVAL_KEY') }}</code>: {{ object.config.profilingInfoInterval }}
+<code style="padding: 2px 4px;font-size: 90%;color: #4f4f4f;background-color: #f9f2f4;border-radius: 4px;">{{ constant('SerendipityHQ\\Bundle\\CommandsQueuesBundle\\DependencyInjection\\Configuration::DAEMON_PRINT_PROFILING_INFO_KEY') }}</code>: {% if 'true' == object.config.printProfilingInfo %}<small>boolean</small> true{% else %}<small>boolean</small> false{% endif %}
+
+<code style="padding: 2px 4px;font-size: 90%;color: #4f4f4f;background-color: #f9f2f4;border-radius: 4px;">{{ constant('SerendipityHQ\\Bundle\\CommandsQueuesBundle\\DependencyInjection\\Configuration::DAEMON_SLEEP_FOR_KEY') }}</code>: {{ object.config.sleepFor }}
 </pre>
         </div>
     </div>

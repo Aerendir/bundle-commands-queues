@@ -36,6 +36,7 @@ use Safe\Exceptions\MiscException;
 use Safe\Exceptions\PcntlException;
 use Safe\Exceptions\StringsException;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Config\DaemonConfig;
+use SerendipityHQ\Bundle\CommandsQueuesBundle\DependencyInjection\Configuration;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Daemon;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Repository\JobRepository;
@@ -261,7 +262,7 @@ class QueuesDaemon
     public function processNextJob(string $queueName): bool
     {
         // If the max_concurrent_jobs number is reached, don't process one more job
-        if ($this->countRunningJobs($queueName) >= $this->config->getQueue($queueName)['max_concurrent_jobs']) {
+        if ($this->countRunningJobs($queueName) >= $this->config->getQueue($queueName)[Configuration::QUEUE_RUNNING_JOBS_CHECK_INTERVAL_KEY]) {
             return false;
         }
 
@@ -393,6 +394,10 @@ class QueuesDaemon
      */
     public function hasToCheckAliveDaemons(): bool
     {
+        if (0 === $this->getConfig()->getAliveDaemonsCheckInterval()) {
+            return false;
+        }
+
         return microtime(true) - $this->getProfiler()->getAliveDaemonsLastCheckedAt() >= $this->getConfig()->getAliveDaemonsCheckInterval();
     }
 
@@ -585,7 +590,7 @@ class QueuesDaemon
     /**
      * @return bool
      */
-    public function hasToPrintProfilingInfo(): bool
+    public function hasToProfile(): bool
     {
         return microtime(true) - $this->getProfiler()->getLastMicrotime() >= $this->getConfig()->getProfilingInfoInterval();
     }
@@ -658,13 +663,50 @@ class QueuesDaemon
     }
 
     /**
+     * Removes from the queue all the Jobs older than max_retention_days.
+     *
+     * @param string $queueName
+     *
+     * @throws ORMException
+     * @throws StringsException
+     */
+    public function purgeExpiredJobs(string $queueName): void
+    {
+        // @todo move this to the creating QueueConfig object
+        $maxRetentionDays = $this->config->getQueue($queueName)[Configuration::QUEUE_MAX_RETENTION_DAYS_KEY];
+        $maxRetentionDate = new Carbon();
+        $maxRetentionDate = $maxRetentionDate->subDays($maxRetentionDays);
+        if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
+            $this->ioWriter->infoLineNoBg(\Safe\sprintf('Expired jobs: removing from queue <success-nobg>%s</success-nobg>...', $queueName));
+            $this->ioWriter->commentLineNoBg(\Safe\sprintf('Removing expired jobs (older than %s days - before %s...', $maxRetentionDays, $maxRetentionDate->format(JobsUtil::TIME_FORMAT)));
+        }
+
+        $removingJobs = $this->jobsRepo->findExpiredJobs($queueName, $maxRetentionDate);
+
+        /** @var Job $removingJob */
+        foreach ($removingJobs as $removingJob) {
+            $this->ioWriter->infoLineNoBg(\Safe\sprintf('Job <success-nobg>%s</success-nobg>: removing...', $removingJob->getId()));
+
+            if (false === $removingJob->canBeRemoved()) {
+                $this->ioWriter->infoLineNoBg(\Safe\sprintf('Job <success-nobg>%s</success-nobg>: cannot be removed because %s. Skipping', $removingJob->getId(), $removingJob->getCannotBeRemovedBecause()));
+
+                continue;
+            }
+
+            $this->jobsManager->remove($removingJob);
+        }
+
+        $this->entityManager->flush();
+    }
+
+    /**
      * Put the Daemon in sleep.
      *
      * @throws MiscException
      */
     public function sleep(): void
     {
-        \Safe\sleep($this->getConfig()->getIdleTime());
+        \Safe\sleep($this->getConfig()->getSleepFor());
     }
 
     /**
@@ -709,7 +751,7 @@ class QueuesDaemon
      */
     public function getJobsToLoad(string $queueName): int
     {
-        return $this->getConfig()->getQueue($queueName)['max_concurrent_jobs'] - $this->countRunningJobs($queueName);
+        return $this->getConfig()->getQueue($queueName)[Configuration::QUEUE_RUNNING_JOBS_CHECK_INTERVAL_KEY] - $this->countRunningJobs($queueName);
     }
 
     /**
@@ -1002,42 +1044,5 @@ class QueuesDaemon
         );
 
         return true;
-    }
-
-    /**
-     * Removes from the queue all the Jobs older than max_retention_days.
-     *
-     * @param string $queueName
-     *
-     * @throws ORMException
-     * @throws StringsException
-     */
-    private function purgeExpiredJobs(string $queueName): void
-    {
-        // @todo move this to the creating QueueConfig object
-        $maxRetentionDays = $this->config->getQueue($queueName)['max_retention_days'];
-        $maxRetentionDate = new Carbon();
-        $maxRetentionDate = $maxRetentionDate->subDays($maxRetentionDays);
-        if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
-            $this->ioWriter->infoLineNoBg(\Safe\sprintf('Expired jobs: removing from queue <success-nobg>%s</success-nobg>...', $queueName));
-            $this->ioWriter->commentLineNoBg(\Safe\sprintf('Removing expired jobs (older than %s days - before %s...', $maxRetentionDays, $maxRetentionDate->format(JobsUtil::TIME_FORMAT)));
-        }
-
-        $removingJobs = $this->jobsRepo->findExpiredJobs($queueName, $maxRetentionDate);
-
-        /** @var Job $removingJob */
-        foreach ($removingJobs as $removingJob) {
-            $this->ioWriter->infoLineNoBg(\Safe\sprintf('Job <success-nobg>%s</success-nobg>: removing...', $removingJob->getId()));
-
-            if (false === $removingJob->canBeRemoved()) {
-                $this->ioWriter->infoLineNoBg(\Safe\sprintf('Job <success-nobg>%s</success-nobg>: cannot be removed because %s. Skipping', $removingJob->getId(), $removingJob->getCannotBeRemovedBecause()));
-
-                continue;
-            }
-
-            $this->jobsManager->remove($removingJob);
-        }
-
-        $this->entityManager->flush();
     }
 }

@@ -22,7 +22,9 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
+use RuntimeException;
 use Safe\Exceptions\ArrayException;
+use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Daemon;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Repository\JobRepository;
 
@@ -41,7 +43,7 @@ class QueuesManager
     {
         // This is to make static analysis pass
         if ( ! $entityManager instanceof EntityManager) {
-            throw new \RuntimeException('You need to pass an EntityManager instance.');
+            throw new RuntimeException('You need to pass an EntityManager instance.');
         }
 
         $this->entityManager = $entityManager;
@@ -103,7 +105,7 @@ class QueuesManager
      *
      * @return bool|Job
      */
-    public function exists(string $command, array $arguments = [], string $queue = 'default')
+    public function exists(string $command, array $arguments = [], string $queue = Daemon::DEFAULT_QUEUE_NAME)
     {
         $exists = $this->find($command, $arguments, $queue);
 
@@ -128,7 +130,7 @@ class QueuesManager
      *
      * @return Job|null
      */
-    public function find(string $command, array $arguments = [], string $queue = 'default'): ?Job
+    public function find(string $command, array $arguments = [], string $queue = Daemon::DEFAULT_QUEUE_NAME): ?Job
     {
         /** @var JobRepository $jobsRepo */
         $jobsRepo = $this->entityManager->getRepository(Job::class);

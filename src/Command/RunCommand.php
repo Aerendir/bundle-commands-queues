@@ -216,9 +216,12 @@ class RunCommand extends Command
             }
 
             // Print profiling info
-            if ($this->daemon->hasToPrintProfilingInfo()) {
+            if ($this->daemon->hasToProfile()) {
                 $this->daemon->getProfiler()->profile();
-                $this->daemon->getProfiler()->printProfilingInfo();
+
+                if ($this->daemon->getConfig()->printProfilingInfo()) {
+                    $this->daemon->getProfiler()->printProfilingInfo();
+                }
             }
 
             if ($printUow) {
@@ -229,7 +232,7 @@ class RunCommand extends Command
             if ($this->daemon->canSleep()) {
                 if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
                     $this->ioWriter->infoLineNoBg(\Safe\sprintf(
-                        'No Jobs to process. Idling for <success-nobg>%s seconds<success-nobg>...', $this->daemon->getConfig()->getIdleTime()
+                        'No Jobs to process. Idling for <success-nobg>%s seconds<success-nobg>...', $this->daemon->getConfig()->getSleepFor()
                     ));
                 }
                 $this->daemon->sleep();

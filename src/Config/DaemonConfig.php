@@ -18,6 +18,7 @@ declare(strict_types=1);
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Config;
 
 use InvalidArgumentException;
+use SerendipityHQ\Bundle\CommandsQueuesBundle\DependencyInjection\Configuration;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Daemon;
 
 /**
@@ -40,8 +41,8 @@ class DaemonConfig extends AbstractConfig
     /** @var int $aliveDaemonsCheckInterval */
     private $aliveDaemonsCheckInterval;
 
-    /** @var int $idleTime */
-    private $idleTime;
+    /** @var int $sleepFor */
+    private $sleepFor;
 
     /** @var int $managedEntitiesTreshold */
     private $managedEntitiesTreshold;
@@ -88,18 +89,18 @@ class DaemonConfig extends AbstractConfig
 
         $this->name = $daemon;
         $this->setProdAllowed($allowProd);
-        $this->setAliveDaemonsCheckInterval($this->daemons[$daemon]['alive_daemons_check_interval']);
-        $this->setIdleTime($this->daemons[$daemon]['idle_time']);
-        $this->setManagedEntitiesTreshold($this->daemons[$daemon]['managed_entities_treshold']);
-        $this->setMaxRuntime($this->daemons[$daemon]['max_runtime']);
-        $this->setProfilingInfoInterval($this->daemons[$daemon]['profiling_info_interval']);
-        $this->setPrintProfilingInfo($this->daemons[$daemon]['print_profiling_info']);
+        $this->setAliveDaemonsCheckInterval($this->daemons[$daemon][Configuration::DAEMON_ALIVE_DAEMONS_CHECK_INTERVAL_KEY]);
+        $this->setManagedEntitiesTreshold($this->daemons[$daemon][Configuration::DAEMON_MANAGED_ENTITIES_TRESHOLD_KEY]);
+        $this->setMaxRuntime($this->daemons[$daemon][Configuration::DAEMON_MAX_RUNTIME_KEY]);
+        $this->setProfilingInfoInterval($this->daemons[$daemon][Configuration::DAEMON_PROFILING_INFO_INTERVAL_KEY]);
+        $this->setPrintProfilingInfo($this->daemons[$daemon][Configuration::DAEMON_PRINT_PROFILING_INFO_KEY]);
+        $this->setSleepFor($this->daemons[$daemon][Configuration::DAEMON_SLEEP_FOR_KEY]);
 
         // Remove non needed queues configurations
         $queues = array_keys($this->queues);
         foreach ($queues as $queue) {
             // Do not unset the default queue
-            if ('default' !== $queue && false === in_array($queue, $this->daemons[$daemon]['queues'], true)) {
+            if (Daemon::DEFAULT_QUEUE_NAME !== $queue && false === in_array($queue, $this->daemons[$daemon]['queues'], true)) {
                 unset($this->queues[$queue]);
             }
         }
@@ -132,7 +133,7 @@ class DaemonConfig extends AbstractConfig
      */
     public function getQueue(string $queueName): array
     {
-        return $this->queues[$queueName] ?? $this->queues['default'];
+        return $this->queues[$queueName] ?? $this->queues[Daemon::DEFAULT_QUEUE_NAME];
     }
 
     /**
@@ -154,9 +155,9 @@ class DaemonConfig extends AbstractConfig
     /**
      * @return int
      */
-    public function getIdleTime(): int
+    public function getSleepFor(): int
     {
-        return $this->idleTime;
+        return $this->sleepFor;
     }
 
     /**
@@ -198,7 +199,7 @@ class DaemonConfig extends AbstractConfig
      */
     public function getRetryStaleJobs(string $queueName): bool
     {
-        return $this->queues[$queueName]['retry_stale_jobs'];
+        return $this->queues[$queueName][Configuration::QUEUE_RETRY_STALE_JOBS_KEY];
     }
 
     /**
@@ -208,7 +209,7 @@ class DaemonConfig extends AbstractConfig
      */
     public function getRunningJobsCheckInterval(string $queueName): int
     {
-        return $this->queues[$queueName]['running_jobs_check_interval'];
+        return $this->queues[$queueName][Configuration::QUEUE_RUNNING_JOBS_CHECK_INTERVAL_KEY];
     }
 
     /**
@@ -239,11 +240,11 @@ class DaemonConfig extends AbstractConfig
     }
 
     /**
-     * @param int $idleTime
+     * @param int $sleepFor
      */
-    private function setIdleTime(int $idleTime): void
+    private function setSleepFor(int $sleepFor): void
     {
-        $this->idleTime = $idleTime;
+        $this->sleepFor = $sleepFor;
     }
 
     /**
