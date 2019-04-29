@@ -51,9 +51,7 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class RunCommand extends Command
 {
-    /**
-     * @var string
-     */
+    /** @var string */
     protected static $defaultName = 'queues:run';
 
     /** @var QueuesDaemon $daemon */
