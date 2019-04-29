@@ -67,7 +67,7 @@ class JobsManager
     {
         // This is to make static analysis pass
         if ( ! $entityManager instanceof EntityManager) {
-            throw new \RuntimeException('You need to pass an EntityManager instance.');
+            throw new RuntimeException('You need to pass an EntityManager instance.');
         }
 
         $env                 = $ioWriter->getInput()->getOption('env');
@@ -166,15 +166,8 @@ class JobsManager
             $parentDependency->removeChildDependency($removingJob);
         }
 
-        // If this is a cancelling Job, we need to first remove the association
-        // with the cancelled Jobs
-        /** @var Job $cancelledJob */
-        foreach ($removingJob->getCancelledJobs() as $cancelledJob) {
-            $cancelledJob->removeCancelledBy();
-        }
-
+        // Apply remove only to the owning side (inversedBy)
         $removingJob->removeFirstRetriedJob();
-        $removingJob->removeRetriedBy();
         $removingJob->removeRetryOf();
 
         self::$entityManager->remove($removingJob);

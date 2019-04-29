@@ -24,3 +24,7 @@ services:
         arguments: ['@SensioLabs\AnsiConverter\AnsiToHtmlConverter']
         tags:
             - { name: twig.extension }
+    SerendipityHQ\Bundle\CommandsQueuesBundle\Admin\Sonata\Twig\CommandsQueuesExtension:
+        autowire: true
+        tags:
+            - { name: twig.extension }

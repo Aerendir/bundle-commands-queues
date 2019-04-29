@@ -97,8 +97,8 @@ file that was distributed with this source code.
                 <p>{% trans %}Parent Jobs{% endtrans %}:</p>
                 {% set parentJobs = {} %}
                 {% for parentJob in object.parentDependencies %}
-                    {% set linkedParentJob = '<a href="' ~ path('admin_serendipityhq_commandsqueues_job_show', {'id': parentobject.id}) ~ '">#' ~ parentobject.id ~ '</a> (' ~ parentobject.status ~ ')' %}
-                    {% set parentJobs = parentJobs|merge({ ('_' ~ parentobject.id ~ '-'): linkedParentJob}) %}
+                    {% set linkedParentJob = '<a href="' ~ path('admin_serendipityhq_commandsqueues_job_show', {'id': parentJob.id}) ~ '">#' ~ parentJob.id ~ '</a> (' ~ parentJob.status ~ ')' %}
+                    {% set parentJobs = parentJobs|merge({ ('_' ~ parentJob.id ~ '-'): linkedParentJob}) %}
                 {% endfor %}
                 <p>{{ parentJobs|join(', ')|raw }}</p>
             {% endif %}
@@ -117,6 +117,19 @@ file that was distributed with this source code.
             {% endif %}
         </div>
     </div>
+    {% if object.isTypeInternal %}
+        <div class="row">
+            <div class="col-lg-12">
+                <h2>{% trans %}Cancelled Jobs{% endtrans %} (childs of {{ object|commands_queues_get_id_option_value|raw }})</h2>
+                {% set cancelledJobs = {} %}
+                {% for cancelledJob in object.cancelledJobs %}
+                    {% set linkedCancelledJob = '<a href="' ~ path('admin_serendipityhq_commandsqueues_job_show', {'id': cancelledJob.id}) ~ '">#' ~ cancelledJob.id ~ '</a> (' ~ cancelledJob.status ~ ')' %}
+                    {% set cancelledJobs = cancelledJobs|merge({ ('_' ~ cancelledJob.id ~ '-'): linkedCancelledJob}) %}
+                {% endfor %}
+                <p>{{ cancelledJobs|join(', ')|raw }}</p>
+            </div>
+        </div>
+    {% endif %}
     <div class="row">
         <div class="col-lg-12">
             <h2>Debug</h2>

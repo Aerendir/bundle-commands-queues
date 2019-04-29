@@ -109,7 +109,7 @@ class QueuesDaemon
     {
         // This is to make static analysis pass
         if ( ! $entityManager instanceof EntityManager) {
-            throw new \RuntimeException('You need to pass an EntityManager instance.');
+            throw new RuntimeException('You need to pass an EntityManager instance.');
         }
 
         $this->config        = $config;
@@ -635,9 +635,6 @@ class QueuesDaemon
                 $this->wait();
             }
 
-            // Clear now the entity manager to make it completely free of Jobs
-            $this->entityManager->clear();
-
             // We need to be sure that there are no jobs running, so it is possible to flush safely
             foreach ($this->getConfig()->getQueues() as $queueName) {
                 // Remove jobs that are older than max_retention_days
@@ -665,13 +662,24 @@ class QueuesDaemon
     /**
      * Removes from the queue all the Jobs older than max_retention_days.
      *
+     * This method doesn't purge Jobs if there are any still running
+     * (as it needs to completely clear the entity manager and then flush).
+     *
      * @param string $queueName
      *
      * @throws ORMException
      * @throws StringsException
+     * @throws MappingException
      */
     public function purgeExpiredJobs(string $queueName): void
     {
+        if ($this->hasRunningJobs()) {
+            return;
+        }
+
+        // Clear now the entity manager to make it completely free of Jobs
+        $this->entityManager->clear();
+
         // @todo move this to the creating QueueConfig object
         $maxRetentionDays = $this->config->getQueue($queueName)[Configuration::QUEUE_MAX_RETENTION_DAYS_KEY];
         $maxRetentionDate = new Carbon();

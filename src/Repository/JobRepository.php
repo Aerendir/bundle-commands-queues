@@ -156,16 +156,12 @@ class JobRepository extends EntityRepository
                     $queryBuilder->expr()->eq('j.status', ':aborted'),
                     $queryBuilder->expr()->eq('j.status', ':failed'),
                     $queryBuilder->expr()->eq('j.status', ':retry_failed'),
-                    $queryBuilder->expr()->eq('j.status', ':cancelled'),
-                    $queryBuilder->expr()->eq('j.status', ':retry_failed'),
                     $queryBuilder->expr()->eq('j.status', ':cancelled')
                 ))
             ->setParameter('succeeded', Job::STATUS_SUCCEEDED)
             ->setParameter('retry_succeeded', Job::STATUS_RETRY_SUCCEEDED)
             ->setParameter('aborted', Job::STATUS_ABORTED)
             ->setParameter('failed', Job::STATUS_FAILED)
-            ->setParameter('retry_failed', Job::STATUS_RETRY_FAILED)
-            ->setParameter('cancelled', Job::STATUS_CANCELLED)
             ->setParameter('retry_failed', Job::STATUS_RETRY_FAILED)
             ->setParameter('cancelled', Job::STATUS_CANCELLED)
             ->andWhere($queryBuilder->expr()->eq('j.queue', ':queue_name'))

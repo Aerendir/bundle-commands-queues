@@ -79,7 +79,7 @@ class RunCommand extends Command
     {
         // This is to make static analysis pass
         if ( ! $entityManager instanceof EntityManager) {
-            throw new \RuntimeException('You need to pass an EntityManager instance.');
+            throw new RuntimeException('You need to pass an EntityManager instance.');
         }
 
         $this->daemon        = $daemon;
@@ -185,6 +185,7 @@ class RunCommand extends Command
                             if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
                                 $this->ioWriter->infoLineNoBg(\Safe\sprintf('Queue <success-nobg>%s</success-nobg> is empty: no more Jobs to initialize.', $queueName));
                             }
+
                             // The next Job is null: exit this queue and pass to the next one
                             break;
                         }
@@ -230,6 +231,15 @@ class RunCommand extends Command
 
             // If the daemon can sleep, make it sleep
             if ($this->daemon->canSleep()) {
+                // Before trying to purge, check there are no running jobs
+                // to avoid conflicts and errors during flush
+                if (false === $this->daemon->hasRunningJobs()) {
+                    foreach ($this->daemon->getConfig()->getQueues() as $queueName) {
+                        // Now is a good time to try to delete expired jobs
+                        $this->daemon->purgeExpiredJobs($queueName);
+                    }
+                }
+
                 if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
                     $this->ioWriter->infoLineNoBg(\Safe\sprintf(
                         'No Jobs to process. Idling for <success-nobg>%s seconds<success-nobg>...', $this->daemon->getConfig()->getSleepFor()

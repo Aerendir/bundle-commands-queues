@@ -880,25 +880,20 @@ class Job
     }
 
     /**
-     * @throws StringsException
-     *
      * @return bool
      */
     public function canBeRemoved(): bool
     {
-        // Until this Job has retrying Jobs not still deleted, it cannot be deleted, too
+        // Until this Job has retrying Jobs not still removed, it cannot be remvoed, too
         if ($this->getRetryingJobs()->count() > 0) {
-            $this->cannotBeRemovedBecause = 'has retrying Jobs not still deleted';
+            $this->cannotBeRemovedBecause = 'has retrying Jobs not still removed';
 
             return false;
         }
 
-        // Until this Job is referenced by a cancelling Job, it cannot be removed
-        if ($this->getCancelledBy() instanceof self) {
-            $this->cannotBeRemovedBecause = \Safe\sprintf(
-                'is referenced by cancelling Job <success-nobg>%s</success-nobg>',
-                $this->getCancelledBy()->getId()
-            );
+        // Until this Job has cancelled Jobs not still removed, it cannot be removed, too
+        if ($this->isTypeCancelling() && $this->getCancelledJobs()->count() > 0) {
+            $this->cannotBeRemovedBecause = 'has cancelled Jobs not still removed';
 
             return false;
         }

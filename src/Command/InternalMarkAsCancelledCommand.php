@@ -114,6 +114,7 @@ class InternalMarkAsCancelledCommand extends AbstractQueuesCommand
             return 1;
         }
 
+        // We only cancel childs and not the failed Job as the failed Job is marked as "failed" and we don't want to change its status)
         $this->cancelChildJobs($failedJob, $cancellingJob, \Safe\sprintf('Parent Job %s failed.', $failedJob->getId()));
 
         $this->getIoWriter()->successLineNoBg(\Safe\sprintf('All child jobs of Job %s and their respective child Jobs were marked as cancelled.', $failedJob->getId()));

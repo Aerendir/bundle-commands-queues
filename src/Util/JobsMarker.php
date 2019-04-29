@@ -55,7 +55,7 @@ class JobsMarker
     {
         // This is to make static analysis pass
         if ( ! $entityManager instanceof EntityManager) {
-            throw new \RuntimeException('You need to pass an EntityManager instance.');
+            throw new RuntimeException('You need to pass an EntityManager instance.');
         }
 
         self::$entityManager = $entityManager;
