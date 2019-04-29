@@ -19,10 +19,10 @@ namespace SerendipityHQ\Bundle\CommandsQueuesBundle\DependencyInjection;
 
 use Exception;
 use Safe\Exceptions\StringsException;
-use SerendipityHQ\Bundle\CommandsQueuesBundle\Command\FakeCommand;
-use SerendipityHQ\Bundle\CommandsQueuesBundle\Command\MarkAsCancelledCommand;
+use SerendipityHQ\Bundle\CommandsQueuesBundle\Command\InternalMarkAsCancelledCommand;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Command\RunCommand;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Command\TestFailingJobsCommand;
+use SerendipityHQ\Bundle\CommandsQueuesBundle\Command\TestFakeCommand;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Command\TestRandomJobsCommand;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Config\DaemonConfig;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Service\JobsManager;
@@ -106,12 +106,12 @@ class SHQCommandsQueuesExtension extends Extension
         $container->setDefinition(TestRandomJobsCommand::class, $testRandomJobsCommandDefinition);
 
         // The queues:test:fake command
-        $testFakeCommandDefinition = (new Definition(FakeCommand::class))->addTag('console.command')->setAutowired(true);
-        $container->setDefinition(FakeCommand::class, $testFakeCommandDefinition);
+        $testFakeCommandDefinition = (new Definition(TestFakeCommand::class))->addTag('console.command')->setAutowired(true);
+        $container->setDefinition(TestFakeCommand::class, $testFakeCommandDefinition);
 
         // The queues:internal:mark-as-cancelled command
-        $internalMarkAsCancelledCommandDefinition = (new Definition(MarkAsCancelledCommand::class))->addTag('console.command')->setAutowired(true);
-        $container->setDefinition(MarkAsCancelledCommand::class, $internalMarkAsCancelledCommandDefinition);
+        $internalMarkAsCancelledCommandDefinition = (new Definition(InternalMarkAsCancelledCommand::class))->addTag('console.command')->setAutowired(true);
+        $container->setDefinition(InternalMarkAsCancelledCommand::class, $internalMarkAsCancelledCommandDefinition);
 
         if (class_exists(SonataAdminBundle::class)) {
             $sonataLoader = new YamlFileLoader($container, new FileLocator(__DIR__ . '/../Admin/Sonata/Resources/config'));

@@ -78,15 +78,15 @@ class TestFailingJobsCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $job1 = new Job('queues:test', '--id=1 --trigger-error=true');
+        $job1 = new Job(TestFakeCommand::$defaultName, '--id=1 --trigger-error=true');
         $job1->setRetryStrategy(new LiveStrategy(3))->setQueue('queue_1');
         $this->queuesManager->schedule($job1);
 
-        $job2 = new Job('queues:test', '--id=2 --trigger-error=true');
+        $job2 = new Job(TestFakeCommand::$defaultName, '--id=2 --trigger-error=true');
         $job2->setQueue('queue_1')->addParentDependency($job1);
         $this->queuesManager->schedule($job2);
 
-        $job3 = new Job('queues:test', '--id=3 --trigger-error=true');
+        $job3 = new Job(TestFakeCommand::$defaultName, '--id=3 --trigger-error=true');
         $job3->setQueue('queue_1');
         $job2->addChildDependency($job3);
         $this->queuesManager->schedule($job3);

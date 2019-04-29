@@ -26,6 +26,7 @@ use LogicException;
 use RuntimeException;
 use Safe\Exceptions\ArrayException;
 use Safe\Exceptions\StringsException;
+use SerendipityHQ\Bundle\CommandsQueuesBundle\Command\InternalMarkAsCancelledCommand;
 use SerendipityHQ\Component\ThenWhen\Strategy\LiveStrategy;
 use SerendipityHQ\Component\ThenWhen\Strategy\NeverRetryStrategy;
 use SerendipityHQ\Component\ThenWhen\Strategy\StrategyInterface;
@@ -479,7 +480,7 @@ class Job
     public function createCancelChildsJob(): Job
     {
         // If the Job as child Jobs, create a process to mark them as cancelled
-        return (new Job('queues:internal:mark-as-cancelled', [\Safe\sprintf('--id=%s', $this->getId())]))
+        return (new Job(InternalMarkAsCancelledCommand::$defaultName, [\Safe\sprintf('--id=%s', $this->getId())]))
             ->setQueue($this->getQueue())
             // This Job has to be successful!
             ->setRetryStrategy(new LiveStrategy(100000))

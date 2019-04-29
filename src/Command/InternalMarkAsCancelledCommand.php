@@ -35,10 +35,10 @@ use Symfony\Component\Console\Output\OutputInterface;
  * On very deep trees of Jobs the marking may require a lot of time. Using a dedicated command allows the Daemon to
  * continue running while this command, in the background, marks the Jobs and its childs as cancelled.
  */
-class MarkAsCancelledCommand extends AbstractQueuesCommand
+class InternalMarkAsCancelledCommand extends AbstractQueuesCommand
 {
     /** @var string */
-    protected static $defaultName = 'queues:internal:mark-as-cancelled';
+    public static $defaultName = 'queues:internal:mark-as-cancelled';
 
     /** @var JobRepository $jobsRepo */
     private $jobsRepo;

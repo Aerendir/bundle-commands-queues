@@ -131,7 +131,7 @@ class TestRandomJobsCommand extends AbstractQueuesCommand
         for ($i = 0; $i < $howManyJobs; ++$i) {
             // First: we create a Job to push to the queue
             $arguments    = '--id=' . ($i + 1);
-            $scheduledJob = new Job('queues:test:fake', $arguments);
+            $scheduledJob = new Job(TestFakeCommand::$defaultName, $arguments);
 
             // Set a random queue
             $queue = random_int(0, count($this->queues) - 1);

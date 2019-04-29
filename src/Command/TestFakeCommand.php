@@ -28,15 +28,17 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * A Fake command to use as fake Job.
  */
-class FakeCommand extends Command
+class TestFakeCommand extends Command
 {
+    /** @var string $defaultName */
+    public static $defaultName = 'queues:test:fake';
+
     /**
      * {@inheritdoc}
      */
     protected function configure(): void
     {
         $this
-            ->setName('queues:test:fake')
             ->setDescription('[INTERNAL] A Job to test the behaviors of SHQCommandsQueuesBundle. Returns randomly exceptions, and false or true results.')
             ->addOption('id', null, InputOption::VALUE_REQUIRED, 'The ID of the Job.')
             ->addOption('trigger-error', 'te', InputOption::VALUE_NONE, 'If passed, triggers some errors to see how the queue deals with them.');
