@@ -179,6 +179,11 @@ class QueuesDaemon
 
         // Check for Jobs started by a previous Daemon
         $this->checkStaleJobs($output);
+
+        // Remove expired Jobs
+        foreach ($this->getConfig()->getQueues() as $queueName) {
+            $this->purgeExpiredJobs($queueName);
+        }
     }
 
     /**
@@ -628,8 +633,6 @@ class QueuesDaemon
                 $this->purgeExpiredJobs($queueName);
             }
 
-            $this->entityManager->flush();
-
             // Clear again the EntityManager to free up all the memory
             $this->entityManager->clear();
         }
@@ -1010,7 +1013,7 @@ class QueuesDaemon
         $maxRetentionDate = new Carbon();
         $maxRetentionDate = $maxRetentionDate->subDays($maxRetentionDays);
         if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
-            $this->ioWriter->infoLineNoBg('Expired jobs: removing...');
+            $this->ioWriter->infoLineNoBg(\Safe\sprintf('Expired jobs: removing from queue <success-nobg>%s</success-nobg>...', $queueName));
             $this->ioWriter->commentLineNoBg(\Safe\sprintf('Removing expired jobs (older than %s days - before %s...', $maxRetentionDays, $maxRetentionDate->format(JobsUtil::TIME_FORMAT)));
         }
 
@@ -1028,5 +1031,7 @@ class QueuesDaemon
 
             $this->jobsManager->remove($removingJob);
         }
+
+        $this->entityManager->flush();
     }
 }
