@@ -46,7 +46,7 @@ class JobAdmin extends AbstractAdmin
      */
     protected $datagridValues = [
         '_page'     => 1,
-        '_per_page' => 128,
+        '_per_page' => 50,
 
         // reverse order (default = 'ASC')
         '_sort_order' => 'DESC',
@@ -55,9 +55,9 @@ class JobAdmin extends AbstractAdmin
         '_sort_by' => 'id',
     ];
 
-    protected $perPageOptions = [64, 128, 256, 10000];
+    protected $perPageOptions = [50, 100, 1000, 10000];
 
-    protected $maxPerPage = 10000;
+    protected $maxPerPage = 50;
 
     /**
      * {@inheritdoc}
