@@ -157,6 +157,7 @@ class Job
     private $command;
 
     /**
+     * This is called "arguments", but stores both arguments and options (-op or --option=value or --option value)
      * @var array
      *
      * @ORM\Column(name="arguments", type="array", nullable=false)
