@@ -161,7 +161,7 @@ class RunCommand extends Command
         $this->ioWriter->commentLineNoBg('To quit the Queues Daemon use CONTROL-C.');
 
         // Run the Daemon
-        while ($this->daemon->isAlive()) {
+        while ($this->daemon->isAlive(true)) {
             $printUow = false;
             // First process Jobs already running in each queue
             foreach ($this->daemon->getConfig()->getQueues() as $queueName) {
@@ -173,6 +173,14 @@ class RunCommand extends Command
 
             // Then initialize new Jobs for each queue if possible
             foreach ($this->daemon->getConfig()->getQueues() as $queueName) {
+                if (false === $this->daemon->canInitializeNewJobs($queueName)) {
+                    if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
+                        $this->ioWriter->infoLineNoBg(\Safe\sprintf('The queue <success-nobg>%s</success-nobg> is already processing the max allowed number of concurrent Jobs.', $queueName));
+                    }
+
+                    continue;
+                }
+
                 $jobsToLoad = $this->daemon->getJobsToLoad($queueName);
                 if (0 < $jobsToLoad) {
                     if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {

@@ -97,3 +97,10 @@ to do this you have to add an argument to your command:
         }
 
 Done: now your commands are aware of the Job that executes it!
+
+## Shutting down the damon
+
+The daemon will shut down when it will intercept a `SIGTERM` or a `SIGINT` signal.
+
+Those signals are managed by `pcntl` and are meant to gracefully stop the daemon, giving it some time to complete still running Jobs.
+This means that the more Jobs you process concurrently, the more time requires the daemon to intercept the signals, the more time it requires to shut down.

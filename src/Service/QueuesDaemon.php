@@ -214,15 +214,19 @@ class QueuesDaemon
      *
      * This service is not meant to be retrieved outside of RunCommand.
      *
+     * @param bool $hitIteration the iteration has to be hit only from the RunCommand
+     *
      * @throws PcntlException
      * @throws StringsException
      *
      * @return bool
      */
-    public function isAlive(): bool
+    public function isAlive(bool $hitIteration = false): bool
     {
         // Increment the iterations counter
-        $this->profiler->hitIteration();
+        if ($hitIteration) {
+            $this->profiler->hitIteration();
+        }
 
         if (true === $this->pcntlLoaded) {
             \Safe\pcntl_signal_dispatch();
@@ -248,6 +252,20 @@ class QueuesDaemon
     }
 
     /**
+     * @param string $queueName
+     *
+     * @throws PcntlException
+     * @throws StringsException
+     *
+     * @return bool
+     */
+    public function canInitializeNewJobs(string $queueName): bool
+    {
+        // If the max_concurrent_jobs number is reached, don't process one more job
+        return $this->isAlive() && false === $this->countRunningJobs($queueName) >= $this->config->getQueue($queueName)[Configuration::QUEUE_MAX_CONCURRENT_JOBS_KEY];
+    }
+
+    /**
      * Processes the next Job in the queue.
      *
      * @param string $queueName
@@ -262,7 +280,7 @@ class QueuesDaemon
     public function processNextJob(string $queueName): bool
     {
         // If the max_concurrent_jobs number is reached, don't process one more job
-        if ($this->countRunningJobs($queueName) >= $this->config->getQueue($queueName)[Configuration::QUEUE_RUNNING_JOBS_CHECK_INTERVAL_KEY]) {
+        if ($this->countRunningJobs($queueName) >= $this->config->getQueue($queueName)[Configuration::QUEUE_MAX_CONCURRENT_JOBS_KEY]) {
             return false;
         }
 
@@ -618,7 +636,7 @@ class QueuesDaemon
         }
 
         // Check if the optimization worked
-        if ($this->hasToOptimize()) {
+        if ($this->isAlive() && $this->hasToOptimize()) {
             if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
                 $this->ioWriter->warning(\Safe\sprintf('Trying to hard detach all Jobs to free more space.'));
                 $this->ioWriter->infoLineNoBg('Emptying the queue of still running Jobs...');
@@ -759,7 +777,7 @@ class QueuesDaemon
      */
     public function getJobsToLoad(string $queueName): int
     {
-        return $this->getConfig()->getQueue($queueName)[Configuration::QUEUE_RUNNING_JOBS_CHECK_INTERVAL_KEY] - $this->countRunningJobs($queueName);
+        return $this->getConfig()->getQueue($queueName)[Configuration::QUEUE_MAX_CONCURRENT_JOBS_KEY] - $this->countRunningJobs($queueName);
     }
 
     /**

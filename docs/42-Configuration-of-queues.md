@@ -20,6 +20,16 @@ This param indicates how many of them it has to process concurrently in each que
             queue_4:
                 max_concurrent_jobs: 2 # Only queue_5 will process 2 jobs concurrently
 
+Keep in mind that the higher this value, the higher the load on your server, obviously.
+
+If this number is too high, you may receive an error message like this 
+
+> [php] Warning: proc_open(): unable to create pipe Too many open files
+
+This means you have to reduce the number of concurrent jobs.
+
+This also means that the Daemon died without having the possibility to complete the still running Jobs (that, so, became "stale").
+
 ### `max_retention_days`
 
 The number of days after which a Job that cannot be run anymore will be considered expired and will be removed from the database.
