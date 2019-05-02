@@ -31,6 +31,7 @@ use Doctrine\ORM\TransactionRequiredException;
 use Exception;
 use RuntimeException;
 use Safe\Exceptions\ArrayException;
+use Safe\Exceptions\PcntlException;
 use Safe\Exceptions\StringsException;
 use function Safe\getmypid;
 use function Safe\pcntl_signal_dispatch;
@@ -191,6 +192,8 @@ class QueuesDaemon
         foreach ($this->getConfig()->getQueues() as $queueName) {
             $this->purgeExpiredJobs($queueName);
         }
+
+        // dd('Initialized');
     }
 
     /**
@@ -217,6 +220,8 @@ class QueuesDaemon
      * @param bool $hitIteration the iteration has to be hit only from the RunCommand
      *
      * @return bool
+     * @throws StringsException
+     * @throws PcntlException
      */
     public function isAlive(bool $hitIteration = false): bool
     {
@@ -252,6 +257,8 @@ class QueuesDaemon
      * @param string $queueName
      *
      * @return bool
+     * @throws PcntlException
+     * @throws StringsException
      */
     public function canInitializeNewJobs(string $queueName): bool
     {
@@ -685,8 +692,10 @@ class QueuesDaemon
      *
      * @param string $queueName
      *
-     * @throws ORMException
      * @throws MappingException
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @throws StringsException
      */
     public function purgeExpiredJobs(string $queueName): void
     {

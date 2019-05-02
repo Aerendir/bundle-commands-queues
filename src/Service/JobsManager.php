@@ -230,34 +230,35 @@ class JobsManager
      */
     public function createJobProcess(Job $job, bool $allowProd): Process
     {
-        $arguments = [];
+        $command = [];
 
         // Prepend php
-        $arguments[] = 'php';
+        $command[] = 'php';
 
         // Add the console
-        $arguments[] = $this->findConsole();
+        $command[] = $this->findConsole();
 
         // The command to execute
-        $arguments[] = $job->getCommand();
+        $command[] = $job->getCommand();
 
         // The input
-        $arguments[] = InputParser::stringify($job->getInput());
+        $input = InputParser::stringify($job->getInput());
+        $command = array_merge($command, explode(' ', $input));
 
         // Decide the environment to use
         $env         = $allowProd ? $this->env : 'dev';
-        $arguments[] = '--env=' . $env;
+        $command[] = '--env=' . $env;
 
         // Verbosity level (only if not normal = agument verbosity not set in command)
         if (OutputInterface::VERBOSITY_NORMAL !== $this->verbosity) {
-            $arguments[] = $this->guessVerbosityLevel();
+            $command[] = $this->guessVerbosityLevel();
         }
 
         if ($job->isAwareOfJob()) {
-            $arguments[] = '--job-id=' . $job->getId();
+            $command[] = '--job-id=' . $job->getId();
         }
 
-        return new Process($arguments);
+        return new Process($command);
     }
 
     /**
