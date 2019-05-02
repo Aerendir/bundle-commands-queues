@@ -242,12 +242,14 @@ class JobsManager
         $command[] = $job->getCommand();
 
         // The input
-        $input = InputParser::stringify($job->getInput());
-        $command = array_merge($command, explode(' ', $input));
+        $input   = InputParser::stringify($job->getInput());
+        if (null !== $input) {
+            $command = array_merge($command, explode(' ', $input));
+        }
 
         // Decide the environment to use
         $env         = $allowProd ? $this->env : 'dev';
-        $command[] = '--env=' . $env;
+        $command[]   = '--env=' . $env;
 
         // Verbosity level (only if not normal = agument verbosity not set in command)
         if (OutputInterface::VERBOSITY_NORMAL !== $this->verbosity) {

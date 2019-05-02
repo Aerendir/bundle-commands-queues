@@ -847,7 +847,7 @@ class Job
             }
 
             // It has to be flushed at the end
-            $this->cannotBeDetachedBecause = \Safe\sprintf('is being retried by Job #%s (%s)', $retriedBy->getId(), $retriedBy->getStatus());
+            $this->cannotBeDetachedBecause = sprintf('is being retried by Job #%s (%s)', $retriedBy->getId(), $retriedBy->getStatus());
 
             return false;
         }

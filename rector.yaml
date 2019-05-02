@@ -20,3 +20,6 @@ parameters:
         - 'Rector\CodeQuality\Rector\Identical\SimplifyBoolIdenticalTrueRector'
         - 'Rector\CodeQuality\Rector\Concat\JoinStringConcatRector'
         - 'Rector\CodingStyle\Rector\Identical\IdenticalFalseToBooleanNotRector'
+        # This doesn't recognize the difference between classes and functions
+        # Waiting the fix https://github.com/rectorphp/rector/issues/1376
+        - 'Rector\CodingStyle\Rector\Namespace_\ImportFullyQualifiedNamesRector'

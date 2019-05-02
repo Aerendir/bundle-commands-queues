@@ -219,9 +219,10 @@ class QueuesDaemon
      *
      * @param bool $hitIteration the iteration has to be hit only from the RunCommand
      *
-     * @return bool
      * @throws StringsException
      * @throws PcntlException
+     *
+     * @return bool
      */
     public function isAlive(bool $hitIteration = false): bool
     {
@@ -256,9 +257,10 @@ class QueuesDaemon
     /**
      * @param string $queueName
      *
-     * @return bool
      * @throws PcntlException
      * @throws StringsException
+     *
+     * @return bool
      */
     public function canInitializeNewJobs(string $queueName): bool
     {
