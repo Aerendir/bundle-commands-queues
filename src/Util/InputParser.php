@@ -17,6 +17,8 @@ declare(strict_types=1);
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Util;
 
+use InvalidArgumentException;
+use Safe\Exceptions\StringsException;
 use function Safe\sprintf;
 
 /**
@@ -58,9 +60,10 @@ class InputParser
      * @param array|string|null $input
      * @param bool              $hasCommand If the input contains also the command name or not
      *
-     * @suppress PhanTypeMismatchDimFetch
+     * @throws StringsException
      *
      * @return array
+     * @suppress PhanTypeMismatchDimFetch
      */
     public static function parseInput($input = [], bool $hasCommand = true): array
     {
@@ -84,6 +87,11 @@ class InputParser
 
         if ($hasCommand && $wasString) {
             $commandKey                     = array_key_first($input);
+
+            if (false === self::isArgument($input[$commandKey])) {
+                throw new InvalidArgumentException(sprintf('The given command "%s" seems not to be a valid command.', $input[$commandKey]));
+            }
+
             self::$preparedInput['command'] = $input[$commandKey];
             unset($input[$commandKey]);
         }
