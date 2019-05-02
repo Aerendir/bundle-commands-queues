@@ -356,7 +356,7 @@ class Job
     public function __construct(string $command, $input = [], string $queue = Daemon::DEFAULT_QUEUE_NAME)
     {
         $this->command            = $command;
-        $this->input              = InputParser::parseInput($input);
+        $this->input              = InputParser::parseInput($input, false);
         $this->priority           = 1;
         $this->queue              = $queue;
         $this->status             = self::STATUS_NEW;
