@@ -18,6 +18,7 @@ declare(strict_types=1);
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Admin\Sonata\Twig;
 
 use Safe\Exceptions\StringsException;
+use function Safe\sprintf;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Twig\Extension\AbstractExtension;
@@ -58,13 +59,11 @@ class CommandsQueuesExtension extends AbstractExtension
      */
     public function getIdOptionValue(Job $job): ?string
     {
-        foreach ($job->getArguments() as $option) {
-            if (0 === strpos($option, '--id=')) {
-                $id  = str_replace('--id=', '', $option);
-                $url = $this->generator->generate('admin_serendipityhq_commandsqueues_job_show', ['id' => $id], UrlGeneratorInterface::ABSOLUTE_PATH);
+        $input = $job->getInput();
+        if (null !== $input && false === array_key_exists('options', $input) && isset($input['options']['--id'])) {
+            $url = $this->generator->generate('admin_serendipityhq_commandsqueues_job_show', ['id' => $input['options']['--id']], UrlGeneratorInterface::ABSOLUTE_PATH);
 
-                return \Safe\sprintf('<a href="%s">#%s</a>', $url, $id);
-            }
+            return sprintf('<a href="%s">#%s</a>', $url, $input['options']['--id']);
         }
 
         return null;

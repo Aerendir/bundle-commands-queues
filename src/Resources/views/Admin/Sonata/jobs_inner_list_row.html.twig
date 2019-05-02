@@ -151,8 +151,18 @@ file that was distributed with this source code.
         <td>
             <p>
                 <code style="width:300px; overflow:hidden; white-space:nowrap;">{{ object.command }}
-                    {% if object.arguments %}
-                        <span class="text-muted">{{ object.arguments|join(' ') }}</span>
+                    {% if object.input %}
+                        <span class="text-muted">
+                            {% if object.input.arguments %}
+                                {{ object.input.arguments|join(' ') }}
+                            {% endif %}
+                            {% if object.input.options %}
+                                {{ object.input.options|join(' ') }}
+                            {% endif %}
+                            {% if object.input.shortcuts %}
+                                {{ object.input.shortcuts|join(' ') }}
+                            {% endif %}
+                        </span>
                     {% endif %}
                 </code>
             </p>

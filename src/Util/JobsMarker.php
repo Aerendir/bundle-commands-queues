@@ -30,6 +30,7 @@ use ReflectionException;
 use RuntimeException;
 use Safe\Exceptions\ArrayException;
 use Safe\Exceptions\StringsException;
+use function Safe\sprintf;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Daemon;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
 use SerendipityHQ\Bundle\ConsoleStyles\Console\Style\SerendipityHQStyle;
@@ -317,7 +318,7 @@ class JobsMarker
             // current Job.
             // Here we refresh the Job to manage again all the required Jobs.
             // This is a required trade-off between the memory consumption and the queries to the database: we chose to
-            // the sacrifice queries to the databse in favor of a minor memory consumption.
+            // sacrifice queries to the databse in favor of a minor memory consumption.
             ->setMiddleHandlerForException([
                 ORMInvalidArgumentException::class, InvalidArgumentException::class,
             ], static function (Exception $e) use ($job, $status, $info, $daemon, $ioWriter) {
@@ -350,10 +351,10 @@ class JobsMarker
         $tryAgainBuilder->initializeRetryStrategy()
             ->try(static function () use ($job) {
                 /*
-             * Flush now to be sure editings aren't cleared during optimizations.
-             *
-             * We flush the single Jobs to don't affect the others that may be still processing.
-             */
+                 * Flush now to be sure editings aren't cleared during optimizations.
+                 *
+                 * We flush the single Jobs to don't affect the others that may be still processing.
+                 */
                 if ($job->isTypeRetried()) {
                     // Flush the new retrying Job
                     self::$entityManager->flush($job->getRetriedBy());
@@ -424,7 +425,7 @@ class JobsMarker
                     $reflectedProperty = $reflectedClass->getProperty('cancellationReason');
                     break;
                 default:
-                    throw new RuntimeException(\Safe\sprintf(
+                    throw new RuntimeException(sprintf(
                         'The property %s is not managed. Manage it or verify its spelling is correct.',
                         $property
                     ));

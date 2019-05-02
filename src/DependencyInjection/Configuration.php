@@ -19,6 +19,8 @@ namespace SerendipityHQ\Bundle\CommandsQueuesBundle\DependencyInjection;
 
 use Safe\Exceptions\ArrayException;
 use Safe\Exceptions\StringsException;
+use function Safe\ksort;
+use function Safe\sprintf;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Daemon;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
@@ -274,7 +276,7 @@ class Configuration implements ConfigurationInterface
     private function validateConfiguration(array $tree): bool
     {
         if (1 > $tree[self::DAEMON_ALIVE_DAEMONS_CHECK_INTERVAL_KEY]) {
-            throw new InvalidConfigurationException(\Safe\sprintf(
+            throw new InvalidConfigurationException(sprintf(
                 'The global "%s" config param MUST be greater than 0. You set it to "%s".', self::DAEMON_ALIVE_DAEMONS_CHECK_INTERVAL_KEY, $tree[self::DAEMON_ALIVE_DAEMONS_CHECK_INTERVAL_KEY]
             ));
         }
@@ -282,7 +284,7 @@ class Configuration implements ConfigurationInterface
         foreach ($tree['daemons'] as $daemon => $config) {
             // A Daemon MUST HAVE at least one queue assigned
             if (empty($config['queues'])) {
-                throw new InvalidConfigurationException(\Safe\sprintf(
+                throw new InvalidConfigurationException(sprintf(
                     'The "%s" daemon MUST specify at least one queue to process.', $daemon
                 ));
             }
@@ -290,7 +292,7 @@ class Configuration implements ConfigurationInterface
             // Check the queue is not already assigned
             foreach ($config['queues'] as $queue) {
                 if (array_key_exists($queue, $this->foundQueues)) {
-                    throw new InvalidConfigurationException(\Safe\sprintf(
+                    throw new InvalidConfigurationException(sprintf(
                         'Queue "%s" already assigned to daemon "%s". You cannot assign this queue also to daemon "%s".',
                         $queue, $this->foundQueues[$queue], $daemon
                     ));
@@ -338,7 +340,7 @@ class Configuration implements ConfigurationInterface
         }
 
         // Sort queues alphabetically
-        \Safe\ksort($returnConfig['queues']);
+        ksort($returnConfig['queues']);
 
         // Now configure the queues
         foreach ($returnConfig['queues'] as $queue => $config) {

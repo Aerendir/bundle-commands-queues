@@ -32,6 +32,7 @@ use Safe\Exceptions\MiscException;
 use Safe\Exceptions\PcntlException;
 use Safe\Exceptions\StreamException;
 use Safe\Exceptions\StringsException;
+use function Safe\sprintf;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Daemon;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Repository\DaemonRepository;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Service\QueuesDaemon;
@@ -175,7 +176,7 @@ class RunCommand extends Command
             foreach ($this->daemon->getConfig()->getQueues() as $queueName) {
                 if (false === $this->daemon->canInitializeNewJobs($queueName)) {
                     if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
-                        $this->ioWriter->infoLineNoBg(\Safe\sprintf('The queue <success-nobg>%s</success-nobg> is already processing the max allowed number of concurrent Jobs.', $queueName));
+                        $this->ioWriter->infoLineNoBg(sprintf('The queue <success-nobg>%s</success-nobg> is already processing the max allowed number of concurrent Jobs.', $queueName));
                     }
 
                     continue;
@@ -184,14 +185,14 @@ class RunCommand extends Command
                 $jobsToLoad = $this->daemon->getJobsToLoad($queueName);
                 if (0 < $jobsToLoad) {
                     if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
-                        $this->ioWriter->infoLineNoBg(\Safe\sprintf('Trying to initialize <success-nobg>%s</success-nobg> new Jobs for queue <success-nobg>%s</success-nobg>...', $jobsToLoad, $queueName));
+                        $this->ioWriter->infoLineNoBg(sprintf('Trying to initialize <success-nobg>%s</success-nobg> new Jobs for queue <success-nobg>%s</success-nobg>...', $jobsToLoad, $queueName));
                         $initializingJobs = ProgressBarFactory::createProgressBar(ProgressBarFactory::FORMAT_INITIALIZING_JOBS, $output, $jobsToLoad);
                     }
                     for ($i = 0; $i < $jobsToLoad; ++$i) {
                         // Start processing the next Job in the queue
                         if (false === $this->daemon->processNextJob($queueName)) {
                             if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
-                                $this->ioWriter->infoLineNoBg(\Safe\sprintf('Queue <success-nobg>%s</success-nobg> is empty: no more Jobs to initialize.', $queueName));
+                                $this->ioWriter->infoLineNoBg(sprintf('Queue <success-nobg>%s</success-nobg> is empty: no more Jobs to initialize.', $queueName));
                             }
 
                             // The next Job is null: exit this queue and pass to the next one
@@ -249,7 +250,7 @@ class RunCommand extends Command
                 }
 
                 if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
-                    $this->ioWriter->infoLineNoBg(\Safe\sprintf(
+                    $this->ioWriter->infoLineNoBg(sprintf(
                         'No Jobs to process. Idling for <success-nobg>%s seconds<success-nobg>...', $this->daemon->getConfig()->getSleepFor()
                     ));
                 }
@@ -317,7 +318,7 @@ class RunCommand extends Command
             return;
         }
 
-        $this->ioWriter->infoLineNoBg(\Safe\sprintf('Found <success-nobg>%s</success-nobg> struggler Daemon(s).', count($strugglers)));
+        $this->ioWriter->infoLineNoBg(sprintf('Found <success-nobg>%s</success-nobg> struggler Daemon(s).', count($strugglers)));
         $this->ioWriter->commentLineNoBg('Their "diedOn" date is set to NOW and mortisCausa is "struggler".');
 
         $table = [];
@@ -325,12 +326,12 @@ class RunCommand extends Command
             $strugglerDaemonDieOn = $strugglerDaemon->getDiedOn();
 
             if (null === $strugglerDaemonDieOn) {
-                throw new RuntimeException(\Safe\sprintf("The daemon %s is being processed as struggler, but it hasn't a die date.", $strugglerDaemon->getId()));
+                throw new RuntimeException(sprintf("The daemon %s is being processed as struggler, but it hasn't a die date.", $strugglerDaemon->getId()));
             }
 
             $age     = $strugglerDaemonDieOn->diff($strugglerDaemon->getBornOn());
             $table[] = [
-                \Safe\sprintf('<%s>%s</>', 'success-nobg', "\xE2\x9C\x94"),
+                sprintf('<%s>%s</>', 'success-nobg', "\xE2\x9C\x94"),
                 $strugglerDaemon->getPid(),
                 $strugglerDaemon->getHost(),
                 $strugglerDaemon->getBornOn()->format('Y-m-d H:i:s'),
@@ -359,7 +360,7 @@ class RunCommand extends Command
     private function isDaemonStillRunning(Daemon $daemon): bool
     {
         // Get the running processes with the Daemon's PID
-        exec(\Safe\sprintf('ps -ef | grep %s', $daemon->getPid()), $lines);
+        exec(sprintf('ps -ef | grep %s', $daemon->getPid()), $lines);
 
         // Search the line with this command name: this indicates the process is still running
         foreach ($lines as $line) {
@@ -383,7 +384,7 @@ class RunCommand extends Command
     {
         $currentlyRunningProgress = null;
         if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
-            $this->ioWriter->infoLineNoBg(\Safe\sprintf(
+            $this->ioWriter->infoLineNoBg(sprintf(
                 'Checking <success-nobg>%s</success-nobg> running jobs on queue "%s"...',
                 $this->daemon->countRunningJobs($queueName), $queueName
             ));
