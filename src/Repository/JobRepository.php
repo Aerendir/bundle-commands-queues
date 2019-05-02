@@ -29,7 +29,6 @@ use Safe\Exceptions\StringsException;
 use function Safe\sprintf;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Service\JobsManager;
-use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\InputParser;
 use SerendipityHQ\Bundle\ConsoleStyles\Console\Style\SerendipityHQStyle;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -193,17 +192,17 @@ class JobRepository extends EntityRepository
      * @param string     $queue
      * @param bool       $fullSearch If false, will search only in the not already started jobs
      *
+     * @throws StringsException
+     *
      * @return array|null
      */
     public function findBySearch(string $command, ?array $input = [], string $queue = 'default', bool $fullSearch = false): ?array
     {
         $queryBuilder = $this->getEntityManager()->createQueryBuilder();
-        $stringInput  = InputParser::stringify($input);
 
         $queryBuilder->select('j')->from(Job::class, 'j')
                      ->where($queryBuilder->expr()->eq('j.command', ':command'))
-                     ->setParameter('command', $command)
-                     ->andWhere(null === $stringInput ? $queryBuilder->expr()->isNull('j.input') : $queryBuilder->expr()->eq('j.input', $stringInput));
+                     ->setParameter('command', $command);
 
         if (null !== $queue) {
             $queryBuilder->andWhere($queryBuilder->expr()->eq('j.queue', ':queue'))->setParameter('queue', $queue);
@@ -211,6 +210,26 @@ class JobRepository extends EntityRepository
 
         if (false === $fullSearch) {
             $queryBuilder->andWhere($queryBuilder->expr()->isNull('j.startedAt'));
+        }
+
+        if (null !== $input) {
+            if (isset($input['arguments']) && is_array($input['arguments'])) {
+                foreach ($input['arguments'] as $argument) {
+                    $queryBuilder->andWhere($queryBuilder->expr()->like('j.input', $queryBuilder->expr()->literal('%' . $argument . '%')));
+                }
+            }
+
+            if (isset($input['options']) && is_array($input['options'])) {
+                foreach ($input['options'] as $option => $value) {
+                    $queryBuilder->andWhere($queryBuilder->expr()->like('j.input', $queryBuilder->expr()->literal('%' . sprintf('%s %s', $option, $value) . '%')));
+                }
+            }
+
+            if (isset($input['shortcuts']) && is_array($input['shortcuts'])) {
+                foreach ($input['shortcuts'] as $shortcut => $value) {
+                    $queryBuilder->andWhere($queryBuilder->expr()->like('j.input', $queryBuilder->expr()->literal('%' . sprintf('%s %s', $shortcut, $value) . '%')));
+                }
+            }
         }
 
         return $queryBuilder->getQuery()->execute();
