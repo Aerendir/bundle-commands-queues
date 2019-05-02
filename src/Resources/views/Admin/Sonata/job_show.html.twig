@@ -57,7 +57,7 @@ file that was distributed with this source code.
                 {% set status = 'default' %}
             {% endif %}
             <p><strong>#{{ object.id }}</strong> <span class="label label-{{ status }}">{{ object.status }}</span> <code>@{{ object.queue }}</code> (<code>{{ object.priority }}</code>)</p>
-            <pre>>: {{ object.command }}{% if object.arguments %} {{ object.arguments|join(' ') }}{% endif %}</pre>
+            <pre>>: {{ object.command }}{% if object.input %} {% if object.input.arguments %}{{ object.input.arguments|join(' ') }}{% endif %}{% if object.input.options %}{{ object.input.options|join(' ') }}{% endif %}{% if object.input.shortcuts %}{{ object.input.shortcuts|join(' ') }}{% endif %}{% endif %}</pre>
         </div>
     </div>
     <div class="row">

@@ -78,7 +78,7 @@ class JobAdmin extends AbstractAdmin
         $datagridMapper
             ->add('status')
             ->add('command')
-            ->add('arguments')
+            ->add('input')
             ->add('queue')
             ->add('exitCode')
             ->add('priority')

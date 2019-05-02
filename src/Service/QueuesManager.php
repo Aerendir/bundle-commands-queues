@@ -19,14 +19,13 @@ namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Service;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use RuntimeException;
-use Safe\Exceptions\ArrayException;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Daemon;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Repository\JobRepository;
+use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\InputParser;
 
 /**
  * Manages the commands_queues.
@@ -60,14 +59,11 @@ class QueuesManager
      *
      * @param Job $job
      *
-     * @throws ArrayException
-     * @throws NonUniqueResultException
-     *
-     * @return bool|Job
+     * @return bool
      */
-    public function jobExists(Job $job)
+    public function jobExists(Job $job):bool
     {
-        return $this->exists($job->getCommand(), $job->getArguments(), $job->getQueue());
+        return $this->exists($job->getCommand(), $job->getInput(), $job->getQueue());
     }
 
     /**
@@ -81,14 +77,11 @@ class QueuesManager
      *
      * @param Job $job
      *
-     * @throws ArrayException
-     * @throws NonUniqueResultException
-     *
-     * @return Job|null
+     * @return array|null
      */
-    public function findJob(Job $job): ?Job
+    public function findByJob(Job $job): ?array
     {
-        return $this->find($job->getCommand(), $job->getArguments(), $job->getQueue());
+        return $this->find($job->getCommand(), $job->getInput(), $job->getQueue());
     }
 
     /**
@@ -96,24 +89,17 @@ class QueuesManager
      *
      * Returns (bool) false if it doesn't exist or the scheduled Job if it exists.
      *
-     * @param string $command
-     * @param array  $arguments
-     * @param string $queue
+     * @param string            $command
+     * @param array|string|null $input
+     * @param string            $queue
      *
-     * @throws ArrayException
-     * @throws NonUniqueResultException
-     *
-     * @return bool|Job
+     * @return bool
      */
-    public function exists(string $command, array $arguments = [], string $queue = Daemon::DEFAULT_QUEUE_NAME)
+    public function exists(string $command, $input = null, string $queue = Daemon::DEFAULT_QUEUE_NAME):bool
     {
-        $exists = $this->find($command, $arguments, $queue);
+        $exists = $this->find($command, $input, $queue);
 
-        if (null === $exists) {
-            return false;
-        }
-
-        return $exists;
+        return null !== $exists;
     }
 
     /**
@@ -121,24 +107,22 @@ class QueuesManager
      *
      * Returns null if it doesn't exist or the scheduled Job if it exists.
      *
-     * @param string $command
-     * @param array  $arguments
-     * @param string $queue
+     * @param string            $command
+     * @param array|string|null $input
+     * @param string            $queue
      *
-     * @throws ArrayException
-     * @throws NonUniqueResultException
      *
-     * @return Job|null
+     * @return array|null
      */
-    public function find(string $command, array $arguments = [], string $queue = Daemon::DEFAULT_QUEUE_NAME): ?Job
+    public function find(string $command, $input = null, string $queue = Daemon::DEFAULT_QUEUE_NAME): ?array
     {
         /** @var JobRepository $jobsRepo */
         $jobsRepo = $this->entityManager->getRepository(Job::class);
 
         // Check and prepare arguments of the command
-        $arguments = Job::prepareArguments($arguments);
+        $input = InputParser::parseInput($input);
 
-        return $jobsRepo->exists($command, $arguments, $queue);
+        return $jobsRepo->findBySearch($command, $input, $queue);
     }
 
     /**

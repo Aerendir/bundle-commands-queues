@@ -22,11 +22,13 @@ use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Exception;
+use InvalidArgumentException;
 use LogicException;
 use RuntimeException;
-use Safe\Exceptions\ArrayException;
 use Safe\Exceptions\StringsException;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Command\InternalMarkAsCancelledCommand;
+use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\InputParser;
 use SerendipityHQ\Component\ThenWhen\Strategy\LiveStrategy;
 use SerendipityHQ\Component\ThenWhen\Strategy\NeverRetryStrategy;
 use SerendipityHQ\Component\ThenWhen\Strategy\StrategyInterface;
@@ -36,6 +38,7 @@ use SerendipityHQ\Component\ThenWhen\Strategy\StrategyInterface;
  *
  * @ORM\Entity(repositoryClass="SerendipityHQ\Bundle\CommandsQueuesBundle\Repository\JobRepository")
  * @ORM\Table(name="queues_scheduled_jobs")
+ * @ORM\HasLifecycleCallbacks
  */
 class Job
 {
@@ -94,48 +97,57 @@ class Job
      */
     public const STATUS_RUNNING = 'running';
 
-    /** The job was processed and finished with success.
+    /**
+     * The job was processed and finished with success.
      *
      * @var string
      */
     public const STATUS_SUCCEEDED = 'succeeded';
 
-    /** A failed Job that were retried and the retry Job were finished
+    /**
+     * A failed Job that were retried and the retry Job were finished
      *
      * @var string */
     public const STATUS_RETRY_SUCCEEDED = 'retry_succeeded';
 
-    /** The $process->start() method thrown an exception.
+    /**
+     * The $process->start() method thrown an exception.
      *
      * @var string */
     public const STATUS_ABORTED = 'aborted';
 
-    /** The job failed for some reasons.
+    /**
+     * The job failed for some reasons.
      *
      * @var string */
     public const STATUS_FAILED = 'failed';
 
-    /** A failed Job that were retried and the retry Job failed, too
+    /**
+     * A failed Job that were retried and the retry Job failed, too
      *
      * @var string */
     public const STATUS_RETRY_FAILED = 'retry_failed';
 
-    /** The parent job (on which this one depends) failed.
+    /**
+     * The parent job (on which this one depends) failed.
      *
      * @var string */
     public const STATUS_CANCELLED = 'cancelled';
 
-    /** Are of this type the Jobs that mark as cancelled child Jobs of a failed one.
+    /**
+     * Are of this type the Jobs that mark as cancelled child Jobs of a failed one.
      *
      * @var string */
     public const TYPE_CANCELLING = 'cancelling';
 
-    /** Are of this type all Jobs created by the developer or by other Jobs.
+    /**
+     * Are of this type all Jobs created by the developer or by other Jobs.
      *
      * @var string */
     public const TYPE_JOB = 'job';
 
-    /** Are of this type Jobs created to retry failed ones.
+    /**
+     * Are of this type Jobs created to retry failed ones.
      *
      * @var string */
     public const TYPE_RETRY = 'retry';
@@ -157,12 +169,11 @@ class Job
     private $command;
 
     /**
-     * This is called "arguments", but stores both arguments and options (-op or --option=value or --option value)
-     * @var array
+     * @var array|null
      *
-     * @ORM\Column(name="arguments", type="array", nullable=false)
+     * @ORM\Column(name="input", type="array", nullable=true)
      */
-    private $arguments;
+    private $input;
 
     /**
      * @var bool
@@ -341,12 +352,12 @@ class Job
      * @param array|string $arguments
      * @param string       $queue
      *
-     * @throws ArrayException
+     * @throws Exception
      */
     public function __construct(string $command, $arguments = [], string $queue = Daemon::DEFAULT_QUEUE_NAME)
     {
         $this->command            = $command;
-        $this->arguments          = self::prepareArguments($arguments);
+        $this->input              = InputParser::parseInput($arguments);
         $this->priority           = 1;
         $this->queue              = $queue;
         $this->status             = self::STATUS_NEW;
@@ -356,44 +367,78 @@ class Job
         $this->parentDependencies = new ArrayCollection();
         $this->retryStrategy      = new NeverRetryStrategy();
         $this->retryingJobs       = new ArrayCollection();
+
+        unset($this->input['command']);
     }
 
     /**
-     * Ensures the $arguments is only a string or an array.
-     * If a string is passed, it is transformed into an array.
-     * Then it reorder the arguments to get a unique signature to facilitate checks on existent Jobs.
+     * This method accepts a string like "argument".
      *
-     * @param array|string $arguments
-     *
-     * @throws ArrayException
-     *
-     * @return array
-     */
-    public static function prepareArguments($arguments = []): array
-    {
-        // If is a String...
-        if (is_string($arguments)) {
-            // Transform into an array
-            $arguments = explode(' ', $arguments);
-
-            // And remove leading and trailing spaces
-            $arguments = array_map('trim', $arguments);
-        }
-
-        // Order arguments
-        \Safe\asort($arguments);
-
-        return $arguments;
-    }
-
-    /**
-     * @param string $argument
+     * @param string $value
      *
      * @return Job
      */
-    public function addArgument(string $argument): Job
+    public function addArgument(string $value): Job
     {
-        $this->arguments[] = $argument;
+        if (false === InputParser::isArgument($value)) {
+            throw new InvalidArgumentException('Job::addArgument() doesn\'t accept options nor shortcuts.');
+        }
+
+        $this->input['arguments'][] = $value;
+
+        return $this;
+    }
+
+    /**
+     * This method accepts a string like "--option".
+     *
+     * @param string      $option
+     * @param string|null $value
+     *
+     * @return Job
+     * @throws StringsException
+     */
+    public function addOption(string $option, ?string $value = null): Job
+    {
+        if (false === InputParser::isOption($option)) {
+            throw new InvalidArgumentException('Job::addAOption() accepts only strings that start with "--".');
+        }
+
+        if (false === is_array($this->input['options'])) {
+            $this->input['options'] = [];
+        }
+
+        if (array_key_exists($option, $this->input['options'])) {
+            throw new InvalidArgumentException(\Safe\sprintf('The option "%s" was already added to the command.', $option));
+        }
+
+        $this->input['options'][$option] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string      $option
+     * @param string|null $value
+     *
+     * @return Job
+     * @throws StringsException
+     */
+    public function addShortcut(string $option, ?string $value = null): Job
+    {
+        if (false === InputParser::isShortcut($option)) {
+            throw new InvalidArgumentException('Job::addShortcut() accepts only strings that start with "-".');
+        }
+
+        if (false === is_array($this->input['shortcuts'])) {
+            $this->input['shortcuts'] = [];
+        }
+
+        if (array_key_exists($option, $this->input['shortcuts'])) {
+            throw new InvalidArgumentException(\Safe\sprintf('The shortcut "%s" was already added to the command.', $option));
+        }
+
+        $this->input['shortcuts'][$option] = $value;
 
         return $this;
     }
@@ -474,14 +519,15 @@ class Job
 
     /**
      * @throws StringsException
-     * @throws ArrayException
+     * @throws Exception
      *
      * @return Job
      */
     public function createCancelChildsJob(): Job
     {
         // If the Job as child Jobs, create a process to mark them as cancelled
-        return (new Job(InternalMarkAsCancelledCommand::$defaultName, [\Safe\sprintf('--id=%s', $this->getId())]))
+        return (new Job(InternalMarkAsCancelledCommand::$defaultName))
+            ->addOption('--id', (string) $this->getId())
             ->setQueue($this->getQueue())
             // This Job has to be successful!
             ->setRetryStrategy(new LiveStrategy(100000))
@@ -490,10 +536,8 @@ class Job
     }
 
     /**
-     * @throws ArrayException
-     * @throws LogicException
-     *
      * @return Job
+     * @throws Exception
      */
     public function createRetryForFailed(): Job
     {
@@ -504,7 +548,7 @@ class Job
         }
 
         // Create a new Job that will retry the original one
-        return (new Job($this->getCommand(), $this->getArguments()))
+        return (new Job($this->getCommand(), $this->getInput()))
             // First get the retry date
             ->setExecuteAfterTime($retryOn)
             // Then we can increment the current number of attempts setting also the RetryStrategy
@@ -516,14 +560,13 @@ class Job
     }
 
     /**
-     * @throws ArrayException
-     *
      * @return Job
+     * @throws Exception
      */
     public function createRetryForStale(): Job
     {
         // Create a new Job that will retry the original one
-        $retryJob = (new Job($this->getCommand(), $this->getArguments()))
+        $retryJob = (new Job($this->getCommand(), $this->getInput()))
             // Then we can increment the current number of attempts setting also the RetryStrategy
             ->setRetryStrategy($this->getRetryStrategy())
             ->setPriority($this->getPriority())
@@ -557,11 +600,11 @@ class Job
     }
 
     /**
-     * @return array
+     * @return array|null
      */
-    public function getArguments(): array
+    public function getInput():? array
     {
-        return $this->arguments;
+        return $this->input;
     }
 
     /**
@@ -772,7 +815,7 @@ class Job
             );
         }
 
-        foreach ($this->getArguments() as $argument) {
+        foreach ($this->getInput() as $argument) {
             if (false !== strpos($argument, '--id=')) {
                 return (int) str_replace('--id=', '', $argument);
             }
@@ -824,13 +867,10 @@ class Job
             return false;
         }
 
-        // Is being retried
+        // Is being retried.
+        // The retrying Job can be null if really short retention periods are set and errors happen really fast (like if the Jobs cannot start at all)
         $retriedBy = $this->getRetriedBy();
-        if ($this->isStatusRetried()) {
-            if (null === $retriedBy) {
-                throw new RuntimeException('This is a retried Job but the retrying Job is not set and this is not possible.');
-            }
-
+        if (null !== $retriedBy && $this->isStatusRetried()) {
             // It has to be flushed at the end
             $this->cannotBeDetachedBecause = \Safe\sprintf('is being retried by Job #%s (%s)', $retriedBy->getId(), $retriedBy->getStatus());
 
@@ -1328,6 +1368,21 @@ class Job
         $retriedJob->setRetriedBy($this);
 
         return $this;
+    }
+
+    /**
+     * @ORM\PreFlush
+     */
+    public function reorderInputs():void
+    {
+        // Don't reorder the arguments as their order is relevant
+        if (array_key_exists('options', $this->input) && null !== $this->input['options']) {
+            ksort($this->input['options'], SORT_NATURAL);
+        }
+
+        if (array_key_exists('shortcuts', $this->input) && null !== $this->input['shortcuts']) {
+            ksort($this->input['shortcuts'], SORT_NATURAL);
+        }
     }
 
     /**

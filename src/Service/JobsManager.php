@@ -26,7 +26,9 @@ use Doctrine\ORM\TransactionRequiredException;
 use Doctrine\ORM\UnitOfWork;
 use RuntimeException;
 use Safe\Exceptions\StringsException;
+use Safe\sprintf;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
+use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\InputParser;
 use SerendipityHQ\Bundle\ConsoleStyles\Console\Style\SerendipityHQStyle;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\Process;
@@ -104,7 +106,7 @@ class JobsManager
                 if (self::$ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_DEBUG) {
                     // Add the current Job to the already detached
                     $detached[$jobInTreeId] = '#' . $jobInTreeId;
-                    self::$ioWriter->successLineNoBg(\Safe\sprintf(
+                    self::$ioWriter->successLineNoBg(sprintf(
                         "Job <info-nobg>#%s</info-nobg> is not managed and so it hasn't been detached.",
                         $jobInTreeId
                     ));
@@ -114,7 +116,7 @@ class JobsManager
 
             if (false === $jobInTree->canBeDetached()) {
                 if (self::$ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_DEBUG) {
-                    self::$ioWriter->infoLineNoBg(\Safe\sprintf(
+                    self::$ioWriter->infoLineNoBg(sprintf(
                         'Skipping detaching Job <success-nobg>#%s</success-nobg> [Em: %s] because <success-nobg>%s</success-nobg>.',
                         $jobInTree->getId(), self::guessJobEmState($jobInTree), $jobInTree->getCannotBeDetachedBecause()
                     ));
@@ -128,7 +130,7 @@ class JobsManager
             // Now detach the Job
             self::$entityManager->detach($jobInTree);
             if (self::$ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_DEBUG) {
-                self::$ioWriter->successLineNoBg(\Safe\sprintf('Job <info-nobg>#%s</info-nobg> detached.', $jobInTree->getId()));
+                self::$ioWriter->successLineNoBg(sprintf('Job <info-nobg>#%s</info-nobg> detached.', $jobInTree->getId()));
             }
             // Add the current Job to the already detached
             $jobInTreeId            = $jobInTree->getId();
@@ -136,18 +138,18 @@ class JobsManager
         }
 
         if (self::$ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
-            self::$ioWriter->infoLineNoBg(\Safe\sprintf(
+            self::$ioWriter->infoLineNoBg(sprintf(
                 'Job <success-nobg>#%s</success-nobg> and its linked Jobs detached.', $job->getId()
             ));
 
             // Print detached
             if (false === empty($detached)) {
-                self::$ioWriter->commentLineNoBg(\Safe\sprintf('Detached: %s', implode(', ', $detached)));
+                self::$ioWriter->commentLineNoBg(sprintf('Detached: %s', implode(', ', $detached)));
             }
 
             // Print not detached
             if (false === empty($notDetached)) {
-                self::$ioWriter->commentLineNoBg(\Safe\sprintf('Not Detached: %s', implode(', ', $notDetached)));
+                self::$ioWriter->commentLineNoBg(sprintf('Not Detached: %s', implode(', ', $notDetached)));
             }
         }
     }
@@ -239,6 +241,9 @@ class JobsManager
         // The command to execute
         $arguments[] = $job->getCommand();
 
+        // The input
+        $arguments[] = InputParser::stringify($job->getInput());
+
         // Decide the environment to use
         $env         = $allowProd ? $this->env : 'dev';
         $arguments[] = '--env=' . $env;
@@ -251,9 +256,6 @@ class JobsManager
         if ($job->isAwareOfJob()) {
             $arguments[] = '--job-id=' . $job->getId();
         }
-
-        // The arguments of the command
-        $arguments = array_merge($arguments, $job->getArguments());
 
         return new Process($arguments);
     }

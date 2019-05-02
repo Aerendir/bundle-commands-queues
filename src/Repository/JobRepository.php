@@ -18,6 +18,7 @@ declare(strict_types=1);
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Repository;
 
 use DateTime;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\EntityRepository;
@@ -28,6 +29,7 @@ use RuntimeException;
 use Safe\Exceptions\StringsException;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Service\JobsManager;
+use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\InputParser;
 use SerendipityHQ\Bundle\ConsoleStyles\Console\Style\SerendipityHQStyle;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -186,30 +188,32 @@ class JobRepository extends EntityRepository
     /**
      * Checks if the given Job exists or not.
      *
-     * @param string $command
-     * @param array  $arguments
-     * @param string $queue
+     * @param string     $command
+     * @param array|null $input
+     * @param string     $queue
+     * @param bool       $fullSearch If false, will search only in the not already started jobs
      *
-     * @throws NonUniqueResultException
-     *
-     * @return Job|null
+     * @return array|null
      */
-    public function exists(string $command, array $arguments = [], string $queue = 'default'): ?Job
+    public function findBySearch(string $command, ?array $input = [], string $queue = 'default', bool $fullSearch = false): ?array
     {
         $queryBuilder = $this->getEntityManager()->createQueryBuilder();
+        $stringInput = InputParser::stringify($input);
 
         $queryBuilder->select('j')->from(Job::class, 'j')
                      ->where($queryBuilder->expr()->eq('j.command', ':command'))
                      ->setParameter('command', $command)
-                     ->andWhere($queryBuilder->expr()->eq('j.queue', ':queue'))
-                     ->setParameter('queue', $queue)
-                     ->andWhere($queryBuilder->expr()->isNull('j.startedAt'));
+                     ->andWhere(null === $stringInput ? $queryBuilder->expr()->isNull('j.input') : $queryBuilder->expr()->eq('j.input', $stringInput));
 
-        foreach ($arguments as $argument) {
-            $queryBuilder->andWhere($queryBuilder->expr()->like('j.arguments', $queryBuilder->expr()->literal('%' . $argument . '%')));
+        if (null !== $queue) {
+            $queryBuilder->andWhere($queryBuilder->expr()->eq('j.queue', ':queue'))->setParameter('queue', $queue);
         }
 
-        return $queryBuilder->getQuery()->setMaxResults(1)->getOneOrNullResult();
+        if (false === $fullSearch) {
+            $queryBuilder->andWhere($queryBuilder->expr()->isNull('j.startedAt'));
+        }
+
+        return $queryBuilder->getQuery()->execute();
     }
 
     /**

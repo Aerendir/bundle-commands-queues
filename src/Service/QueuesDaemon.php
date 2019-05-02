@@ -31,10 +31,11 @@ use Doctrine\ORM\TransactionRequiredException;
 use Exception;
 use RuntimeException;
 use Safe\Exceptions\ArrayException;
-use Safe\Exceptions\InfoException;
-use Safe\Exceptions\MiscException;
-use Safe\Exceptions\PcntlException;
 use Safe\Exceptions\StringsException;
+use Safe\getmypid;
+use Safe\pcntl_signal_dispatch;
+use Safe\sleep;
+use Safe\sprintf;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Config\DaemonConfig;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\DependencyInjection\Configuration;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Daemon;
@@ -133,7 +134,6 @@ class QueuesDaemon
      *
      * @throws OptimisticLockException
      * @throws Exception
-     * @throws InfoException
      * @throws StringsException
      */
     public function initialize(?string $daemon, bool $allowProd, SerendipityHQStyle $ioWriter, OutputInterface $output): void
@@ -152,10 +152,10 @@ class QueuesDaemon
         if (false === is_string($hostname)) {
             throw new RuntimeException('Impossible to get the host name.');
         }
-        $this->me = new Daemon($hostname, \Safe\getmypid(), $this->config);
+        $this->me = new Daemon($hostname, getmypid(), $this->config);
         $this->entityManager->persist($this->me);
         $this->entityManager->flush($this->me);
-        $ioWriter->successLineNoBg(\Safe\sprintf(
+        $ioWriter->successLineNoBg(sprintf(
                 'I\'m Daemon "%s@%s" (ID: %s).', $this->me->getPid(), $this->me->getHost(), $this->me->getId())
         );
 
@@ -216,8 +216,6 @@ class QueuesDaemon
      *
      * @param bool $hitIteration the iteration has to be hit only from the RunCommand
      *
-     * @throws PcntlException
-     * @throws StringsException
      *
      * @return bool
      */
@@ -229,7 +227,7 @@ class QueuesDaemon
         }
 
         if (true === $this->pcntlLoaded) {
-            \Safe\pcntl_signal_dispatch();
+            pcntl_signal_dispatch();
         }
 
         // This is true if a SIGTERM or a SIGINT signal is received
@@ -241,7 +239,7 @@ class QueuesDaemon
         if ($this->profiler->isMaxRuntimeReached()) {
             if ($this->verbosity >= OutputInterface::VERBOSITY_NORMAL) {
                 $this->ioWriter->warning(
-                    \Safe\sprintf('Max runtime of <success-nobg>%s</success-nobg> seconds reached.', $this->config->getMaxRuntime())
+                    sprintf('Max runtime of <success-nobg>%s</success-nobg> seconds reached.', $this->config->getMaxRuntime())
                 );
             }
 
@@ -253,9 +251,6 @@ class QueuesDaemon
 
     /**
      * @param string $queueName
-     *
-     * @throws PcntlException
-     * @throws StringsException
      *
      * @return bool
      */
@@ -304,7 +299,7 @@ class QueuesDaemon
             'started_at' => $now,
         ];
         if ($this->verbosity >= OutputInterface::VERBOSITY_NORMAL) {
-            $this->ioWriter->infoLineNoBg(\Safe\sprintf(
+            $this->ioWriter->infoLineNoBg(sprintf(
                 '[%s] Job <success-nobg>#%s</success-nobg> on Queue <success-nobg>%s</success-nobg>: Initializing the process.',
                 $now->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue()
             ));
@@ -312,22 +307,24 @@ class QueuesDaemon
 
         if ($job->isTypeCancelling()) {
             if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
-                $this->ioWriter->warningLineNoBg(\Safe\sprintf(
+                $this->ioWriter->warningLineNoBg(sprintf(
                     '[%s] Job <success-nobg>#%s</success-nobg> on Queue <success-nobg>%s</success-nobg>: This will mark as CANCELLED childs of #%s.',
-                    $now->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue(), $job->getArguments()[0]
+                    $now->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue(), $job->getInput()['options']['--id']
                 ));
             }
 
             // Add the ID of the cancelling Job to the command to execute
-            $job->addArgument(\Safe\sprintf('--cancelling-job-id=%s', $job->getId()));
+            if (false === $job->isTypeRetrying()) {
+                $job->addOption('--cancelling-job-id', (string) $job->getId());
+            }
         }
 
         if ($job->isTypeRetrying() && $this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
             $jobRetryOf = $job->getRetryOf();
             if (null === $jobRetryOf) {
-                throw new RuntimeException(\Safe\sprintf('The job of which this one (ID: %s) is a retry is not set.', $job->getId()));
+                throw new RuntimeException(sprintf('The job of which this one (ID: %s) is a retry is not set.', $job->getId()));
             }
-            $this->ioWriter->noteLineNoBg(\Safe\sprintf(
+            $this->ioWriter->noteLineNoBg(sprintf(
                 '[%s] Job <success-nobg>#%s</success-nobg> on Queue <success-nobg>%s</success-nobg>: This is a retry of original Job <success-nobg>#%s</success-nobg> (Childs: %s).',
                 $now->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue(), $jobRetryOf->getId(), $job->getChildDependencies()->count()
             ));
@@ -342,7 +339,7 @@ class QueuesDaemon
         } catch (Throwable $e) {
             // Something went wrong starting the process: close it as failed
             $info['output']       = 'Failing start the process.';
-            $info['output_error'] = $e;
+            $info['debug']['output_error'] = $e->getMessage();
 
             // Check if it can be retried and if the retry were successful
             if ($job->getRetryStrategy()->canRetry()) {
@@ -353,12 +350,12 @@ class QueuesDaemon
             $cancellingJob = $this->handleChildsOfFailedJob($job);
             $this->jobsMarker->markJobAsAborted($job, $info, $this->me);
             if ($this->verbosity >= OutputInterface::VERBOSITY_NORMAL) {
-                $this->ioWriter->errorLineNoBg(\Safe\sprintf(
+                $this->ioWriter->errorLineNoBg(sprintf(
                     "[%s] Job <success-nobg>#%s</success-nobg> on Queue <success-nobg>%s</success-nobg>: The process didn't started due to some errors. See them in the"
                     . ' logs of the Job.', $now->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue()
                 ));
                 if ($cancellingJob instanceof Job) {
-                    $this->ioWriter->errorLineNoBg(\Safe\sprintf('The Job #%s will mark its childs as cancelled.', $cancellingJob->getId()));
+                    $this->ioWriter->errorLineNoBg(sprintf('The Job #%s will mark its childs as cancelled.', $cancellingJob->getId()));
                 }
             }
 
@@ -492,7 +489,7 @@ class QueuesDaemon
             }
 
             if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
-                $this->ioWriter->infoLineNoBg(\Safe\sprintf(
+                $this->ioWriter->infoLineNoBg(sprintf(
                     '[%s] Job <success-nobg>#%s [%s]</success-nobg> on Queue <success-nobg>%s</success-nobg>: Checking status...',
                     $now->format('Y-m-d H:i:s'), $checkingJob->getId(), $checkingJob->getQueue(), $checkingProcess->getPid()
                 ));
@@ -538,7 +535,7 @@ class QueuesDaemon
 
             // And print its PID (available only if the process is already running)
             if ($this->verbosity >= OutputInterface::VERBOSITY_VERY_VERBOSE && $process->isStarted()) {
-                $this->ioWriter->infoLineNoBg(\Safe\sprintf(
+                $this->ioWriter->infoLineNoBg(sprintf(
                         '[%s] Job <success-nobg>#%s</success-nobg> on Queue <success-nobg>%s</success-nobg>: Process is currently running with PID "%s".',
                         $now->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue(), $process->getPid())
                 );
@@ -558,7 +555,11 @@ class QueuesDaemon
 
         // If this is a cancelling Job or a retrying one, refresh the entire tree
         if ($job->isTypeCancelling()) {
-            $startJobId = str_replace('--id=', '', $job->getArguments()[0]);
+            $startJobId = null;
+            $input = $job->getInput();
+            if (null !== $input && isset($input['options']['--id'])) {
+                $startJobId = $input['options']['--id'];
+            }
 
             if (false === is_numeric($startJobId)) {
                 throw new RuntimeException('Impossible to obtain the start Job ID.');
@@ -568,7 +569,7 @@ class QueuesDaemon
 
             if ( ! $startJob instanceof Job) {
                 // The job may not exist anymore if it expired and so was deleted
-                $this->ioWriter->infoLineNoBg(\Safe\sprintf("The starting job <success-nobg>%s</success-nobg> doesn't exist anymore: nothing more to do...", $startJobId));
+                $this->ioWriter->infoLineNoBg(sprintf("The starting job <success-nobg>%s</success-nobg> doesn't exist anymore: nothing more to do...", $startJobId));
 
                 return true;
             }
@@ -638,7 +639,7 @@ class QueuesDaemon
         // Check if the optimization worked
         if ($this->isAlive() && $this->hasToOptimize()) {
             if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
-                $this->ioWriter->warning(\Safe\sprintf('Trying to hard detach all Jobs to free more space.'));
+                $this->ioWriter->warning(sprintf('Trying to hard detach all Jobs to free more space.'));
                 $this->ioWriter->infoLineNoBg('Emptying the queue of still running Jobs...');
             }
             // Wait for the currently running jobs to finish
@@ -666,7 +667,7 @@ class QueuesDaemon
         // Force the garbage collection
         $cycles = gc_collect_cycles();
         if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
-            $this->ioWriter->infoLineNoBg(\Safe\sprintf('Collected <success-nobg>%s</success-nobg> cycles.', $cycles));
+            $this->ioWriter->infoLineNoBg(sprintf('Collected <success-nobg>%s</success-nobg> cycles.', $cycles));
         }
 
         $this->getProfiler()->optimized();
@@ -674,7 +675,7 @@ class QueuesDaemon
         $this->profiler->profile();
         $this->profiler->printProfilingInfo();
 
-        $this->ioWriter->success(\Safe\sprintf('Optimization completed.'));
+        $this->ioWriter->success(sprintf('Optimization completed.'));
     }
 
     /**
@@ -686,7 +687,6 @@ class QueuesDaemon
      * @param string $queueName
      *
      * @throws ORMException
-     * @throws StringsException
      * @throws MappingException
      */
     public function purgeExpiredJobs(string $queueName): void
@@ -703,18 +703,18 @@ class QueuesDaemon
         $maxRetentionDate = new Carbon();
         $maxRetentionDate = $maxRetentionDate->subDays($maxRetentionDays);
         if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
-            $this->ioWriter->infoLineNoBg(\Safe\sprintf('Expired jobs: removing from queue <success-nobg>%s</success-nobg>...', $queueName));
-            $this->ioWriter->commentLineNoBg(\Safe\sprintf('Removing expired jobs (older than %s days - before %s...', $maxRetentionDays, $maxRetentionDate->format(JobsUtil::TIME_FORMAT)));
+            $this->ioWriter->infoLineNoBg(sprintf('Expired jobs: removing from queue <success-nobg>%s</success-nobg>...', $queueName));
+            $this->ioWriter->commentLineNoBg(sprintf('Removing expired jobs (older than %s days - before %s...', $maxRetentionDays, $maxRetentionDate->format(JobsUtil::TIME_FORMAT)));
         }
 
         $removingJobs = $this->jobsRepo->findExpiredJobs($queueName, $maxRetentionDate);
 
         /** @var Job $removingJob */
         foreach ($removingJobs as $removingJob) {
-            $this->ioWriter->infoLineNoBg(\Safe\sprintf('Job <success-nobg>%s</success-nobg>: removing...', $removingJob->getId()));
+            $this->ioWriter->infoLineNoBg(sprintf('Job <success-nobg>%s</success-nobg>: removing...', $removingJob->getId()));
 
             if (false === $removingJob->canBeRemoved()) {
-                $this->ioWriter->infoLineNoBg(\Safe\sprintf('Job <success-nobg>%s</success-nobg>: cannot be removed because %s. Skipping', $removingJob->getId(), $removingJob->getCannotBeRemovedBecause()));
+                $this->ioWriter->infoLineNoBg(sprintf('Job <success-nobg>%s</success-nobg>: cannot be removed because %s. Skipping', $removingJob->getId(), $removingJob->getCannotBeRemovedBecause()));
 
                 continue;
             }
@@ -728,11 +728,10 @@ class QueuesDaemon
     /**
      * Put the Daemon in sleep.
      *
-     * @throws MiscException
      */
     public function sleep(): void
     {
-        \Safe\sleep($this->getConfig()->getSleepFor());
+        sleep($this->getConfig()->getSleepFor());
     }
 
     /**
@@ -823,13 +822,13 @@ class QueuesDaemon
 
         $this->jobsMarker->markJobAsFailed($job, $info);
 
-        $message = \Safe\sprintf(
+        $message = sprintf(
             '[%s] Job <success-nobg>#%s</success-nobg> on Queue <success-nobg>%s</success-nobg>: Job failed (no retries allowed).',
             JobsUtil::getFormattedTime($job, 'getClosedAt'), $job->getId(), $job->getQueue()
         );
 
         if ($cancellingJob instanceof Job) {
-            $message = \Safe\sprintf('%s The Job #%s will mark its childs as cancelled.', $message, $cancellingJob->getId());
+            $message = sprintf('%s The Job #%s will mark its childs as cancelled.', $message, $cancellingJob->getId());
         }
 
         $this->ioWriter->errorLineNoBg($message);
@@ -839,7 +838,6 @@ class QueuesDaemon
      * @param Job     $job
      * @param Process $process
      *
-     * @throws StringsException
      * @throws Exception
      */
     final protected function handleSuccessfulJob(Job $job, Process $process): void
@@ -847,7 +845,7 @@ class QueuesDaemon
         $info = $this->jobsManager->buildDefaultInfo($process);
         $this->jobsMarker->markJobAsFinished($job, $info);
 
-        $this->ioWriter->successLineNoBg(\Safe\sprintf(
+        $this->ioWriter->successLineNoBg(sprintf(
             '[%s] Job <success-nobg>#%s</success-nobg> on Queue <success-nobg>%s</success-nobg>: Process succeded.',
             JobsUtil::getFormattedTime($job, 'getClosedAt'), $job->getId(), $job->getQueue()));
     }
@@ -857,7 +855,6 @@ class QueuesDaemon
      *
      * @throws OptimisticLockException
      * @throws StringsException
-     * @throws ArrayException
      * @throws ORMException
      *
      * @return bool|Job Returns false or the Job object
@@ -866,7 +863,7 @@ class QueuesDaemon
     {
         if ($job->getChildDependencies()->count() > 0) {
             if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
-                $this->ioWriter->noteLineNoBg(\Safe\sprintf(
+                $this->ioWriter->noteLineNoBg(sprintf(
                     '[%s] Job <success-nobg>#%s</success-nobg> on Queue <success-nobg>%s</success-nobg>: Creating a Job to mark childs as as CANCELLED.',
                     (new DateTime())->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue()
                 ));
@@ -882,7 +879,7 @@ class QueuesDaemon
         }
 
         if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
-            $this->ioWriter->noteLineNoBg(\Safe\sprintf(
+            $this->ioWriter->noteLineNoBg(sprintf(
                 '[%s] Job <success-nobg>#%s</success-nobg> on Queue <success-nobg>%s</success-nobg>: No childs found. The Job to mark childs as CANCELLED will not be created.',
                 (new DateTime())->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue()
             ));
@@ -927,7 +924,7 @@ class QueuesDaemon
             }
 
             if ($this->verbosity >= OutputInterface::VERBOSITY_NORMAL) {
-                $this->ioWriter->warning(\Safe\sprintf('%s signal received.', $signal));
+                $this->ioWriter->warning(sprintf('%s signal received.', $signal));
             }
         };
 
@@ -965,12 +962,12 @@ class QueuesDaemon
     private function retryFailedJob(Job $job, array $info, string $retryReason): bool
     {
         $retryJob = $this->jobsMarker->markFailedJobAsRetried($job, $info);
-        $this->ioWriter->warningLineNoBg(\Safe\sprintf(
+        $this->ioWriter->warningLineNoBg(sprintf(
                 '[%s] Job <success-nobg>#%s</success-nobg> on Queue <success-nobg>%s</success-nobg>: %s.',
                 JobsUtil::getFormattedTime($job, 'getClosedAt'), $job->getId(), $job->getQueue(), $retryReason)
         );
         if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
-            $this->ioWriter->noteLineNoBg(\Safe\sprintf(
+            $this->ioWriter->noteLineNoBg(sprintf(
                     '[%s] Job <success-nobg>#%s</success-nobg> on Queue "%s": Retry with Job "#%s" (Attempt #%s/%s).',
                     JobsUtil::getFormattedTime($job, 'getClosedAt'), $job->getId(), $job->getQueue(), $retryJob->getId(), $retryJob->getRetryStrategy()->getAttempts(), $retryJob->getRetryStrategy()->getMaxAttempts())
             );
@@ -1012,7 +1009,7 @@ class QueuesDaemon
 
         // There are stale Jobs
         if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
-            $this->ioWriter->infoLineNoBg(\Safe\sprintf('Found <success-nobg>%s</success-nobg> stale Jobs: start processing them.', $staleJobsCount));
+            $this->ioWriter->infoLineNoBg(sprintf('Found <success-nobg>%s</success-nobg> stale Jobs: start processing them.', $staleJobsCount));
         }
 
         /** @var Job $job */
@@ -1037,7 +1034,7 @@ class QueuesDaemon
             }
 
             $this->jobsMarker->markJobAsFailed($job, $info);
-            $this->ioWriter->errorLineNoBg(\Safe\sprintf(
+            $this->ioWriter->errorLineNoBg(sprintf(
                 '[%s] Job <success-nobg>#%s</success-nobg> on Queue <success-nobg>%s</success-nobg>: Process were stale so it were marked as FAILED.',
                 JobsUtil::getFormattedTime($job, 'getClosedAt'), $job->getId(), $job->getQueue()
             ));
@@ -1060,11 +1057,11 @@ class QueuesDaemon
     private function retryStaleJob(Job $job, array $info, string $retryReason): bool
     {
         $retryingJob = $this->jobsMarker->markStaleJobAsRetried($job, $info);
-        $this->ioWriter->warningLineNoBg(\Safe\sprintf(
+        $this->ioWriter->warningLineNoBg(sprintf(
                 '[%s] Job <success-nobg>#%s</success-nobg> on Queue <success-nobg>%s</success-nobg>: %s.',
                 JobsUtil::getFormattedTime($job, 'getClosedAt'), $job->getId(), $job->getQueue(), $retryReason)
         );
-        $this->ioWriter->noteLineNoBg(\Safe\sprintf(
+        $this->ioWriter->noteLineNoBg(sprintf(
                 '[%s] Job <success-nobg>#%s</success-nobg> on Queue "%s": This will be retried with Job <success-nobg>#%s</success-nobg> (already retried %s times of %s).',
                 JobsUtil::getFormattedTime($job, 'getClosedAt'), $job->getId(), $job->getQueue(), $retryingJob->getId(), $retryingJob->getRetryStrategy()->getAttempts(), $retryingJob->getRetryStrategy()->getMaxAttempts())
         );
