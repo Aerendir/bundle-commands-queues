@@ -18,7 +18,6 @@ declare(strict_types=1);
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Repository;
 
 use DateTime;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\EntityRepository;
@@ -27,6 +26,7 @@ use Doctrine\ORM\ORMException;
 use Doctrine\ORM\QueryBuilder;
 use RuntimeException;
 use Safe\Exceptions\StringsException;
+use function Safe\sprintf;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Service\JobsManager;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\InputParser;
@@ -94,7 +94,7 @@ class JobRepository extends EntityRepository
                 $this->getEntityManager()->refresh($job);
 
                 if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
-                    $this->ioWriter->infoLineNoBg(\Safe\sprintf('Job <success-nobg>#%s</success-nobg> ready to run.', $job->getId()));
+                    $this->ioWriter->infoLineNoBg(sprintf('Job <success-nobg>#%s</success-nobg> ready to run.', $job->getId()));
                 }
 
                 // ... Return it
@@ -102,7 +102,7 @@ class JobRepository extends EntityRepository
             }
 
             if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
-                $this->ioWriter->infoLineNoBg(\Safe\sprintf('Job <success-nobg>#%s</success-nobg> cannot run because <success-nobg>%s</success-nobg>.', $job->getId(), $job->getCannotRunBecause()));
+                $this->ioWriter->infoLineNoBg(sprintf('Job <success-nobg>#%s</success-nobg> cannot run because <success-nobg>%s</success-nobg>.', $job->getId(), $job->getCannotRunBecause()));
             }
 
             // The Job cannot be run
@@ -198,7 +198,7 @@ class JobRepository extends EntityRepository
     public function findBySearch(string $command, ?array $input = [], string $queue = 'default', bool $fullSearch = false): ?array
     {
         $queryBuilder = $this->getEntityManager()->createQueryBuilder();
-        $stringInput = InputParser::stringify($input);
+        $stringInput  = InputParser::stringify($input);
 
         $queryBuilder->select('j')->from(Job::class, 'j')
                      ->where($queryBuilder->expr()->eq('j.command', ':command'))

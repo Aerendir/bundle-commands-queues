@@ -17,7 +17,6 @@ declare(strict_types=1);
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Entity;
 
-use BadMethodCallException;
 use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -25,8 +24,8 @@ use Doctrine\ORM\Mapping as ORM;
 use Exception;
 use InvalidArgumentException;
 use LogicException;
-use RuntimeException;
 use Safe\Exceptions\StringsException;
+use function Safe\sprintf;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Command\InternalMarkAsCancelledCommand;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\InputParser;
 use SerendipityHQ\Component\ThenWhen\Strategy\LiveStrategy;
@@ -105,7 +104,7 @@ class Job
     public const STATUS_SUCCEEDED = 'succeeded';
 
     /**
-     * A failed Job that were retried and the retry Job were finished
+     * A failed Job that were retried and the retry Job were finished.
      *
      * @var string */
     public const STATUS_RETRY_SUCCEEDED = 'retry_succeeded';
@@ -123,7 +122,7 @@ class Job
     public const STATUS_FAILED = 'failed';
 
     /**
-     * A failed Job that were retried and the retry Job failed, too
+     * A failed Job that were retried and the retry Job failed, too.
      *
      * @var string */
     public const STATUS_RETRY_FAILED = 'retry_failed';
@@ -349,15 +348,15 @@ class Job
 
     /**
      * @param string       $command
-     * @param array|string $arguments
+     * @param array|string $input
      * @param string       $queue
      *
      * @throws Exception
      */
-    public function __construct(string $command, $arguments = [], string $queue = Daemon::DEFAULT_QUEUE_NAME)
+    public function __construct(string $command, $input = [], string $queue = Daemon::DEFAULT_QUEUE_NAME)
     {
         $this->command            = $command;
-        $this->input              = InputParser::parseInput($arguments);
+        $this->input              = InputParser::parseInput($input);
         $this->priority           = 1;
         $this->queue              = $queue;
         $this->status             = self::STATUS_NEW;
@@ -381,7 +380,7 @@ class Job
     public function addArgument(string $value): Job
     {
         if (false === InputParser::isArgument($value)) {
-            throw new InvalidArgumentException('Job::addArgument() doesn\'t accept options nor shortcuts.');
+            throw new InvalidArgumentException("Job::addArgument() doesn't accept options nor shortcuts.");
         }
 
         $this->input['arguments'][] = $value;
@@ -395,8 +394,9 @@ class Job
      * @param string      $option
      * @param string|null $value
      *
-     * @return Job
      * @throws StringsException
+     *
+     * @return Job
      */
     public function addOption(string $option, ?string $value = null): Job
     {
@@ -409,7 +409,7 @@ class Job
         }
 
         if (array_key_exists($option, $this->input['options'])) {
-            throw new InvalidArgumentException(\Safe\sprintf('The option "%s" was already added to the command.', $option));
+            throw new InvalidArgumentException(sprintf('The option "%s" was already added to the command.', $option));
         }
 
         $this->input['options'][$option] = $value;
@@ -421,8 +421,9 @@ class Job
      * @param string      $option
      * @param string|null $value
      *
-     * @return Job
      * @throws StringsException
+     *
+     * @return Job
      */
     public function addShortcut(string $option, ?string $value = null): Job
     {
@@ -435,7 +436,7 @@ class Job
         }
 
         if (array_key_exists($option, $this->input['shortcuts'])) {
-            throw new InvalidArgumentException(\Safe\sprintf('The shortcut "%s" was already added to the command.', $option));
+            throw new InvalidArgumentException(sprintf('The shortcut "%s" was already added to the command.', $option));
         }
 
         $this->input['shortcuts'][$option] = $value;
@@ -494,7 +495,7 @@ class Job
         $status = $this->getStatus();
         if (self::STATUS_PENDING === $status || self::STATUS_RUNNING === $status) {
             throw new LogicException(
-                \Safe\sprintf(
+                sprintf(
                     'The Job %s has already started. You cannot add the parent dependency %s.',
                     $this->getId(), $job->getId()
                 )
@@ -502,7 +503,7 @@ class Job
         }
 
         if (true === $this->childDependencies->contains($job)) {
-            throw new LogicException(\Safe\sprintf(
+            throw new LogicException(sprintf(
                 'You cannot add a parent dependecy (%s) that is already a child dependency.'
                 . ' This will create an unresolvable circular reference.',
                 $job->getId()
@@ -536,8 +537,9 @@ class Job
     }
 
     /**
-     * @return Job
      * @throws Exception
+     *
+     * @return Job
      */
     public function createRetryForFailed(): Job
     {
@@ -548,7 +550,8 @@ class Job
         }
 
         // Create a new Job that will retry the original one
-        return (new Job($this->getCommand(), $this->getInput()))
+
+        return (new Job($this->getCommand(), $this->getInput() ?? []))
             // First get the retry date
             ->setExecuteAfterTime($retryOn)
             // Then we can increment the current number of attempts setting also the RetryStrategy
@@ -560,13 +563,14 @@ class Job
     }
 
     /**
-     * @return Job
      * @throws Exception
+     *
+     * @return Job
      */
     public function createRetryForStale(): Job
     {
         // Create a new Job that will retry the original one
-        $retryJob = (new Job($this->getCommand(), $this->getInput()))
+        $retryJob = (new Job($this->getCommand(), $this->getInput() ?? []))
             // Then we can increment the current number of attempts setting also the RetryStrategy
             ->setRetryStrategy($this->getRetryStrategy())
             ->setPriority($this->getPriority())
@@ -602,7 +606,7 @@ class Job
     /**
      * @return array|null
      */
-    public function getInput():? array
+    public function getInput(): ? array
     {
         return $this->input;
     }
@@ -794,39 +798,6 @@ class Job
     }
 
     /**
-     * Returns the ID of the Job for which this one were created.
-     *
-     * For example, if this is a cancelling Job, it will cancel childs of the given Job: this method will return the ID
-     * of this given Job.
-     *
-     * @throws StringsException
-     * @throws RuntimeException
-     *
-     * @return int
-     */
-    public function getProcessedJobId(): int
-    {
-        if (false === $this->isTypeInternal()) {
-            throw new BadMethodCallException(
-                \Safe\sprintf(
-                    'This Job #%s is not internal, so you cannot call the method self::getProcessedJobId().',
-                    $this->getId()
-                )
-            );
-        }
-
-        foreach ($this->getInput() as $argument) {
-            if (false !== strpos($argument, '--id=')) {
-                return (int) str_replace('--id=', '', $argument);
-            }
-        }
-
-        throw new RuntimeException('Impossible to find the ID. This should never happen: investigate further.');
-        // This should be never reached
-        // This was "return false;". Modified with the exception
-    }
-
-    /**
      * @return string
      */
     public function getCannotBeDetachedBecause(): string
@@ -872,7 +843,7 @@ class Job
         $retriedBy = $this->getRetriedBy();
         if (null !== $retriedBy && $this->isStatusRetried()) {
             // It has to be flushed at the end
-            $this->cannotBeDetachedBecause = \Safe\sprintf('is being retried by Job #%s (%s)', $retriedBy->getId(), $retriedBy->getStatus());
+            $this->cannotBeDetachedBecause = sprintf('is being retried by Job #%s (%s)', $retriedBy->getId(), $retriedBy->getStatus());
 
             return false;
         }
@@ -882,7 +853,7 @@ class Job
             switch ($parentJob->getStatus()) {
                 // Waiting dependencies
                 case self::STATUS_NEW:
-                    $this->cannotBeDetachedBecause = \Safe\sprintf(
+                    $this->cannotBeDetachedBecause = sprintf(
                         'has parent Job #%s@%s that has to be processed (%s)',
                         $parentJob->getId(), $parentJob->getQueue(), $parentJob->getStatus()
                     );
@@ -890,7 +861,7 @@ class Job
                     return false;
                     break;
                 case self::STATUS_RETRIED:
-                    $this->cannotBeDetachedBecause = \Safe\sprintf(
+                    $this->cannotBeDetachedBecause = sprintf(
                         'has parent Job #%s@%s that were retried (%s)',
                         $parentJob->getId(), $parentJob->getQueue(), $parentJob->getStatus()
                     );
@@ -900,14 +871,14 @@ class Job
 
                 // Working dependencies
                 case self::STATUS_PENDING:
-                    $this->cannotBeDetachedBecause = \Safe\sprintf(
+                    $this->cannotBeDetachedBecause = sprintf(
                         'has parent Job #%s@%s that is being processed (%s)',
                         $parentJob->getId(), $parentJob->getQueue(), $parentJob->getStatus()
                     );
 
                     return false;
                 case self::STATUS_RUNNING:
-                    $this->cannotBeDetachedBecause = \Safe\sprintf(
+                    $this->cannotBeDetachedBecause = sprintf(
                         'has parent Job #%s@%s that is running (%s)',
                         $parentJob->getId(), $parentJob->getQueue(), $parentJob->getStatus()
                     );
@@ -960,7 +931,7 @@ class Job
             switch ($parentJob->getStatus()) {
                 // Waiting dependencies
                 case self::STATUS_NEW:
-                    $this->cannotRunBecause = \Safe\sprintf(
+                    $this->cannotRunBecause = sprintf(
                         'has parent Job #%s@%s that has to be processed (%s)',
                         $parentJob->getId(), $parentJob->getQueue(), $parentJob->getStatus()
                     );
@@ -968,7 +939,7 @@ class Job
                     return false;
                     break;
                 case self::STATUS_RETRIED:
-                    $this->cannotRunBecause = \Safe\sprintf(
+                    $this->cannotRunBecause = sprintf(
                         'has parent Job #%s@%s that were retried (%s)',
                         $parentJob->getId(), $parentJob->getQueue(), $parentJob->getStatus()
                     );
@@ -978,14 +949,14 @@ class Job
 
                 // Working dependencies
                 case self::STATUS_PENDING:
-                    $this->cannotRunBecause = \Safe\sprintf(
+                    $this->cannotRunBecause = sprintf(
                         'has parent Job #%s@%s that is being processed (%s)',
                         $parentJob->getId(), $parentJob->getQueue(), $parentJob->getStatus()
                     );
 
                     return false;
                 case self::STATUS_RUNNING:
-                    $this->cannotRunBecause = \Safe\sprintf(
+                    $this->cannotRunBecause = sprintf(
                         'has parent Job #%s@%s that is running (%s)',
                         $parentJob->getId(), $parentJob->getQueue(), $parentJob->getStatus()
                     );
@@ -1373,14 +1344,14 @@ class Job
     /**
      * @ORM\PreFlush
      */
-    public function reorderInputs():void
+    public function reorderInputs(): void
     {
         // Don't reorder the arguments as their order is relevant
-        if (array_key_exists('options', $this->input) && null !== $this->input['options']) {
+        if (null !== $this->input && isset($this->input['options']) && is_array($this->input['options'])) {
             ksort($this->input['options'], SORT_NATURAL);
         }
 
-        if (array_key_exists('shortcuts', $this->input) && null !== $this->input['shortcuts']) {
+        if (null !== $this->input && isset($this->input['shortcuts']) && is_array($this->input['shortcuts'])) {
             ksort($this->input['shortcuts'], SORT_NATURAL);
         }
     }

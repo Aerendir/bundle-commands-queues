@@ -26,7 +26,7 @@ use Doctrine\ORM\TransactionRequiredException;
 use Doctrine\ORM\UnitOfWork;
 use RuntimeException;
 use Safe\Exceptions\StringsException;
-use Safe\sprintf;
+use function Safe\sprintf;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\InputParser;
 use SerendipityHQ\Bundle\ConsoleStyles\Console\Style\SerendipityHQStyle;

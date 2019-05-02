@@ -18,6 +18,7 @@ declare(strict_types=1);
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Util;
 
 use Symfony\Component\Console\Helper\Helper;
+use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
@@ -47,17 +48,17 @@ class ProgressBarFactory
      * @param OutputInterface $output
      * @param int             $howManyJobs
      *
-     * @return \Symfony\Component\Console\Helper\ProgressBar
+     * @return ProgressBar
      */
-    public static function createProgressBar(string $format, OutputInterface $output, int $howManyJobs = 0): \Symfony\Component\Console\Helper\ProgressBar
+    public static function createProgressBar(string $format, OutputInterface $output, int $howManyJobs = 0): ProgressBar
     {
-        \Symfony\Component\Console\Helper\ProgressBar::setPlaceholderFormatterDefinition(
+        ProgressBar::setPlaceholderFormatterDefinition(
             'memory_nr',
-            function (\Symfony\Component\Console\Helper\ProgressBar $bar, OutputInterface $output) {
+            function (ProgressBar $bar, OutputInterface $output) {
                 return Helper::formatMemory(memory_get_usage(false));
             }
         );
-        $progress = new \Symfony\Component\Console\Helper\ProgressBar($output, $howManyJobs);
+        $progress = new ProgressBar($output, $howManyJobs);
         $progress->setFormat($format);
 
         return $progress;

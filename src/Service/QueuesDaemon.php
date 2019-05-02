@@ -32,10 +32,10 @@ use Exception;
 use RuntimeException;
 use Safe\Exceptions\ArrayException;
 use Safe\Exceptions\StringsException;
-use Safe\getmypid;
-use Safe\pcntl_signal_dispatch;
-use Safe\sleep;
-use Safe\sprintf;
+use function Safe\getmypid;
+use function Safe\pcntl_signal_dispatch;
+use function Safe\sleep;
+use function Safe\sprintf;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Config\DaemonConfig;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\DependencyInjection\Configuration;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Daemon;
@@ -216,7 +216,6 @@ class QueuesDaemon
      *
      * @param bool $hitIteration the iteration has to be hit only from the RunCommand
      *
-     *
      * @return bool
      */
     public function isAlive(bool $hitIteration = false): bool
@@ -338,7 +337,7 @@ class QueuesDaemon
             $process->start();
         } catch (Throwable $e) {
             // Something went wrong starting the process: close it as failed
-            $info['output']       = 'Failing start the process.';
+            $info['output']                = 'Failing start the process.';
             $info['debug']['output_error'] = $e->getMessage();
 
             // Check if it can be retried and if the retry were successful
@@ -556,7 +555,7 @@ class QueuesDaemon
         // If this is a cancelling Job or a retrying one, refresh the entire tree
         if ($job->isTypeCancelling()) {
             $startJobId = null;
-            $input = $job->getInput();
+            $input      = $job->getInput();
             if (null !== $input && isset($input['options']['--id'])) {
                 $startJobId = $input['options']['--id'];
             }
@@ -727,7 +726,6 @@ class QueuesDaemon
 
     /**
      * Put the Daemon in sleep.
-     *
      */
     public function sleep(): void
     {

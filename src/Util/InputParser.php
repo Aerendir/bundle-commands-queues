@@ -17,6 +17,8 @@ declare(strict_types=1);
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Util;
 
+use function Safe\sprintf;
+
 /**
  * An helper class to manage the input of a command.
  *
@@ -32,7 +34,7 @@ class InputParser
     /** @var string|null $foundOption */
     private static $foundOption;
 
-    /** @var null|string $foundShortcut  */
+    /** @var string|null $foundShortcut */
     private static $foundShortcut;
 
     /** @var array|null $preparedInput */
@@ -40,9 +42,9 @@ class InputParser
 
     /** @var array $preparedInput */
     private static $defaultPreparedInput = [
-        'command' => null,
+        'command'   => null,
         'arguments' => null,
-        'options' => null,
+        'options'   => null,
         'shortcuts' => null,
     ];
 
@@ -51,15 +53,23 @@ class InputParser
      * If a string is passed, it is transformed into an array.
      * Then it reorder the arguments to get a unique signature to facilitate checks on existent Jobs.
      *
-     * @param array|string $input
-     * @param bool $hasCommand If the input contains also the command name or not
+     * This suppresses a Phan error: check if it is fixed here https://github.com/phan/phan/issues/2706
+     *
+     * @param array|string|null $input
+     * @param bool              $hasCommand If the input contains also the command name or not
+     *
+     * @suppress PhanTypeMismatchDimFetch
      *
      * @return array
      */
     public static function parseInput($input = [], bool $hasCommand = true): array
     {
         self::$preparedInput = self::$defaultPreparedInput;
-        $wasString = false;
+        $wasString           = false;
+
+        if (null === $input) {
+            return self::$preparedInput;
+        }
 
         if (is_string($input)) {
             $input = str_replace('=', ' ', $input);
@@ -68,12 +78,12 @@ class InputParser
             $input = explode(' ', $input);
 
             // And remove leading and trailing spaces
-            $input = array_map('trim', $input);
+            $input     = array_map('trim', $input);
             $wasString = true;
         }
 
         if ($hasCommand && $wasString) {
-            $commandKey = array_key_first($input);
+            $commandKey                     = array_key_first($input);
             self::$preparedInput['command'] = $input[$commandKey];
             unset($input[$commandKey]);
         }
@@ -108,36 +118,38 @@ class InputParser
             }
         }
 
-        $preparedInput = self::$preparedInput;
-        self::$preparedInput = null;
         self::$foundArgument = null;
-        self::$foundOption = null;
+        self::$foundOption   = null;
         self::$foundShortcut = null;
 
         // Don't reorder the arguments as their order is relevant
-        if (array_key_exists('options', $preparedInput) && null !== $preparedInput['options']) {
-            ksort($preparedInput['options'], SORT_NATURAL);
+        if (array_key_exists('options', self::$preparedInput) && null !== self::$preparedInput['options']) {
+            ksort(self::$preparedInput['options'], SORT_NATURAL);
         }
 
-        if (array_key_exists('shortcuts', $preparedInput) && null !== $preparedInput['shortcuts']) {
-            ksort($preparedInput['shortcuts'], SORT_NATURAL);
+        if (array_key_exists('shortcuts', self::$preparedInput) && null !== self::$preparedInput['shortcuts']) {
+            ksort(self::$preparedInput['shortcuts'], SORT_NATURAL);
         }
 
-        return $preparedInput;
+        return self::$preparedInput;
     }
 
     /**
      * @param array|null $input
-     * @param bool $withCommand
+     * @param bool       $withCommand
      *
      * @return string|null
      */
-    public static function stringify(?array $input = [], $withCommand = false):?string
+    public static function stringify(?array $input = [], $withCommand = false): ?string
     {
-        $preparedInput = '';
-        $stringifyClosure = static function($value, $key) {
-            return \Safe\sprintf('%s=%s', $key, $value);
+        $preparedInput    = '';
+        $stringifyClosure = static function ($value, $key) {
+            return sprintf('%s=%s', $key, $value);
         };
+
+        if (null === $input) {
+            return null;
+        }
 
         if ($withCommand && array_key_exists('command', $input)) {
             $preparedInput .= $input['command'];
@@ -150,15 +162,15 @@ class InputParser
 
         if (array_key_exists('options', $input) && null !== $input['options']) {
             $optionsKeys = array_keys($input['options']);
-            $options = array_map($stringifyClosure, $input['options'], $optionsKeys);
-            $options = implode(' ', $options);
+            $options     = array_map($stringifyClosure, $input['options'], $optionsKeys);
+            $options     = implode(' ', $options);
             $preparedInput .= ' ' . $options;
         }
 
         if (array_key_exists('shortcuts', $input) && null !== $input['shortcuts']) {
             $shortcutsKeys = array_keys($input['shortcuts']);
-            $shortcuts = array_map($stringifyClosure, $input['shortcuts'], $shortcutsKeys);
-            $shortcuts = implode(' ', $shortcuts);
+            $shortcuts     = array_map($stringifyClosure, $input['shortcuts'], $shortcutsKeys);
+            $shortcuts     = implode(' ', $shortcuts);
             $preparedInput .= ' ' . $shortcuts;
         }
 
@@ -172,7 +184,7 @@ class InputParser
      *
      * @return bool
      */
-    public static function isArgument(string $argument):bool
+    public static function isArgument(string $argument): bool
     {
         return false === self::isOption($argument) && false === self::isShortcut($argument);
     }
@@ -182,7 +194,7 @@ class InputParser
      *
      * @return bool
      */
-    public static function isOption(string $option):bool
+    public static function isOption(string $option): bool
     {
         return 0 === strpos($option, '--');
     }
@@ -192,7 +204,7 @@ class InputParser
      *
      * @return bool
      */
-    public static function isShortcut(string $shortcut):bool
+    public static function isShortcut(string $shortcut): bool
     {
         return false === self::isOption($shortcut) && 0 === strpos($shortcut, '-');
     }
@@ -200,7 +212,7 @@ class InputParser
     /**
      * @param string $value
      */
-    private static function parseValue(string $value):void
+    private static function parseValue(string $value): void
     {
         if (null === self::$foundOption && null === self::$foundShortcut && self::isArgument($value)) {
             self::$foundArgument = $value;
@@ -208,29 +220,29 @@ class InputParser
 
         if (self::isOption($value)) {
             self::$preparedInput['options'][$value] = null;
-            self::$foundOption = $value;
-            self::$foundShortcut = null;
+            self::$foundOption                      = $value;
+            self::$foundShortcut                    = null;
         }
 
         if (self::isShortcut($value)) {
             self::$preparedInput['shortcuts'][$value] = null;
-            self::$foundShortcut = $value;
-            self::$foundOption = null;
+            self::$foundShortcut                      = $value;
+            self::$foundOption                        = null;
         }
 
         if (null !== self::$foundArgument) {
             self::$preparedInput['arguments'][] = self::$foundArgument;
-            self::$foundArgument = null;
+            self::$foundArgument                = null;
         }
 
         if (null !== self::$foundOption && self::$foundOption !== $value && false === self::isOption($value) && false === self::isShortcut($value)) {
             self::$preparedInput['options'][self::$foundOption] = $value;
-            self::$foundOption = null;
+            self::$foundOption                                  = null;
         }
 
         if (null !== self::$foundShortcut && self::$foundShortcut !== $value && false === self::isOption($value) && false === self::isShortcut($value)) {
             self::$preparedInput['shortcuts'][self::$foundShortcut] = $value;
-            self::$foundShortcut = null;
+            self::$foundShortcut                                    = null;
         }
     }
 }

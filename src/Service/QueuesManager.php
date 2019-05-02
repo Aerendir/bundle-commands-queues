@@ -61,7 +61,7 @@ class QueuesManager
      *
      * @return bool
      */
-    public function jobExists(Job $job):bool
+    public function jobExists(Job $job): bool
     {
         return $this->exists($job->getCommand(), $job->getInput(), $job->getQueue());
     }
@@ -95,7 +95,7 @@ class QueuesManager
      *
      * @return bool
      */
-    public function exists(string $command, $input = null, string $queue = Daemon::DEFAULT_QUEUE_NAME):bool
+    public function exists(string $command, $input = null, string $queue = Daemon::DEFAULT_QUEUE_NAME): bool
     {
         $exists = $this->find($command, $input, $queue);
 
@@ -110,7 +110,6 @@ class QueuesManager
      * @param string            $command
      * @param array|string|null $input
      * @param string            $queue
-     *
      *
      * @return array|null
      */

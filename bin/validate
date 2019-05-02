@@ -4,6 +4,7 @@ vendor/bin/rector process src --dry-run &&
 vendor/bin/php-cs-fixer fix --allow-risky yes --dry-run -v &&
 vendor/bin/phpstan analyse src -c phpstan.neon --level max &&
 vendor/bin/phan --progress-bar &&
+phpunit &&
 composer validate --strict --no-check-lock &&
 composer outdated &&
 vendor/bin/security-checker security:check
