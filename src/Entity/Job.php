@@ -24,6 +24,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Exception;
 use InvalidArgumentException;
 use LogicException;
+use RuntimeException;
 use Safe\Exceptions\StringsException;
 use function Safe\sprintf;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Command\InternalMarkAsCancelledCommand;
@@ -839,11 +840,14 @@ class Job
         }
 
         // Is being retried.
-        // The retrying Job can be null if really short retention periods are set and errors happen really fast (like if the Jobs cannot start at all)
         $retriedBy = $this->getRetriedBy();
-        if (null !== $retriedBy && $this->isStatusRetried()) {
+        if ($this->isStatusRetried()) {
+            if (null === $retriedBy) {
+                throw new RuntimeException('This is a retried Job but the retrying Job is not set and this is not possible.');
+            }
+
             // It has to be flushed at the end
-            $this->cannotBeDetachedBecause = sprintf('is being retried by Job #%s (%s)', $retriedBy->getId(), $retriedBy->getStatus());
+            $this->cannotBeDetachedBecause = \Safe\sprintf('is being retried by Job #%s (%s)', $retriedBy->getId(), $retriedBy->getStatus());
 
             return false;
         }
