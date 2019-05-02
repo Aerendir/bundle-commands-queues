@@ -18,18 +18,18 @@ Here there is the available configuration parameters:
 
     shq_commands_queues:
         # Daemons configuration
-        alive_daemons_check_interval: 3600 # OPTIONAL. The number of seconds after which the check has to be done
-        managed_entities_treshold: 100 # OPTIONAL. The maximum number of Jobs entities that the EntityManager of a daemon can manage
-        max_runtime: 100 # OPTIONAL. The Daemons will die after this amount of seconds.
-        profiling_info_interval: 350 # OPTIONAL. The number of SECONDS after which the profiling info have to be printed. Works only with -vv.
-        print_profiling_info: true # OPTIONAL. If the profiling have to be printed or not after the profiling_info_interval.
-        sleep_for: 10 # OPTIONAL. The amount of seconds the Daemon will sleep when runs out of jobs.
+        daemon_alive_daemons_check_interval: 3600 # OPTIONAL. The number of seconds after which the check has to be done
+        daemon_managed_entities_treshold: 100 # OPTIONAL. The maximum number of Jobs entities that the EntityManager of a daemon can manage
+        daemon_max_runtime: 100 # OPTIONAL. The Daemons will die after this amount of seconds.
+        daemon_profiling_info_interval: 350 # OPTIONAL. The number of SECONDS after which the profiling info have to be printed. Works only with -vv.
+        daemon_print_profiling_info: true # OPTIONAL. If the profiling have to be printed or not after the daemon_profiling_info_interval.
+        daemon_sleep_for: 10 # OPTIONAL. The amount of seconds the Daemon will sleep when runs out of jobs.
         
         # Queues configuration
-        max_concurrent_jobs: 1 # OPTIONAL. The number of concurrent jobs to process at the same time in each queue.
-        max_retention_days: 365 # OPTIONAL. Jobs closed (with any status) older than the days specified, will be deleted.
-        retry_stale_jobs: true # OPTIONAL. If the stale Jobs have to be retried or not
-        running_jobs_check_interval: 100000 # OPTIONAL. The number of seconds after which the running jobs have to be checked
+        queue_max_concurrent_jobs: 1 # OPTIONAL. The number of concurrent jobs to process at the same time in each queue.
+        queue_max_retention_days: 365 # OPTIONAL. Jobs closed (with any status) older than the days specified, will be deleted.
+        queue_retry_stale_jobs: true # OPTIONAL. If the stale Jobs have to be retried or not
+        queue_running_jobs_check_interval: 100000 # OPTIONAL. The number of seconds after which the running jobs have to be checked
 
 The default configuration is very slow, so make sure to fine tune this settings to use the maximum amount of power of your servers!
 

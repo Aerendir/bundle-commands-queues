@@ -234,7 +234,7 @@ class QueuesDaemon
             return false;
         }
 
-        // The max_runtime is reached
+        // The daemon_max_runtime is reached
         if ($this->profiler->isMaxRuntimeReached()) {
             if ($this->verbosity >= OutputInterface::VERBOSITY_NORMAL) {
                 $this->ioWriter->warning(
@@ -255,7 +255,7 @@ class QueuesDaemon
      */
     public function canInitializeNewJobs(string $queueName): bool
     {
-        // If the max_concurrent_jobs number is reached, don't process one more job
+        // If the queue_max_concurrent_jobs number is reached, don't process one more job
         return $this->isAlive() && false === $this->countRunningJobs($queueName) >= $this->config->getQueue($queueName)[Configuration::QUEUE_MAX_CONCURRENT_JOBS_KEY];
     }
 
@@ -273,7 +273,7 @@ class QueuesDaemon
      */
     public function processNextJob(string $queueName): bool
     {
-        // If the max_concurrent_jobs number is reached, don't process one more job
+        // If the queue_max_concurrent_jobs number is reached, don't process one more job
         if ($this->countRunningJobs($queueName) >= $this->config->getQueue($queueName)[Configuration::QUEUE_MAX_CONCURRENT_JOBS_KEY]) {
             return false;
         }
@@ -655,7 +655,7 @@ class QueuesDaemon
 
             // We need to be sure that there are no jobs running, so it is possible to flush safely
             foreach ($this->getConfig()->getQueues() as $queueName) {
-                // Remove jobs that are older than max_retention_days
+                // Remove jobs that are older than queue_max_retention_days
                 $this->purgeExpiredJobs($queueName);
             }
 
@@ -678,7 +678,7 @@ class QueuesDaemon
     }
 
     /**
-     * Removes from the queue all the Jobs older than max_retention_days.
+     * Removes from the queue all the Jobs older than queue_max_retention_days.
      *
      * This method doesn't purge Jobs if there are any still running
      * (as it needs to completely clear the entity manager and then flush).

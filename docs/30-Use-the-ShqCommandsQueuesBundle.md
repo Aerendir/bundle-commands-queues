@@ -15,14 +15,14 @@ In the previous chapter "[FastStart](20-Fast-Start.md)" we have seen a basic con
 
     # config/packages/shq_commands_queues.yaml
     shq_commands_queues:
-        max_runtime: 100000
+        daemon_max_runtime: 100000
         daemons:
             daemon_1:
                 queues: ['queue_1', 'queue_2', 'queue_3', 'queue_4', 'queue_5']
         queues:
             queue_1:
                 # The number of concurrent jobs to process at the same time.
-                max_concurrent_jobs: 3
+                queue_max_concurrent_jobs: 3
 
 As you can see, under the node `shq_commands_queues.daemons` you list the daemons: the daemon's node will be the daemon's name.
 

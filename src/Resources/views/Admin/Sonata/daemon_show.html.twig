@@ -51,11 +51,11 @@ file that was distributed with this source code.
 <pre>
 {% for queue in object.config.queues %}
 <strong>{{ queue }}</strong>:
-<code style="padding: 2px 4px;font-size: 90%;color: #4f4f4f;background-color: #f9f2f4;border-radius: 4px;">{{ constant('SerendipityHQ\\Bundle\\CommandsQueuesBundle\\DependencyInjection\\Configuration::QUEUE_MAX_CONCURRENT_JOBS_KEY') }}</code>: {{ object.config.queue(queue).max_concurrent_jobs }}
-<code style="padding: 2px 4px;font-size: 90%;color: #4f4f4f;background-color: #f9f2f4;border-radius: 4px;">{{ constant('SerendipityHQ\\Bundle\\CommandsQueuesBundle\\DependencyInjection\\Configuration::QUEUE_MAX_RETENTION_DAYS_KEY') }}</code>: {{ object.config.queue(queue).max_retention_days }}
-<code style="padding: 2px 4px;font-size: 90%;color: #4f4f4f;background-color: #f9f2f4;border-radius: 4px;">{{ constant('SerendipityHQ\\Bundle\\CommandsQueuesBundle\\DependencyInjection\\Configuration::QUEUE_RETRY_STALE_JOBS_KEY') }}</code>: {% if 'true' == object.config.queue(queue).retry_stale_jobs %}<small>boolean</small> true{% else %}<small>boolean</small> false{% endif %}
+<code style="padding: 2px 4px;font-size: 90%;color: #4f4f4f;background-color: #f9f2f4;border-radius: 4px;">{{ constant('SerendipityHQ\\Bundle\\CommandsQueuesBundle\\DependencyInjection\\Configuration::QUEUE_MAX_CONCURRENT_JOBS_KEY') }}</code>: {{ object.config.queue(queue).queue_max_concurrent_jobs }}
+<code style="padding: 2px 4px;font-size: 90%;color: #4f4f4f;background-color: #f9f2f4;border-radius: 4px;">{{ constant('SerendipityHQ\\Bundle\\CommandsQueuesBundle\\DependencyInjection\\Configuration::QUEUE_MAX_RETENTION_DAYS_KEY') }}</code>: {{ object.config.queue(queue).queue_max_retention_days }}
+<code style="padding: 2px 4px;font-size: 90%;color: #4f4f4f;background-color: #f9f2f4;border-radius: 4px;">{{ constant('SerendipityHQ\\Bundle\\CommandsQueuesBundle\\DependencyInjection\\Configuration::QUEUE_RETRY_STALE_JOBS_KEY') }}</code>: {% if 'true' == object.config.queue(queue).queue_retry_stale_jobs %}<small>boolean</small> true{% else %}<small>boolean</small> false{% endif %}
 
-<code style="padding: 2px 4px;font-size: 90%;color: #4f4f4f;background-color: #f9f2f4;border-radius: 4px;">{{ constant('SerendipityHQ\\Bundle\\CommandsQueuesBundle\\DependencyInjection\\Configuration::QUEUE_RUNNING_JOBS_CHECK_INTERVAL_KEY') }}</code>: {{ object.config.queue(queue).running_jobs_check_interval }}
+<code style="padding: 2px 4px;font-size: 90%;color: #4f4f4f;background-color: #f9f2f4;border-radius: 4px;">{{ constant('SerendipityHQ\\Bundle\\CommandsQueuesBundle\\DependencyInjection\\Configuration::QUEUE_RUNNING_JOBS_CHECK_INTERVAL_KEY') }}</code>: {{ object.config.queue(queue).queue_running_jobs_check_interval }}
 
 {% endfor %}
 </pre>

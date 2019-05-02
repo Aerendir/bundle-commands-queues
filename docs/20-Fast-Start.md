@@ -30,21 +30,21 @@ So, just a little bit of configuration:
 
     # config/packages/shq_commands_queues.yaml
     shq_commands_queues:
-        max_runtime: 100000
+        daemon_max_runtime: 100000
         daemons:
             daemon_1:
                 queues: ['queue_1', 'queue_2', 'queue_3', 'queue_4', 'queue_5']
         queues:
             queue_1:
                 # The number of concurrent jobs to process at the same time.
-                max_concurrent_jobs: 30
+                queue_max_concurrent_jobs: 30
 
 With this configuration we have:
 
-1. Set a generic configuration for `max_runtime` parameter: this will be used by the daemon (and can be overwritten for each single daemon)
+1. Set a generic configuration for `daemon_max_runtime` parameter: this will be used by the daemon (and can be overwritten for each single daemon)
 2. Created 1 daemon calling it "daemon_1";
 3. Assigned to the daemon "daemon_1" the processing of queues "queue_1", "queue_2", "queue_3", "queue_4" and "queue_5";
-4. Explicitly configured the parameter `max_concurrent_jobs` only for the "queue_1": this queue will process 3 jobs concurrently, while all the others will process only 1 ("1" is the default value set by the bundle) 
+4. Explicitly configured the parameter `queue_max_concurrent_jobs` only for the "queue_1": this queue will process 3 jobs concurrently, while all the others will process only 1 ("1" is the default value set by the bundle) 
 
 Step 2: generate the random jobs
 --------------------------------

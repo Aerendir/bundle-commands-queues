@@ -35,61 +35,61 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 class Configuration implements ConfigurationInterface
 {
     /** @var string */
-    public const DAEMON_ALIVE_DAEMONS_CHECK_INTERVAL_KEY = 'alive_daemons_check_interval';
+    public const DAEMON_ALIVE_DAEMONS_CHECK_INTERVAL_KEY = 'daemon_alive_daemons_check_interval';
 
     /** @var string */
     public const DAEMON_ALIVE_DAEMONS_CHECK_INTERVAL_DESCRIPTION = 'Indicates to the running daemons after how many seconds they have to check if otherr running daemons are still alive (running). Defaults to 3600 seconds.';
 
     /** @var string */
-    public const DAEMON_MANAGED_ENTITIES_TRESHOLD_KEY = 'managed_entities_treshold';
+    public const DAEMON_MANAGED_ENTITIES_TRESHOLD_KEY = 'daemon_managed_entities_treshold';
 
     /** @var string */
     public const DAEMON_MANAGED_ENTITIES_TRESHOLD_DESCRIPTION = 'Indicates the maximum number of Jobs that a Daemon can keep in the entity manager at any given time.';
 
     /** @var string */
-    public const DAEMON_MAX_RUNTIME_KEY = 'max_runtime';
+    public const DAEMON_MAX_RUNTIME_KEY = 'daemon_max_runtime';
 
     /** @var string */
     public const DAEMON_MAX_RUNTIME_DESCRIPTION = 'Indicates the maximum amount of seconds the daemon will live. Once elapsed, the daemon will die.';
 
     /** @var string */
-    public const DAEMON_PROFILING_INFO_INTERVAL_KEY = 'profiling_info_interval';
+    public const DAEMON_PROFILING_INFO_INTERVAL_KEY = 'daemon_profiling_info_interval';
 
     /** @var string */
     public const DAEMON_PROFILING_INFO_INTERVAL_DESCRIPTION = 'Indicates the amount of seconds between each profiling information collection and printing in the console log.';
 
     /** @var string */
-    public const DAEMON_PRINT_PROFILING_INFO_KEY = 'print_profiling_info';
+    public const DAEMON_PRINT_PROFILING_INFO_KEY = 'daemon_print_profiling_info';
 
     /** @var string */
     public const DAEMON_PRINT_PROFILING_INFO_DESCRIPTION = 'Indicates the amount of seconds between each profiling information collection and printing in the console log.';
 
     /** @var string */
-    public const DAEMON_SLEEP_FOR_KEY = 'sleep_for';
+    public const DAEMON_SLEEP_FOR_KEY = 'daemon_sleep_for';
 
     /** @var string */
     public const DAEMON_SLEEP_FOR_DESCRIPTION = 'The amount of seconds the Daemon will sleep when runs out of jobs.';
 
     /** @var string */
-    public const QUEUE_MAX_CONCURRENT_JOBS_KEY = 'max_concurrent_jobs';
+    public const QUEUE_MAX_CONCURRENT_JOBS_KEY = 'queue_max_concurrent_jobs';
 
     /** @var string */
     public const QUEUE_MAX_CONCURRENT_JOBS_DESCRIPTION = 'The number of concurrent jobs to process at the same time in each queue.';
 
     /** @var string */
-    public const QUEUE_MAX_RETENTION_DAYS_KEY = 'max_retention_days';
+    public const QUEUE_MAX_RETENTION_DAYS_KEY = 'queue_max_retention_days';
 
     /** @var string */
     public const QUEUE_MAX_RETENTION_DAYS_DESCRIPTION = 'The number of days after which a Job that cannot be run anymore will be considered expired and will be removed from the database.';
 
     /** @var string */
-    public const QUEUE_RETRY_STALE_JOBS_KEY = 'retry_stale_jobs';
+    public const QUEUE_RETRY_STALE_JOBS_KEY = 'queue_retry_stale_jobs';
 
     /** @var string */
     public const QUEUE_RETRY_STALE_JOBS_DESCRIPTION = 'If true, stale jobs will be retried when the daemon restarts.';
 
     /** @var string */
-    public const QUEUE_RUNNING_JOBS_CHECK_INTERVAL_KEY = 'running_jobs_check_interval';
+    public const QUEUE_RUNNING_JOBS_CHECK_INTERVAL_KEY = 'queue_running_jobs_check_interval';
 
     /** @var string */
     public const QUEUE_RUNNING_JOBS_CHECK_INTERVAL_DESCRIPTION = 'The number of seconds after which the running jobs have to be checked.';
