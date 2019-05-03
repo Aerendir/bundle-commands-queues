@@ -58,15 +58,16 @@ class QueuesManager
      *
      * Returns (bool) false if it doesn't exist or the scheduled Job if it exists.
      *
-     * @param Job $job
+     * @param Job  $job
+     * @param bool $fullSearch If false, searches only not yet started jobs
      *
      * @throws StringsException
      *
      * @return bool
      */
-    public function jobExists(Job $job): bool
+    public function jobExists(Job $job, $fullSearch = false): bool
     {
-        return $this->exists($job->getCommand(), $job->getInput(), $job->getQueue());
+        return $this->exists($job->getCommand(), $job->getInput(), $job->getQueue(), $fullSearch);
     }
 
     /**
@@ -78,15 +79,16 @@ class QueuesManager
      *
      * Returns null if it doesn't exist or the scheduled Job if it exists.
      *
-     * @param Job $job
+     * @param Job  $job
+     * @param bool $fullSearch If false, searches only not yet started jobs
      *
      * @throws StringsException
      *
      * @return array|null
      */
-    public function findByJob(Job $job): ?array
+    public function findByJob(Job $job, $fullSearch = false): ?array
     {
-        return $this->find($job->getCommand(), $job->getInput(), $job->getQueue());
+        return $this->find($job->getCommand(), $job->getInput(), $job->getQueue(), $fullSearch);
     }
 
     /**
@@ -97,14 +99,15 @@ class QueuesManager
      * @param string            $command
      * @param array|string|null $input
      * @param string            $queue
+     * @param bool              $fullSearch If false, searches only not yet started jobs
      *
      * @throws StringsException
      *
      * @return bool
      */
-    public function exists(string $command, $input = null, string $queue = Daemon::DEFAULT_QUEUE_NAME): bool
+    public function exists(string $command, $input = null, string $queue = Daemon::DEFAULT_QUEUE_NAME, $fullSearch = false): bool
     {
-        $exists = $this->find($command, $input, $queue);
+        $exists = $this->find($command, $input, $queue, $fullSearch);
 
         return ! empty($exists);
     }
@@ -117,12 +120,13 @@ class QueuesManager
      * @param string            $command
      * @param array|string|null $input
      * @param string            $queue
+     * @param bool              $fullSearch If false, searches only not yet started jobs
      *
      * @throws StringsException
      *
      * @return array|null
      */
-    public function find(string $command, $input = null, string $queue = Daemon::DEFAULT_QUEUE_NAME): ?array
+    public function find(string $command, $input = null, string $queue = Daemon::DEFAULT_QUEUE_NAME, $fullSearch = false): ?array
     {
         /** @var JobRepository $jobsRepo */
         $jobsRepo = $this->entityManager->getRepository(Job::class);
@@ -130,7 +134,7 @@ class QueuesManager
         // Check and prepare arguments of the command
         $input = InputParser::parseInput($input);
 
-        return $jobsRepo->findBySearch($command, $input, $queue);
+        return $jobsRepo->findBySearch($command, $input, $queue, $fullSearch);
     }
 
     /**
