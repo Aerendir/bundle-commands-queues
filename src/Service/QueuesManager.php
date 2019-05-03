@@ -60,8 +60,9 @@ class QueuesManager
      *
      * @param Job $job
      *
-     * @return bool
      * @throws StringsException
+     *
+     * @return bool
      */
     public function jobExists(Job $job): bool
     {
@@ -79,8 +80,9 @@ class QueuesManager
      *
      * @param Job $job
      *
-     * @return Job[]|null
      * @throws StringsException
+     *
+     * @return array|null
      */
     public function findByJob(Job $job): ?array
     {
@@ -96,14 +98,15 @@ class QueuesManager
      * @param array|string|null $input
      * @param string            $queue
      *
-     * @return bool
      * @throws StringsException
+     *
+     * @return bool
      */
     public function exists(string $command, $input = null, string $queue = Daemon::DEFAULT_QUEUE_NAME): bool
     {
         $exists = $this->find($command, $input, $queue);
 
-        return null !== $exists;
+        return ! empty($exists);
     }
 
     /**
@@ -115,8 +118,9 @@ class QueuesManager
      * @param array|string|null $input
      * @param string            $queue
      *
-     * @return Job[]|null
      * @throws StringsException
+     *
+     * @return array|null
      */
     public function find(string $command, $input = null, string $queue = Daemon::DEFAULT_QUEUE_NAME): ?array
     {
