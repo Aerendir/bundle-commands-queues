@@ -25,7 +25,7 @@ Requirements
 ------------
 
 1. PHP ^7.1
-2. Symfony ^4`
+2. Symfony ^4
 
 **Fully tested with PHPStan and Phan at maximum levels of strictness**.
 
