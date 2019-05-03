@@ -192,8 +192,6 @@ class JobRepository extends EntityRepository
      * @param string     $queue
      * @param bool       $fullSearch If false, will search only in the not already started jobs
      *
-     * @throws StringsException
-     *
      * @return array|null
      */
     public function findBySearch(string $command, ?array $input = [], string $queue = 'default', bool $fullSearch = false): ?array
@@ -221,13 +219,13 @@ class JobRepository extends EntityRepository
 
             if (isset($input['options']) && is_array($input['options'])) {
                 foreach ($input['options'] as $option => $value) {
-                    $queryBuilder->andWhere($queryBuilder->expr()->like('j.input', $queryBuilder->expr()->literal('%' . sprintf('%s %s', $option, $value) . '%')));
+                    $queryBuilder->andWhere($queryBuilder->expr()->like('j.input', $queryBuilder->expr()->literal('%' . serialize([$option => $value]) . '%')));
                 }
             }
 
             if (isset($input['shortcuts']) && is_array($input['shortcuts'])) {
                 foreach ($input['shortcuts'] as $shortcut => $value) {
-                    $queryBuilder->andWhere($queryBuilder->expr()->like('j.input', $queryBuilder->expr()->literal('%' . sprintf('%s %s', $shortcut, $value) . '%')));
+                    $queryBuilder->andWhere($queryBuilder->expr()->like('j.input', $queryBuilder->expr()->literal('%' . serialize([$shortcut => $value]) . '%')));
                 }
             }
         }
