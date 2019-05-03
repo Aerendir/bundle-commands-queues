@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the SHQCommandsQueuesBundle.
  *
@@ -15,7 +17,20 @@
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Util;
 
+use DateTime;
 use Doctrine\ORM\UnitOfWork;
+use RuntimeException;
+use function Safe\asort;
+use Safe\Exceptions\ArrayException;
+use Safe\Exceptions\FilesystemException;
+use Safe\Exceptions\StreamException;
+use Safe\Exceptions\StringsException;
+use function Safe\fclose;
+use function Safe\fopen;
+use function Safe\fwrite;
+use function Safe\mkdir;
+use function Safe\sprintf;
+use function Safe\stream_get_contents;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Service\JobsManager;
 use SerendipityHQ\Bundle\ConsoleStyles\Console\Style\SerendipityHQStyle;
@@ -63,7 +78,7 @@ class Profiler
     /** @var int $iterations How many times Daemon::mustRun() was called in the "while(Daemon::mustRun())" */
     private $iterations = 0;
 
-    /** @var float $maxRuntime After this amount of time the Daemon MUST die */
+    /** @var int $maxRuntime After this amount of time the Daemon MUST die */
     private $maxRuntime;
 
     /** @var bool $memprofEnabled */
@@ -82,6 +97,8 @@ class Profiler
     private static $ioWriter;
 
     /**
+     * @throws ArrayException
+     *
      * @return string
      */
     public static function buildJobsList(): string
@@ -106,16 +123,19 @@ class Profiler
      * @param SerendipityHQStyle $ioWriter
      * @param UnitOfWork         $uow
      */
-    public static function setDependencies(SerendipityHQStyle $ioWriter, UnitOfWork $uow)
+    public static function setDependencies(SerendipityHQStyle $ioWriter, UnitOfWork $uow): void
     {
         self::$ioWriter = $ioWriter;
         self::$uow      = $uow;
     }
 
     /**
-     * @param string $where
+     * @param string|null $where
+     *
+     * @throws ArrayException
+     * @throws StringsException
      */
-    public static function printUnitOfWork(string $where = null)
+    public static function printUnitOfWork(string $where = null): void
     {
         if (self::$ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
             $count   = isset(self::$uow->getIdentityMap()[Job::class]) ? count(self::$uow->getIdentityMap()[Job::class]) : 0;
@@ -142,10 +162,10 @@ class Profiler
      * Start the profiler.
      *
      * @param int   $pid
-     * @param float $maxRuntime after this amount of time the Daemon MUST die
+     * @param int   $maxRuntime after this amount of time the Daemon MUST die
      * @param array $queues     The configured queues
      */
-    public function start(int $pid, float $maxRuntime, array $queues)
+    public function start(int $pid, int $maxRuntime, array $queues): void
     {
         $this->pid = $pid;
 
@@ -172,9 +192,15 @@ class Profiler
     }
 
     /**
+     * @throws FilesystemException
+     * @throws StreamException
+     * @throws StringsException
+     *
      * @return array
+     *
+     * @suppress PhanUndeclaredFunction
      */
-    public function profile()
+    public function profile(): array
     {
         $currentMicrotime       = microtime(true);
         $currentMemoryUsage     = memory_get_usage();
@@ -268,7 +294,7 @@ class Profiler
         $this->highestMemoryPeakReal = $this->highestMemoryPeakReal < $currentMemoryPeakReal ? $currentMemoryPeakReal : $this->highestMemoryPeakReal;
         $this->highestUowSize        = $currentHighestUowSize;
 
-        if ($this->isMemprofEnabled()) {
+        if (function_exists('memprof_dump_callgrind') && $this->isMemprofEnabled()) {
             // Create the directory if it doesn't exist
             if (false === file_exists('app/logs/callgrind')) {
                 mkdir('app/logs/callgrind', 0777, true);
@@ -276,8 +302,9 @@ class Profiler
             $callgrind = fopen(
                 sprintf(
                     'app/logs/callgrind/callgrind.out.%s.%s.%s',
-                    (new \DateTime())->format('Y-m-d'), $this->pid, $this->getCurrentIteration()
-                ), 'w');
+                    (new DateTime())->format('Y-m-d'), $this->pid, $this->getCurrentIteration()
+                    // "w": writing only; "b": binary safe
+                ), 'wb');
             memprof_dump_callgrind($callgrind);
             fwrite($callgrind, stream_get_contents($callgrind));
             fclose($callgrind);
@@ -289,7 +316,7 @@ class Profiler
     /**
      * Prints the current profiling info.
      */
-    public function printProfilingInfo()
+    public function printProfilingInfo(): void
     {
         self::$ioWriter->table(
             ['', 'Profiling info'],
@@ -342,7 +369,7 @@ class Profiler
     /**
      * Sets to NOW the microtime of last check of alive damons.
      */
-    public function aliveDaemonsJustCheked()
+    public function aliveDaemonsJustCheked(): void
     {
         $this->aliveDaemonsLastCheckedAt = microtime(true);
     }
@@ -350,7 +377,7 @@ class Profiler
     /**
      * Sets to NOW the microtime of the last optimization.
      */
-    public function optimized()
+    public function optimized(): void
     {
         $this->lastOptimizationAt = microtime(true);
     }
@@ -358,7 +385,7 @@ class Profiler
     /**
      * Increment the number of iterations by 1.
      */
-    public function hitIteration()
+    public function hitIteration(): void
     {
         ++$this->iterations;
     }
@@ -366,7 +393,7 @@ class Profiler
     /**
      * @param string $queueName
      */
-    public function runningJobsJustChecked(string $queueName)
+    public function runningJobsJustChecked(string $queueName): void
     {
         $this->runningJobsLastCheckedAt[$queueName] = microtime(true);
     }
@@ -376,6 +403,10 @@ class Profiler
      */
     public function isMaxRuntimeReached(): bool
     {
+        if (0 === $this->maxRuntime) {
+            return false;
+        }
+
         return microtime(true) - $this->startTime > $this->maxRuntime;
     }
 
@@ -389,11 +420,13 @@ class Profiler
 
     /**
      * Enables Memprof if required.
+     *
+     * @suppress PhanUndeclaredFunction
      */
-    public function enableMemprof()
+    public function enableMemprof(): bool
     {
         // Intialize php-memprof
-        if (true === extension_loaded('memprof')) {
+        if (function_exists('memprof_enable') && true === extension_loaded('memprof')) {
             memprof_enable();
 
             return $this->memprofEnabled = true;
@@ -407,9 +440,13 @@ class Profiler
      *
      * @return string
      */
-    private function formatTime(float $time)
+    private function formatTime(float $time): string
     {
-        $date = \DateTime::createFromFormat('U.u', number_format($time, 6, '.', ''));
+        $date = DateTime::createFromFormat('U.u', number_format($time, 6, '.', ''));
+
+        if ( ! $date instanceof DateTime) {
+            throw new RuntimeException('Impossible to parse the string into a valid DateTime object.');
+        }
 
         return $date->format('Y-m-d H:i:s.u');
     }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the SHQCommandsQueuesBundle.
  *
@@ -15,9 +17,11 @@
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Entity;
 
+use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Exception;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Config\DaemonConfig;
 
 /**
@@ -28,11 +32,23 @@ use SerendipityHQ\Bundle\CommandsQueuesBundle\Config\DaemonConfig;
  */
 class Daemon
 {
-    /** Used when a Daemon is killed due to a PCNTL signal */
-    const MORTIS_SIGNAL = 'signal';
+    /** @var string */
+    public const DEFAULT_DAEMON_NAME = 'default';
 
-    /** Used when a Daemon is not found anymore during the check of queues:run checkAliveDamons */
-    const MORTIS_STRAGGLER = 'straggler';
+    /** @var string */
+    public const DEFAULT_QUEUE_NAME = 'default';
+
+    /**
+     * Used when a Daemon is killed due to a PCNTL signal.
+     *
+     * @var string
+     */
+    public const MORTIS_SIGNAL = 'signal';
+
+    /** Used when a Daemon is not found anymore during the check of queues:run checkAliveDamons
+     *
+     * @var string */
+    public const MORTIS_STRAGGLER = 'straggler';
 
     /**
      * @var int
@@ -48,7 +64,7 @@ class Daemon
      *
      * @ORM\Column(name="config", type="array", nullable=false)
      */
-    private $config = [];
+    private $config;
 
     /**
      * @var string
@@ -65,21 +81,21 @@ class Daemon
     private $pid;
 
     /**
-     * @var \DateTime
+     * @var DateTime
      *
      * @ORM\Column(name="born_on", type="datetime", nullable=false)
      */
     private $bornOn;
 
     /**
-     * @var \DateTime
+     * @var DateTime|null
      *
      * @ORM\Column(name="died_on", type="datetime", nullable=true)
      */
     private $diedOn;
 
     /**
-     * @var string
+     * @var string|null
      *
      * @ORM\Column(name="mortis_causa", type="string", length=255, nullable=true)
      */
@@ -93,13 +109,17 @@ class Daemon
     private $processedJobs;
 
     /**
+     * Daemon constructor.
+     *
      * @param string       $host
      * @param int          $pid
      * @param DaemonConfig $config
+     *
+     * @throws Exception
      */
     public function __construct(string $host, int $pid, DaemonConfig $config)
     {
-        $this->bornOn        = new \DateTime();
+        $this->bornOn        = new DateTime();
         $this->config        = $config;
         $this->host          = $host;
         $this->pid           = $pid;
@@ -115,9 +135,9 @@ class Daemon
     }
 
     /**
-     * @return \DateTime
+     * @return DateTime
      */
-    public function getBornOn(): \DateTime
+    public function getBornOn(): DateTime
     {
         return $this->bornOn;
     }
@@ -131,17 +151,17 @@ class Daemon
     }
 
     /**
-     * @return \DateTime|null
+     * @return DateTime|null
      */
-    public function getDiedOn()
+    public function getDiedOn(): ? DateTime
     {
         return $this->diedOn;
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getMortisCausa()
+    public function getMortisCausa(): ? string
     {
         return $this->mortisCausa;
     }
@@ -176,10 +196,12 @@ class Daemon
      * Requiescat In Pace (I'm Resting In Pace).
      *
      * @param string $mortisCausa
+     *
+     * @throws Exception
      */
-    public function requiescatInPace(string $mortisCausa = self::MORTIS_SIGNAL)
+    public function requiescatInPace(string $mortisCausa = self::MORTIS_SIGNAL): void
     {
-        $this->diedOn      = new \DateTime();
+        $this->diedOn      = new DateTime();
         $this->mortisCausa = $mortisCausa;
     }
 

@@ -3,41 +3,68 @@
 START IN LESS THEN 5 MINUTES WITH `SHQCommandsQueuesBundle`
 ===========================================================
 
-`SHQCommandsQueuesBundle` makes you able to immediately test its functionalities providing you with a pawerful command
+`SHQCommandsQueuesBundle` makes you able to immediately test its functionalities providing you with a powerful command
  to generate random `Job`s.
 
-The command `queues:random-jobs` can create how many `Job`s you like and makes you able to decide which kind of `Job`s
+The command `queues:test:random-jobs` can create how many `Job`s you like and makes you able to decide which kind of `Job`s
  you like to create.
 
-In this example it will create 1000 `Job`s randomly assigning them to one between `queue_1`, `queue_2`, `queue_3`,
+Obviously, those are fake jobs, but they are useful to see the bundle in action and understand how does it work.
+
+Then, you can start creating your own jobs, being sure you fully know how they are managed by the bundle.
+
+In this example it will create 1000 `Job`s and will assigning them randomly to one between `queue_1`, `queue_2`, `queue_3`,
  `queue_4` and `queue_5`.
+
+To see the bundle in action you need only two steps:
+
+1. Create the configuration file;
+2. Generate the random jobs.
+
+Step 1: Create the configuration file `shq_commands_queues.yaml`
+----------------------------------------------------------------
+
+In the folder `config/packages`, create the file `shq_commands_queues.yaml`:
 
 So, just a little bit of configuration:
 
-    # config.yml
+    # config/packages/shq_commands_queues.yaml
     shq_commands_queues:
-        max_runtime: 100000
+        daemon_max_runtime: 100000
         daemons:
             daemon_1:
                 queues: ['queue_1', 'queue_2', 'queue_3', 'queue_4', 'queue_5']
         queues:
             queue_1:
                 # The number of concurrent jobs to process at the same time.
-                max_concurrent_jobs: 3
-            queue_3: ~
+                queue_max_concurrent_jobs: 30
 
-**Remember to completely delete the folder `app/cache` to be sure the configuration will be loaded: we are going to set
- the `production` environment!** 
+With this configuration we have:
 
-To test `SHQCommandsQueuesBundle` during development, we like to use the command this way:
+1. Set a generic configuration for `daemon_max_runtime` parameter: this will be used by the daemon (and can be overwritten for each single daemon)
+2. Created 1 daemon calling it "daemon_1";
+3. Assigned to the daemon "daemon_1" the processing of queues "queue_1", "queue_2", "queue_3", "queue_4" and "queue_5";
+4. Explicitly configured the parameter `queue_max_concurrent_jobs` only for the "queue_1": this queue will process 3 jobs concurrently, while all the others will process only 1 ("1" is the default value set by the bundle) 
 
-    app/console queues:random-jobs 1000 --env=prod --no-future-jobs --retry-strategies=live &&
-    app/console queues:run --env=prod
+Step 2: generate the random jobs
+--------------------------------
 
-***NOTE**: Simply passing `--env=prod` runs anyway the commands in the queue using `--env=dev`: this is a security measure to avoid, for example, the sending of emails to the real email addresses.*
+Now that we have configured the bundle, we can go to create the random jobs.
 
-*So, to run the queue in production, **don't forget to add the flag `--allow-prod`**: this flag makes possible for the run commands in the queue to inherit the value passed in the flag `--env=prod`
-if it is `prod`. If it is `dev` the commands in the queues will be run using anyway `--env=dev`.*
+This requires a single command (keep reading before copying and pasting it in the console!):
+
+    bin/console queues:test:random-jobs 1000 --env=prod --no-future-jobs --retry-strategies=live -vvv
+
+This command will generate `1000` random fake jobs, all to be executed immediately (`--no-future-jobs`) and that will be retried immediately if they fails (`--retry-strategy=live`).
+
+**`SHQCommandsQueuesBundle` permits you to define very advanced retry strategies to fine grain them and be sure the `Job`s are retryied exactly when you want and exactly how many times you want!**
+
+We also tell the command to run in `prod` environment: this will keep the memory consumption as low as possible, preventing going out of memory (and this will happen if you will generate many random jobs!).
+
+Before running the command **Remember to completely delete the folder `app/cache` to be sure the configuration will be loaded: we are going to set
+ the `production` environment and in production the configuration is loaded from the cache and the cahce will not be regenrated on configuration changes!**
+
+Once you have removeed the `cache` folder, copy the command above and paste it in your consle, then run it!
 
 In a matter of seconds you will see your console printing the logs of the `SHQCommandsQueuesBundle`:
 
@@ -53,7 +80,27 @@ In a matter of seconds you will see your console printing the logs of the `SHQCo
                                                                                                                             
      [✔] All done: 1000 random jobs generated!                                                                              
                                                                                                                             
-    
+
+There are other arguments you can pass the command: see its
+ [`configure()` method](https://github.com/Aerendir/bundle-commands-queues/blob/master/Command/RandomJobsCommand.php)
+ for more details (it is not so complex and will give you a good starting point to better understand how to create
+ `Job`s.
+
+Start the damon
+---------------
+
+Now that we have the jobs created, they are in the database and are ready to be prcessed, but the bundle is not running any queue.
+
+To start processing the Jobs, you need to start the daemon:
+
+    bin/console queues:run --env=prod
+
+***NOTE**: Simply passing `--env=prod` runs anyway the commands in the queue using `--env=dev`: this is a security measure to avoid, for example, the sending of emails to the real email addresses during development of your commands.*
+
+*So, when you will run the queue in production, **don't forget to add the flag `--allow-prod`**: this flag makes possible for the run commands in the queue to inherit the value passed to the option `--env`.
+So, if it is `prod`, then the Jobs will run the commands in the `prod` env; if it is `dev` the commands in the queues will be run using anyway `--env=dev`.*
+
+Once you start the daemon, you will start to see its output:
     
     SerendipityHQ Queue Bundle Daemon
     =================================
@@ -99,33 +146,15 @@ In a matter of seconds you will see your console printing the logs of the `SHQCo
     [>] [2017-02-23 18:43:18] Job "31" on Queue "queue_1": Initializing the process.
     ...
 
-What happened?
---------------
+When running the daemons, you can pass also verbosity levels to the command `queue:run` (`-v` or `-vv`) to see more detailed logs about what's happening.
 
-    app/console queues:random-jobs 1000 --env=prod --no-future-jobs --retry-strategies=live
+**Remember the `--env=prod` argument to not consume too much memory and the `--allow-prod` flag when running `SHQCommandsQueuesBundle` in production!**
 
-1. `1000` is the number of random `Job`s we'd like to create
-2. `--env=prod` is required to disable all debugging functionalities of Symfony: this makes the generation process
- really fast
-3. `--no-future-jobs` tells the command to not create commands that will be executed in the future
-4. `--retry-strtegies=live` Tells the command to create only commands with `live` retry strategies.
- **`SHQCommandsQueuesBundle` permits you to define very advanced retry strategies to fine grain them and be sure the
- `Job`s are retryied exactly when you want and exactly how many times you want!**
+You can also test the behavior of failing jobs:
 
-There are other arguments you can pass the command: see its
- [`configure()` method](https://github.com/Aerendir/bundle-commands-queues/blob/master/Command/RandomJobsCommand.php)
- for more details (it is not so complex and will give you a good starting point to better understand how to create
- `Job`s.
+    bin/console queues:test:failing-jobs --env=prod
 
-You can try to play with the verbosity levels to get deeper insights about what's happening:
-
-    app/console queues:run --env=prod -v
-
-or
-
-    app/console queues:run --env=prod -vv
-
-**Remember the `--env=prod` argument to not consume too much memory and the `--allow-prod` flag when running CommandsQueues in production!**
+Now that you have a basic understanding of how `SHQCommandsQueuesBundle`works, you can [start customizing it to your needs](30-Use-the-ShqCommandsQueuesBundle.md).
 
 *Do you like this bundle? [**Leave a &#9733;**](#js-repo-pjax-container) or run `composer global require symfony/thanks && composer thanks` to say thank you to all libraries you use in your current project, this one too!*
 

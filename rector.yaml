@@ -1,0 +1,25 @@
+imports:
+    #- { resource: 'vendor/rector/rector/config/level/architecture/*' }
+    - { resource: 'vendor/rector/rector/config/level/code-quality/*' }
+    - { resource: 'vendor/rector/rector/config/level/coding-style/*' }
+    - { resource: 'vendor/rector/rector/config/level/doctrine/doctrine25.yaml' }
+    - { resource: 'vendor/rector/rector/config/level/phpstan/phpstan.yaml' }
+    - { resource: 'vendor/rector/rector/config/level/sensio/*' }
+    # Temporary disabled as throws errors
+    #- { resource: 'vendor/rector/rector/config/level/symfony/symfony-code-quality.yaml' }
+    - { resource: 'vendor/rector/rector/config/level/symfony/symfony-constructor-injection.yaml' }
+    - { resource: 'vendor/rector/rector/config/level/symfony/symfony42.yaml' }
+    # Disabled as it causes wrong changes in the code
+    #- { resource: 'vendor/rector/rector/config/level/symfony/symfony-constructor-injection.yaml' }
+    # Temporary disabled until https://github.com/thecodingmachine/safe/issues/116 is resolved
+    #- { resource: 'vendor/thecodingmachine/safe/rector-migrate.yml' }
+
+parameters:
+    php_version_features: '7.2'
+    exclude_rectors:
+        - 'Rector\CodeQuality\Rector\Identical\SimplifyBoolIdenticalTrueRector'
+        - 'Rector\CodeQuality\Rector\Concat\JoinStringConcatRector'
+        - 'Rector\CodingStyle\Rector\Identical\IdenticalFalseToBooleanNotRector'
+        # This doesn't recognize the difference between classes and functions
+        # Waiting the fix https://github.com/rectorphp/rector/issues/1376
+        - 'Rector\CodingStyle\Rector\Namespace_\ImportFullyQualifiedNamesRector'

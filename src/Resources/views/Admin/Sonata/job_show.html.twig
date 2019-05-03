@@ -1,0 +1,146 @@
+{#
+
+This file is part of the Serendipity HQ Commands Queues package.
+
+(c) Adamo Aerendir Crespi <hello@aerendir.me>
+
+For the full copyright and license information, please view the LICENSE
+file that was distributed with this source code.
+
+#}
+{% trans_default_domain 'shq_commands_queues' %}
+{% extends base_template %}
+
+{% block title %}
+    {{ "job_title_show"|trans({'%name%': admin.toString(object)|truncate(15) }, 'shq_commands_queues') }}
+{% endblock %}
+
+{% block navbar_title %}
+    {{ block('title') }}
+{% endblock %}
+
+{%- block actions -%}
+    {% include 'SonataAdminBundle:CRUD:action_buttons.html.twig' %}
+{%- endblock -%}
+
+{% block tab_menu %}
+    {{ knp_menu_render(admin.sidemenu(action), {
+        'currentClass' : 'active',
+        'template': sonata_admin.adminPool.getTemplate('tab_menu_template')
+    }, 'twig') }}
+{% endblock %}
+
+{% block show %}
+<div class="sonata-ba-view">
+    <div class="row">
+        <div class="col-lg-12">
+            {% set status = '' %}
+            {% if 'running' == object.status %}
+                {% set status = 'active' %}
+            {% endif %}
+            {% if 'retried' == object.status %}
+                {% set status = 'warning' %}
+            {% endif %}
+            {% if 'failed' == object.status or 'retry_failed' == object.status %}
+                {% set status = 'danger' %}
+            {% endif %}
+            {% if 'succeeded' == object.status or 'retry_succeeded' == object.status %}
+                {% set status = 'success' %}
+            {% endif %}
+            {% if 'cancelled' == object.status %}
+                {% set status = 'danger' %}
+            {% endif %}
+            {% if 'pending' == object.status or 'running' == object.status %}
+                {% set status = 'info' %}
+            {% endif %}
+            {% if 'new' == object.status %}
+                {% set status = 'default' %}
+            {% endif %}
+            <p><strong>#{{ object.id }}</strong> <span class="label label-{{ status }}">{{ object.status }}</span> <code>@{{ object.queue }}</code> (<code>{{ object.priority }}</code>)</p>
+            <pre>>: {{ object.command }}{% if object.input %} {% if object.input.arguments %}{{ object.input.arguments|join(' ') }}{% endif %}{% if object.input.options %}{{ object.input.options|join(' ') }}{% endif %}{% if object.input.shortcuts %}{{ object.input.shortcuts|join(' ') }}{% endif %}{% endif %}</pre>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-4">
+            <p>{% trans %}Created On{% endtrans %}: {% if object.createdAt %}{{ object.createdAt|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }}{% endif %}</p>
+            <p>{% trans %}Started On{% endtrans %}: {% if object.startedAt %}{{ object.startedAt|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }}{% endif %}</p>
+            <p>{% trans %}Closed On{% endtrans %}: {% if object.closedAt %}{{ object.closedAt|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }}{% endif %}</p>
+            <p>{% trans %}Exit code{% endtrans %}: {{ object.exitCode }}</p>
+
+            {% if object.isTypeRetrying %}
+                <p><small class="text-muted">{% trans %}Is retry of{% endtrans %} <a href="{{ path('admin_serendipityhq_commandsqueues_job_show', {'id': object.retryOf.id}) }}">#{{ object.retryOf.id }}</a></small></p>
+            {% endif %}
+            {% if object.isTypeRetried %}
+                <p><small class="text-muted">{% trans %}Retried by{% endtrans %} <br /><a href="{{ path('admin_serendipityhq_commandsqueues_job_show', {'id': object.retriedBy.id}) }}">#{{ object.retriedBy.id }}</a> ({{ object.retriedBy.status }})</small></p>
+                {% if 0 < object.retryingJobs.count %}
+                    <small class="text-muted">{% trans %}All retrying Jobs{% endtrans %}:</small>
+                    {% set retryingJobs = {} %}
+                    {% for retryingJob in object.retryingJobs %}
+                        {% set linkedretryingJob = '<a href="' ~ path('admin_serendipityhq_commandsqueues_job_show', {'id': retryingJob.id}) ~ '">#' ~ retryingJob.id ~ '</a> (' ~ retryingJob.status ~ ')' %}
+                        {% set retryingJobs = retryingJobs|merge({ ('_' ~ retryingJob.id ~ '-'): linkedretryingJob}) %}
+                    {% endfor %}
+                    <p><small class="text-muted">{{ retryingJobs|join(', ')|raw }}</small></p>
+                {% endif %}
+            {% endif %}
+            {% if object.firstRetriedJob %}
+                <p><small class="text-muted">{% trans %}First retried job{% endtrans %}:<br /><a href="{{ path('admin_serendipityhq_commandsqueues_job_show', {'id': object.firstRetriedJob.id}) }}">#{{ object.firstRetriedJob.id }} ({{ object.firstRetriedJob.status }})</a></small></p>
+            {% endif %}
+            {% if 'cancelled' == object.status %}
+                <p><small class="text-muted">{{ object.debug.cancellation_reason }}</small></p>
+                <p><small class="text-muted">{% trans %}Cancelled by{% endtrans %} <a href="{{ path('admin_serendipityhq_commandsqueues_job_show', {'id': object.cancelledBy}) }}">#{{ object.cancelledBy }}</a></small></p>
+            {% endif %}
+        </div>
+        <div class="col-lg-4">
+            {% if false == object.hasParentDependencies %}
+                {% if false == object.isTypeRetrying %}{% trans %}No parent Jobs{% endtrans %}{% endif %}
+            {% else %}
+                <p>{% trans %}Parent Jobs{% endtrans %}:</p>
+                {% set parentJobs = {} %}
+                {% for parentJob in object.parentDependencies %}
+                    {% set linkedParentJob = '<a href="' ~ path('admin_serendipityhq_commandsqueues_job_show', {'id': parentJob.id}) ~ '">#' ~ parentJob.id ~ '</a> (' ~ parentJob.status ~ ')' %}
+                    {% set parentJobs = parentJobs|merge({ ('_' ~ parentJob.id ~ '-'): linkedParentJob}) %}
+                {% endfor %}
+                <p>{{ parentJobs|join(', ')|raw }}</p>
+            {% endif %}
+        </div>
+        <div class="col-lg-4">
+            {% if false == object.hasChildDependencies %}
+                {% trans %}No child Jobs{% endtrans %}
+            {% else %}
+                <p>{% trans %}Child Jobs{% endtrans %}:</p>
+                {% set childJobs = {} %}
+                {% for childJob in object.childDependencies %}
+                    {% set linkedChildJob = '<a href="' ~ path('admin_serendipityhq_commandsqueues_job_show', {'id': childJob.id}) ~ '">#' ~ childJob.id ~ '</a> (' ~ childJob.status ~ ')' %}
+                    {% set childJobs = childJobs|merge({ ('_' ~ childJob.id ~ '-'): linkedChildJob}) %}
+                {% endfor %}
+                <p>{{ childJobs|join(', ')|raw }}</p>
+            {% endif %}
+        </div>
+    </div>
+    {% if object.isTypeInternal %}
+        <div class="row">
+            <div class="col-lg-12">
+                <h2>{% trans %}Cancelled Jobs{% endtrans %} (childs of {{ object|commands_queues_get_id_option_value|raw }})</h2>
+                {% set cancelledJobs = {} %}
+                {% for cancelledJob in object.cancelledJobs %}
+                    {% set linkedCancelledJob = '<a href="' ~ path('admin_serendipityhq_commandsqueues_job_show', {'id': cancelledJob.id}) ~ '">#' ~ cancelledJob.id ~ '</a> (' ~ cancelledJob.status ~ ')' %}
+                    {% set cancelledJobs = cancelledJobs|merge({ ('_' ~ cancelledJob.id ~ '-'): linkedCancelledJob}) %}
+                {% endfor %}
+                <p>{{ cancelledJobs|join(', ')|raw }}</p>
+            </div>
+        </div>
+    {% endif %}
+    <div class="row">
+        <div class="col-lg-12">
+            <h2>Debug</h2>
+            {% import 'SHQCommandsQueuesBundle:Admin:print_debug.html.twig' as m %}
+            <pre>{{ m.print_debug(object.debug) }}</pre>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-12">
+            <pre style="background-color: #262626;line-height: 1.23;">{{ object.output|ansi_to_html }}</pre>
+        </div>
+    </div>
+</div>
+{% endblock %}

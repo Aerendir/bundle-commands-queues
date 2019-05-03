@@ -1,0 +1,21 @@
+{#
+
+This file is part of the Serendipity HQ Commands Queues package.
+
+(c) Adamo Aerendir Crespi <hello@aerendir.me>
+
+For the full copyright and license information, please view the LICENSE
+file that was distributed with this source code.
+
+#}
+
+{# Do not indent as this is meant to be used in <pre></pre> and this will render indentation, too #}
+{% macro print_debug(debug) %}
+{% import _self as m %}
+{% if debug %}
+{% for key,value in debug %}
+    <code style="padding: 2px 4px;font-size: 90%;color: #4f4f4f;background-color: #f9f2f4;border-radius: 4px;">{{ key }}</code>: {% if null == value %}<span style="color: #3465a4;">null</span>{% elseif 'true' == value %}<small>boolean</small> true{% elseif 'false' == value %}<small>boolean</small> false{% else %}<small>string</small> <span style="color: #cc0000;">{{ value }}</span>{% endif %}
+
+{% endfor %}
+{% endif %}
+{% endmacro %}

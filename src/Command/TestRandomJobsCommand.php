@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the SHQCommandsQueuesBundle.
  *
@@ -15,8 +17,15 @@
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Command;
 
+use DateTime;
+use Doctrine\ORM\EntityManagerInterface;
+use Exception;
+use Safe\Exceptions\ArrayException;
+use Safe\Exceptions\StringsException;
+use function Safe\sprintf;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
-use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\ProgressBar;
+use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\JobsMarker;
+use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\ProgressBarFactory;
 use SerendipityHQ\Component\ThenWhen\Strategy\ConstantStrategy;
 use SerendipityHQ\Component\ThenWhen\Strategy\ExponentialStrategy;
 use SerendipityHQ\Component\ThenWhen\Strategy\LinearStrategy;
@@ -25,7 +34,6 @@ use SerendipityHQ\Component\ThenWhen\Strategy\NeverRetryStrategy;
 use SerendipityHQ\Component\ThenWhen\Strategy\StrategyInterface;
 use SerendipityHQ\Component\ThenWhen\Strategy\TimeFixedStrategy;
 use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -35,50 +43,87 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class TestRandomJobsCommand extends AbstractQueuesCommand
 {
-    private $queues = [
-        'queue_1', 'queue_2', 'queue_3', 'queue_4', 'queue_5',
-    ];
+    /** @var string $defaultName */
+    protected static $defaultName = 'queues:test:random-jobs';
+
+    /** @var array $queues */
+    private $queues;
+
+    /**
+     * @param EntityManagerInterface $entityManager
+     * @param JobsMarker             $doNotUseJobsMarker
+     */
+    public function __construct(EntityManagerInterface $entityManager, JobsMarker $doNotUseJobsMarker)
+    {
+        parent::__construct($entityManager, $doNotUseJobsMarker);
+        $this->queues = [
+            'queue_1', 'queue_2', 'queue_3', 'queue_4', 'queue_5',
+        ];
+    }
 
     /**
      * {@inheritdoc}
      */
-    protected function configure()
+    protected function configure(): void
     {
         $this
-            ->setName('queues:test:random-jobs')
             ->setDescription('[INTERNAL] Generates random Jobs to test SHQCommandsQueuesBundle.')
-            ->setDefinition(
-                new InputDefinition([
-                    new InputArgument('how-many-jobs', InputArgument::OPTIONAL, 'How many random Jobs would you like to create?', 10),
-                    new InputOption('batch', null, InputOption::VALUE_OPTIONAL, 'The number of Jobs in a batch.', 10),
-                    new InputOption('no-future-jobs', null),
-                    new InputOption('retry-strategies', null, InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, 'The allowed retry strategies.', ['constant', 'exponential', 'linear', 'live', 'never_retry', 'time_fixed']),
-                    new InputOption('time-units', null, InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, 'The allowed time units.', StrategyInterface::TIME_UNITS),
-                ])
-            );
+            ->addArgument('how-many-jobs', InputArgument::OPTIONAL, 'How many random Jobs would you like to create?', '10')
+            ->addOption('batch', null, InputOption::VALUE_OPTIONAL, 'The number of Jobs in a batch.', '10')
+            ->addOption('no-future-jobs', null, InputOption::VALUE_NONE)
+            ->addOption('retry-strategies', null, InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, 'The allowed retry strategies.', ['constant', 'exponential', 'linear', 'live', 'never_retry', 'time_fixed'])
+            ->addOption('time-units', null, InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, 'The allowed time units.', StrategyInterface::TIME_UNITS);
     }
 
     /**
      * @param InputInterface  $input
      * @param OutputInterface $output
      *
-     * @return bool
+     * @throws ArrayException
+     * @throws StringsException
+     * @throws Exception
+     *
+     * @return int
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         parent::execute($input, $output);
 
-        $howManyJobs     = (int) $input->getArgument('how-many-jobs');
-        $batch           = $input->getOption('batch');
+        $howManyJobs  = $input->getArgument('how-many-jobs');
+        $batch        = $input->getOption('batch');
+        $noFutureJobs = $input->getOption('no-future-jobs');
+
+        /** @var array $retryStrategies */
         $retryStrategies = $input->getOption('retry-strategies');
-        $timeUnits       = $input->getOption('time-units');
-        $noFutureJobs    = $input->getOption('no-future-jobs');
+
+        /** @var array $timeUnits */
+        $timeUnits = $input->getOption('time-units');
+
+        if (null !== $howManyJobs && false === is_numeric($howManyJobs)) {
+            $this->getIoWriter()->error('The number of jobs has to be a numeric value.');
+
+            return 1;
+        }
+        $howManyJobs = (int) $howManyJobs;
+
+        if (null !== $batch && false === is_numeric($batch)) {
+            $this->getIoWriter()->error('--batch accepts only numeric values.');
+
+            return 1;
+        }
+        $batch = (int) $batch;
+
+        if (null !== $noFutureJobs && false === is_bool($noFutureJobs)) {
+            $this->getIoWriter()->error("--no-future-jobs doesn't accept any value.");
+
+            return 1;
+        }
 
         $this->getIoWriter()->title('SerendipityHQ Queue Bundle Daemon');
         $this->getIoWriter()->info(sprintf('Starting generating %s random jobs...', $howManyJobs));
 
         // Generate the random jobs
-        $progress = ProgressBar::createProgressBar(ProgressBar::FORMAT_CREATE_JOBS, $output, $howManyJobs);
+        $progress = ProgressBarFactory::createProgressBar(ProgressBarFactory::FORMAT_CREATE_JOBS, $output, $howManyJobs);
         $progress->start();
 
         $progress->setRedrawFrequency($batch);
@@ -87,10 +132,10 @@ class TestRandomJobsCommand extends AbstractQueuesCommand
         for ($i = 0; $i < $howManyJobs; ++$i) {
             // First: we create a Job to push to the queue
             $arguments    = '--id=' . ($i + 1);
-            $scheduledJob = new Job('queues:test:fake', $arguments);
+            $scheduledJob = new Job(TestFakeCommand::$defaultName, $arguments);
 
             // Set a random queue
-            $queue = rand(0, count($this->queues) - 1);
+            $queue = random_int(0, count($this->queues) - 1);
             $scheduledJob->setQueue($this->queues[$queue]);
 
             // Set a random retry strategy
@@ -100,41 +145,41 @@ class TestRandomJobsCommand extends AbstractQueuesCommand
 
             // Decide if this will be executed in the future
             if (false === $noFutureJobs) {
-                $condition = rand(0, 10);
+                $condition = random_int(0, 10);
                 if (7 <= $condition) {
-                    $days   = rand(1, 10);
-                    $future = new \DateTime();
+                    $days   = random_int(1, 10);
+                    $future = new DateTime();
                     $future->modify('+' . $days . ' day');
                     $scheduledJob->setExecuteAfterTime($future);
                 }
             }
 
             // Decide if this has a dependency on another job
-            $condition = rand(0, 10);
+            $condition = random_int(0, 10);
             // Be sure there is at least one already created Job!!!
-            if (7 <= $condition && 0 < count($jobs)) {
+            if (7 <= $condition && 1 < count($jobs)) {
                 // Decide how many dependencies it has
-                $howManyDeps = rand(1, count($jobs) - 1);
+                $howManyDeps = random_int(1, count($jobs) - 1);
 
                 for ($ii = 0; $ii <= $howManyDeps; ++$ii) {
-                    $parentJob = rand(0, count($jobs) - 1);
+                    $parentJob = random_int(0, count($jobs) - 1);
                     $scheduledJob->addParentDependency($jobs[$parentJob]);
                 }
             }
 
-            $this->getContainer()->get('doctrine')->getManager()->persist($scheduledJob);
+            $this->getEntityManager()->persist($scheduledJob);
             $jobs[] = $scheduledJob;
 
-            if (0 === $i % $input->getOption('batch')) {
-                $this->getContainer()->get('doctrine')->getManager()->flush();
+            if (0 === $i % $batch) {
+                $this->getEntityManager()->flush();
                 $jobs = [];
-                $this->getContainer()->get('doctrine')->getManager()->clear();
+                $this->getEntityManager()->clear();
             }
 
             $progress->advance();
         }
 
-        $this->getContainer()->get('doctrine')->getManager()->flush();
+        $this->getEntityManager()->flush();
         $progress->finish();
 
         $this->getIoWriter()->write("\n\n");
@@ -147,14 +192,16 @@ class TestRandomJobsCommand extends AbstractQueuesCommand
      * @param array $strategies
      * @param array $timeUnits
      *
+     * @throws Exception
+     *
      * @return StrategyInterface
      */
     private function getRandomRetryStrategy(array $strategies, array $timeUnits): StrategyInterface
     {
         // Pick a random strategy
-        $strategy    = $strategies[rand(0, count($strategies) - 1)];
-        $maxAttempts = rand(1, 3);
-        $incrementBy = rand(1, 10);
+        $strategy    = $strategies[random_int(0, count($strategies) - 1)];
+        $maxAttempts = random_int(1, 3);
+        $incrementBy = random_int(1, 10);
         $timeUnit    = $this->getRandomTimeUnit($timeUnits);
 
         switch ($strategy) {
@@ -162,7 +209,7 @@ class TestRandomJobsCommand extends AbstractQueuesCommand
                 return new ConstantStrategy($maxAttempts, $incrementBy, $timeUnit);
                 break;
             case 'exponential':
-                $exponentialBase = rand(2, 5);
+                $exponentialBase = random_int(2, 5);
 
                 return new ExponentialStrategy($maxAttempts, $incrementBy, $timeUnit, $exponentialBase);
                 break;
@@ -186,10 +233,12 @@ class TestRandomJobsCommand extends AbstractQueuesCommand
     /**
      * @param array $timeUnits
      *
+     * @throws Exception
+     *
      * @return string
      */
-    private function getRandomTimeUnit(array $timeUnits)
+    private function getRandomTimeUnit(array $timeUnits): string
     {
-        return $timeUnits[rand(0, count($timeUnits) - 1)];
+        return $timeUnits[random_int(0, count($timeUnits) - 1)];
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the SHQCommandsQueuesBundle.
  *
@@ -15,21 +17,21 @@
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Command;
 
-use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\JobsMarker;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\Profiler;
 use SerendipityHQ\Bundle\ConsoleStyles\Console\Formatter\SerendipityHQOutputFormatter;
 use SerendipityHQ\Bundle\ConsoleStyles\Console\Style\SerendipityHQStyle;
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * An abstract command to manage common dependencies of all other commands.
  */
-abstract class AbstractQueuesCommand extends ContainerAwareCommand
+abstract class AbstractQueuesCommand extends Command
 {
-    /** @var EntityManager $entityManager */
+    /** @var EntityManagerInterface $entityManager */
     private $entityManager;
 
     /** @var SerendipityHQStyle */
@@ -39,18 +41,27 @@ abstract class AbstractQueuesCommand extends ContainerAwareCommand
     private $jobsMarker;
 
     /**
+     * @param EntityManagerInterface $entityManager
+     * @param JobsMarker             $doNotUseJobsMarker
+     */
+    public function __construct(EntityManagerInterface $entityManager, JobsMarker $doNotUseJobsMarker)
+    {
+        parent::__construct();
+        $this->entityManager = $entityManager;
+        $this->jobsMarker    = $doNotUseJobsMarker;
+    }
+
+    /**
      * @param InputInterface  $input
      * @param OutputInterface $output
      *
-     * @return bool
+     * @return int
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         // Create the Input/Output writer
         $this->ioWriter = new SerendipityHQStyle($input, $output);
         $this->ioWriter->setFormatter(new SerendipityHQOutputFormatter(true));
-
-        $this->entityManager = $this->getContainer()->get('shq_commands_queues.do_not_use.entity_manager');
 
         Profiler::setDependencies($this->getIoWriter(), $this->getEntityManager()->getUnitOfWork());
 
@@ -58,9 +69,9 @@ abstract class AbstractQueuesCommand extends ContainerAwareCommand
     }
 
     /**
-     * @return EntityManager
+     * @return EntityManagerInterface
      */
-    final protected function getEntityManager(): EntityManager
+    final protected function getEntityManager(): EntityManagerInterface
     {
         return $this->entityManager;
     }
@@ -70,11 +81,6 @@ abstract class AbstractQueuesCommand extends ContainerAwareCommand
      */
     final protected function getJobsMarker(): JobsMarker
     {
-        if (null === $this->jobsMarker) {
-            $this->jobsMarker = $this->getContainer()->get('shq_commands_queues.do_not_use.jobs_marker');
-            $this->jobsMarker->setIoWriter($this->getIoWriter());
-        }
-
         return $this->jobsMarker;
     }
 

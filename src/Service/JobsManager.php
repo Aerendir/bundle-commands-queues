@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the SHQCommandsQueuesBundle.
  *
@@ -16,12 +18,20 @@
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Service;
 
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\ORMException;
+use Doctrine\ORM\ORMInvalidArgumentException;
+use Doctrine\ORM\TransactionRequiredException;
 use Doctrine\ORM\UnitOfWork;
+use RuntimeException;
+use Safe\Exceptions\StringsException;
+use function Safe\sprintf;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
+use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\InputParser;
 use SerendipityHQ\Bundle\ConsoleStyles\Console\Style\SerendipityHQStyle;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\Process;
-use Symfony\Component\Process\ProcessBuilder;
 
 /**
  * Manages the Jobs.
@@ -40,7 +50,7 @@ class JobsManager
     /** @var string $kernelRootDir */
     private $kernelRootDir;
 
-    /** @var string $verbosity */
+    /** @var int $verbosity */
     private $verbosity;
 
     /**
@@ -52,14 +62,20 @@ class JobsManager
     }
 
     /**
-     * @param EntityManager      $entityManager
-     * @param SerendipityHQStyle $ioWriter
+     * @param EntityManagerInterface $entityManager
+     * @param SerendipityHQStyle     $ioWriter
      */
-    public function initialize(EntityManager $entityManager, SerendipityHQStyle $ioWriter)
+    public function initialize(EntityManagerInterface $entityManager, SerendipityHQStyle $ioWriter): void
     {
+        // This is to make static analysis pass
+        if ( ! $entityManager instanceof EntityManager) {
+            throw new RuntimeException('You need to pass an EntityManager instance.');
+        }
+
+        $env                 = $ioWriter->getInput()->getOption('env');
         self::$entityManager = $entityManager;
         self::$ioWriter      = $ioWriter;
-        $this->env           = $ioWriter->getInput()->getOption('env');
+        $this->env           = is_string($env) ? $env : 'dev';
         $this->verbosity     = $ioWriter->getVerbosity();
     }
 
@@ -69,23 +85,30 @@ class JobsManager
      * IMplements a custom logic to detach Jobs linked to the detaching one.
      *
      * @param Job $job
+     *
+     * @throws OptimisticLockException
+     * @throws ORMInvalidArgumentException
+     * @throws TransactionRequiredException
+     * @throws ORMException
+     * @throws StringsException
      */
-    public static function detach(Job $job)
+    public static function detach(Job $job): void
     {
         $tree        = self::calculateJobsTree($job);
         $detached    = [];
         $notDetached = [];
 
-        foreach ($tree as $jobInTree) {
-            $jobInTree = self::$entityManager->find('SHQCommandsQueuesBundle:Job', $jobInTree);
+        foreach ($tree as $jobInTreeId) {
+            /** @var Job|null $jobInTree */
+            $jobInTree = self::$entityManager->find(Job::class, $jobInTreeId);
 
             if (null === $jobInTree) {
                 if (self::$ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_DEBUG) {
                     // Add the current Job to the already detached
-                    $detached[$jobInTree->getId()] = '#' . $jobInTree->getId();
+                    $detached[$jobInTreeId] = '#' . $jobInTreeId;
                     self::$ioWriter->successLineNoBg(sprintf(
-                        'Job <info-nobg>#%s</info-nobg> is not managed and so it will not has to be detached.',
-                        $jobInTree->getId()
+                        "Job <info-nobg>#%s</info-nobg> is not managed and so it hasn't been detached.",
+                        $jobInTreeId
                     ));
                 }
                 continue;
@@ -110,7 +133,8 @@ class JobsManager
                 self::$ioWriter->successLineNoBg(sprintf('Job <info-nobg>#%s</info-nobg> detached.', $jobInTree->getId()));
             }
             // Add the current Job to the already detached
-            $detached[$jobInTree->getId()] = '#' . $jobInTree->getId();
+            $jobInTreeId            = $jobInTree->getId();
+            $detached[$jobInTreeId] = '#' . $jobInTreeId;
         }
 
         if (self::$ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
@@ -131,19 +155,49 @@ class JobsManager
     }
 
     /**
+     * @param Job $removingJob
+     *
+     * @throws ORMException
+     */
+    public function remove(Job $removingJob): void
+    {
+        // When the Job is being removed from the database, it has to first
+        // be removed from its parent dependencies to avoid foreign key errors.
+        /** @var Job $parentDependency */
+        foreach ($removingJob->getParentDependencies() as $parentDependency) {
+            $parentDependency->removeChildDependency($removingJob);
+        }
+
+        // Apply remove only to the owning side (inversedBy)
+        $removingJob->removeFirstRetriedJob();
+        $removingJob->removeRetryOf();
+
+        self::$entityManager->remove($removingJob);
+    }
+
+    /**
      * Refreshes the entire tree of Jobs.
      *
+     * This has to be used to be sure that all the Job that are
+     * in any way linked with the given Job are managed by the Entitymanager
+     * to avoid errors about new not managed entities.
+     *
      * @param Job $job
+     *
+     * @throws OptimisticLockException
+     * @throws ORMInvalidArgumentException
+     * @throws TransactionRequiredException
+     * @throws ORMException
      */
-    public function refreshTree(Job $job)
+    public function refreshTree(Job $job): void
     {
         $jobsTree = self::calculateJobsTree($job);
 
         foreach ($jobsTree as $jobId) {
-            $job = self::$entityManager->find(Job::class, $jobId);
+            $jobInTree = self::$entityManager->find(Job::class, $jobId);
 
-            if (null !== $job && false === $job->isStatusWorking()) {
-                self::$entityManager->refresh($job);
+            if ($jobInTree instanceof Job && false === $jobInTree->isStatusWorking()) {
+                self::$entityManager->refresh($jobInTree);
             }
         }
     }
@@ -151,24 +205,19 @@ class JobsManager
     /**
      * @param Process $process
      *
-     * @compatibility Symfony 3 and 4
-     *
      * @return array
      */
-    public function buildDefaultInfo(Process $process)
+    public function buildDefaultInfo(Process $process): array
     {
         return [
             'output'    => $process->getOutput() . $process->getErrorOutput(),
             'exit_code' => $process->getExitCode(),
             'debug'     => [
-                'exit_code_text'                  => $process->getExitCodeText(),
-                'complete_command'                => $process->getCommandLine(),
-                'input'                           => $process->getInput(),
-                'options'                         => method_exists($process, 'getOptions') ? $process->getOptions() : 'You are using Symfony 4 and options are not available in this version.',
-                'env'                             => $process->getEnv(),
-                'working_directory'               => $process->getWorkingDirectory(),
-                'enhanced_sigchild_compatibility' => method_exists($process, 'getEnhanceSigchildCompatibility') ? $process->getEnhanceSigchildCompatibility() : true,
-                'enhanced_windows_compatibility'  => method_exists($process, 'getEnhanceWindowsCompatibility') ? $process->getEnhanceWindowsCompatibility() : true,
+                'exit_code_text'    => $process->getExitCodeText(),
+                'complete_command'  => $process->getCommandLine(),
+                'input'             => $process->getInput(),
+                'env'               => $process->getEnv(),
+                'working_directory' => $process->getWorkingDirectory(),
             ],
         ];
     }
@@ -177,41 +226,41 @@ class JobsManager
      * @param Job  $job
      * @param bool $allowProd
      *
-     * @return \Symfony\Component\Process\Process
+     * @return Process
      */
-    public function createJobProcess(Job $job, bool $allowProd)
+    public function createJobProcess(Job $job, bool $allowProd): Process
     {
-        $arguments = [];
+        $command = [];
 
         // Prepend php
-        $arguments[] = 'php';
+        $command[] = 'php';
 
         // Add the console
-        $arguments[] = $this->findConsole();
+        $command[] = $this->findConsole();
 
         // The command to execute
-        $arguments[] = $job->getCommand();
+        $command[] = $job->getCommand();
+
+        // The input
+        $input   = InputParser::stringify($job->getInput());
+        if (null !== $input) {
+            $command = array_merge($command, explode(' ', $input));
+        }
 
         // Decide the environment to use
         $env         = $allowProd ? $this->env : 'dev';
-        $arguments[] = '--env=' . $env;
+        $command[]   = '--env=' . $env;
 
         // Verbosity level (only if not normal = agument verbosity not set in command)
         if (OutputInterface::VERBOSITY_NORMAL !== $this->verbosity) {
-            $arguments[] = $this->guessVerbosityLevel();
+            $command[] = $this->guessVerbosityLevel();
         }
 
         if ($job->isAwareOfJob()) {
-            $arguments[] = '--job-id=' . $job->getId();
+            $command[] = '--job-id=' . $job->getId();
         }
 
-        // The arguments of the command
-        $arguments = array_merge($arguments, $job->getArguments());
-
-        // Build the command to be run (@compatibility Symfony 3 and 4)
-        return class_exists(ProcessBuilder::class, false)
-            ? (new ProcessBuilder())->setArguments($arguments)->getProcess()
-            : new Process($arguments);
+        return new Process($command);
     }
 
     /**
@@ -219,7 +268,7 @@ class JobsManager
      *
      * @return string
      */
-    public static function guessJobEmState(Job $job)
+    public static function guessJobEmState(Job $job): string
     {
         switch (self::$entityManager->getUnitOfWork()->getEntityState($job)) {
             case UnitOfWork::STATE_DETACHED:
@@ -247,16 +296,16 @@ class JobsManager
      * It adds to the tree all childs and parents, and all other linked Jobs to the one given and its childs.
      *
      * @param Job   $job
-     * @param array $tree The buil tree
+     * @param array $tree The build tree
      *
-     * @return array
+     * @return int[]
      */
-    private static function calculateJobsTree(Job $job, &$tree = [])
+    private static function calculateJobsTree(Job $job, array &$tree = []): array
     {
-        if (null !== $job->getChildDependencies() && 0 < count($job->getChildDependencies())) {
+        if (null !== $job->getChildDependencies() && 0 < $job->getChildDependencies()->count()) {
             /** @var Job $childDependency Detach child deps * */
             foreach ($job->getChildDependencies() as $childDependency) {
-                if (false === in_array($childDependency->getId(), $tree)) {
+                if (false === in_array($childDependency->getId(), $tree, true)) {
                     // Add it to the tree
                     $tree[] = $childDependency->getId();
 
@@ -269,7 +318,7 @@ class JobsManager
         if (null !== $job->getParentDependencies() && 0 < count($job->getParentDependencies())) {
             /** @var Job $parentDependency Detach parend deps * */
             foreach ($job->getParentDependencies() as $parentDependency) {
-                if (false === in_array($parentDependency->getId(), $tree)) {
+                if (false === in_array($parentDependency->getId(), $tree, true)) {
                     // Add it to the tree
                     $tree[] = $parentDependency->getId();
 
@@ -280,7 +329,7 @@ class JobsManager
         }
 
         // Detach the cancelling Job if any
-        if (null !== $job->getCancelledBy() && false === in_array($job->getCancelledBy()->getId(), $tree)) {
+        if (null !== $job->getCancelledBy() && false === in_array($job->getCancelledBy()->getId(), $tree, true)) {
             $tree[] = $job->getCancelledBy()->getId();
 
             // Visit the child
@@ -288,9 +337,9 @@ class JobsManager
         }
 
         /* @var Job $retryingDependency Detach cancelled Jobs **/
-        if (null !== $job->getCancelledJobs() && 0 < count($job->getCancelledJobs())) {
+        if (0 < $job->getCancelledJobs()->count()) {
             foreach ($job->getCancelledJobs() as $cancelledJob) {
-                if (false === in_array($cancelledJob->getId(), $tree)) {
+                if (false === in_array($cancelledJob->getId(), $tree, true)) {
                     // Add it to the tree
                     $tree[] = $cancelledJob->getId();
 
@@ -301,7 +350,7 @@ class JobsManager
         }
 
         // Detach the retried Job
-        if (null !== $job->getRetryOf() && false === in_array($job->getRetryOf()->getId(), $tree)) {
+        if (null !== $job->getRetryOf() && false === in_array($job->getRetryOf()->getId(), $tree, true)) {
             $tree[] = $job->getRetryOf()->getId();
 
             // Visit the child
@@ -309,7 +358,7 @@ class JobsManager
         }
 
         // And the first retried one
-        if (null !== $job->getFirstRetriedJob() && false === in_array($job->getFirstRetriedJob()->getId(), $tree)) {
+        if (null !== $job->getFirstRetriedJob() && false === in_array($job->getFirstRetriedJob()->getId(), $tree, true)) {
             $tree[] = $job->getFirstRetriedJob()->getId();
 
             // Visit the child
@@ -317,7 +366,7 @@ class JobsManager
         }
 
         // The retrying one if any
-        if (null !== $job->getRetriedBy() && false === in_array($job->getRetriedBy()->getId(), $tree)) {
+        if (null !== $job->getRetriedBy() && false === in_array($job->getRetriedBy()->getId(), $tree, true)) {
             $tree[] = $job->getRetriedBy()->getId();
 
             // Visit the child
@@ -328,7 +377,7 @@ class JobsManager
         /* @var Job $retryingDependency Detach retryingDeps **/
         if (null !== $job->getRetryingJobs() && 0 < count($job->getRetryingJobs())) {
             foreach ($job->getRetryingJobs() as $retryingJob) {
-                if (false === in_array($retryingJob->getId(), $tree)) {
+                if (false === in_array($retryingJob->getId(), $tree, true)) {
                     // Add it to the tree
                     $tree[] = $retryingJob->getId();
 
@@ -344,7 +393,7 @@ class JobsManager
     /**
      * Finds the path to the console file.
      *
-     * @throws \RuntimeException if the console file cannot be found
+     * @throws RuntimeException if the console file cannot be found
      *
      * @return string
      */
@@ -358,11 +407,11 @@ class JobsManager
             return $this->kernelRootDir . '/../bin/console';
         }
 
-        throw new \RuntimeException('Unable to find the console file. You should check your Symfony installation. The console file should be in /app/ folder or in /bin/ folder.');
+        throw new RuntimeException('Unable to find the console file. You should check your Symfony installation. The console file should be in /app/ folder or in /bin/ folder.');
     }
 
     /**
-     * @return string|null
+     * @return string
      */
     private function guessVerbosityLevel(): string
     {
