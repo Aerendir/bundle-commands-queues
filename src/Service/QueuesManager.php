@@ -22,6 +22,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use RuntimeException;
+use Safe\Exceptions\StringsException;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Daemon;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Repository\JobRepository;
@@ -59,6 +60,8 @@ class QueuesManager
      *
      * @param Job $job
      *
+     * @throws StringsException
+     *
      * @return bool
      */
     public function jobExists(Job $job): bool
@@ -77,6 +80,8 @@ class QueuesManager
      *
      * @param Job $job
      *
+     * @throws StringsException
+     *
      * @return array|null
      */
     public function findByJob(Job $job): ?array
@@ -93,13 +98,15 @@ class QueuesManager
      * @param array|string|null $input
      * @param string            $queue
      *
+     * @throws StringsException
+     *
      * @return bool
      */
     public function exists(string $command, $input = null, string $queue = Daemon::DEFAULT_QUEUE_NAME): bool
     {
         $exists = $this->find($command, $input, $queue);
 
-        return null !== $exists;
+        return ! empty($exists);
     }
 
     /**
@@ -110,6 +117,8 @@ class QueuesManager
      * @param string            $command
      * @param array|string|null $input
      * @param string            $queue
+     *
+     * @throws StringsException
      *
      * @return array|null
      */
