@@ -13,7 +13,7 @@ SHQCommandsQueuesBundle
 [![License](https://poser.pugx.org/serendipity_hq/commands-queues-bundle/license)](https://packagist.org/packages/serendipity_hq/commands-queues-bundle)
 [![SensioLabsInsight](https://insight.sensiolabs.com/projects/2a1bcd2f-f241-4969-96e4-10ead299d57b/mini.png)](https://insight.sensiolabs.com/projects/2a1bcd2f-f241-4969-96e4-10ead299d57b)
 
-SHQCommandsQueuesBundle manages queues and processes jobs in your Symfony App.
+`SHQCommandsQueuesBundle manages queues and processes jobs in your Symfony App.
 
 It is possible to run a single job or start a daemon that listens for new jobs and processes them as they are pushed into the queue.
 
@@ -25,7 +25,9 @@ Requirements
 ------------
 
 1. PHP ^7.1
-2. Symfony ^4
+2. Symfony ^4`
+
+**Fully tested with PHPStan and Phan at maximum levels of strictness**.
 
 DOCUMENTATION
 =============
