@@ -192,8 +192,6 @@ class QueuesDaemon
         foreach ($this->getConfig()->getQueues() as $queueName) {
             $this->purgeExpiredJobs($queueName);
         }
-
-        // dd('Initialized');
     }
 
     /**

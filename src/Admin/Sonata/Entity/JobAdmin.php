@@ -86,18 +86,6 @@ class JobAdmin extends AbstractAdmin
             ->add('startedAt', 'doctrine_orm_date_range')
             ->add('closedAt', 'doctrine_orm_date_range')
             ->add('executeAfterTime', 'doctrine_orm_date_range');
-
-        /*
-        $datagridMapper->add('status', 'doctrine_orm_choice',[], ChoiceType::class, [
-            'operator_type' => HiddenType::class,
-            'field_options' => [
-                'choices' => [
-                    'New' => Job::STATUS_NEW,
-                    'Aborted' => Job::STATUS_ABORTED,
-                ]
-            ],
-        ]);
-        */
     }
 
     /**
