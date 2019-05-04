@@ -150,21 +150,7 @@ file that was distributed with this source code.
     {% elseif 'command' == field_description.name %}
         <td>
             <p>
-                <code style="width:300px; overflow:hidden; white-space:nowrap;">{{ object.command }}
-                    {% if object.input %}
-                        <span class="text-muted">
-                            {% if object.input.arguments %}
-                                {{ object.input.arguments|join(' ') }}
-                            {% endif %}
-                            {% if object.input.options %}
-                                {{ object.input.options|join(' ') }}
-                            {% endif %}
-                            {% if object.input.shortcuts %}
-                                {{ object.input.shortcuts|join(' ') }}
-                            {% endif %}
-                        </span>
-                    {% endif %}
-                </code>
+                <code style="width:300px; overflow:hidden; white-space:nowrap;">{{ object.command }} <span class="text-muted">{{ object.input|commands_queues_render_input }}</span></code>
             </p>
             <p>
                 <b>{% trans %}Created At{% endtrans %}</b>: {% if object.createdAt %}{{ object.createdAt|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }}{% endif %}<br />
