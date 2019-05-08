@@ -17,6 +17,7 @@ declare(strict_types=1);
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Repository;
 
+use BadMethodCallException;
 use DateTime;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Types\Type;
@@ -150,36 +151,36 @@ class JobRepository extends EntityRepository
         $queryBuilder = $this->getEntityManager()->createQueryBuilder();
 
         $queryBuilder->select('j')->from(Job::class, 'j')
-            ->where(
-                $queryBuilder->expr()->orX(
-                    $queryBuilder->expr()->eq('j.status', ':succeeded'),
-                    $queryBuilder->expr()->eq('j.status', ':retry_succeeded'),
-                    $queryBuilder->expr()->eq('j.status', ':aborted'),
-                    $queryBuilder->expr()->eq('j.status', ':failed'),
-                    $queryBuilder->expr()->eq('j.status', ':retry_failed'),
-                    $queryBuilder->expr()->eq('j.status', ':cancelled')
-                ))
-            ->setParameter('succeeded', Job::STATUS_SUCCEEDED)
-            ->setParameter('retry_succeeded', Job::STATUS_RETRY_SUCCEEDED)
-            ->setParameter('aborted', Job::STATUS_ABORTED)
-            ->setParameter('failed', Job::STATUS_FAILED)
-            ->setParameter('retry_failed', Job::STATUS_RETRY_FAILED)
-            ->setParameter('cancelled', Job::STATUS_CANCELLED)
-            ->andWhere($queryBuilder->expr()->eq('j.queue', ':queue_name'))
-            ->setParameter('queue_name', $queueName)
-            ->andWhere($queryBuilder->expr()->lt('j.closedAt', ':max_date'))
-            ->andWhere($queryBuilder->expr()->orX(
-                $queryBuilder->expr()->andX(
-                    $queryBuilder->expr()->isNotNull('j.startedAt'),
-                    $queryBuilder->expr()->neq('j.status', ':cancelled')
-                ),
-                $queryBuilder->expr()->andX(
-                    $queryBuilder->expr()->isNull('j.startedAt'),
-                    $queryBuilder->expr()->eq('j.status', ':cancelled')
-                )
-            ))
-            ->setParameter('max_date', $maxRetentionDate, Type::DATETIME)
-            ->orderBy('j.closedAt', 'DESC');
+                     ->where(
+                         $queryBuilder->expr()->orX(
+                             $queryBuilder->expr()->eq('j.status', ':succeeded'),
+                             $queryBuilder->expr()->eq('j.status', ':retry_succeeded'),
+                             $queryBuilder->expr()->eq('j.status', ':aborted'),
+                             $queryBuilder->expr()->eq('j.status', ':failed'),
+                             $queryBuilder->expr()->eq('j.status', ':retry_failed'),
+                             $queryBuilder->expr()->eq('j.status', ':cancelled')
+                         ))
+                     ->setParameter('succeeded', Job::STATUS_SUCCEEDED)
+                     ->setParameter('retry_succeeded', Job::STATUS_RETRY_SUCCEEDED)
+                     ->setParameter('aborted', Job::STATUS_ABORTED)
+                     ->setParameter('failed', Job::STATUS_FAILED)
+                     ->setParameter('retry_failed', Job::STATUS_RETRY_FAILED)
+                     ->setParameter('cancelled', Job::STATUS_CANCELLED)
+                     ->andWhere($queryBuilder->expr()->eq('j.queue', ':queue_name'))
+                     ->setParameter('queue_name', $queueName)
+                     ->andWhere($queryBuilder->expr()->lt('j.closedAt', ':max_date'))
+                     ->andWhere($queryBuilder->expr()->orX(
+                         $queryBuilder->expr()->andX(
+                             $queryBuilder->expr()->isNotNull('j.startedAt'),
+                             $queryBuilder->expr()->neq('j.status', ':cancelled')
+                         ),
+                         $queryBuilder->expr()->andX(
+                             $queryBuilder->expr()->isNull('j.startedAt'),
+                             $queryBuilder->expr()->eq('j.status', ':cancelled')
+                         )
+                     ))
+                     ->setParameter('max_date', $maxRetentionDate, Type::DATETIME)
+                     ->orderBy('j.closedAt', 'DESC');
 
         return $queryBuilder->getQuery()->getResult();
     }
@@ -187,20 +188,28 @@ class JobRepository extends EntityRepository
     /**
      * Checks if the given Job exists or not.
      *
-     * @param string     $command
-     * @param array|null $input
-     * @param string     $queue
-     * @param bool       $fullSearch If false, will search only in the not already started jobs
+     * @param string|null $command
+     * @param array|null  $input
+     * @param string|null $queue
+     * @param bool        $fullSearch If false, will search only in the not already started jobs
      *
      * @return array|null
      */
-    public function findBySearch(string $command, ?array $input = [], string $queue = 'default', bool $fullSearch = false): ?array
+    public function findBySearch(?string $command = null, ?array $input = null, ?string $queue = 'default', bool $fullSearch = false): ?array
     {
+        if (null === $command && (null === $input || empty($input)) && null === $queue) {
+            throw new BadMethodCallException('You should pass at least one between "command", "input" and "queue".');
+        }
+
         $queryBuilder = $this->getEntityManager()->createQueryBuilder();
 
-        $queryBuilder->select('j')->from(Job::class, 'j')
-                     ->where($queryBuilder->expr()->eq('j.command', ':command'))
-                     ->setParameter('command', $command);
+        $queryBuilder->select('j')->from(Job::class, 'j');
+
+        if (null !== $command) {
+            $queryBuilder
+                ->where($queryBuilder->expr()->eq('j.command', ':command'))
+                ->setParameter('command', $command);
+        }
 
         if (null !== $queue) {
             $queryBuilder->andWhere($queryBuilder->expr()->eq('j.queue', ':queue'))->setParameter('queue', $queue);
