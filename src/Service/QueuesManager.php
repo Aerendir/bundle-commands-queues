@@ -117,22 +117,24 @@ class QueuesManager
      *
      * Returns null if it doesn't exist or the scheduled Job if it exists.
      *
-     * @param string            $command
+     * @param string|null       $command
      * @param array|string|null $input
-     * @param string            $queue
+     * @param string|null       $queue
      * @param bool              $fullSearch If false, searches only not yet started jobs
      *
      * @throws StringsException
      *
      * @return array|null
      */
-    public function find(string $command, $input = null, string $queue = Daemon::DEFAULT_QUEUE_NAME, $fullSearch = false): ?array
+    public function find(string $command = null, $input = null, ?string $queue = Daemon::DEFAULT_QUEUE_NAME, $fullSearch = false): ?array
     {
         /** @var JobRepository $jobsRepo */
         $jobsRepo = $this->entityManager->getRepository(Job::class);
 
         // Check and prepare arguments of the command
-        $input = InputParser::parseInput($input);
+        if (null !== $input) {
+            $input = InputParser::parseInput($input);
+        }
 
         return $jobsRepo->findBySearch($command, $input, $queue, $fullSearch);
     }
