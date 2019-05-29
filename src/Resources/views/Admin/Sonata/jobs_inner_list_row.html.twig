@@ -153,10 +153,10 @@ file that was distributed with this source code.
                 <code style="width:300px; overflow:hidden; white-space:nowrap;">{{ object.command }} <span class="text-muted">{{ object.input|commands_queues_render_input }}</span></code>
             </p>
             <p>
-                <b>{% trans %}Created At{% endtrans %}</b>: {% if object.createdAt %}{{ object.createdAt|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }}{% endif %}<br />
+                <b>{% trans %}Created On{% endtrans %}</b>: {% if object.createdAt %}{{ object.createdAt|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }}{% endif %}<br />
                 <b>{% trans %}Execute After{% endtrans %}</b>: {% if object.executeAfterTime %}{{ object.executeAfterTime|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }}{% endif %}<br />
-                <b>{% trans %}Started At{% endtrans %}</b>: {% if object.startedAt %}{{ object.startedAt|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }}{% endif %}<br />
-                <b>{% trans %}Closed At{% endtrans %}</b>: {% if object.closedAt %}{{ object.closedAt|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }}{% endif %}<br />
+                <b>{% trans %}Started On{% endtrans %}</b>: {% if object.startedAt %}{{ object.startedAt|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }}{% endif %}<br />
+                <b>{% trans %}Closed On{% endtrans %}</b>: {% if object.closedAt %}{{ object.closedAt|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }}{% endif %}<br />
             </p>
             <p><small>
                     <b>{% trans %}Retry strategy{% endtrans %}: {{ object.retryStrategy.strategyName }}</b><br />
