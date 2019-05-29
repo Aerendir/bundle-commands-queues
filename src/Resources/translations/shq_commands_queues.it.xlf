@@ -1,331 +1,462 @@
 <?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:2.0" version="2.0" srcLang="it" trgLang="it">
   <file id="shq_commands_queues.it">
-    <unit name="tab_status_new">
+    <unit id="J39b3Xz" name="tab_status_new">
+      <notes>
+        <note category="file-source" priority="1">vendor/serendipity_hq/commands-queues-bundle/src/Resources/views/Admin/Sonata/_translation_placeholders.html.twig:5</note>
+      </notes>
       <segment>
         <source>tab_status_new</source>
         <target>Nuovi</target>
       </segment>
     </unit>
-    <unit name="tab_status_pending">
+    <unit id=".QzooBT" name="tab_status_pending">
+      <notes>
+        <note category="file-source" priority="1">vendor/serendipity_hq/commands-queues-bundle/src/Resources/views/Admin/Sonata/_translation_placeholders.html.twig:6</note>
+      </notes>
       <segment>
         <source>tab_status_pending</source>
         <target>In Attesa</target>
       </segment>
     </unit>
-    <unit name="tab_status_running">
+    <unit id="pfkC.UY" name="tab_status_running">
+      <notes>
+        <note category="file-source" priority="1">vendor/serendipity_hq/commands-queues-bundle/src/Resources/views/Admin/Sonata/_translation_placeholders.html.twig:7</note>
+      </notes>
       <segment>
         <source>tab_status_running</source>
         <target>In Esecuzione</target>
       </segment>
     </unit>
-    <unit name="tab_status_succeeded">
+    <unit id="pOcSKgH" name="tab_status_succeeded">
+      <notes>
+        <note category="file-source" priority="1">vendor/serendipity_hq/commands-queues-bundle/src/Resources/views/Admin/Sonata/_translation_placeholders.html.twig:8</note>
+      </notes>
       <segment>
         <source>tab_status_succeeded</source>
         <target>Riusciti</target>
       </segment>
     </unit>
-    <unit name="tab_status_failed">
+    <unit id="4Tf19f1" name="tab_status_failed">
+      <notes>
+        <note category="file-source" priority="1">vendor/serendipity_hq/commands-queues-bundle/src/Resources/views/Admin/Sonata/_translation_placeholders.html.twig:9</note>
+      </notes>
       <segment>
         <source>tab_status_failed</source>
         <target>Falliti</target>
       </segment>
     </unit>
-    <unit name="tab_status_aborted">
+    <unit id=".vOZBnG" name="tab_status_aborted">
+      <notes>
+        <note category="file-source" priority="1">vendor/serendipity_hq/commands-queues-bundle/src/Resources/views/Admin/Sonata/_translation_placeholders.html.twig:10</note>
+      </notes>
       <segment>
         <source>tab_status_aborted</source>
         <target>Abortiti</target>
       </segment>
     </unit>
-    <unit name="tab_status_cancelled">
+    <unit id="N0457DW" name="tab_status_cancelled">
+      <notes>
+        <note category="file-source" priority="1">vendor/serendipity_hq/commands-queues-bundle/src/Resources/views/Admin/Sonata/_translation_placeholders.html.twig:11</note>
+      </notes>
       <segment>
         <source>tab_status_cancelled</source>
         <target>Cancellati</target>
       </segment>
     </unit>
-    <unit name="tab_status_retried">
+    <unit id="N4KbteO" name="tab_status_retried">
+      <notes>
+        <note category="file-source" priority="1">vendor/serendipity_hq/commands-queues-bundle/src/Resources/views/Admin/Sonata/_translation_placeholders.html.twig:12</note>
+      </notes>
       <segment>
         <source>tab_status_retried</source>
         <target>Riprovati</target>
       </segment>
     </unit>
-    <unit name="tab_status_retry_succeeded">
+    <unit id="FmMqga9" name="tab_status_retry_succeeded">
+      <notes>
+        <note category="file-source" priority="1">vendor/serendipity_hq/commands-queues-bundle/src/Resources/views/Admin/Sonata/_translation_placeholders.html.twig:13</note>
+      </notes>
       <segment>
         <source>tab_status_retry_succeeded</source>
         <target>Riprovati e Riusciti</target>
       </segment>
     </unit>
-    <unit name="tab_status_retry_failed">
+    <unit id="YcA_M3G" name="tab_status_retry_failed">
+      <notes>
+        <note category="file-source" priority="1">vendor/serendipity_hq/commands-queues-bundle/src/Resources/views/Admin/Sonata/_translation_placeholders.html.twig:14</note>
+      </notes>
       <segment>
         <source>tab_status_retry_failed</source>
         <target>Riprovati e Falliti</target>
       </segment>
     </unit>
-    <unit name="Job List">
-      <segment>
-        <source>Job List</source>
-        <target>Lista dei comandi in coda</target>
-      </segment>
-    </unit>
-    <unit name="Daemons">
-      <segment>
-        <source>Daemons</source>
-        <target>Demoni</target>
-      </segment>
-    </unit>
-    <unit name="Jobs">
+    <unit id="Lxeg_NU" name="Jobs">
+      <notes>
+        <note category="file-source" priority="1">vendor/serendipity_hq/commands-queues-bundle/src/Resources/views/Admin/Sonata/_translation_placeholders.html.twig:15</note>
+      </notes>
       <segment>
         <source>Jobs</source>
         <target>Comandi</target>
       </segment>
     </unit>
-    <unit name="job_title_show">
+    <unit id="m1RT25y" name="Job List">
+      <notes>
+        <note category="file-source" priority="1">vendor/serendipity_hq/commands-queues-bundle/src/Resources/views/Admin/Sonata/_translation_placeholders.html.twig:16</note>
+      </notes>
       <segment>
-        <source>job_title_show</source>
-        <target>Mostra Comando</target>
+        <source>Job List</source>
+        <target>Lista dei comandi in coda</target>
       </segment>
     </unit>
-    <unit name="daemon_title_show">
+    <unit id="omLbbGt" name="Daemons">
+      <notes>
+        <note category="file-source" priority="1">vendor/serendipity_hq/commands-queues-bundle/src/Resources/views/Admin/Sonata/_translation_placeholders.html.twig:17</note>
+      </notes>
       <segment>
-        <source>daemon_title_show</source>
-        <target>Mostra Demone</target>
+        <source>Daemons</source>
+        <target>Demoni</target>
       </segment>
     </unit>
-    <unit name="Daemon List">
+    <unit id="F50kbwe" name="Daemons List">
+      <notes>
+        <note category="file-source" priority="1">vendor/serendipity_hq/commands-queues-bundle/src/Resources/views/Admin/Sonata/_translation_placeholders.html.twig:18</note>
+      </notes>
       <segment>
-        <source>Daemon List</source>
+        <source>Daemons List</source>
         <target>Lista dei Demoni</target>
       </segment>
     </unit>
-    <unit name="Id">
+    <unit id="EhVukhv" name="Id">
+      <notes>
+        <note category="file-source" priority="1">vendor/serendipity_hq/commands-queues-bundle/src/Resources/views/Admin/Sonata/_translation_placeholders.html.twig:19</note>
+      </notes>
       <segment>
         <source>Id</source>
         <target>Id</target>
       </segment>
     </unit>
-    <unit name="Host">
+    <unit id="SoIxGLm" name="Host">
+      <notes>
+        <note category="file-source" priority="1">vendor/serendipity_hq/commands-queues-bundle/src/Resources/views/Admin/Sonata/_translation_placeholders.html.twig:20</note>
+      </notes>
       <segment>
         <source>Host</source>
         <target>Host</target>
       </segment>
     </unit>
-    <unit name="Pid">
+    <unit id="VP_dO_S" name="Pid">
+      <notes>
+        <note category="file-source" priority="1">vendor/serendipity_hq/commands-queues-bundle/src/Resources/views/Admin/Sonata/_translation_placeholders.html.twig:21</note>
+      </notes>
       <segment>
         <source>Pid</source>
         <target>Pid</target>
       </segment>
     </unit>
-    <unit name="Born On">
+    <unit id="BztDpoL" name="Mortis causa">
+      <notes>
+        <note category="file-source" priority="1">vendor/serendipity_hq/commands-queues-bundle/src/Resources/views/Admin/Sonata/_translation_placeholders.html.twig:22</note>
+      </notes>
       <segment>
-        <source>Born On</source>
-        <target>Nato Il</target>
-      </segment>
-    </unit>
-    <unit name="Died On">
-      <segment>
-        <source>Died On</source>
-        <target>Morto Il</target>
-      </segment>
-    </unit>
-    <unit name="Mortis Causa">
-      <segment>
-        <source>Mortis Causa</source>
+        <source>Mortis causa</source>
         <target>Mortis Causa</target>
       </segment>
     </unit>
-    <unit name="Command">
+    <unit id="cTFmlx1" name="Command">
+      <notes>
+        <note category="file-source" priority="1">vendor/serendipity_hq/commands-queues-bundle/src/Resources/views/Admin/Sonata/_translation_placeholders.html.twig:23</note>
+      </notes>
       <segment>
         <source>Command</source>
         <target>Comando</target>
       </segment>
     </unit>
-    <unit name="Dependencies">
+    <unit id="LkGxGOs" name="Dependencies">
+      <notes>
+        <note category="file-source" priority="1">vendor/serendipity_hq/commands-queues-bundle/src/Resources/views/Admin/Sonata/_translation_placeholders.html.twig:24</note>
+      </notes>
       <segment>
         <source>Dependencies</source>
         <target>Dipendenze</target>
       </segment>
     </unit>
-    <unit name="Status">
+    <unit id="kg5BPH1" name="Status">
+      <notes>
+        <note category="file-source" priority="1">vendor/serendipity_hq/commands-queues-bundle/src/Resources/views/Admin/Sonata/_translation_placeholders.html.twig:25</note>
+      </notes>
       <segment>
         <source>Status</source>
         <target>Status</target>
       </segment>
     </unit>
-    <unit name="Arguments">
+    <unit id="f4FgcsH" name="Arguments">
+      <notes>
+        <note category="file-source" priority="1">vendor/serendipity_hq/commands-queues-bundle/src/Resources/views/Admin/Sonata/_translation_placeholders.html.twig:26</note>
+      </notes>
       <segment>
         <source>Arguments</source>
         <target>Argomenti</target>
       </segment>
     </unit>
-    <unit name="Queue">
+    <unit id="Oy.gPja" name="Queue">
+      <notes>
+        <note category="file-source" priority="1">vendor/serendipity_hq/commands-queues-bundle/src/Resources/views/Admin/Sonata/_translation_placeholders.html.twig:27</note>
+      </notes>
       <segment>
         <source>Queue</source>
         <target>Coda</target>
       </segment>
     </unit>
-    <unit name="Exit Code">
-      <segment>
-        <source>Exit Code</source>
-        <target>Codice di uscita</target>
-      </segment>
-    </unit>
-    <unit name="Priority">
+    <unit id="1g27oHk" name="Priority">
+      <notes>
+        <note category="file-source" priority="1">vendor/serendipity_hq/commands-queues-bundle/src/Resources/views/Admin/Sonata/_translation_placeholders.html.twig:28</note>
+      </notes>
       <segment>
         <source>Priority</source>
         <target>Priorità</target>
       </segment>
     </unit>
-    <unit name="Created At">
+    <unit id="KVFWM9T" name="job_title_show">
+      <notes>
+        <note category="file-source" priority="1">vendor/serendipity_hq/commands-queues-bundle/src/Resources/views/Admin/Sonata/job_show.html.twig:15</note>
+      </notes>
       <segment>
-        <source>Created At</source>
-        <target>Creato il</target>
+        <source>job_title_show</source>
+        <target>Mostra Comando</target>
       </segment>
     </unit>
-    <unit name="Started At">
-      <segment>
-        <source>Started At</source>
-        <target>Avviato il</target>
-      </segment>
-    </unit>
-    <unit name="Closed At">
-      <segment>
-        <source>Closed At</source>
-        <target>Chiuso il</target>
-      </segment>
-    </unit>
-    <unit name="Execute After Time">
-      <segment>
-        <source>Execute After Time</source>
-        <target>Esegui dopo il</target>
-      </segment>
-    </unit>
-    <unit name="Queues">
-      <segment>
-        <source>Queues</source>
-        <target>Code</target>
-      </segment>
-    </unit>
-    <unit name="Created On">
+    <unit id="e_Eep3_" name="Created On">
+      <notes>
+        <note category="file-source" priority="1">vendor/serendipity_hq/commands-queues-bundle/src/Resources/views/Admin/Sonata/job_show.html.twig:65</note>
+        <note category="file-source" priority="1">vendor/serendipity_hq/commands-queues-bundle/src/Resources/views/Admin/Sonata/jobs_inner_list_row.html.twig:156</note>
+      </notes>
       <segment>
         <source>Created On</source>
         <target>Creato il</target>
       </segment>
     </unit>
-    <unit name="Started On">
+    <unit id="XfOZOPo" name="Started On">
+      <notes>
+        <note category="file-source" priority="1">vendor/serendipity_hq/commands-queues-bundle/src/Resources/views/Admin/Sonata/job_show.html.twig:66</note>
+        <note category="file-source" priority="1">vendor/serendipity_hq/commands-queues-bundle/src/Resources/views/Admin/Sonata/jobs_inner_list_row.html.twig:158</note>
+      </notes>
       <segment>
         <source>Started On</source>
         <target>Avviato il</target>
       </segment>
     </unit>
-    <unit name="Closed On">
+    <unit id="JFZxwoD" name="Closed On">
+      <notes>
+        <note category="file-source" priority="1">vendor/serendipity_hq/commands-queues-bundle/src/Resources/views/Admin/Sonata/job_show.html.twig:67</note>
+        <note category="file-source" priority="1">vendor/serendipity_hq/commands-queues-bundle/src/Resources/views/Admin/Sonata/jobs_inner_list_row.html.twig:159</note>
+      </notes>
       <segment>
         <source>Closed On</source>
         <target>Chiuso il</target>
       </segment>
     </unit>
-    <unit name="Exit code">
+    <unit id="zMbrHIe" name="Exit code">
+      <notes>
+        <note category="file-source" priority="1">vendor/serendipity_hq/commands-queues-bundle/src/Resources/views/Admin/Sonata/job_show.html.twig:68</note>
+      </notes>
       <segment>
         <source>Exit code</source>
         <target>Codice di Uscita</target>
       </segment>
     </unit>
-    <unit name="Is retry of">
+    <unit id="HnXhv75" name="Is retry of">
+      <notes>
+        <note category="file-source" priority="1">vendor/serendipity_hq/commands-queues-bundle/src/Resources/views/Admin/Sonata/job_show.html.twig:71</note>
+        <note category="file-source" priority="1">vendor/serendipity_hq/commands-queues-bundle/src/Resources/views/Admin/Sonata/jobs_inner_list_row.html.twig:39</note>
+      </notes>
       <segment>
         <source>Is retry of</source>
         <target>È un ritentativo di</target>
       </segment>
     </unit>
-    <unit name="Retried by">
+    <unit id="e6VYw4z" name="Retried by">
+      <notes>
+        <note category="file-source" priority="1">vendor/serendipity_hq/commands-queues-bundle/src/Resources/views/Admin/Sonata/job_show.html.twig:74</note>
+        <note category="file-source" priority="1">vendor/serendipity_hq/commands-queues-bundle/src/Resources/views/Admin/Sonata/jobs_inner_list_row.html.twig:65</note>
+      </notes>
       <segment>
         <source>Retried by</source>
         <target>Ritentato da</target>
       </segment>
     </unit>
-    <unit name="All retrying Jobs">
+    <unit id="Jf0zsYs" name="All retrying Jobs">
+      <notes>
+        <note category="file-source" priority="1">vendor/serendipity_hq/commands-queues-bundle/src/Resources/views/Admin/Sonata/job_show.html.twig:76</note>
+        <note category="file-source" priority="1">vendor/serendipity_hq/commands-queues-bundle/src/Resources/views/Admin/Sonata/jobs_inner_list_row.html.twig:69</note>
+      </notes>
       <segment>
         <source>All retrying Jobs</source>
         <target>Tutti i ritentativi</target>
       </segment>
     </unit>
-    <unit name="First retried job">
+    <unit id="sqU03Pn" name="First retried job">
+      <notes>
+        <note category="file-source" priority="1">vendor/serendipity_hq/commands-queues-bundle/src/Resources/views/Admin/Sonata/job_show.html.twig:86</note>
+        <note category="file-source" priority="1">vendor/serendipity_hq/commands-queues-bundle/src/Resources/views/Admin/Sonata/jobs_inner_list_row.html.twig:124</note>
+      </notes>
       <segment>
         <source>First retried job</source>
         <target>Primo ritentativo</target>
       </segment>
     </unit>
-    <unit name="Cancelled by">
+    <unit id="MT3oNor" name="Cancelled by">
+      <notes>
+        <note category="file-source" priority="1">vendor/serendipity_hq/commands-queues-bundle/src/Resources/views/Admin/Sonata/job_show.html.twig:90</note>
+        <note category="file-source" priority="1">vendor/serendipity_hq/commands-queues-bundle/src/Resources/views/Admin/Sonata/jobs_inner_list_row.html.twig:147</note>
+      </notes>
       <segment>
         <source>Cancelled by</source>
         <target>Cancellato da</target>
       </segment>
     </unit>
-    <unit name="No parent Jobs">
+    <unit id="E9cdvzx" name="No parent Jobs">
+      <notes>
+        <note category="file-source" priority="1">vendor/serendipity_hq/commands-queues-bundle/src/Resources/views/Admin/Sonata/job_show.html.twig:95</note>
+        <note category="file-source" priority="1">vendor/serendipity_hq/commands-queues-bundle/src/Resources/views/Admin/Sonata/jobs_inner_list_row.html.twig:174</note>
+      </notes>
       <segment>
         <source>No parent Jobs</source>
         <target>Nessun Job genitore</target>
       </segment>
     </unit>
-    <unit name="Parent Jobs">
+    <unit id="ye0xeJI" name="Parent Jobs">
+      <notes>
+        <note category="file-source" priority="1">vendor/serendipity_hq/commands-queues-bundle/src/Resources/views/Admin/Sonata/job_show.html.twig:97</note>
+        <note category="file-source" priority="1">vendor/serendipity_hq/commands-queues-bundle/src/Resources/views/Admin/Sonata/jobs_inner_list_row.html.twig:176</note>
+      </notes>
       <segment>
         <source>Parent Jobs</source>
         <target>Job genitore</target>
       </segment>
     </unit>
-    <unit name="Cancelled Jobs">
-      <segment>
-        <source>Cancelled Jobs</source>
-        <target>Job cancellati</target>
-      </segment>
-    </unit>
-    <unit name="No child Jobs">
+    <unit id="sR421W9" name="No child Jobs">
+      <notes>
+        <note category="file-source" priority="1">vendor/serendipity_hq/commands-queues-bundle/src/Resources/views/Admin/Sonata/job_show.html.twig:108</note>
+      </notes>
       <segment>
         <source>No child Jobs</source>
         <target>Nessun job figlio</target>
       </segment>
     </unit>
-    <unit name="Child Jobs">
+    <unit id="Oyz2VGB" name="Child Jobs">
+      <notes>
+        <note category="file-source" priority="1">vendor/serendipity_hq/commands-queues-bundle/src/Resources/views/Admin/Sonata/job_show.html.twig:110</note>
+        <note category="file-source" priority="1">vendor/serendipity_hq/commands-queues-bundle/src/Resources/views/Admin/Sonata/jobs_inner_list_row.html.twig:214</note>
+      </notes>
       <segment>
         <source>Child Jobs</source>
         <target>Job figli</target>
       </segment>
     </unit>
-    <unit name="Cancellation Reason">
+    <unit id="TvYovro" name="Cancelled Jobs">
+      <notes>
+        <note category="file-source" priority="1">vendor/serendipity_hq/commands-queues-bundle/src/Resources/views/Admin/Sonata/job_show.html.twig:123</note>
+      </notes>
+      <segment>
+        <source>Cancelled Jobs</source>
+        <target>Job cancellati</target>
+      </segment>
+    </unit>
+    <unit id="QZeGhxz" name="daemon_title_show">
+      <notes>
+        <note category="file-source" priority="1">vendor/serendipity_hq/commands-queues-bundle/src/Resources/views/Admin/Sonata/daemon_show.html.twig:15</note>
+      </notes>
+      <segment>
+        <source>daemon_title_show</source>
+        <target>Mostra Demone</target>
+      </segment>
+    </unit>
+    <unit id="yhz69z9" name="Born On">
+      <notes>
+        <note category="file-source" priority="1">vendor/serendipity_hq/commands-queues-bundle/src/Resources/views/Admin/Sonata/daemon_show.html.twig:45</note>
+      </notes>
+      <segment>
+        <source>Born On</source>
+        <target>Nato Il</target>
+      </segment>
+    </unit>
+    <unit id="JHHwxqh" name="Died On">
+      <notes>
+        <note category="file-source" priority="1">vendor/serendipity_hq/commands-queues-bundle/src/Resources/views/Admin/Sonata/daemon_show.html.twig:45</note>
+      </notes>
+      <segment>
+        <source>Died On</source>
+        <target>Morto Il</target>
+      </segment>
+    </unit>
+    <unit id="vnfbEVb" name="Queues">
+      <notes>
+        <note category="file-source" priority="1">vendor/serendipity_hq/commands-queues-bundle/src/Resources/views/Admin/Sonata/daemon_show.html.twig:50</note>
+      </notes>
+      <segment>
+        <source>Queues</source>
+        <target>Code</target>
+      </segment>
+    </unit>
+    <unit id="BSqvuOv" name="Cancellation Reason">
+      <notes>
+        <note category="file-source" priority="1">vendor/serendipity_hq/commands-queues-bundle/src/Resources/views/Admin/Sonata/jobs_inner_list_row.html.twig:146</note>
+      </notes>
       <segment>
         <source>Cancellation Reason</source>
         <target>Causa della cancellazione</target>
       </segment>
     </unit>
-    <unit name="Execute After">
+    <unit id="kN1t6mJ" name="Execute After">
+      <notes>
+        <note category="file-source" priority="1">vendor/serendipity_hq/commands-queues-bundle/src/Resources/views/Admin/Sonata/jobs_inner_list_row.html.twig:157</note>
+      </notes>
       <segment>
         <source>Execute After</source>
         <target>Esegui dopo il</target>
       </segment>
     </unit>
-    <unit name="Retry strategy">
+    <unit id="o7LWn5O" name="Retry strategy">
+      <notes>
+        <note category="file-source" priority="1">vendor/serendipity_hq/commands-queues-bundle/src/Resources/views/Admin/Sonata/jobs_inner_list_row.html.twig:162</note>
+      </notes>
       <segment>
         <source>Retry strategy</source>
         <target>Strategia per ritentare</target>
       </segment>
     </unit>
-    <unit name="Current attempt">
+    <unit id="ZjUZhHJ" name="Current attempt">
+      <notes>
+        <note category="file-source" priority="1">vendor/serendipity_hq/commands-queues-bundle/src/Resources/views/Admin/Sonata/jobs_inner_list_row.html.twig:165</note>
+      </notes>
       <segment>
         <source>Current attempt</source>
         <target>Ritentativo attuale</target>
       </segment>
     </unit>
-    <unit name="Max attempts">
+    <unit id="Di7O73j" name="Max attempts">
+      <notes>
+        <note category="file-source" priority="1">vendor/serendipity_hq/commands-queues-bundle/src/Resources/views/Admin/Sonata/jobs_inner_list_row.html.twig:165</note>
+      </notes>
       <segment>
         <source>Max attempts</source>
         <target>Numero massimo di ritentativi</target>
       </segment>
     </unit>
-    <unit name="Increment by">
+    <unit id="OmnESg6" name="Increment by">
+      <notes>
+        <note category="file-source" priority="1">vendor/serendipity_hq/commands-queues-bundle/src/Resources/views/Admin/Sonata/jobs_inner_list_row.html.twig:166</note>
+      </notes>
       <segment>
         <source>Increment by</source>
         <target>Incrementa di</target>
       </segment>
     </unit>
-    <unit name="Exponential base">
+    <unit id=".dT4klM" name="Exponential base">
+      <notes>
+        <note category="file-source" priority="1">vendor/serendipity_hq/commands-queues-bundle/src/Resources/views/Admin/Sonata/jobs_inner_list_row.html.twig:167</note>
+      </notes>
       <segment>
         <source>Exponential base</source>
         <target>Base esponenziale</target>
