@@ -33,7 +33,7 @@
         "ext-ast": "*",
         "drenso/phan-extensions": "^2.4",
         "friendsofphp/php-cs-fixer": "^2",
-        "phan/phan": "^1.3",
+        "phan/phan": "^2.4",
         "phpstan/phpstan": "@stable",
         "phpstan/phpstan-doctrine": "@stable",
         "phpstan/phpstan-phpunit": "@stable",
