@@ -16,7 +16,7 @@ Install Judy (http://php.net/manual/en/judy.installation.php)
 To install `php-memprof`
 
     pecl install memprof
-    
+
 then [load the extension in your `php.ini`](https://github.com/arnaud-lb/php-memory-profiler#loading-the-extension) and
  restart the server.
 
@@ -24,10 +24,10 @@ To install `GraphViz`
 
     brew install graphviz
 
-To install `QCacheGrind`: 
+To install `QCacheGrind`:
 
     brew install qcachegrind
-    
+
 To view the generated file
 
     qcachegrind app/logs/callgrind.out
@@ -45,5 +45,9 @@ http://php.net/manual/en/internals2.memory.management.php
 - https://alexatnet.com/articles/optimize-php-memory-usage-eliminate-circular-references
 - http://paul-m-jones.com/archives/262
 - http://jpauli.github.io/2014/07/02/php-memory.html
+- (tool) https://github.com/arnaud-lb/php-memory-profiler
+- (tool) https://github.com/BitOne/php-meminfo
+- (tool) https://blackfire.io/
+- https://jolicode.com/blog/you-may-have-memory-leaking-from-php-7-and-symfony-tests
 
 *Do you like this bundle? [**Leave a &#9733;**](#js-repo-pjax-container) or run `composer global require symfony/thanks && composer thanks` to say thank you to all libraries you use in your current project, this one too!*
