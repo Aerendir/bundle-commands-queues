@@ -21,8 +21,8 @@
         "pagerfanta/pagerfanta": "^2.0",
         "sensio/framework-extra-bundle": "^5.1",
         "sensiolabs/ansi-to-html": "^1.1",
-        "serendipity_hq/console-styles-bundle": "^1.1",
-        "serendipity_hq/then-when": "^1.1",
+        "serendipity_hq/console-styles-bundle": "dev-dev",
+        "serendipity_hq/then-when": "dev-dev",
         "symfony/console": "^3.0|^4.0|^5.0",
         "symfony/framework-bundle": "^3.0|^4.0|^5.0",
         "symfony/polyfill-php73": "@stable",
@@ -34,7 +34,7 @@
         "drenso/phan-extensions": "^2.4",
         "friendsofphp/php-cs-fixer": "^2",
         "phan/phan": "^1.3",
-        "phpstan/phpstan": "@stable",
+        "phpstan/phpstan": "^0.12",
         "phpstan/phpstan-doctrine": "@stable",
         "phpstan/phpstan-phpunit": "@stable",
         "phpstan/phpstan-symfony": "@stable",
@@ -54,6 +54,11 @@
             "SerendipityHQ\\Bundle\\CommandsQueuesBundle\\": "src"
         },
         "exclude-from-classmap": ["/Tests/"]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "SerendipityHQ\\Bundle\\CommandsQueuesBundle\\Tests\\": "tests"
+        }
     },
     "config": {
         "sort-packages": true
