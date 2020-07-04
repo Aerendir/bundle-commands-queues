@@ -27,7 +27,7 @@
         "symfony/framework-bundle": "^3.0|^4.0|^5.0",
         "symfony/polyfill-php73": "@stable",
         "symfony/process": "^3.0|^4.0|^5.0",
-        "thecodingmachine/safe": "^0.1.15 || ^1.0.0"
+        "thecodingmachine/safe": "^0.1|^1.0"
     },
     "require-dev": {
         "ext-ast": "*",
