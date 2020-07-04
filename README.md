@@ -19,7 +19,6 @@ SHQ COMMANDS QUEUES BUNDLE
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=Aerendir_bundle-commands-queues&metric=security_rating)](https://sonarcloud.io/dashboard?id=Aerendir_bundle-commands-queues)
 [![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=Aerendir_bundle-commands-queues&metric=sqale_index)](https://sonarcloud.io/dashboard?id=Aerendir_bundle-commands-queues)
 [![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=Aerendir_bundle-commands-queues&metric=vulnerabilities)](https://sonarcloud.io/dashboard?id=Aerendir_bundle-commands-queues)
-[![SensioLabsInsight](https://insight.sensiolabs.com/projects/2a1bcd2f-f241-4969-96e4-10ead299d57b/mini.png)](https://insight.sensiolabs.com/projects/2a1bcd2f-f241-4969-96e4-10ead299d57b)
 
 ![Phan](https://github.com/Aerendir/bundle-commands-queues/workflows/Phan/badge.svg)
 ![PHPStan](https://github.com/Aerendir/bundle-commands-queues/workflows/PHPStan/badge.svg)
