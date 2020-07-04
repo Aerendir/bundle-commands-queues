@@ -8,9 +8,9 @@ SHQ COMMANDS QUEUES BUNDLE
 ==========================
 
 [![PHP from Packagist](https://img.shields.io/packagist/php-v/serendipity_hq/commands-queues-bundle?color=%238892BF)](https://packagist.org/packages/serendipity_hq/commands-queues-bundle)
-[![Tested with Symfony ^3.4](https://img.shields.io/badge/Symfony-%5E3.4-333)](https://github.com/Aerendir/bundle-commands-queues/actions)
-[![Tested with Symfony ^4.4](https://img.shields.io/badge/Symfony-%5E4.4-333)](https://github.com/Aerendir/bundle-commands-queues/actions)
-[![Tested with Symfony ^5.2](https://img.shields.io/badge/Symfony-%5E5.2-333)](https://github.com/Aerendir/bundle-commands-queues/actions)
+[![Tested with Symfony ^3.0](https://img.shields.io/badge/Symfony-%5E3.0-333)](https://github.com/Aerendir/bundle-commands-queues/actions)
+[![Tested with Symfony ^4.0](https://img.shields.io/badge/Symfony-%5E4.0-333)](https://github.com/Aerendir/bundle-commands-queues/actions)
+[![Tested with Symfony ^5.0](https://img.shields.io/badge/Symfony-%5E5.0-333)](https://github.com/Aerendir/bundle-commands-queues/actions)
 
 ![Suggests sonata-project/admin-bundle](https://img.shields.io/badge/Suggests-sonata--project%2Fadmin--bundle-8892BF)
 
