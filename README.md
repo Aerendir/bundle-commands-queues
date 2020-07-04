@@ -8,6 +8,12 @@ SHQ COMMANDS QUEUES BUNDLE
 ==========================
 
 [![PHP from Packagist](https://img.shields.io/packagist/php-v/serendipity_hq/commands-queues-bundle?color=%238892BF)](https://packagist.org/packages/serendipity_hq/commands-queues-bundle)
+[![Tested with Symfony ^3.4](https://img.shields.io/badge/Symfony-%5E3.4-333)](https://github.com/Aerendir/bundle-commands-queues/actions)
+[![Tested with Symfony ^4.4](https://img.shields.io/badge/Symfony-%5E4.4-333)](https://github.com/Aerendir/bundle-commands-queues/actions)
+[![Tested with Symfony ^5.2](https://img.shields.io/badge/Symfony-%5E5.2-333)](https://github.com/Aerendir/bundle-commands-queues/actions)
+
+![Suggests sonata-project/admin-bundle](https://img.shields.io/badge/Suggests-sonata--project%2Fadmin--bundle-8892BF)
+
 [![Latest Stable Version](https://poser.pugx.org/serendipity_hq/commands-queues-bundle/v/stable.png)](https://packagist.org/packages/serendipity_hq/commands-queues-bundle)
 [![Total Downloads](https://poser.pugx.org/serendipity_hq/commands-queues-bundle/downloads.svg)](https://packagist.org/packages/serendipity_hq/commands-queues-bundle)
 [![License](https://poser.pugx.org/serendipity_hq/commands-queues-bundle/license.svg)](https://packagist.org/packages/serendipity_hq/commands-queues-bundle)
