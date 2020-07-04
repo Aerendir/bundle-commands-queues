@@ -4,8 +4,8 @@
     </a>
 </p>
 
-SHQCommandsQueuesBundle
-=======================
+SHQ COMMANDS QUEUES BUNDLE
+==========================
 
 [![Latest Stable Version](https://poser.pugx.org/serendipity_hq/commands-queues-bundle/v/stable)](https://packagist.org/packages/serendipity_hq/commands-queues-bundle)
 [![Build Status](https://travis-ci.org/Aerendir/bundle-commands_queues.svg?branch=master)](https://travis-ci.org/Aerendir/bundle-commands-queues)
