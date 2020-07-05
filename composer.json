@@ -32,7 +32,6 @@
     "require-dev": {
         "drenso/phan-extensions": "@stable",
         "friendsofphp/php-cs-fixer": "^2",
-        "rector/rector": "^0.7.41",
         "phan/phan": "^3.",
         "phpstan/phpstan": "^0.12",
         "phpstan/phpstan-doctrine": "@stable",
@@ -44,7 +43,9 @@
         "sensiolabs/security-checker": "^6",
         "sonata-project/admin-bundle": "^3.48",
         "symfony/var-dumper": "^3.0|^4.0|^5.0",
-        "thecodingmachine/phpstan-safe-rule": "@stable"
+        "thecodingmachine/phpstan-safe-rule": "@stable",
+        "vimeo/psalm": "^3.12",
+        "weirdan/doctrine-psalm-plugin": "@stable"
     },
     "suggest":{
         "sonata-project/admin-bundle": "Allows to view what's going on with your queues and commands jobs using automatic integration with SonataAdminBundle."
