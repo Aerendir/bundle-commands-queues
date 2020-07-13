@@ -1,22 +1,26 @@
 <p align="center">
     <a href="http://www.serendipityhq.com" target="_blank">
-        <img src="http://www.serendipityhq.com/assets/open-source-projects/Logo-SerendipityHQ-Icon-Text-Purple.png">
+        <img style="max-width: 350px" src="http://www.serendipityhq.com/assets/open-source-projects/Logo-SerendipityHQ-Icon-Text-Purple.png">
     </a>
 </p>
 
-SHQ COMMANDS QUEUES BUNDLE
-==========================
+<h1 align="center">Serendipity HQ Commands Queues Bundle</h1>
+<p align="center">Manages queues and processes jobs in your Symfony App better than simple cronjobs.</p>
+<p align="center">
+    <a href="https://github.com/Aerendir/bundle-commands-queues/releases"><img src="https://img.shields.io/packagist/v/serendipity_hq/bundle-commands-queues.svg?style=flat-square"></a>
+    <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square"></a>
+    <a href="https://github.com/Aerendir/bundle-commands-queues/releases"><img src="https://img.shields.io/packagist/php-v/serendipity_hq/bundle-commands-queues?color=%238892BF&style=flat-square&logo=php" /></a>
+    <a title="Tested with Symfony ^3.4" href="https://github.com/Aerendir/bundle-commands-queues/actions?query=branch%3Adev"><img title="Tested with Symfony ^3.4" src="https://img.shields.io/badge/Symfony-%5E3.4-333?style=flat-square&logo=symfony" /></a>
+    <a title="Tested with Symfony ^4.4" href="https://github.com/Aerendir/bundle-commands-queues/actions?query=branch%3Adev"><img title="Tested with Symfony ^4.4" src="https://img.shields.io/badge/Symfony-%5E4.4-333?style=flat-square&logo=symfony" /></a>
+    <a title="Tested with Symfony ^5.0" href="https://github.com/Aerendir/bundle-commands-queues/actions?query=branch%3Adev"><img title="Tested with Symfony ^5.0" src="https://img.shields.io/badge/Symfony-%5E5.0-333?style=flat-square&logo=symfony" /></a>
+</p>
+<p align="center">
+    <a href="https://www.php.net/manual/en/book.json.php"><img src="https://img.shields.io/badge/Requires-ext--json-%238892BF?style=flat-square&logo=php"></a>
+    <a href="https://www.php.net/manual/en/book.pcntl.php"><img src="https://img.shields.io/badge/Requires-ext--pcntl-%238892BF?style=flat-square&logo=php"></a>
+    <a href="https://sonata-project.org/bundles/admin/master/doc/index.html"><img src="https://img.shields.io/badge/Suggests-sonata--project/admin--bundle-%238892BF?style=flat-square&logo=php"></a>
+</p>
 
-[![PHP from Packagist](https://img.shields.io/packagist/php-v/serendipity_hq/commands-queues-bundle?color=%238892BF)](https://packagist.org/packages/serendipity_hq/commands-queues-bundle)
-[![Tested with Symfony ^3.0](https://img.shields.io/badge/Symfony-%5E3.0-333)](https://github.com/Aerendir/bundle-commands-queues/actions)
-[![Tested with Symfony ^4.0](https://img.shields.io/badge/Symfony-%5E4.0-333)](https://github.com/Aerendir/bundle-commands-queues/actions)
-[![Tested with Symfony ^5.0](https://img.shields.io/badge/Symfony-%5E5.0-333)](https://github.com/Aerendir/bundle-commands-queues/actions)
-
-![Suggests sonata-project/admin-bundle](https://img.shields.io/badge/Suggests-sonata--project%2Fadmin--bundle-8892BF)
-
-[![Latest Stable Version](https://poser.pugx.org/serendipity_hq/commands-queues-bundle/v/stable.png)](https://packagist.org/packages/serendipity_hq/commands-queues-bundle)
-[![Total Downloads](https://poser.pugx.org/serendipity_hq/commands-queues-bundle/downloads.svg)](https://packagist.org/packages/serendipity_hq/commands-queues-bundle)
-[![License](https://poser.pugx.org/serendipity_hq/commands-queues-bundle/license.svg)](https://packagist.org/packages/serendipity_hq/commands-queues-bundle)
+## Current Status
 
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=Aerendir_bundle-commands-queues&metric=coverage)](https://sonarcloud.io/dashboard?id=Aerendir_bundle-commands-queues)
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=Aerendir_bundle-commands-queues&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=Aerendir_bundle-commands-queues)
@@ -33,8 +37,6 @@ SHQ COMMANDS QUEUES BUNDLE
 ![Composer](https://github.com/Aerendir/bundle-commands-queues/workflows/Composer/badge.svg)
 ![PHP CS Fixer](https://github.com/Aerendir/bundle-commands-queues/workflows/PHP%20CS%20Fixer/badge.svg)
 ![Rector](https://github.com/Aerendir/bundle-commands-queues/workflows/Rector/badge.svg)
-
-SHQCommandsQueuesBundle manages queues and processes jobs in your Symfony App.
 
 It is possible to run a single job or start a daemon that listens for new jobs and processes them as they are pushed into the queue.
 

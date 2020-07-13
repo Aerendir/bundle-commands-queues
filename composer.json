@@ -11,8 +11,8 @@
         }
     ],
     "require": {
-        "php": "^7.1",
-        "ext-json": "^1.5",
+        "php": "^7.2",
+        "ext-json": "*",
         "ext-pcntl": "*",
         "carbondate/carbon": "^1.33",
         "doctrine/common": "^2.5",
@@ -22,12 +22,12 @@
         "sensio/framework-extra-bundle": "^5.1",
         "sensiolabs/ansi-to-html": "^1.1",
         "serendipity_hq/console-styles-bundle": "dev-dev",
-        "serendipity_hq/then-when": "dev-dev",
+        "serendipity_hq/component-then-when": "dev-dev",
         "symfony/console": "^3.0|^4.0|^5.0",
         "symfony/framework-bundle": "^3.0|^4.0|^5.0",
         "symfony/polyfill-php73": "@stable",
         "symfony/process": "^3.0|^4.0|^5.0",
-        "thecodingmachine/safe": "^0.1|^1.0"
+        "thecodingmachine/safe": "^1.0"
     },
     "require-dev": {
         "drenso/phan-extensions": "@stable",
@@ -39,7 +39,6 @@
         "phpstan/phpstan-symfony": "@stable",
         "rector/rector": "^0.7",
         "roave/security-advisories": "dev-master",
-        "sensiolabs/security-checker": "^6",
         "sonata-project/admin-bundle": "^3.48",
         "symfony/phpunit-bridge": "^5.1",
         "symfony/var-dumper": "^3.0|^4.0|^5.0",
