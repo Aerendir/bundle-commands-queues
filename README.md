@@ -38,13 +38,14 @@
 [![PHP CS Fixer](https://github.com/Aerendir/bundle-commands-queues/workflows/PHP%20CS%20Fixer/badge.svg)](https://github.com/Aerendir/bundle-commands-queues/actions?query=branch%3Adev)
 [![Rector](https://github.com/Aerendir/bundle-commands-queues/workflows/Rector/badge.svg)](https://github.com/Aerendir/bundle-commands-queues/actions?query=branch%3Adev)
 
+## Features
+
 It is possible to run a single job or start a daemon that listens for new jobs and processes them as they are pushed into the queue.
 
 It automatically integrates with SonataAdminBundle for an easier administration.
 
 Do you like this bundle? [**Leave a &#9733;**](#js-repo-pjax-container)!
 
-DOCUMENTATION
-=============
+# Documentation
 
 You can read how to install, configure, test and use the SerendipityHQ Queues Bundle in the [documentation](docs/00-Index.md).
