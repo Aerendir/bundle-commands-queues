@@ -4,5 +4,6 @@ composer.lock
 phpunit.xml
 build
 vendor
+/vendor-bin/**/vendor
 var
 !var/cache/.gitkeep
