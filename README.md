@@ -30,13 +30,13 @@
 [![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=Aerendir_bundle-commands-queues&metric=sqale_index)](https://sonarcloud.io/dashboard?id=Aerendir_bundle-commands-queues)
 [![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=Aerendir_bundle-commands-queues&metric=vulnerabilities)](https://sonarcloud.io/dashboard?id=Aerendir_bundle-commands-queues)
 
-![Phan](https://github.com/Aerendir/bundle-commands-queues/workflows/Phan/badge.svg)
-![PHPStan](https://github.com/Aerendir/bundle-commands-queues/workflows/PHPStan/badge.svg)
-![PSalm](https://github.com/Aerendir/bundle-commands-queues/workflows/PSalm/badge.svg)
-![PHPUnit](https://github.com/Aerendir/bundle-commands-queues/workflows/PHPunit/badge.svg)
-![Composer](https://github.com/Aerendir/bundle-commands-queues/workflows/Composer/badge.svg)
-![PHP CS Fixer](https://github.com/Aerendir/bundle-commands-queues/workflows/PHP%20CS%20Fixer/badge.svg)
-![Rector](https://github.com/Aerendir/bundle-commands-queues/workflows/Rector/badge.svg)
+[![Phan](https://github.com/Aerendir/bundle-commands-queues/workflows/Phan/badge.svg)](https://github.com/Aerendir/bundle-commands-queues/actions?query=branch%3Adev)
+[![PHPStan](https://github.com/Aerendir/bundle-commands-queues/workflows/PHPStan/badge.svg)](https://github.com/Aerendir/bundle-commands-queues/actions?query=branch%3Adev)
+[![PSalm](https://github.com/Aerendir/bundle-commands-queues/workflows/PSalm/badge.svg)](https://github.com/Aerendir/bundle-commands-queues/actions?query=branch%3Adev)
+[![PHPUnit](https://github.com/Aerendir/bundle-commands-queues/workflows/PHPunit/badge.svg)](https://github.com/Aerendir/bundle-commands-queues/actions?query=branch%3Adev)
+[![Composer](https://github.com/Aerendir/bundle-commands-queues/workflows/Composer/badge.svg)](https://github.com/Aerendir/bundle-commands-queues/actions?query=branch%3Adev)
+[![PHP CS Fixer](https://github.com/Aerendir/bundle-commands-queues/workflows/PHP%20CS%20Fixer/badge.svg)](https://github.com/Aerendir/bundle-commands-queues/actions?query=branch%3Adev)
+[![Rector](https://github.com/Aerendir/bundle-commands-queues/workflows/Rector/badge.svg)](https://github.com/Aerendir/bundle-commands-queues/actions?query=branch%3Adev)
 
 It is possible to run a single job or start a daemon that listens for new jobs and processes them as they are pushed into the queue.
 
