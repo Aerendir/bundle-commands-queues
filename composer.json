@@ -1,5 +1,5 @@
 {
-    "name": "serendipity_hq/commands-queues-bundle",
+    "name": "serendipity_hq/bundle-commands-queues",
     "description": "Manage queues of commands and processes them in your Symfony app.",
     "type": "symfony-bundle",
     "keywords": [],
@@ -11,8 +11,8 @@
         }
     ],
     "require": {
-        "php": "^7.1",
-        "ext-json": "^1.5",
+        "php": "^7.2",
+        "ext-json": "*",
         "ext-pcntl": "*",
         "carbondate/carbon": "^1.33",
         "doctrine/common": "^2.5",
@@ -21,30 +21,19 @@
         "pagerfanta/pagerfanta": "^2.0",
         "sensio/framework-extra-bundle": "^5.1",
         "sensiolabs/ansi-to-html": "^1.1",
-        "serendipity_hq/console-styles-bundle": "^1.1",
-        "serendipity_hq/then-when": "^1.1",
-        "symfony/console": "^4.2.3",
-        "symfony/framework-bundle": "^4.0",
-        "symfony/polyfill-php73": "^1.11",
-        "symfony/process": "^4.0",
-        "thecodingmachine/safe": "^0.1.15 || ^1.0.0"
+        "serendipity_hq/console-styles-bundle": "dev-dev",
+        "serendipity_hq/component-then-when": "dev-dev",
+        "symfony/console": "^3.0|^4.0|^5.0",
+        "symfony/framework-bundle": "^3.0|^4.0|^5.0",
+        "symfony/polyfill-php73": "@stable",
+        "symfony/process": "^3.0|^4.0|^5.0",
+        "thecodingmachine/safe": "^1.0"
     },
     "require-dev": {
-        "ext-ast": "*",
-        "drenso/phan-extensions": "^2.4",
-        "friendsofphp/php-cs-fixer": "^2",
-        "phan/phan": "^1.3",
-        "phpstan/phpstan": "@stable",
-        "phpstan/phpstan-doctrine": "@stable",
-        "phpstan/phpstan-phpunit": "@stable",
-        "phpstan/phpstan-symfony": "@stable",
-        "phpunit/phpunit": "^6||^7||^8",
-        "rector/rector": "^0.4.11",
+        "bamarni/composer-bin-plugin": "^1.4",
         "roave/security-advisories": "dev-master",
-        "sensiolabs/security-checker": "^6",
         "sonata-project/admin-bundle": "^3.48",
-        "symfony/var-dumper": "^4.0",
-        "thecodingmachine/phpstan-safe-rule": "@stable"
+        "symfony/var-dumper": "^3.0|^4.0|^5.0"
     },
     "suggest":{
         "sonata-project/admin-bundle": "Allows to view what's going on with your queues and commands jobs using automatic integration with SonataAdminBundle."
@@ -52,10 +41,19 @@
     "autoload": {
         "psr-4": {
             "SerendipityHQ\\Bundle\\CommandsQueuesBundle\\": "src"
-        },
-        "exclude-from-classmap": ["/Tests/"]
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "SerendipityHQ\\Bundle\\CommandsQueuesBundle\\Tests\\": "tests"
+        }
     },
     "config": {
         "sort-packages": true
+    },
+    "scripts": {
+        "bin": "echo 'bin not installed'",
+        "post-install-cmd": ["@composer bin all install --ansi"],
+        "post-update-cmd": ["@composer bin all update --ansi"]
     }
 }

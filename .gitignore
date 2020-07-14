@@ -1,6 +1,7 @@
-/vendor/
-/composer.lock
-/build/
+composer.lock
 phpunit.xml
-.php_cs.cache
-.phpunit.result.cache
+build
+vendor
+/vendor-bin/**/vendor
+var
+!var/cache/.gitkeep

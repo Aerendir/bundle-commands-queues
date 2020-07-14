@@ -6,7 +6,8 @@ $finder = PhpCsFixer\Finder::create()
         'docs',
         'vendor'
     ])
-    ->in(__DIR__.'/src');
+    ->in(__DIR__.'/src')
+    ->in(__DIR__.'/tests');
 
 $header = <<<EOF
 This file is part of the SHQCommandsQueuesBundle.
@@ -17,13 +18,14 @@ For the full copyright and license information, please view the LICENSE
 file that was distributed with this source code.
 
 @author    Adamo Aerendir Crespi <hello@aerendir.me>
-@copyright Copyright (C) 2017 Aerendir. All rights reserved.
+@copyright Copyright (C) 2017 - 2020 Aerendir. All rights reserved.
 @license   MIT License.
 EOF;
 
 return PhpCsFixer\Config::create()
     ->setFinder($finder)
     ->setUsingCache(true)
+    ->setCacheFile(__DIR__.'/var/cache/.php_cs.cache')
     ->setRiskyAllowed(true)
     ->setRules([
         'header_comment' => ['header' => $header],
@@ -48,6 +50,7 @@ return PhpCsFixer\Config::create()
         'no_multiline_whitespace_before_semicolons' => true,
         'no_null_property_initialization' => true,
         'no_short_echo_tag' => true,
+        'no_superfluous_phpdoc_tags' => false,
         'no_unreachable_default_argument_value' => true,
         'no_useless_else' => true,
         'no_useless_return' => true,
@@ -71,6 +74,7 @@ return PhpCsFixer\Config::create()
         ],
         'ordered_imports' => true,
         'phpdoc_add_missing_param_annotation' => true,
+        'phpdoc_var_without_name' => false,
         'phpdoc_order' => true,
         'phpdoc_types_order' => ['null_adjustment' => 'always_last'],
         'single_line_comment_style' => ['comment_types' => ['hash']],
