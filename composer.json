@@ -21,7 +21,7 @@
         "pagerfanta/pagerfanta": "^2.0",
         "sensio/framework-extra-bundle": "^5.1",
         "sensiolabs/ansi-to-html": "^1.1",
-        "serendipity_hq/console-styles-bundle": "dev-dev",
+        "serendipity_hq/component-console-styles": "dev-dev",
         "serendipity_hq/component-then-when": "dev-dev",
         "symfony/console": "^3.0|^4.0|^5.0",
         "symfony/framework-bundle": "^3.0|^4.0|^5.0",
