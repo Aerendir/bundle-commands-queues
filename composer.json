@@ -1,5 +1,5 @@
 {
-    "name": "serendipity_hq/commands-queues-bundle",
+    "name": "serendipity_hq/bundle-commands-queues",
     "description": "Manage queues of commands and processes them in your Symfony app.",
     "type": "symfony-bundle",
     "keywords": [],
