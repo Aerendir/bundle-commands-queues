@@ -1,3 +1,5 @@
+*Do you like this bundle? [**Leave a &#9733;**](#js-repo-pjax-container) or run `composer global require symfony/thanks && composer thanks` to say thank you to all libraries you use in your current project, this included!*
+
 ### `queue_max_concurrent_jobs`
 
 The number of concurrent jobs to process at the same time in each queue.
@@ -22,7 +24,7 @@ This param indicates how many of them it has to process concurrently in each que
 
 Keep in mind that the higher this value, the higher the load on your server, obviously.
 
-If this number is too high, you may receive an error message like this 
+If this number is too high, you may receive an error message like this
 
 > [php] Warning: proc_open(): unable to create pipe Too many open files
 
@@ -85,3 +87,15 @@ The number of seconds after which the running jobs have to be checked.
         queues:
             queue_4:
                 queue_running_jobs_check_interval: 150 # Only queue_4 will check running jobs each 150 seconds
+
+<hr />
+<h3 align="center">
+    <b>Do you like this bundle?</b><br />
+    <b><a href="#js-repo-pjax-container">LEAVE A &#9733;</a></b>
+</h3>
+<p align="center">
+    or run<br />
+    <code>composer global require symfony/thanks && composer thanks</code><br />
+    to say thank you to all libraries you use in your current project, this included!
+</p>
+<hr />

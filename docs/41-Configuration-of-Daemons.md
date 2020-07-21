@@ -1,3 +1,5 @@
+*Do you like this bundle? [**Leave a &#9733;**](#js-repo-pjax-container) or run `composer global require symfony/thanks && composer thanks` to say thank you to all libraries you use in your current project, this included!*
+
 ### Configuring Daemons
 
 This is a sample configuration:
@@ -145,3 +147,15 @@ The following are the parameters that impact on the queues behavior and that can
 You can overwrite thoss parameters on a queue basis.
 
 See the details about this config params in the section [Configure Queues](42-Configuration-of-queues.md).
+
+<hr />
+<h3 align="center">
+    <b>Do you like this bundle?</b><br />
+    <b><a href="#js-repo-pjax-container">LEAVE A &#9733;</a></b>
+</h3>
+<p align="center">
+    or run<br />
+    <code>composer global require symfony/thanks && composer thanks</code><br />
+    to say thank you to all libraries you use in your current project, this included!
+</p>
+<hr />

@@ -1,4 +1,4 @@
-*Do you like this bundle? [**Leave a &#9733;**](#js-repo-pjax-container) or run `composer global require symfony/thanks && composer thanks` to say thank you to all libraries you use in your current project, this one too!*
+*Do you like this bundle? [**Leave a &#9733;**](#js-repo-pjax-container) or run `composer global require symfony/thanks && composer thanks` to say thank you to all libraries you use in your current project, this included!*
 
 How to configure Serendipity HQ Stripe Bundle
 =============================================
@@ -24,7 +24,7 @@ Here there is the available configuration parameters:
         daemon_profiling_info_interval: 350 # OPTIONAL. The number of SECONDS after which the profiling info have to be printed. Works only with -vv.
         daemon_print_profiling_info: true # OPTIONAL. If the profiling have to be printed or not after the daemon_profiling_info_interval.
         daemon_sleep_for: 10 # OPTIONAL. The amount of seconds the Daemon will sleep when runs out of jobs.
-        
+
         # Queues configuration
         queue_max_concurrent_jobs: 1 # OPTIONAL. The number of concurrent jobs to process at the same time in each queue.
         queue_max_retention_days: 365 # OPTIONAL. Jobs closed (with any status) older than the days specified, will be deleted.
@@ -39,6 +39,16 @@ You can overwrite those parameters on a daemon or queue basis.
 
 See the details about this config params in the sections [Configure Daemons](41-Configuration-of-Daemons.md) and [Configure Queues](42-Configuration-of-queues.md).
 
-*Do you like this bundle? [**Leave a &#9733;**](#js-repo-pjax-container) or run `composer global require symfony/thanks && composer thanks` to say thank you to all libraries you use in your current project, this one too!*
+<hr />
+<h3 align="center">
+    <b>Do you like this bundle?</b><br />
+    <b><a href="#js-repo-pjax-container">LEAVE A &#9733;</a></b>
+</h3>
+<p align="center">
+    or run<br />
+    <code>composer global require symfony/thanks && composer thanks</code><br />
+    to say thank you to all libraries you use in your current project, this included!
+</p>
+<hr />
 
 ([Go back to index](Index.md)) | Next step: [Configure the retention strategies](50-Retention-strategies.md)
