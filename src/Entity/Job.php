@@ -3,16 +3,12 @@
 declare(strict_types=1);
 
 /*
- * This file is part of the SHQCommandsQueuesBundle.
+ * This file is part of the Serendipity HQ Commands Queues Bundle.
  *
- * Copyright Adamo Aerendir Crespi 2017.
+ * Copyright (c) Adamo Aerendir Crespi <aerendir@serendipityhq.com>.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
- *
- * @author    Adamo Aerendir Crespi <hello@aerendir.me>
- * @copyright Copyright (C) 2017 Aerendir. All rights reserved.
- * @license   MIT License.
  */
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Entity;
@@ -455,17 +451,11 @@ class Job
     public function addChildDependency(Job $job): Job
     {
         if ($this === $job) {
-            throw new LogicException(
-                'You cannot add as dependency the object itself.'
-                . ' Check your addParentDependency() and addChildDependency() method.'
-            );
+            throw new LogicException('You cannot add as dependency the object itself.' . ' Check your addParentDependency() and addChildDependency() method.');
         }
 
         if ($this->parentDependencies->contains($job)) {
-            throw new LogicException(
-                'You cannot add a child dependecy that is already a parent dependency.'
-                . ' This will create an unresolvable circular reference.'
-            );
+            throw new LogicException('You cannot add a child dependecy that is already a parent dependency.' . ' This will create an unresolvable circular reference.');
         }
 
         if (false === $this->childDependencies->contains($job)) {
@@ -486,29 +476,17 @@ class Job
     public function addParentDependency(Job $job): Job
     {
         if ($this === $job) {
-            throw new LogicException(
-                'You cannot add as dependency the object itself.'
-                . ' Check your addParentDependency() and addChildDependency() method.'
-            );
+            throw new LogicException('You cannot add as dependency the object itself.' . ' Check your addParentDependency() and addChildDependency() method.');
         }
 
         // This Job is already started...
         $status = $this->getStatus();
         if (self::STATUS_PENDING === $status || self::STATUS_RUNNING === $status) {
-            throw new LogicException(
-                sprintf(
-                    'The Job %s has already started. You cannot add the parent dependency %s.',
-                    $this->getId(), $job->getId()
-                )
-            );
+            throw new LogicException(sprintf('The Job %s has already started. You cannot add the parent dependency %s.', $this->getId(), $job->getId()));
         }
 
         if (true === $this->childDependencies->contains($job)) {
-            throw new LogicException(sprintf(
-                'You cannot add a parent dependecy (%s) that is already a child dependency.'
-                . ' This will create an unresolvable circular reference.',
-                $job->getId()
-            ));
+            throw new LogicException(sprintf('You cannot add a parent dependecy (%s) that is already a child dependency.' . ' This will create an unresolvable circular reference.', $job->getId()));
         }
 
         if (false === $this->parentDependencies->contains($job)) {

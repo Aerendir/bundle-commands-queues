@@ -3,16 +3,12 @@
 declare(strict_types=1);
 
 /*
- * This file is part of the SHQCommandsQueuesBundle.
+ * This file is part of the Serendipity HQ Commands Queues Bundle.
  *
- * Copyright Adamo Aerendir Crespi 2017.
+ * Copyright (c) Adamo Aerendir Crespi <aerendir@serendipityhq.com>.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
- *
- * @author    Adamo Aerendir Crespi <hello@aerendir.me>
- * @copyright Copyright (C) 2017 Aerendir. All rights reserved.
- * @license   MIT License.
  */
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\DependencyInjection;
@@ -276,26 +272,19 @@ class Configuration implements ConfigurationInterface
     private function validateConfiguration(array $tree): bool
     {
         if (1 > $tree[self::DAEMON_ALIVE_DAEMONS_CHECK_INTERVAL_KEY]) {
-            throw new InvalidConfigurationException(sprintf(
-                'The global "%s" config param MUST be greater than 0. You set it to "%s".', self::DAEMON_ALIVE_DAEMONS_CHECK_INTERVAL_KEY, $tree[self::DAEMON_ALIVE_DAEMONS_CHECK_INTERVAL_KEY]
-            ));
+            throw new InvalidConfigurationException(sprintf('The global "%s" config param MUST be greater than 0. You set it to "%s".', self::DAEMON_ALIVE_DAEMONS_CHECK_INTERVAL_KEY, $tree[self::DAEMON_ALIVE_DAEMONS_CHECK_INTERVAL_KEY]));
         }
 
         foreach ($tree['daemons'] as $daemon => $config) {
             // A Daemon MUST HAVE at least one queue assigned
             if (empty($config['queues'])) {
-                throw new InvalidConfigurationException(sprintf(
-                    'The "%s" daemon MUST specify at least one queue to process.', $daemon
-                ));
+                throw new InvalidConfigurationException(sprintf('The "%s" daemon MUST specify at least one queue to process.', $daemon));
             }
 
             // Check the queue is not already assigned
             foreach ($config['queues'] as $queue) {
                 if (array_key_exists($queue, $this->foundQueues)) {
-                    throw new InvalidConfigurationException(sprintf(
-                        'Queue "%s" already assigned to daemon "%s". You cannot assign this queue also to daemon "%s".',
-                        $queue, $this->foundQueues[$queue], $daemon
-                    ));
+                    throw new InvalidConfigurationException(sprintf('Queue "%s" already assigned to daemon "%s". You cannot assign this queue also to daemon "%s".', $queue, $this->foundQueues[$queue], $daemon));
                 }
 
                 $this->foundQueues[$queue] = $daemon;
