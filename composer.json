@@ -30,7 +30,6 @@
         "serendipity_hq/component-then-when": "dev-dev",
         "symfony/console": "^3.4|^4.4|^5.1",
         "symfony/framework-bundle": "^3.4|^4.4|^5.1",
-        "symfony/polyfill-php73": "@stable",
         "symfony/process": "^3.4|^4.4|^5.1",
         "thecodingmachine/safe": "^1.0"
     },

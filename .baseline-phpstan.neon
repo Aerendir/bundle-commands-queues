@@ -3,505 +3,505 @@ parameters:
 		-
 			message: "#^Property SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Admin\\\\Sonata\\\\Entity\\\\JobAdmin\\:\\:\\$datagridValues type has no value type specified in iterable type array\\.$#"
 			count: 1
-			path: ../src/Admin/Sonata/Entity/JobAdmin.php
+			path: src/Admin/Sonata/Entity/JobAdmin.php
 
 		-
 			message: "#^Property SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Admin\\\\Sonata\\\\Entity\\\\JobAdmin\\:\\:\\$perPageOptions type has no value type specified in iterable type array\\.$#"
 			count: 1
-			path: ../src/Admin/Sonata/Entity/JobAdmin.php
+			path: src/Admin/Sonata/Entity/JobAdmin.php
 
 		-
 			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Admin\\\\Sonata\\\\Entity\\\\JobAdmin\\:\\:configureDatagridFilters\\(\\) has no return typehint specified\\.$#"
 			count: 1
-			path: ../src/Admin/Sonata/Entity/JobAdmin.php
+			path: src/Admin/Sonata/Entity/JobAdmin.php
 
 		-
 			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Admin\\\\Sonata\\\\Entity\\\\JobAdmin\\:\\:configureTabMenu\\(\\) has parameter \\$menu with no value type specified in iterable type Knp\\\\Menu\\\\ItemInterface\\.$#"
 			count: 1
-			path: ../src/Admin/Sonata/Entity/JobAdmin.php
+			path: src/Admin/Sonata/Entity/JobAdmin.php
 
 		-
 			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Admin\\\\Sonata\\\\SHQAnsiTheme\\:\\:asArray\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
-			path: ../src/Admin/Sonata/SHQAnsiTheme.php
+			path: src/Admin/Sonata/SHQAnsiTheme.php
 
 		-
 			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Admin\\\\Sonata\\\\Twig\\\\CommandsQueuesExtension\\:\\:getRenderedInput\\(\\) has parameter \\$input with no value type specified in iterable type array\\.$#"
 			count: 1
-			path: ../src/Admin/Sonata/Twig/CommandsQueuesExtension.php
+			path: src/Admin/Sonata/Twig/CommandsQueuesExtension.php
 
 		-
 			message: "#^Cannot cast array\\<string\\>\\|bool\\|string\\|null to int\\.$#"
 			count: 2
-			path: ../src/Command/InternalMarkAsCancelledCommand.php
+			path: src/Command/InternalMarkAsCancelledCommand.php
 
 		-
 			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Command\\\\InternalMarkAsCancelledCommand\\:\\:cancelChildJobs\\(\\) has parameter \\$alreadyCancelledJobs with no value type specified in iterable type array\\.$#"
 			count: 1
-			path: ../src/Command/InternalMarkAsCancelledCommand.php
+			path: src/Command/InternalMarkAsCancelledCommand.php
 
 		-
 			message: "#^Parameter \\#2 \\$needle of function strpos expects int\\|string, string\\|null given\\.$#"
 			count: 1
-			path: ../src/Command/RunCommand.php
+			path: src/Command/RunCommand.php
 
 		-
 			message: "#^Binary operation \"\\.\" between 'I\\\\'m TestQueue \\#' and array\\<string\\>\\|bool\\|string\\|null results in an error\\.$#"
 			count: 1
-			path: ../src/Command/TestFakeCommand.php
+			path: src/Command/TestFakeCommand.php
 
 		-
 			message: "#^Property SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Command\\\\TestRandomJobsCommand\\:\\:\\$queues type has no value type specified in iterable type array\\.$#"
 			count: 1
-			path: ../src/Command/TestRandomJobsCommand.php
+			path: src/Command/TestRandomJobsCommand.php
 
 		-
 			message: "#^PHPDoc tag @var for variable \\$retryStrategies has no value type specified in iterable type array\\.$#"
 			count: 1
-			path: ../src/Command/TestRandomJobsCommand.php
+			path: src/Command/TestRandomJobsCommand.php
 
 		-
 			message: "#^PHPDoc tag @var for variable \\$timeUnits has no value type specified in iterable type array\\.$#"
 			count: 1
-			path: ../src/Command/TestRandomJobsCommand.php
+			path: src/Command/TestRandomJobsCommand.php
 
 		-
 			message: "#^Cannot cast array\\<string\\>\\|string\\|null to int\\.$#"
 			count: 1
-			path: ../src/Command/TestRandomJobsCommand.php
+			path: src/Command/TestRandomJobsCommand.php
 
 		-
 			message: "#^Cannot cast array\\<string\\>\\|bool\\|string\\|null to int\\.$#"
 			count: 1
-			path: ../src/Command/TestRandomJobsCommand.php
+			path: src/Command/TestRandomJobsCommand.php
 
 		-
 			message: "#^Class DateTime is unsafe to use\\. Its methods can return FALSE instead of throwing an exception\\. Please add 'use Safe\\\\DateTime;' at the beginning of the file to use the variant provided by the 'thecodingmachine/safe' library\\.$#"
 			count: 1
-			path: ../src/Command/TestRandomJobsCommand.php
+			path: src/Command/TestRandomJobsCommand.php
 
 		-
 			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Command\\\\TestRandomJobsCommand\\:\\:getRandomRetryStrategy\\(\\) has parameter \\$strategies with no value type specified in iterable type array\\.$#"
 			count: 1
-			path: ../src/Command/TestRandomJobsCommand.php
+			path: src/Command/TestRandomJobsCommand.php
 
 		-
 			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Command\\\\TestRandomJobsCommand\\:\\:getRandomRetryStrategy\\(\\) has parameter \\$timeUnits with no value type specified in iterable type array\\.$#"
 			count: 1
-			path: ../src/Command/TestRandomJobsCommand.php
+			path: src/Command/TestRandomJobsCommand.php
 
 		-
 			message: "#^Unreachable statement \\- code above always terminates\\.$#"
 			count: 6
-			path: ../src/Command/TestRandomJobsCommand.php
+			path: src/Command/TestRandomJobsCommand.php
 
 		-
 			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Command\\\\TestRandomJobsCommand\\:\\:getRandomTimeUnit\\(\\) has parameter \\$timeUnits with no value type specified in iterable type array\\.$#"
 			count: 1
-			path: ../src/Command/TestRandomJobsCommand.php
+			path: src/Command/TestRandomJobsCommand.php
 
 		-
 			message: "#^Property SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Config\\\\DaemonConfig\\:\\:\\$daemons type has no value type specified in iterable type array\\.$#"
 			count: 1
-			path: ../src/Config/DaemonConfig.php
+			path: src/Config/DaemonConfig.php
 
 		-
 			message: "#^Property SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Config\\\\DaemonConfig\\:\\:\\$queues type has no value type specified in iterable type array\\.$#"
 			count: 1
-			path: ../src/Config/DaemonConfig.php
+			path: src/Config/DaemonConfig.php
 
 		-
 			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Config\\\\DaemonConfig\\:\\:__construct\\(\\) has parameter \\$daemons with no value type specified in iterable type array\\.$#"
 			count: 1
-			path: ../src/Config/DaemonConfig.php
+			path: src/Config/DaemonConfig.php
 
 		-
 			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Config\\\\DaemonConfig\\:\\:__construct\\(\\) has parameter \\$queues with no value type specified in iterable type array\\.$#"
 			count: 1
-			path: ../src/Config/DaemonConfig.php
+			path: src/Config/DaemonConfig.php
 
 		-
 			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Config\\\\DaemonConfig\\:\\:getQueues\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
-			path: ../src/Config/DaemonConfig.php
+			path: src/Config/DaemonConfig.php
 
 		-
 			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Config\\\\DaemonConfig\\:\\:getQueue\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
-			path: ../src/Config/DaemonConfig.php
+			path: src/Config/DaemonConfig.php
 
 		-
 			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Config\\\\DaemonConfig\\:\\:getRepoConfig\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
-			path: ../src/Config/DaemonConfig.php
+			path: src/Config/DaemonConfig.php
 
 		-
 			message: "#^Property SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Entity\\\\Daemon\\:\\:\\$processedJobs with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
 			count: 1
-			path: ../src/Entity/Daemon.php
+			path: src/Entity/Daemon.php
 
 		-
 			message: "#^Class DateTime is unsafe to use\\. Its methods can return FALSE instead of throwing an exception\\. Please add 'use Safe\\\\DateTime;' at the beginning of the file to use the variant provided by the 'thecodingmachine/safe' library\\.$#"
 			count: 2
-			path: ../src/Entity/Daemon.php
+			path: src/Entity/Daemon.php
 
 		-
 			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Entity\\\\Daemon\\:\\:getProcessedJobs\\(\\) return type with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
 			count: 1
-			path: ../src/Entity/Daemon.php
+			path: src/Entity/Daemon.php
 
 		-
 			message: "#^Property SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Entity\\\\Job\\:\\:\\$input type has no value type specified in iterable type array\\.$#"
 			count: 1
-			path: ../src/Entity/Job.php
+			path: src/Entity/Job.php
 
 		-
 			message: "#^Property SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Entity\\\\Job\\:\\:\\$debug type has no value type specified in iterable type array\\.$#"
 			count: 1
-			path: ../src/Entity/Job.php
+			path: src/Entity/Job.php
 
 		-
 			message: "#^Property SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Entity\\\\Job\\:\\:\\$cancelledJobs with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
 			count: 1
-			path: ../src/Entity/Job.php
+			path: src/Entity/Job.php
 
 		-
 			message: "#^Property SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Entity\\\\Job\\:\\:\\$childDependencies with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
 			count: 1
-			path: ../src/Entity/Job.php
+			path: src/Entity/Job.php
 
 		-
 			message: "#^Property SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Entity\\\\Job\\:\\:\\$parentDependencies with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
 			count: 1
-			path: ../src/Entity/Job.php
+			path: src/Entity/Job.php
 
 		-
 			message: "#^Property SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Entity\\\\Job\\:\\:\\$retryingJobs with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
 			count: 1
-			path: ../src/Entity/Job.php
+			path: src/Entity/Job.php
 
 		-
 			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Entity\\\\Job\\:\\:__construct\\(\\) has parameter \\$input with no value type specified in iterable type array\\.$#"
 			count: 1
-			path: ../src/Entity/Job.php
+			path: src/Entity/Job.php
 
 		-
 			message: "#^Class DateTime is unsafe to use\\. Its methods can return FALSE instead of throwing an exception\\. Please add 'use Safe\\\\DateTime;' at the beginning of the file to use the variant provided by the 'thecodingmachine/safe' library\\.$#"
 			count: 1
-			path: ../src/Entity/Job.php
+			path: src/Entity/Job.php
 
 		-
 			message: "#^Offset 'options' does not exist on array\\|null\\.$#"
 			count: 2
-			path: ../src/Entity/Job.php
+			path: src/Entity/Job.php
 
 		-
 			message: "#^Offset 'shortcuts' does not exist on array\\|null\\.$#"
 			count: 2
-			path: ../src/Entity/Job.php
+			path: src/Entity/Job.php
 
 		-
 			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Entity\\\\Job\\:\\:getInput\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
-			path: ../src/Entity/Job.php
+			path: src/Entity/Job.php
 
 		-
 			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Entity\\\\Job\\:\\:getDebug\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
-			path: ../src/Entity/Job.php
+			path: src/Entity/Job.php
 
 		-
 			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Entity\\\\Job\\:\\:getCancelledJobs\\(\\) return type with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
 			count: 1
-			path: ../src/Entity/Job.php
+			path: src/Entity/Job.php
 
 		-
 			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Entity\\\\Job\\:\\:getChildDependencies\\(\\) return type with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
 			count: 1
-			path: ../src/Entity/Job.php
+			path: src/Entity/Job.php
 
 		-
 			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Entity\\\\Job\\:\\:getParentDependencies\\(\\) return type with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
 			count: 1
-			path: ../src/Entity/Job.php
+			path: src/Entity/Job.php
 
 		-
 			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Entity\\\\Job\\:\\:getRetryingJobs\\(\\) return type with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
 			count: 1
-			path: ../src/Entity/Job.php
+			path: src/Entity/Job.php
 
 		-
 			message: "#^Unreachable statement \\- code above always terminates\\.$#"
 			count: 5
-			path: ../src/Entity/Job.php
+			path: src/Entity/Job.php
 
 		-
 			message: "#^Function ksort is unsafe to use\\. It can return FALSE instead of throwing an exception\\. Please add 'use function Safe\\\\ksort;' at the beginning of the file to use the variant provided by the 'thecodingmachine/safe' library\\.$#"
 			count: 2
-			path: ../src/Entity/Job.php
+			path: src/Entity/Job.php
 
 		-
 			message: "#^Class SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Repository\\\\DaemonRepository extends generic class Doctrine\\\\ORM\\\\EntityRepository but does not specify its types\\: TEntityClass$#"
 			count: 1
-			path: ../src/Repository/DaemonRepository.php
+			path: src/Repository/DaemonRepository.php
 
 		-
 			message: "#^Class SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Repository\\\\JobRepository extends generic class Doctrine\\\\ORM\\\\EntityRepository but does not specify its types\\: TEntityClass$#"
 			count: 1
-			path: ../src/Repository/JobRepository.php
+			path: src/Repository/JobRepository.php
 
 		-
 			message: "#^Property SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Repository\\\\JobRepository\\:\\:\\$config type has no value type specified in iterable type array\\.$#"
 			count: 1
-			path: ../src/Repository/JobRepository.php
+			path: src/Repository/JobRepository.php
 
 		-
 			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Repository\\\\JobRepository\\:\\:configure\\(\\) has parameter \\$config with no value type specified in iterable type array\\.$#"
 			count: 1
-			path: ../src/Repository/JobRepository.php
+			path: src/Repository/JobRepository.php
 
 		-
 			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Repository\\\\JobRepository\\:\\:findExpiredJobs\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
-			path: ../src/Repository/JobRepository.php
+			path: src/Repository/JobRepository.php
 
 		-
 			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Repository\\\\JobRepository\\:\\:findBySearch\\(\\) has parameter \\$input with no value type specified in iterable type array\\.$#"
 			count: 1
-			path: ../src/Repository/JobRepository.php
+			path: src/Repository/JobRepository.php
 
 		-
 			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Repository\\\\JobRepository\\:\\:findBySearch\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
-			path: ../src/Repository/JobRepository.php
+			path: src/Repository/JobRepository.php
 
 		-
 			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Repository\\\\JobRepository\\:\\:findNextStaleJob\\(\\) has parameter \\$knownAsStale with no value type specified in iterable type array\\.$#"
 			count: 1
-			path: ../src/Repository/JobRepository.php
+			path: src/Repository/JobRepository.php
 
 		-
 			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Repository\\\\JobRepository\\:\\:findNextJob\\(\\) has parameter \\$excludedJobs with no value type specified in iterable type array\\.$#"
 			count: 1
-			path: ../src/Repository/JobRepository.php
+			path: src/Repository/JobRepository.php
 
 		-
 			message: "#^Class DateTime is unsafe to use\\. Its methods can return FALSE instead of throwing an exception\\. Please add 'use Safe\\\\DateTime;' at the beginning of the file to use the variant provided by the 'thecodingmachine/safe' library\\.$#"
 			count: 1
-			path: ../src/Repository/JobRepository.php
+			path: src/Repository/JobRepository.php
 
 		-
 			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Service\\\\JobsManager\\:\\:buildDefaultInfo\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
-			path: ../src/Service/JobsManager.php
+			path: src/Service/JobsManager.php
 
 		-
 			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Service\\\\JobsManager\\:\\:calculateJobsTree\\(\\) has parameter \\$tree with no value type specified in iterable type array\\.$#"
 			count: 1
-			path: ../src/Service/JobsManager.php
+			path: src/Service/JobsManager.php
 
 		-
 			message: "#^Unreachable statement \\- code above always terminates\\.$#"
 			count: 4
-			path: ../src/Service/JobsManager.php
+			path: src/Service/JobsManager.php
 
 		-
 			message: "#^Property SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Service\\\\QueuesDaemon\\:\\:\\$canSleep type has no value type specified in iterable type array\\.$#"
 			count: 1
-			path: ../src/Service/QueuesDaemon.php
+			path: src/Service/QueuesDaemon.php
 
 		-
 			message: "#^Property SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Service\\\\QueuesDaemon\\:\\:\\$jobsMarker has no typehint specified\\.$#"
 			count: 1
-			path: ../src/Service/QueuesDaemon.php
+			path: src/Service/QueuesDaemon.php
 
 		-
 			message: "#^Property SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Service\\\\QueuesDaemon\\:\\:\\$runningJobs type has no value type specified in iterable type array\\.$#"
 			count: 1
-			path: ../src/Service/QueuesDaemon.php
+			path: src/Service/QueuesDaemon.php
 
 		-
 			message: "#^Function gethostname is unsafe to use\\. It can return FALSE instead of throwing an exception\\. Please add 'use function Safe\\\\gethostname;' at the beginning of the file to use the variant provided by the 'thecodingmachine/safe' library\\.$#"
 			count: 1
-			path: ../src/Service/QueuesDaemon.php
+			path: src/Service/QueuesDaemon.php
 
 		-
 			message: "#^Class DateTime is unsafe to use\\. Its methods can return FALSE instead of throwing an exception\\. Please add 'use Safe\\\\DateTime;' at the beginning of the file to use the variant provided by the 'thecodingmachine/safe' library\\.$#"
 			count: 5
-			path: ../src/Service/QueuesDaemon.php
+			path: src/Service/QueuesDaemon.php
 
 		-
 			message: "#^Offset 'options' does not exist on array\\|null\\.$#"
 			count: 1
-			path: ../src/Service/QueuesDaemon.php
+			path: src/Service/QueuesDaemon.php
 
 		-
 			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Service\\\\QueuesDaemon\\:\\:processRunningJob\\(\\) has parameter \\$runningJob with no value type specified in iterable type array\\.$#"
 			count: 1
-			path: ../src/Service/QueuesDaemon.php
+			path: src/Service/QueuesDaemon.php
 
 		-
 			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Service\\\\QueuesDaemon\\:\\:retryFailedJob\\(\\) has parameter \\$info with no value type specified in iterable type array\\.$#"
 			count: 1
-			path: ../src/Service/QueuesDaemon.php
+			path: src/Service/QueuesDaemon.php
 
 		-
 			message: "#^Variable \\$job in PHPDoc tag @var does not match assigned variable \\$stales\\.$#"
 			count: 1
-			path: ../src/Service/QueuesDaemon.php
+			path: src/Service/QueuesDaemon.php
 
 		-
 			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Service\\\\QueuesDaemon\\:\\:retryStaleJob\\(\\) has parameter \\$info with no value type specified in iterable type array\\.$#"
 			count: 1
-			path: ../src/Service/QueuesDaemon.php
+			path: src/Service/QueuesDaemon.php
 
 		-
 			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Service\\\\QueuesManager\\:\\:findByJob\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
-			path: ../src/Service/QueuesManager.php
+			path: src/Service/QueuesManager.php
 
 		-
 			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Service\\\\QueuesManager\\:\\:exists\\(\\) has parameter \\$input with no value type specified in iterable type array\\.$#"
 			count: 1
-			path: ../src/Service/QueuesManager.php
+			path: src/Service/QueuesManager.php
 
 		-
 			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Service\\\\QueuesManager\\:\\:find\\(\\) has parameter \\$input with no value type specified in iterable type array\\.$#"
 			count: 1
-			path: ../src/Service/QueuesManager.php
+			path: src/Service/QueuesManager.php
 
 		-
 			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Service\\\\QueuesManager\\:\\:find\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
-			path: ../src/Service/QueuesManager.php
+			path: src/Service/QueuesManager.php
 
 		-
 			message: "#^Property SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Util\\\\InputParser\\:\\:\\$preparedInput type has no value type specified in iterable type array\\.$#"
 			count: 1
-			path: ../src/Util/InputParser.php
+			path: src/Util/InputParser.php
 
 		-
 			message: "#^Property SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Util\\\\InputParser\\:\\:\\$defaultPreparedInput has no typehint specified\\.$#"
 			count: 1
-			path: ../src/Util/InputParser.php
+			path: src/Util/InputParser.php
 
 		-
 			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Util\\\\InputParser\\:\\:parseInput\\(\\) has parameter \\$input with no value type specified in iterable type array\\.$#"
 			count: 1
-			path: ../src/Util/InputParser.php
+			path: src/Util/InputParser.php
 
 		-
 			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Util\\\\InputParser\\:\\:parseInput\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
-			path: ../src/Util/InputParser.php
+			path: src/Util/InputParser.php
 
 		-
 			message: "#^Function ksort is unsafe to use\\. It can return FALSE instead of throwing an exception\\. Please add 'use function Safe\\\\ksort;' at the beginning of the file to use the variant provided by the 'thecodingmachine/safe' library\\.$#"
 			count: 2
-			path: ../src/Util/InputParser.php
+			path: src/Util/InputParser.php
 
 		-
 			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Util\\\\InputParser\\:\\:stringify\\(\\) has parameter \\$input with no value type specified in iterable type array\\.$#"
 			count: 1
-			path: ../src/Util/InputParser.php
+			path: src/Util/InputParser.php
 
 		-
 			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Util\\\\JobsMarker\\:\\:createReflectedJob\\(\\) return type with generic class ReflectionClass does not specify its types\\: T$#"
 			count: 1
-			path: ../src/Util/JobsMarker.php
+			path: src/Util/JobsMarker.php
 
 		-
 			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Util\\\\JobsMarker\\:\\:markJobAsAborted\\(\\) has parameter \\$info with no value type specified in iterable type array\\.$#"
 			count: 1
-			path: ../src/Util/JobsMarker.php
+			path: src/Util/JobsMarker.php
 
 		-
 			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Util\\\\JobsMarker\\:\\:markJobAsCancelled\\(\\) has parameter \\$info with no value type specified in iterable type array\\.$#"
 			count: 1
-			path: ../src/Util/JobsMarker.php
+			path: src/Util/JobsMarker.php
 
 		-
 			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Util\\\\JobsMarker\\:\\:markJobAsFailed\\(\\) has parameter \\$info with no value type specified in iterable type array\\.$#"
 			count: 1
-			path: ../src/Util/JobsMarker.php
+			path: src/Util/JobsMarker.php
 
 		-
 			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Util\\\\JobsMarker\\:\\:markJobAsFinished\\(\\) has parameter \\$info with no value type specified in iterable type array\\.$#"
 			count: 1
-			path: ../src/Util/JobsMarker.php
+			path: src/Util/JobsMarker.php
 
 		-
 			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Util\\\\JobsMarker\\:\\:markJobAsPending\\(\\) has parameter \\$info with no value type specified in iterable type array\\.$#"
 			count: 1
-			path: ../src/Util/JobsMarker.php
+			path: src/Util/JobsMarker.php
 
 		-
 			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Util\\\\JobsMarker\\:\\:markFailedJobAsRetried\\(\\) has parameter \\$info with no value type specified in iterable type array\\.$#"
 			count: 1
-			path: ../src/Util/JobsMarker.php
+			path: src/Util/JobsMarker.php
 
 		-
 			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Util\\\\JobsMarker\\:\\:markStaleJobAsRetried\\(\\) has parameter \\$info with no value type specified in iterable type array\\.$#"
 			count: 1
-			path: ../src/Util/JobsMarker.php
+			path: src/Util/JobsMarker.php
 
 		-
 			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Util\\\\JobsMarker\\:\\:markJobAsClosed\\(\\) has parameter \\$info with no value type specified in iterable type array\\.$#"
 			count: 1
-			path: ../src/Util/JobsMarker.php
+			path: src/Util/JobsMarker.php
 
 		-
 			message: "#^Class DateTime is unsafe to use\\. Its methods can return FALSE instead of throwing an exception\\. Please add 'use Safe\\\\DateTime;' at the beginning of the file to use the variant provided by the 'thecodingmachine/safe' library\\.$#"
 			count: 1
-			path: ../src/Util/JobsMarker.php
+			path: src/Util/JobsMarker.php
 
 		-
 			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Util\\\\JobsMarker\\:\\:markJobAsRetried\\(\\) has parameter \\$info with no value type specified in iterable type array\\.$#"
 			count: 1
-			path: ../src/Util/JobsMarker.php
+			path: src/Util/JobsMarker.php
 
 		-
 			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Util\\\\JobsMarker\\:\\:markJob\\(\\) has parameter \\$info with no value type specified in iterable type array\\.$#"
 			count: 1
-			path: ../src/Util/JobsMarker.php
+			path: src/Util/JobsMarker.php
 
 		-
 			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Util\\\\JobsMarker\\:\\:updateJob\\(\\) has parameter \\$info with no value type specified in iterable type array\\.$#"
 			count: 1
-			path: ../src/Util/JobsMarker.php
+			path: src/Util/JobsMarker.php
 
 		-
 			message: "#^Property SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Util\\\\Profiler\\:\\:\\$runningJobsLastCheckedAt type has no value type specified in iterable type array\\.$#"
 			count: 1
-			path: ../src/Util/Profiler.php
+			path: src/Util/Profiler.php
 
 		-
 			message: "#^Property SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Util\\\\Profiler\\:\\:\\$highestMemoryPeakReal has no typehint specified\\.$#"
 			count: 1
-			path: ../src/Util/Profiler.php
+			path: src/Util/Profiler.php
 
 		-
 			message: "#^Property SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Util\\\\Profiler\\:\\:\\$profilingInfo type has no value type specified in iterable type array\\.$#"
 			count: 1
-			path: ../src/Util/Profiler.php
+			path: src/Util/Profiler.php
 
 		-
 			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Util\\\\Profiler\\:\\:start\\(\\) has parameter \\$queues with no value type specified in iterable type array\\.$#"
 			count: 1
-			path: ../src/Util/Profiler.php
+			path: src/Util/Profiler.php
 
 		-
 			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Util\\\\Profiler\\:\\:profile\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
-			path: ../src/Util/Profiler.php
+			path: src/Util/Profiler.php
 
 		-
 			message: "#^Class DateTime is unsafe to use\\. Its methods can return FALSE instead of throwing an exception\\. Please add 'use Safe\\\\DateTime;' at the beginning of the file to use the variant provided by the 'thecodingmachine/safe' library\\.$#"
 			count: 1
-			path: ../src/Util/Profiler.php
+			path: src/Util/Profiler.php
 
 		-
 			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Tests\\\\Util\\\\InputParserTest\\:\\:getExpected\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
-			path: ../tests/Util/InputParserTest.php
+			path: tests/Util/InputParserTest.php
 
