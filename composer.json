@@ -28,9 +28,9 @@
         "sensiolabs/ansi-to-html": "^1.1",
         "serendipity_hq/component-console-styles": "dev-dev",
         "serendipity_hq/component-then-when": "dev-dev",
-        "symfony/console": "^3.4|^4.4|^5.1",
-        "symfony/framework-bundle": "^3.4|^4.4|^5.1",
-        "symfony/process": "^3.4|^4.4|^5.1",
+        "symfony/console": "^4.4|^5.1",
+        "symfony/framework-bundle": "^4.4|^5.1",
+        "symfony/process": "^4.4|^5.1",
         "thecodingmachine/safe": "^1.0"
     },
     "require-dev": {
@@ -38,7 +38,7 @@
         "bamarni/composer-bin-plugin": "^1.4",
         "roave/security-advisories": "dev-master",
         "sonata-project/admin-bundle": "^3.48",
-        "symfony/var-dumper": "^3.4|^4.4|^5.1"
+        "symfony/var-dumper": "^4.4|^5.1"
     },
     "suggest":{
         "sonata-project/admin-bundle": "Allows to view what's going on with your queues and commands jobs using automatic integration with SonataAdminBundle."
