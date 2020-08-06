@@ -123,6 +123,11 @@ return static function (ContainerConfigurator $containerConfigurator) : void {
             Rector\TypeDeclaration\Rector\ClassMethod\AddArrayParamDocTypeRector::class,
             Rector\TypeDeclaration\Rector\ClassMethod\AddArrayReturnDocTypeRector::class,
 
+            // Temporarily disabled
+            Rector\Generic\Rector\Argument\ArgumentRemoverRector::class, // See src/Service/QueuesDaemon
+            Rector\Generic\Rector\MethodCall\ServiceGetterToConstructorInjectionRector::class, // See src/Service/QueuesDaemon
+            Rector\Php71\Rector\FuncCall\RemoveExtraParametersRector::class, // See src/Service/QueuesDaemon
+
             // Bugged
             Rector\TypeDeclaration\Rector\Property\PropertyTypeDeclarationRector::class,
             Rector\PHPUnit\Rector\MethodCall\GetMockBuilderGetMockToCreateMockRector::class,
