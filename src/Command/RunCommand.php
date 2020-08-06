@@ -360,7 +360,7 @@ final class RunCommand extends Command
 
         // Search the line with this command name: this indicates the process is still running
         foreach ($lines as $line) {
-            if (false !== \strpos($line, $this->getName())) {
+            if (false !== \strpos($line, (string) $this->getName())) {
                 return true;
             }
         }

@@ -36,9 +36,6 @@
     <MixedMethodCall occurrences="1">
       <code>advance</code>
     </MixedMethodCall>
-    <PossiblyNullArgument occurrences="1">
-      <code>$this-&gt;getName()</code>
-    </PossiblyNullArgument>
     <PropertyNotSetInConstructor occurrences="2">
       <code>$ioWriter</code>
       <code>$output</code>

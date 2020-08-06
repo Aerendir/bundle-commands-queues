@@ -16,7 +16,7 @@
         }
     ],
     "require": {
-        "php": "^7.2",
+        "php": "^7.3",
         "ext-json": "*",
         "ext-pcntl": "*",
         "carbondate/carbon": "^1.33",

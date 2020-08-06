@@ -478,7 +478,7 @@ final class QueuesDaemon
         if (null === $queueName) {
             $runningJobs = 0;
             foreach ($this->runningJobs as $currentlyRunning) {
-                $runningJobs += \is_array($currentlyRunning) || $currentlyRunning instanceof Countable ? \count($currentlyRunning) : 0;
+                $runningJobs += \is_countable($currentlyRunning) ? \count($currentlyRunning) : 0;
             }
 
             // Return the overall amount

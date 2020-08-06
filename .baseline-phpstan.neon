@@ -36,11 +36,6 @@ parameters:
 			path: src/Command/InternalMarkAsCancelledCommand.php
 
 		-
-			message: "#^Parameter \\#2 \\$needle of function strpos expects int\\|string, string\\|null given\\.$#"
-			count: 1
-			path: src/Command/RunCommand.php
-
-		-
 			message: "#^Binary operation \"\\.\" between 'I\\\\'m TestQueue \\#' and array\\<string\\>\\|bool\\|string\\|null results in an error\\.$#"
 			count: 1
 			path: src/Command/TestFakeCommand.php

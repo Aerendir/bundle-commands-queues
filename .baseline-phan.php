@@ -15,7 +15,7 @@ return [
     // PhanUnreferencedProtectedProperty : 10+ occurrences
     // PhanReadOnlyPrivateProperty : 9 occurrences
     // PhanTypeArraySuspiciousNullable : 8 occurrences
-    // PhanRedefinedExtendedClass : 6 occurrences
+    // PhanRedefinedExtendedClass : 7 occurrences
     // PhanTypeMismatchArgumentNullable : 5 occurrences
     // PhanUnreferencedClass : 4 occurrences
     // PhanDeprecatedFunction : 2 occurrences
@@ -58,7 +58,7 @@ return [
         'src/Util/JobsMarker.php' => ['PhanRedefinedClassReference'],
         'src/Util/Profiler.php' => ['ConstReferenceClassNotImported', 'ConstReferenceConstNotFound', 'PhanRedefinedClassReference', 'PhanUnreferencedPublicMethod'],
         'src/Util/ProgressBarFactory.php' => ['PhanRedefinedClassReference', 'PhanUnusedClosureParameter'],
-        'tests/Util/InputParserTest.php' => ['PhanUnreferencedPublicMethod'],
+        'tests/Util/InputParserTest.php' => ['PhanRedefinedExtendedClass', 'PhanUnreferencedPublicMethod'],
     ],
     // 'directory_suppressions' => ['src/directory_name' => ['PhanIssueName1', 'PhanIssueName2']] can be manually added if needed.
     // (directory_suppressions will currently be ignored by subsequent calls to --save-baseline, but may be preserved in future Phan releases)
