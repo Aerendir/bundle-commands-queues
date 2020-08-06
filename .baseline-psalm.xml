@@ -47,6 +47,9 @@
     </InvalidOperand>
   </file>
   <file src="src/Command/TestRandomJobsCommand.php">
+    <DocblockTypeContradiction occurrences="1">
+      <code>0</code>
+    </DocblockTypeContradiction>
     <InvalidOperand occurrences="2">
       <code>$i + 1</code>
       <code>$days</code>
@@ -68,6 +71,10 @@
     </UndefinedInterfaceMethod>
   </file>
   <file src="src/Config/DaemonConfig.php">
+    <DocblockTypeContradiction occurrences="2">
+      <code>\is_array($this-&gt;daemons) || $this-&gt;daemons instanceof \Countable</code>
+      <code>0</code>
+    </DocblockTypeContradiction>
     <MixedArgument occurrences="7">
       <code>$this-&gt;daemons[$daemon][Configuration::DAEMON_ALIVE_DAEMONS_CHECK_INTERVAL_KEY]</code>
       <code>$this-&gt;daemons[$daemon][Configuration::DAEMON_MANAGED_ENTITIES_TRESHOLD_KEY]</code>
