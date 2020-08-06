@@ -18,6 +18,6 @@ use Symfony\Component\HttpKernel\Bundle\Bundle;
 /**
  * {@inheritdoc}
  */
-class SHQCommandsQueuesBundle extends Bundle
+final class SHQCommandsQueuesBundle extends Bundle
 {
 }

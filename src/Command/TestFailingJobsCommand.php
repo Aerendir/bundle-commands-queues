@@ -29,13 +29,17 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * Creates some failing Jobs.
  */
-class TestFailingJobsCommand extends Command
+final class TestFailingJobsCommand extends Command
 {
     /** @var string $defaultName */
     protected static $defaultName = 'queues:test:failing-jobs';
 
     /** @var QueuesManager $queuesManager */
     private $queuesManager;
+    /**
+     * @var string
+     */
+    private const QUEUE_1 = 'queue_1';
 
     /**
      * @param QueuesManager $queuesManager
@@ -75,15 +79,15 @@ class TestFailingJobsCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $job1 = new Job(TestFakeCommand::$defaultName, '--id=1 --trigger-error=true');
-        $job1->setRetryStrategy(new LiveStrategy(3))->setQueue('queue_1');
+        $job1->setRetryStrategy(new LiveStrategy(3))->setQueue(self::QUEUE_1);
         $this->queuesManager->schedule($job1);
 
         $job2 = new Job(TestFakeCommand::$defaultName, '--id=2 --trigger-error=true');
-        $job2->setQueue('queue_1')->addParentDependency($job1);
+        $job2->setQueue(self::QUEUE_1)->addParentDependency($job1);
         $this->queuesManager->schedule($job2);
 
         $job3 = new Job(TestFakeCommand::$defaultName, '--id=3 --trigger-error=true');
-        $job3->setQueue('queue_1');
+        $job3->setQueue(self::QUEUE_1);
         $job2->addChildDependency($job3);
         $this->queuesManager->schedule($job3);
 

@@ -19,7 +19,7 @@ use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Daemon;
 /**
  * {@inheritdoc}
  */
-class DaemonRepository extends EntityRepository
+final class DaemonRepository extends EntityRepository
 {
     /**
      * Finds the next Job to process.

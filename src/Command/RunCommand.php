@@ -47,7 +47,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * Runs the daemon that listens for new Joobs to process.
  */
-class RunCommand extends Command
+final class RunCommand extends Command
 {
     /** @var string */
     protected static $defaultName = 'queues:run';
@@ -135,13 +135,13 @@ class RunCommand extends Command
         $daemon    = $input->getArgument('daemon');
         $allowProd = $input->getOption('allow-prod');
 
-        if (null !== $daemon && false === is_string($daemon)) {
+        if (null !== $daemon && false === \is_string($daemon)) {
             $this->ioWriter->errorLineNoBg('The passed daemon is not valid.');
 
             return 1;
         }
 
-        if (false === is_bool($allowProd)) {
+        if (false === \is_bool($allowProd)) {
             $this->ioWriter->errorLineNoBg('The --allow-prod value is not valid.');
 
             return 1;
@@ -308,13 +308,13 @@ class RunCommand extends Command
             }
         }
 
-        if (0 >= count($strugglers) && $this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
+        if (0 >= \count($strugglers) && $this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
             $this->ioWriter->infoLineNoBg('No Struggler Daemons found.');
 
             return;
         }
 
-        $this->ioWriter->infoLineNoBg(sprintf('Found <success-nobg>%s</success-nobg> struggler Daemon(s).', count($strugglers)));
+        $this->ioWriter->infoLineNoBg(sprintf('Found <success-nobg>%s</success-nobg> struggler Daemon(s).', \count($strugglers)));
         $this->ioWriter->commentLineNoBg('Their "diedOn" date is set to NOW and mortisCausa is "struggler".');
 
         $table = [];
@@ -356,11 +356,11 @@ class RunCommand extends Command
     private function isDaemonStillRunning(Daemon $daemon): bool
     {
         // Get the running processes with the Daemon's PID
-        exec(sprintf('ps -ef | grep %s', $daemon->getPid()), $lines);
+        \exec(sprintf('ps -ef | grep %s', $daemon->getPid()), $lines);
 
         // Search the line with this command name: this indicates the process is still running
         foreach ($lines as $line) {
-            if (false !== strpos($line, $this->getName())) {
+            if (false !== \strpos($line, $this->getName())) {
                 return true;
             }
         }

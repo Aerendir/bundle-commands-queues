@@ -18,7 +18,7 @@ use SensioLabs\AnsiConverter\Theme\Theme;
 /**
  * {@inheritdoc}
  */
-class SHQAnsiTheme extends Theme
+final class SHQAnsiTheme extends Theme
 {
     /**
      * {@inheritdoc}

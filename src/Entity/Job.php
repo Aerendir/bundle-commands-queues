@@ -342,6 +342,14 @@ class Job
 
     /** @var string $cannotRunBecause This is not persisted. It is used to give the reason why the Job cannot run. */
     private $cannotRunBecause;
+    /**
+     * @var string
+     */
+    private const OPTIONS = 'options';
+    /**
+     * @var string
+     */
+    private const SHORTCUTS = 'shortcuts';
 
     /**
      * @param string       $command
@@ -371,10 +379,8 @@ class Job
      * This method accepts a string like "argument".
      *
      * @param string $value
-     *
-     * @return Job
      */
-    public function addArgument(string $value): Job
+    public function addArgument(string $value): self
     {
         if (false === InputParser::isArgument($value)) {
             throw new InvalidArgumentException("Job::addArgument() doesn't accept options nor shortcuts.");
@@ -392,24 +398,22 @@ class Job
      * @param string|null $value
      *
      * @throws StringsException
-     *
-     * @return Job
      */
-    public function addOption(string $option, ?string $value = null): Job
+    public function addOption(string $option, ?string $value = null): self
     {
         if (false === InputParser::isOption($option)) {
             throw new InvalidArgumentException('Job::addAOption() accepts only strings that start with "--".');
         }
 
-        if (false === is_array($this->input['options'])) {
-            $this->input['options'] = [];
+        if (false === \is_array($this->input[self::OPTIONS])) {
+            $this->input[self::OPTIONS] = [];
         }
 
-        if (array_key_exists($option, $this->input['options'])) {
+        if (\array_key_exists($option, $this->input[self::OPTIONS])) {
             throw new InvalidArgumentException(sprintf('The option "%s" was already added to the command.', $option));
         }
 
-        $this->input['options'][$option] = $value;
+        $this->input[self::OPTIONS][$option] = $value;
 
         return $this;
     }
@@ -419,24 +423,22 @@ class Job
      * @param string|null $value
      *
      * @throws StringsException
-     *
-     * @return Job
      */
-    public function addShortcut(string $option, ?string $value = null): Job
+    public function addShortcut(string $option, ?string $value = null): self
     {
         if (false === InputParser::isShortcut($option)) {
             throw new InvalidArgumentException('Job::addShortcut() accepts only strings that start with "-".');
         }
 
-        if (false === is_array($this->input['shortcuts'])) {
-            $this->input['shortcuts'] = [];
+        if (false === \is_array($this->input[self::SHORTCUTS])) {
+            $this->input[self::SHORTCUTS] = [];
         }
 
-        if (array_key_exists($option, $this->input['shortcuts'])) {
+        if (\array_key_exists($option, $this->input[self::SHORTCUTS])) {
             throw new InvalidArgumentException(sprintf('The shortcut "%s" was already added to the command.', $option));
         }
 
-        $this->input['shortcuts'][$option] = $value;
+        $this->input[self::SHORTCUTS][$option] = $value;
 
         return $this;
     }
@@ -445,10 +447,8 @@ class Job
      * @param Job $job
      *
      * @throws StringsException
-     *
-     * @return Job
      */
-    public function addChildDependency(Job $job): Job
+    public function addChildDependency(Job $job): self
     {
         if ($this === $job) {
             throw new LogicException('You cannot add as dependency the object itself.' . ' Check your addParentDependency() and addChildDependency() method.');
@@ -470,10 +470,8 @@ class Job
      * @param Job $job
      *
      * @throws StringsException
-     *
-     * @return Job
      */
-    public function addParentDependency(Job $job): Job
+    public function addParentDependency(Job $job): self
     {
         if ($this === $job) {
             throw new LogicException('You cannot add as dependency the object itself.' . ' Check your addParentDependency() and addChildDependency() method.');
@@ -1104,7 +1102,7 @@ class Job
      */
     public function isTypeCancelling(): bool
     {
-        return false !== strpos($this->getCommand(), 'mark-as-cancelled');
+        return false !== \strpos($this->getCommand(), 'mark-as-cancelled');
     }
 
     /**
@@ -1147,10 +1145,8 @@ class Job
 
     /**
      * @param bool $awareOfJobId
-     *
-     * @return Job
      */
-    public function makeAwareOfJob(bool $awareOfJobId = true): Job
+    public function makeAwareOfJob(bool $awareOfJobId = true): self
     {
         $this->awareOfJob = $awareOfJobId;
 
@@ -1159,10 +1155,8 @@ class Job
 
     /**
      * @param Job $job
-     *
-     * @return Job
      */
-    public function removeChildDependency(Job $job): Job
+    public function removeChildDependency(Job $job): self
     {
         if ($this->childDependencies->contains($job)) {
             $this->childDependencies->removeElement($job);
@@ -1174,10 +1168,8 @@ class Job
 
     /**
      * @param Job $job
-     *
-     * @return Job
      */
-    public function removeParentDependency(Job $job): Job
+    public function removeParentDependency(Job $job): self
     {
         if ($this->parentDependencies->contains($job)) {
             $this->parentDependencies->removeElement($job);
@@ -1187,10 +1179,7 @@ class Job
         return $this;
     }
 
-    /**
-     * @return Job
-     */
-    public function removeCancelledBy(): Job
+    public function removeCancelledBy(): self
     {
         $cancelledBy = $this->getCancelledBy();
 
@@ -1204,10 +1193,8 @@ class Job
 
     /**
      * @param Job $job
-     *
-     * @return Job
      */
-    public function removeCancelledJob(Job $job): Job
+    public function removeCancelledJob(Job $job): self
     {
         if ($this->cancelledJobs->contains($job)) {
             $this->cancelledJobs->removeElement($job);
@@ -1217,10 +1204,7 @@ class Job
         return $this;
     }
 
-    /**
-     * @return Job
-     */
-    public function removeRetriedBy(): Job
+    public function removeRetriedBy(): self
     {
         $retriedBy = $this->getRetriedBy();
 
@@ -1232,10 +1216,7 @@ class Job
         return $this;
     }
 
-    /**
-     * @return Job
-     */
-    public function removeRetryOf(): Job
+    public function removeRetryOf(): self
     {
         $retryOf = $this->getRetryOf();
 
@@ -1247,10 +1228,7 @@ class Job
         return $this;
     }
 
-    /**
-     * @return Job
-     */
-    public function removeFirstRetriedJob(): Job
+    public function removeFirstRetriedJob(): self
     {
         $this->firstRetriedJob = null;
 
@@ -1259,10 +1237,8 @@ class Job
 
     /**
      * @param DateTime $executeAfter
-     *
-     * @return Job
      */
-    public function setExecuteAfterTime(DateTime $executeAfter): Job
+    public function setExecuteAfterTime(DateTime $executeAfter): self
     {
         $this->executeAfterTime = $executeAfter;
 
@@ -1271,10 +1247,8 @@ class Job
 
     /**
      * @param int $priority
-     *
-     * @return Job
      */
-    public function setPriority(int $priority): Job
+    public function setPriority(int $priority): self
     {
         $this->priority = $priority;
 
@@ -1283,10 +1257,8 @@ class Job
 
     /**
      * @param string $queue
-     *
-     * @return Job
      */
-    public function setQueue(string $queue): Job
+    public function setQueue(string $queue): self
     {
         $this->queue = $queue;
 
@@ -1295,10 +1267,8 @@ class Job
 
     /**
      * @param StrategyInterface $retryStrategy
-     *
-     * @return Job
      */
-    public function setRetryStrategy(StrategyInterface $retryStrategy): Job
+    public function setRetryStrategy(StrategyInterface $retryStrategy): self
     {
         $this->retryStrategy = $retryStrategy;
 
@@ -1311,10 +1281,8 @@ class Job
      * Maintain this method private! It is used through reflection by Job#createRetryJob().
      *
      * @param Job $retriedJob
-     *
-     * @return Job
      */
-    public function setRetryOf(Job $retriedJob): Job
+    public function setRetryOf(Job $retriedJob): self
     {
         // This is a retry Job for another job
         $this->retryOf = $retriedJob;
@@ -1329,21 +1297,19 @@ class Job
     public function reorderInputs(): void
     {
         // Don't reorder the arguments as their order is relevant
-        if (null !== $this->input && isset($this->input['options']) && is_array($this->input['options'])) {
-            ksort($this->input['options'], SORT_NATURAL);
+        if (null !== $this->input && isset($this->input[self::OPTIONS]) && \is_array($this->input[self::OPTIONS])) {
+            \Safe\ksort($this->input[self::OPTIONS], SORT_NATURAL);
         }
 
-        if (null !== $this->input && isset($this->input['shortcuts']) && is_array($this->input['shortcuts'])) {
-            ksort($this->input['shortcuts'], SORT_NATURAL);
+        if (null !== $this->input && isset($this->input[self::SHORTCUTS]) && \is_array($this->input[self::SHORTCUTS])) {
+            \Safe\ksort($this->input[self::SHORTCUTS], SORT_NATURAL);
         }
     }
 
     /**
      * @param Job $retryingJob
-     *
-     * @return Job
      */
-    protected function setRetriedBy(Job $retryingJob): Job
+    protected function setRetriedBy(Job $retryingJob): self
     {
         $this->retriedBy = $retryingJob;
 
@@ -1352,10 +1318,8 @@ class Job
 
     /**
      * @param Job $firstRetriedJob
-     *
-     * @return Job
      */
-    protected function setFirstRetriedJob(Job $firstRetriedJob): Job
+    protected function setFirstRetriedJob(Job $firstRetriedJob): self
     {
         $this->firstRetriedJob = $firstRetriedJob;
 

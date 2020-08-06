@@ -20,7 +20,7 @@ use Sonata\AdminBundle\Route\RouteCollection;
 /**
  * {@inheritdoc}
  */
-class DaemonAdmin extends AbstractAdmin
+final class DaemonAdmin extends AbstractAdmin
 {
     /**
      * {@inheritdoc}

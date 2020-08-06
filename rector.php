@@ -122,7 +122,8 @@ return static function (ContainerConfigurator $containerConfigurator) : void {
             // Bugged
             Rector\TypeDeclaration\Rector\Property\PropertyTypeDeclarationRector::class,
             Rector\PHPUnit\Rector\MethodCall\GetMockBuilderGetMockToCreateMockRector::class,
-            Rector\CodingStyle\Rector\Property\UnderscoreToPascalCasePropertyNameRector::class
+            Rector\CodingStyle\Rector\Property\UnderscoreToPascalCasePropertyNameRector::class,
+            Rector\SOLID\Rector\Property\ChangeReadOnlyPropertyWithDefaultValueToConstantRector::class
         ]
     );
 };

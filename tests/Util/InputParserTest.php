@@ -19,7 +19,7 @@ use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\InputParser;
 /**
  * {@inheritdoc}
  */
-class InputParserTest extends TestCase
+final class InputParserTest extends TestCase
 {
     public function testIsArgument(): void
     {

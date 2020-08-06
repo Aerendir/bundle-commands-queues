@@ -28,7 +28,7 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
  *
  * {@inheritdoc}
  */
-class Configuration implements ConfigurationInterface
+final class Configuration implements ConfigurationInterface
 {
     /** @var string */
     public const DAEMON_ALIVE_DAEMONS_CHECK_INTERVAL_KEY = 'daemon_alive_daemons_check_interval';
@@ -92,6 +92,14 @@ class Configuration implements ConfigurationInterface
 
     /** @var array $foundQueues The queues found processing the Daemons */
     private $foundQueues = [];
+    /**
+     * @var string
+     */
+    private const DAEMONS = 'daemons';
+    /**
+     * @var string
+     */
+    private const QUEUES = 'queues';
 
     /**
      * The list of supported ORM drivers.
@@ -275,15 +283,15 @@ class Configuration implements ConfigurationInterface
             throw new InvalidConfigurationException(sprintf('The global "%s" config param MUST be greater than 0. You set it to "%s".', self::DAEMON_ALIVE_DAEMONS_CHECK_INTERVAL_KEY, $tree[self::DAEMON_ALIVE_DAEMONS_CHECK_INTERVAL_KEY]));
         }
 
-        foreach ($tree['daemons'] as $daemon => $config) {
+        foreach ($tree[self::DAEMONS] as $daemon => $config) {
             // A Daemon MUST HAVE at least one queue assigned
-            if (empty($config['queues'])) {
+            if (empty($config[self::QUEUES])) {
                 throw new InvalidConfigurationException(sprintf('The "%s" daemon MUST specify at least one queue to process.', $daemon));
             }
 
             // Check the queue is not already assigned
-            foreach ($config['queues'] as $queue) {
-                if (array_key_exists($queue, $this->foundQueues)) {
+            foreach ($config[self::QUEUES] as $queue) {
+                if (\array_key_exists($queue, $this->foundQueues)) {
                     throw new InvalidConfigurationException(sprintf('Queue "%s" already assigned to daemon "%s". You cannot assign this queue also to daemon "%s".', $queue, $this->foundQueues[$queue], $daemon));
                 }
 
@@ -308,32 +316,32 @@ class Configuration implements ConfigurationInterface
         // Create the main configuration array to return
         $returnConfig = [
             'db_driver'          => $tree['db_driver'],
-            'daemons'            => $tree['daemons'],
-            'queues'             => $tree['queues'],
+            self::DAEMONS            => $tree[self::DAEMONS],
+            self::QUEUES             => $tree[self::QUEUES],
         ];
 
-        if (0 === count($returnConfig['daemons'])) {
-            $returnConfig['daemons'][Daemon::DEFAULT_DAEMON_NAME] = [];
+        if (0 === (\is_array($returnConfig[self::DAEMONS]) || $returnConfig[self::DAEMONS] instanceof \Countable ? \count($returnConfig[self::DAEMONS]) : 0)) {
+            $returnConfig[self::DAEMONS][Daemon::DEFAULT_DAEMON_NAME] = [];
         }
 
         // Configure each daemon
-        foreach ($returnConfig['daemons'] as $daemon => $config) {
-            $returnConfig['daemons'][$daemon] = $this->configureDaemon($config, $tree);
+        foreach ($returnConfig[self::DAEMONS] as $daemon => $config) {
+            $returnConfig[self::DAEMONS][$daemon] = $this->configureDaemon($config, $tree);
         }
 
         // Add all the found queues to the queues array
-        foreach (array_keys($this->foundQueues) as $queue) {
-            if (false === array_key_exists($queue, $returnConfig['queues'])) {
-                $returnConfig['queues'][$queue] = [];
+        foreach (\array_keys($this->foundQueues) as $queue) {
+            if (false === \array_key_exists($queue, $returnConfig[self::QUEUES])) {
+                $returnConfig[self::QUEUES][$queue] = [];
             }
         }
 
         // Sort queues alphabetically
-        ksort($returnConfig['queues']);
+        ksort($returnConfig[self::QUEUES]);
 
         // Now configure the queues
-        foreach ($returnConfig['queues'] as $queue => $config) {
-            $returnConfig['queues'][$queue] = $this->configureQueue($this->foundQueues[$queue], $config, $tree);
+        foreach ($returnConfig[self::QUEUES] as $queue => $config) {
+            $returnConfig[self::QUEUES][$queue] = $this->configureQueue($this->foundQueues[$queue], $config, $tree);
         }
 
         return $returnConfig;
@@ -347,8 +355,8 @@ class Configuration implements ConfigurationInterface
      */
     private function configureDaemon(array $config, array $tree): array
     {
-        if (false === isset($config['queues'])) {
-            $config['queues'][]                            = Daemon::DEFAULT_QUEUE_NAME;
+        if (false === isset($config[self::QUEUES])) {
+            $config[self::QUEUES][]                            = Daemon::DEFAULT_QUEUE_NAME;
             $this->foundQueues[Daemon::DEFAULT_QUEUE_NAME] = Daemon::DEFAULT_QUEUE_NAME;
         }
 
@@ -360,7 +368,7 @@ class Configuration implements ConfigurationInterface
             self::DAEMON_PROFILING_INFO_INTERVAL_KEY      => $config[self::DAEMON_PROFILING_INFO_INTERVAL_KEY] ?? $tree[self::DAEMON_PROFILING_INFO_INTERVAL_KEY],
             self::DAEMON_PRINT_PROFILING_INFO_KEY         => $config[self::DAEMON_PRINT_PROFILING_INFO_KEY] ?? $tree[self::DAEMON_PRINT_PROFILING_INFO_KEY],
             self::DAEMON_SLEEP_FOR_KEY                    => $config[self::DAEMON_SLEEP_FOR_KEY] ?? $tree[self::DAEMON_SLEEP_FOR_KEY],
-            'queues'                                      => $config['queues'],
+            self::QUEUES                                      => $config[self::QUEUES],
         ];
     }
 
@@ -374,10 +382,10 @@ class Configuration implements ConfigurationInterface
     private function configureQueue(string $daemon, array $config, array $tree): array
     {
         return [
-            self::QUEUE_MAX_CONCURRENT_JOBS_KEY         => $config[self::QUEUE_MAX_CONCURRENT_JOBS_KEY] ?? $tree['daemons'][$daemon][self::QUEUE_MAX_CONCURRENT_JOBS_KEY] ?? $tree[self::QUEUE_MAX_CONCURRENT_JOBS_KEY],
-            self::QUEUE_MAX_RETENTION_DAYS_KEY          => $config[self::QUEUE_MAX_RETENTION_DAYS_KEY] ?? $tree['daemons'][$daemon][self::QUEUE_MAX_RETENTION_DAYS_KEY] ?? $tree[self::QUEUE_MAX_RETENTION_DAYS_KEY],
-            self::QUEUE_RETRY_STALE_JOBS_KEY            => $config[self::QUEUE_RETRY_STALE_JOBS_KEY] ?? $tree['daemons'][$daemon][self::QUEUE_RETRY_STALE_JOBS_KEY] ?? $tree[self::QUEUE_RETRY_STALE_JOBS_KEY],
-            self::QUEUE_RUNNING_JOBS_CHECK_INTERVAL_KEY => $config[self::QUEUE_RUNNING_JOBS_CHECK_INTERVAL_KEY] ?? $tree['daemons'][$daemon][self::QUEUE_RUNNING_JOBS_CHECK_INTERVAL_KEY] ?? $tree[self::QUEUE_RUNNING_JOBS_CHECK_INTERVAL_KEY],
+            self::QUEUE_MAX_CONCURRENT_JOBS_KEY         => $config[self::QUEUE_MAX_CONCURRENT_JOBS_KEY] ?? $tree[self::DAEMONS][$daemon][self::QUEUE_MAX_CONCURRENT_JOBS_KEY] ?? $tree[self::QUEUE_MAX_CONCURRENT_JOBS_KEY],
+            self::QUEUE_MAX_RETENTION_DAYS_KEY          => $config[self::QUEUE_MAX_RETENTION_DAYS_KEY] ?? $tree[self::DAEMONS][$daemon][self::QUEUE_MAX_RETENTION_DAYS_KEY] ?? $tree[self::QUEUE_MAX_RETENTION_DAYS_KEY],
+            self::QUEUE_RETRY_STALE_JOBS_KEY            => $config[self::QUEUE_RETRY_STALE_JOBS_KEY] ?? $tree[self::DAEMONS][$daemon][self::QUEUE_RETRY_STALE_JOBS_KEY] ?? $tree[self::QUEUE_RETRY_STALE_JOBS_KEY],
+            self::QUEUE_RUNNING_JOBS_CHECK_INTERVAL_KEY => $config[self::QUEUE_RUNNING_JOBS_CHECK_INTERVAL_KEY] ?? $tree[self::DAEMONS][$daemon][self::QUEUE_RUNNING_JOBS_CHECK_INTERVAL_KEY] ?? $tree[self::QUEUE_RUNNING_JOBS_CHECK_INTERVAL_KEY],
         ];
     }
 }

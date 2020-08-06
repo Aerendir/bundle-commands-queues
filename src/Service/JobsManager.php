@@ -32,7 +32,7 @@ use Symfony\Component\Process\Process;
 /**
  * Manages the Jobs.
  */
-class JobsManager
+final class JobsManager
 {
     /** @var EntityManager $entityManager */
     private static $entityManager;
@@ -71,7 +71,7 @@ class JobsManager
         $env                 = $ioWriter->getInput()->getOption('env');
         self::$entityManager = $entityManager;
         self::$ioWriter      = $ioWriter;
-        $this->env           = is_string($env) ? $env : 'dev';
+        $this->env           = \is_string($env) ? $env : 'dev';
         $this->verbosity     = $ioWriter->getVerbosity();
     }
 
@@ -140,12 +140,12 @@ class JobsManager
 
             // Print detached
             if (false === empty($detached)) {
-                self::$ioWriter->commentLineNoBg(sprintf('Detached: %s', implode(', ', $detached)));
+                self::$ioWriter->commentLineNoBg(sprintf('Detached: %s', \implode(', ', $detached)));
             }
 
             // Print not detached
             if (false === empty($notDetached)) {
-                self::$ioWriter->commentLineNoBg(sprintf('Not Detached: %s', implode(', ', $notDetached)));
+                self::$ioWriter->commentLineNoBg(sprintf('Not Detached: %s', \implode(', ', $notDetached)));
             }
         }
     }
@@ -240,7 +240,7 @@ class JobsManager
         // The input
         $input   = InputParser::stringify($job->getInput());
         if (null !== $input) {
-            $command = array_merge($command, explode(' ', $input));
+            $command = \array_merge($command, \explode(' ', $input));
         }
 
         // Decide the environment to use
@@ -301,7 +301,7 @@ class JobsManager
         if (null !== $job->getChildDependencies() && 0 < $job->getChildDependencies()->count()) {
             /** @var Job $childDependency Detach child deps * */
             foreach ($job->getChildDependencies() as $childDependency) {
-                if (false === in_array($childDependency->getId(), $tree, true)) {
+                if (false === \in_array($childDependency->getId(), $tree, true)) {
                     // Add it to the tree
                     $tree[] = $childDependency->getId();
 
@@ -311,10 +311,10 @@ class JobsManager
             }
         }
 
-        if (null !== $job->getParentDependencies() && 0 < count($job->getParentDependencies())) {
+        if (null !== $job->getParentDependencies() && 0 < \count($job->getParentDependencies())) {
             /** @var Job $parentDependency Detach parend deps * */
             foreach ($job->getParentDependencies() as $parentDependency) {
-                if (false === in_array($parentDependency->getId(), $tree, true)) {
+                if (false === \in_array($parentDependency->getId(), $tree, true)) {
                     // Add it to the tree
                     $tree[] = $parentDependency->getId();
 
@@ -325,7 +325,7 @@ class JobsManager
         }
 
         // Detach the cancelling Job if any
-        if (null !== $job->getCancelledBy() && false === in_array($job->getCancelledBy()->getId(), $tree, true)) {
+        if (null !== $job->getCancelledBy() && false === \in_array($job->getCancelledBy()->getId(), $tree, true)) {
             $tree[] = $job->getCancelledBy()->getId();
 
             // Visit the child
@@ -335,7 +335,7 @@ class JobsManager
         /* @var Job $retryingDependency Detach cancelled Jobs **/
         if (0 < $job->getCancelledJobs()->count()) {
             foreach ($job->getCancelledJobs() as $cancelledJob) {
-                if (false === in_array($cancelledJob->getId(), $tree, true)) {
+                if (false === \in_array($cancelledJob->getId(), $tree, true)) {
                     // Add it to the tree
                     $tree[] = $cancelledJob->getId();
 
@@ -346,7 +346,7 @@ class JobsManager
         }
 
         // Detach the retried Job
-        if (null !== $job->getRetryOf() && false === in_array($job->getRetryOf()->getId(), $tree, true)) {
+        if (null !== $job->getRetryOf() && false === \in_array($job->getRetryOf()->getId(), $tree, true)) {
             $tree[] = $job->getRetryOf()->getId();
 
             // Visit the child
@@ -354,7 +354,7 @@ class JobsManager
         }
 
         // And the first retried one
-        if (null !== $job->getFirstRetriedJob() && false === in_array($job->getFirstRetriedJob()->getId(), $tree, true)) {
+        if (null !== $job->getFirstRetriedJob() && false === \in_array($job->getFirstRetriedJob()->getId(), $tree, true)) {
             $tree[] = $job->getFirstRetriedJob()->getId();
 
             // Visit the child
@@ -362,7 +362,7 @@ class JobsManager
         }
 
         // The retrying one if any
-        if (null !== $job->getRetriedBy() && false === in_array($job->getRetriedBy()->getId(), $tree, true)) {
+        if (null !== $job->getRetriedBy() && false === \in_array($job->getRetriedBy()->getId(), $tree, true)) {
             $tree[] = $job->getRetriedBy()->getId();
 
             // Visit the child
@@ -371,9 +371,9 @@ class JobsManager
 
         // And all the retrying Jobs
         /* @var Job $retryingDependency Detach retryingDeps **/
-        if (null !== $job->getRetryingJobs() && 0 < count($job->getRetryingJobs())) {
+        if (null !== $job->getRetryingJobs() && 0 < \count($job->getRetryingJobs())) {
             foreach ($job->getRetryingJobs() as $retryingJob) {
-                if (false === in_array($retryingJob->getId(), $tree, true)) {
+                if (false === \in_array($retryingJob->getId(), $tree, true)) {
                     // Add it to the tree
                     $tree[] = $retryingJob->getId();
 
@@ -395,11 +395,11 @@ class JobsManager
      */
     private function findConsole(): string
     {
-        if (file_exists($this->kernelRootDir . '/console')) {
+        if (\file_exists($this->kernelRootDir . '/console')) {
             return $this->kernelRootDir . '/console';
         }
 
-        if (file_exists($this->kernelRootDir . '/../bin/console')) {
+        if (\file_exists($this->kernelRootDir . '/../bin/console')) {
             return $this->kernelRootDir . '/../bin/console';
         }
 

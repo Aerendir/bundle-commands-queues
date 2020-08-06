@@ -19,7 +19,7 @@ use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
 /**
  * A set of helper methods to use with the Jobs.
  */
-class JobsUtil
+final class JobsUtil
 {
     /** @var string */
     public const TIME_FORMAT = 'Y-m-d H:i:s';
@@ -34,7 +34,7 @@ class JobsUtil
     {
         $time = 'XXXX-XX-XX XX:XX:XX';
 
-        if (false === method_exists($job, $getTime)) {
+        if (false === \method_exists($job, $getTime)) {
             return $time;
         }
 

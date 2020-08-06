@@ -20,7 +20,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * Creates a ProgressBarFactory to display Jobs processing advancing.
  */
-class ProgressBarFactory
+final class ProgressBarFactory
 {
     /**
      * @var string
@@ -51,7 +51,7 @@ class ProgressBarFactory
         ProgressBar::setPlaceholderFormatterDefinition(
             'memory_nr',
             function (ProgressBar $bar, OutputInterface $output) {
-                return Helper::formatMemory(memory_get_usage(false));
+                return Helper::formatMemory(\memory_get_usage(false));
             }
         );
         $progress = new ProgressBar($output, $howManyJobs);

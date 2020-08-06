@@ -37,13 +37,17 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * Changes the status of Jobs during their execution attaching to them execution info.
  */
-class JobsMarker
+final class JobsMarker
 {
     /** @var EntityManager $entityManager */
     private static $entityManager;
 
     /** @var SerendipityHQStyle $ioWriter */
     private static $ioWriter;
+    /**
+     * @var string
+     */
+    private const DEBUG = 'debug';
 
     /**
      * @param EntityManagerInterface $entityManager
@@ -317,11 +321,11 @@ class JobsMarker
             // sacrifice queries to the databse in favor of a minor memory consumption.
             ->setMiddleHandlerForException([
                 ORMInvalidArgumentException::class, InvalidArgumentException::class,
-            ], static function (Exception $e) use ($job, $status, $info, $daemon, $ioWriter) {
+            ], static function (Exception $e) use ($job, $status, $info, $daemon, $ioWriter): void {
                 if (
                     ! $e instanceof ORMInvalidArgumentException
                     && $e instanceof InvalidArgumentException
-                    && false === strpos($e->getMessage(), 'Entity has to be managed or scheduled for removal for single computation')
+                    && false === \strpos($e->getMessage(), 'Entity has to be managed or scheduled for removal for single computation')
                 ) {
                     throw $e;
                 }
@@ -336,7 +340,7 @@ class JobsMarker
             })
             ->setFinalHandlerForException([
                 ORMInvalidArgumentException::class, InvalidArgumentException::class,
-            ], static function (Exception $e) use ($job, $oldStatus, $ioWriter) {
+            ], static function (Exception $e) use ($job, $oldStatus, $ioWriter): void {
                 self::$ioWriter->error(sprintf('Error trying to flush Job #%s (%s => %s).', $job->getId(), $oldStatus, $job->getStatus()));
                 if ($ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
                     Profiler::printUnitOfWork();
@@ -345,7 +349,7 @@ class JobsMarker
             });
 
         $tryAgainBuilder->initializeRetryStrategy()
-            ->try(static function () use ($job) {
+            ->try(static function () use ($job): void {
                 /*
                  * Flush now to be sure editings aren't cleared during optimizations.
                  *
@@ -384,7 +388,7 @@ class JobsMarker
         if (Job::STATUS_CANCELLED === $status) {
             $reflectedProperty = $reflectedClass->getProperty('cancellationReason');
             $reflectedProperty->setAccessible(true);
-            $reflectedProperty->setValue($job, $info['debug']['cancellation_reason']);
+            $reflectedProperty->setValue($job, $info[self::DEBUG]['cancellation_reason']);
         }
 
         // Then set the processing Daemon
@@ -405,8 +409,8 @@ class JobsMarker
                 case 'closed_at':
                     $reflectedProperty = $reflectedClass->getProperty('closedAt');
                     break;
-                case 'debug':
-                    $reflectedProperty = $reflectedClass->getProperty('debug');
+                case self::DEBUG:
+                    $reflectedProperty = $reflectedClass->getProperty(self::DEBUG);
                     break;
                 case 'output':
                     $reflectedProperty = $reflectedClass->getProperty('output');

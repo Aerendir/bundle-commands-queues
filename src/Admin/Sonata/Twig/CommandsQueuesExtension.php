@@ -24,10 +24,18 @@ use Twig\TwigFilter;
 /**
  * {@inheritdoc}
  */
-class CommandsQueuesExtension extends AbstractExtension
+final class CommandsQueuesExtension extends AbstractExtension
 {
     /** @var UrlGeneratorInterface $generator */
     private $generator;
+    /**
+     * @var string
+     */
+    private const OPTIONS = 'options';
+    /**
+     * @var string
+     */
+    private const __ID = '--id';
 
     /**
      * @param UrlGeneratorInterface $generator
@@ -43,8 +51,12 @@ class CommandsQueuesExtension extends AbstractExtension
     public function getFilters(): array
     {
         return [
-            new TwigFilter('commands_queues_get_id_option_value', [$this, 'getIdOptionValue']),
-            new TwigFilter('commands_queues_render_input', [$this, 'getRenderedInput']),
+            new TwigFilter('commands_queues_get_id_option_value', function (Job $job) : ?string {
+                return $this->getIdOptionValue($job);
+            }),
+            new TwigFilter('commands_queues_render_input', function (?array $input) : ?string {
+                return $this->getRenderedInput($input);
+            }),
         ];
     }
 
@@ -58,10 +70,10 @@ class CommandsQueuesExtension extends AbstractExtension
     public function getIdOptionValue(Job $job): ?string
     {
         $input = $job->getInput();
-        if (null !== $input && false === array_key_exists('options', $input) && isset($input['options']['--id'])) {
-            $url = $this->generator->generate('admin_serendipityhq_commandsqueues_job_show', ['id' => $input['options']['--id']], UrlGeneratorInterface::ABSOLUTE_PATH);
+        if (null !== $input && false === \array_key_exists(self::OPTIONS, $input) && isset($input[self::OPTIONS][self::__ID])) {
+            $url = $this->generator->generate('admin_serendipityhq_commandsqueues_job_show', ['id' => $input[self::OPTIONS][self::__ID]], UrlGeneratorInterface::ABSOLUTE_PATH);
 
-            return sprintf('<a href="%s">#%s</a>', $url, $input['options']['--id']);
+            return sprintf('<a href="%s">#%s</a>', $url, $input[self::OPTIONS][self::__ID]);
         }
 
         return null;

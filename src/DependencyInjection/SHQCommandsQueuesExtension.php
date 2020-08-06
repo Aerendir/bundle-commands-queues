@@ -35,7 +35,7 @@ use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 /**
  * {@inheritdoc}
  */
-class SHQCommandsQueuesExtension extends Extension
+final class SHQCommandsQueuesExtension extends Extension
 {
     /**
      * {@inheritdoc}
@@ -94,7 +94,7 @@ class SHQCommandsQueuesExtension extends Extension
         $internalMarkAsCancelledCommandDefinition = (new Definition(InternalMarkAsCancelledCommand::class))->addTag('console.command')->setAutowired(true);
         $container->setDefinition(InternalMarkAsCancelledCommand::class, $internalMarkAsCancelledCommandDefinition);
 
-        if (class_exists(SonataAdminBundle::class)) {
+        if (\class_exists(SonataAdminBundle::class)) {
             $sonataLoader = new YamlFileLoader($container, new FileLocator(__DIR__ . '/../Admin/Sonata/Resources/config'));
             $sonataLoader->load('sonata_admin.yaml');
         }

@@ -27,7 +27,7 @@ use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\InputParser;
 /**
  * Manages the commands_queues.
  */
-class QueuesManager
+final class QueuesManager
 {
     /** @var EntityManager */
     private $entityManager;
@@ -61,7 +61,7 @@ class QueuesManager
      *
      * @return bool
      */
-    public function jobExists(Job $job, $fullSearch = false): bool
+    public function jobExists(Job $job, bool $fullSearch = false): bool
     {
         return $this->exists($job->getCommand(), $job->getInput(), $job->getQueue(), $fullSearch);
     }
@@ -82,7 +82,7 @@ class QueuesManager
      *
      * @return array|null
      */
-    public function findByJob(Job $job, $fullSearch = false): ?array
+    public function findByJob(Job $job, bool $fullSearch = false): ?array
     {
         return $this->find($job->getCommand(), $job->getInput(), $job->getQueue(), $fullSearch);
     }
@@ -101,7 +101,7 @@ class QueuesManager
      *
      * @return bool
      */
-    public function exists(string $command, $input = null, string $queue = Daemon::DEFAULT_QUEUE_NAME, $fullSearch = false): bool
+    public function exists(string $command, $input = null, string $queue = Daemon::DEFAULT_QUEUE_NAME, bool $fullSearch = false): bool
     {
         $exists = $this->find($command, $input, $queue, $fullSearch);
 
@@ -122,7 +122,7 @@ class QueuesManager
      *
      * @return array|null
      */
-    public function find(string $command = null, $input = null, ?string $queue = Daemon::DEFAULT_QUEUE_NAME, $fullSearch = false): ?array
+    public function find(string $command = null, $input = null, ?string $queue = Daemon::DEFAULT_QUEUE_NAME, bool $fullSearch = false): ?array
     {
         /** @var JobRepository $jobsRepo */
         $jobsRepo = $this->entityManager->getRepository(Job::class);
