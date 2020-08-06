@@ -26,8 +26,6 @@ use Twig\TwigFilter;
  */
 final class CommandsQueuesExtension extends AbstractExtension
 {
-    /** @var UrlGeneratorInterface $generator */
-    private $generator;
     /**
      * @var string
      */
@@ -36,6 +34,8 @@ final class CommandsQueuesExtension extends AbstractExtension
      * @var string
      */
     private const __ID = '--id';
+    /** @var UrlGeneratorInterface $generator */
+    private $generator;
 
     /**
      * @param UrlGeneratorInterface $generator
@@ -51,10 +51,10 @@ final class CommandsQueuesExtension extends AbstractExtension
     public function getFilters(): array
     {
         return [
-            new TwigFilter('commands_queues_get_id_option_value', function (Job $job) : ?string {
+            new TwigFilter('commands_queues_get_id_option_value', function (Job $job): ?string {
                 return $this->getIdOptionValue($job);
             }),
-            new TwigFilter('commands_queues_render_input', function (?array $input) : ?string {
+            new TwigFilter('commands_queues_render_input', function (?array $input): ?string {
                 return $this->getRenderedInput($input);
             }),
         ];

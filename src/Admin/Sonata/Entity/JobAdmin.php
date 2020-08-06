@@ -28,6 +28,14 @@ use Sonata\AdminBundle\Route\RouteCollection;
 final class JobAdmin extends AbstractAdmin
 {
     /**
+     * @var string
+     */
+    private const DOCTRINE_ORM_DATE_RANGE = 'doctrine_orm_date_range';
+    /**
+     * @var string
+     */
+    private const URI = 'uri';
+    /**
      * {@inheritdoc}
      */
     protected $translationDomain = 'shq_commands_queues';
@@ -54,14 +62,6 @@ final class JobAdmin extends AbstractAdmin
     protected $perPageOptions = [50, 100, 1000, 10000];
 
     protected $maxPerPage = 50;
-    /**
-     * @var string
-     */
-    private const DOCTRINE_ORM_DATE_RANGE = 'doctrine_orm_date_range';
-    /**
-     * @var string
-     */
-    private const URI = 'uri';
 
     /**
      * {@inheritdoc}

@@ -39,15 +39,15 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 final class JobsMarker
 {
+    /**
+     * @var string
+     */
+    private const DEBUG = 'debug';
     /** @var EntityManager $entityManager */
     private static $entityManager;
 
     /** @var SerendipityHQStyle $ioWriter */
     private static $ioWriter;
-    /**
-     * @var string
-     */
-    private const DEBUG = 'debug';
 
     /**
      * @param EntityManagerInterface $entityManager

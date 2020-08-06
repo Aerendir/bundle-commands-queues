@@ -34,11 +34,6 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 final class JobRepository extends EntityRepository
 {
-    /** @var array $config */
-    private $config;
-
-    /** @var SerendipityHQStyle $ioWriter */
-    private $ioWriter;
     /**
      * @var string
      */
@@ -55,6 +50,11 @@ final class JobRepository extends EntityRepository
      * @var string
      */
     private const ASC = 'ASC';
+    /** @var array $config */
+    private $config;
+
+    /** @var SerendipityHQStyle $ioWriter */
+    private $ioWriter;
 
     /**
      * @param array              $config

@@ -53,6 +53,26 @@ use Throwable;
  */
 final class QueuesDaemon
 {
+    /**
+     * @var string
+     */
+    private const OPTIONS = 'options';
+    /**
+     * @var string
+     */
+    private const __ID = '--id';
+    /**
+     * @var string
+     */
+    private const JOB = 'job';
+    /**
+     * @var string
+     */
+    private const PROCESS = 'process';
+    /**
+     * @var string
+     */
+    private const GET_CLOSED_AT = 'getClosedAt';
     /** @var Daemon $me Is the Daemon object */
     private $me;
 
@@ -96,26 +116,6 @@ final class QueuesDaemon
     /** @var int $verbosity */
     private $verbosity;
     /**
-     * @var string
-     */
-    private const OPTIONS = 'options';
-    /**
-     * @var string
-     */
-    private const __ID = '--id';
-    /**
-     * @var string
-     */
-    private const JOB = 'job';
-    /**
-     * @var string
-     */
-    private const PROCESS = 'process';
-    /**
-     * @var string
-     */
-    private const GET_CLOSED_AT = 'getClosedAt';
-    /**
      * @var \Doctrine\ORM\Configuration
      */
     private $configuration;
@@ -141,8 +141,8 @@ final class QueuesDaemon
         $this->profiler      = $profiler;
 
         /** @var JobRepository $jobsRepo */
-        $jobsRepo       = $this->entityManager->getRepository(Job::class);
-        $this->jobsRepo = $jobsRepo;
+        $jobsRepo            = $this->entityManager->getRepository(Job::class);
+        $this->jobsRepo      = $jobsRepo;
         $this->configuration = $configuration;
     }
 

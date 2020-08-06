@@ -38,6 +38,14 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 final class Profiler
 {
+    /**
+     * @var string
+     */
+    private const SUCCESS_NOBG = 'success-nobg';
+    /**
+     * @var string
+     */
+    private const ERROR_NOBG = 'error-nobg';
     /** @var float $startTime */
     private $startTime;
 
@@ -91,14 +99,6 @@ final class Profiler
 
     /** @var SerendipityHQStyle $ioWriter */
     private static $ioWriter;
-    /**
-     * @var string
-     */
-    private const SUCCESS_NOBG = 'success-nobg';
-    /**
-     * @var string
-     */
-    private const ERROR_NOBG = 'error-nobg';
 
     /**
      * @throws ArrayException
@@ -174,13 +174,13 @@ final class Profiler
         $microtime = \microtime(true);
         $this->pid = $pid;
 
-        $this->startTime = $microtime;
-        $this->lastMicrotime = $microtime;
+        $this->startTime                 = $microtime;
+        $this->lastMicrotime             = $microtime;
         $this->aliveDaemonsLastCheckedAt = $microtime;
-        $this->lastOptimizationAt = $microtime;
-        $this->lastMicrotime = $microtime;
-        $this->lastOptimizationAt = $microtime;
-        $this->lastOptimizationAt = $microtime;
+        $this->lastOptimizationAt        = $microtime;
+        $this->lastMicrotime             = $microtime;
+        $this->lastOptimizationAt        = $microtime;
+        $this->lastOptimizationAt        = $microtime;
 
         $this->lastUowSize = self::$uow->size() - 1;
         $this->highestUowSize

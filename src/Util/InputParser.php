@@ -26,17 +26,6 @@ use function Safe\sprintf;
  */
 final class InputParser
 {
-    /** @var string|null $foundArgument */
-    private static $foundArgument;
-
-    /** @var string|null $foundOption */
-    private static $foundOption;
-
-    /** @var string|null $foundShortcut */
-    private static $foundShortcut;
-
-    /** @var array|null $preparedInput */
-    private static $preparedInput;
     /** @var null[] $preparedInput */
     private const DEFAULT_PREPARED_INPUT = [
         self::COMMAND   => null,
@@ -60,6 +49,17 @@ final class InputParser
      * @var string
      */
     private const SHORTCUTS = 'shortcuts';
+    /** @var string|null $foundArgument */
+    private static $foundArgument;
+
+    /** @var string|null $foundOption */
+    private static $foundOption;
+
+    /** @var string|null $foundShortcut */
+    private static $foundShortcut;
+
+    /** @var array|null $preparedInput */
+    private static $preparedInput;
 
     /**
      * Ensures the $arguments is only a string or an array.
@@ -239,29 +239,29 @@ final class InputParser
 
         if (self::isOption($value)) {
             self::$preparedInput[self::OPTIONS][$value] = null;
-            self::$foundOption                      = $value;
-            self::$foundShortcut                    = null;
+            self::$foundOption                          = $value;
+            self::$foundShortcut                        = null;
         }
 
         if (self::isShortcut($value)) {
             self::$preparedInput[self::SHORTCUTS][$value] = null;
-            self::$foundShortcut                      = $value;
-            self::$foundOption                        = null;
+            self::$foundShortcut                          = $value;
+            self::$foundOption                            = null;
         }
 
         if (null !== self::$foundArgument) {
             self::$preparedInput[self::ARGUMENTS][] = self::$foundArgument;
-            self::$foundArgument                = null;
+            self::$foundArgument                    = null;
         }
 
         if (null !== self::$foundOption && self::$foundOption !== $value && false === self::isOption($value) && false === self::isShortcut($value)) {
             self::$preparedInput[self::OPTIONS][self::$foundOption] = $value;
-            self::$foundOption                                  = null;
+            self::$foundOption                                      = null;
         }
 
         if (null !== self::$foundShortcut && self::$foundShortcut !== $value && false === self::isOption($value) && false === self::isShortcut($value)) {
             self::$preparedInput[self::SHORTCUTS][self::$foundShortcut] = $value;
-            self::$foundShortcut                                    = null;
+            self::$foundShortcut                                        = null;
         }
     }
 }

@@ -89,9 +89,6 @@ final class Configuration implements ConfigurationInterface
 
     /** @var string */
     public const QUEUE_RUNNING_JOBS_CHECK_INTERVAL_DESCRIPTION = 'The number of seconds after which the running jobs have to be checked.';
-
-    /** @var array $foundQueues The queues found processing the Daemons */
-    private $foundQueues = [];
     /**
      * @var string
      */
@@ -100,6 +97,9 @@ final class Configuration implements ConfigurationInterface
      * @var string
      */
     private const QUEUES = 'queues';
+
+    /** @var array $foundQueues The queues found processing the Daemons */
+    private $foundQueues = [];
 
     /**
      * The list of supported ORM drivers.
@@ -315,7 +315,7 @@ final class Configuration implements ConfigurationInterface
     {
         // Create the main configuration array to return
         $returnConfig = [
-            'db_driver'          => $tree['db_driver'],
+            'db_driver'              => $tree['db_driver'],
             self::DAEMONS            => $tree[self::DAEMONS],
             self::QUEUES             => $tree[self::QUEUES],
         ];
@@ -357,17 +357,17 @@ final class Configuration implements ConfigurationInterface
     {
         if (false === isset($config[self::QUEUES])) {
             $config[self::QUEUES][]                            = Daemon::DEFAULT_QUEUE_NAME;
-            $this->foundQueues[Daemon::DEFAULT_QUEUE_NAME] = Daemon::DEFAULT_QUEUE_NAME;
+            $this->foundQueues[Daemon::DEFAULT_QUEUE_NAME]     = Daemon::DEFAULT_QUEUE_NAME;
         }
 
         return [
             // Daemon specific configurations
-            self::DAEMON_ALIVE_DAEMONS_CHECK_INTERVAL_KEY => $config[self::DAEMON_ALIVE_DAEMONS_CHECK_INTERVAL_KEY] ?? $tree[self::DAEMON_ALIVE_DAEMONS_CHECK_INTERVAL_KEY],
-            self::DAEMON_MANAGED_ENTITIES_TRESHOLD_KEY    => $config[self::DAEMON_MANAGED_ENTITIES_TRESHOLD_KEY] ?? $tree[self::DAEMON_MANAGED_ENTITIES_TRESHOLD_KEY],
-            self::DAEMON_MAX_RUNTIME_KEY                  => $config[self::DAEMON_MAX_RUNTIME_KEY] ?? $tree[self::DAEMON_MAX_RUNTIME_KEY],
-            self::DAEMON_PROFILING_INFO_INTERVAL_KEY      => $config[self::DAEMON_PROFILING_INFO_INTERVAL_KEY] ?? $tree[self::DAEMON_PROFILING_INFO_INTERVAL_KEY],
-            self::DAEMON_PRINT_PROFILING_INFO_KEY         => $config[self::DAEMON_PRINT_PROFILING_INFO_KEY] ?? $tree[self::DAEMON_PRINT_PROFILING_INFO_KEY],
-            self::DAEMON_SLEEP_FOR_KEY                    => $config[self::DAEMON_SLEEP_FOR_KEY] ?? $tree[self::DAEMON_SLEEP_FOR_KEY],
+            self::DAEMON_ALIVE_DAEMONS_CHECK_INTERVAL_KEY     => $config[self::DAEMON_ALIVE_DAEMONS_CHECK_INTERVAL_KEY] ?? $tree[self::DAEMON_ALIVE_DAEMONS_CHECK_INTERVAL_KEY],
+            self::DAEMON_MANAGED_ENTITIES_TRESHOLD_KEY        => $config[self::DAEMON_MANAGED_ENTITIES_TRESHOLD_KEY] ?? $tree[self::DAEMON_MANAGED_ENTITIES_TRESHOLD_KEY],
+            self::DAEMON_MAX_RUNTIME_KEY                      => $config[self::DAEMON_MAX_RUNTIME_KEY] ?? $tree[self::DAEMON_MAX_RUNTIME_KEY],
+            self::DAEMON_PROFILING_INFO_INTERVAL_KEY          => $config[self::DAEMON_PROFILING_INFO_INTERVAL_KEY] ?? $tree[self::DAEMON_PROFILING_INFO_INTERVAL_KEY],
+            self::DAEMON_PRINT_PROFILING_INFO_KEY             => $config[self::DAEMON_PRINT_PROFILING_INFO_KEY] ?? $tree[self::DAEMON_PRINT_PROFILING_INFO_KEY],
+            self::DAEMON_SLEEP_FOR_KEY                        => $config[self::DAEMON_SLEEP_FOR_KEY] ?? $tree[self::DAEMON_SLEEP_FOR_KEY],
             self::QUEUES                                      => $config[self::QUEUES],
         ];
     }

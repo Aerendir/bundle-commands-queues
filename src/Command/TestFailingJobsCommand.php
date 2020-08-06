@@ -31,15 +31,15 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 final class TestFailingJobsCommand extends Command
 {
+    /**
+     * @var string
+     */
+    private const QUEUE_1 = 'queue_1';
     /** @var string $defaultName */
     protected static $defaultName = 'queues:test:failing-jobs';
 
     /** @var QueuesManager $queuesManager */
     private $queuesManager;
-    /**
-     * @var string
-     */
-    private const QUEUE_1 = 'queue_1';
 
     /**
      * @param QueuesManager $queuesManager

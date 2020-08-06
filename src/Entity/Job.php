@@ -147,6 +147,14 @@ class Job
      *
      * @var string */
     public const TYPE_RETRY = 'retry';
+    /**
+     * @var string
+     */
+    private const OPTIONS = 'options';
+    /**
+     * @var string
+     */
+    private const SHORTCUTS = 'shortcuts';
 
     /**
      * @var int The ID of the Job
@@ -342,14 +350,6 @@ class Job
 
     /** @var string $cannotRunBecause This is not persisted. It is used to give the reason why the Job cannot run. */
     private $cannotRunBecause;
-    /**
-     * @var string
-     */
-    private const OPTIONS = 'options';
-    /**
-     * @var string
-     */
-    private const SHORTCUTS = 'shortcuts';
 
     /**
      * @param string       $command
