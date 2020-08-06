@@ -29,11 +29,11 @@ jobs:
 
             - name: Run PHPunit
               run: |
-                  vendor/bin/simple-phpunit
+                  vendor/bin/phpunit
 
             - name: Change paths in clover.xml
               run: |
-                  sed -i 's+/home/runner/work/bundle-queues/bundle-queues+/github/workspace+g' ./var/coverage/clover.xml
+                  sed -i 's+/home/runner/work/bundle-commands-queues/bundle-commands-queues+/github/workspace+g' ./var/coverage/clover.xml
 
             - name: Sonarcloud
               uses: sonarsource/sonarcloud-github-action@master
