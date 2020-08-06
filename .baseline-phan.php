@@ -9,24 +9,25 @@
  */
 return [
     // # Issue statistics:
-    // PhanRedefinedClassReference : 360+ occurrences
+    // PhanRedefinedClassReference : 510+ occurrences
     // PhanUnreferencedPublicMethod : 40+ occurrences
     // PhanPluginUnreachableCode : 15+ occurrences
-    // PhanReadOnlyPrivateProperty : 10+ occurrences
     // PhanUnreferencedProtectedProperty : 10+ occurrences
+    // PhanReadOnlyPrivateProperty : 9 occurrences
     // PhanTypeArraySuspiciousNullable : 8 occurrences
-    // PhanRedefinedExtendedClass : 7 occurrences
+    // PhanRedefinedExtendedClass : 6 occurrences
     // PhanTypeMismatchArgumentNullable : 5 occurrences
     // PhanUnreferencedClass : 4 occurrences
     // PhanDeprecatedFunction : 2 occurrences
     // PhanReadOnlyPublicProperty : 2 occurrences
     // PhanUnreferencedClosure : 2 occurrences
     // PhanUnusedClosureParameter : 2 occurrences
-    // PhanUnusedProtectedMethodParameter : 2 occurrences
+    // PhanUnusedProtectedFinalMethodParameter : 2 occurrences
     // ConstReferenceClassNotImported : 1 occurrence
     // ConstReferenceConstNotFound : 1 occurrence
     // PhanDeprecatedClassConstant : 1 occurrence
     // PhanTypeInvalidDimOffset : 1 occurrence
+    // PhanTypeNoPropertiesForeach : 1 occurrence
     // PhanUndeclaredMethod : 1 occurrence
     // PhanUnreferencedProtectedMethod : 1 occurrence
 
@@ -39,11 +40,11 @@ return [
         'src/Command/AbstractQueuesCommand.php' => ['PhanRedefinedClassReference', 'PhanRedefinedExtendedClass'],
         'src/Command/InternalMarkAsCancelledCommand.php' => ['PhanReadOnlyPublicProperty', 'PhanRedefinedClassReference'],
         'src/Command/RunCommand.php' => ['PhanDeprecatedFunction', 'PhanRedefinedClassReference', 'PhanRedefinedExtendedClass', 'PhanUnreferencedProtectedProperty'],
-        'src/Command/TestFailingJobsCommand.php' => ['PhanRedefinedClassReference', 'PhanRedefinedExtendedClass', 'PhanUnreferencedProtectedProperty', 'PhanUnusedProtectedMethodParameter'],
+        'src/Command/TestFailingJobsCommand.php' => ['PhanRedefinedClassReference', 'PhanRedefinedExtendedClass', 'PhanUnreferencedProtectedProperty', 'PhanUnusedProtectedFinalMethodParameter'],
         'src/Command/TestFakeCommand.php' => ['PhanReadOnlyPublicProperty', 'PhanRedefinedClassReference', 'PhanRedefinedExtendedClass'],
         'src/Command/TestRandomJobsCommand.php' => ['PhanPluginUnreachableCode', 'PhanRedefinedClassReference', 'PhanTypeInvalidDimOffset', 'PhanUnreferencedProtectedProperty'],
         'src/Config/DaemonConfig.php' => ['PhanUnreferencedPublicMethod'],
-        'src/DependencyInjection/Configuration.php' => ['PhanUndeclaredMethod', 'PhanUnreferencedClosure'],
+        'src/DependencyInjection/Configuration.php' => ['PhanTypeNoPropertiesForeach', 'PhanUndeclaredMethod', 'PhanUnreferencedClosure'],
         'src/DependencyInjection/SHQCommandsQueuesExtension.php' => ['PhanUnreferencedClass'],
         'src/Entity/Daemon.php' => ['PhanReadOnlyPrivateProperty', 'PhanRedefinedClassReference', 'PhanUnreferencedPublicMethod'],
         'src/Entity/Job.php' => ['PhanPluginUnreachableCode', 'PhanReadOnlyPrivateProperty', 'PhanRedefinedClassReference', 'PhanTypeArraySuspiciousNullable', 'PhanTypeMismatchArgumentNullable', 'PhanUnreferencedPublicMethod'],
@@ -53,11 +54,11 @@ return [
         'src/Service/JobsManager.php' => ['PhanDeprecatedFunction', 'PhanPluginUnreachableCode', 'PhanRedefinedClassReference', 'PhanTypeMismatchArgumentNullable'],
         'src/Service/QueuesDaemon.php' => ['PhanRedefinedClassReference', 'PhanTypeArraySuspiciousNullable', 'PhanUnreferencedProtectedMethod'],
         'src/Service/QueuesManager.php' => ['PhanRedefinedClassReference', 'PhanUnreferencedPublicMethod'],
-        'src/Util/InputParser.php' => ['PhanReadOnlyPrivateProperty', 'PhanTypeArraySuspiciousNullable'],
+        'src/Util/InputParser.php' => ['PhanTypeArraySuspiciousNullable'],
         'src/Util/JobsMarker.php' => ['PhanRedefinedClassReference'],
         'src/Util/Profiler.php' => ['ConstReferenceClassNotImported', 'ConstReferenceConstNotFound', 'PhanRedefinedClassReference', 'PhanUnreferencedPublicMethod'],
         'src/Util/ProgressBarFactory.php' => ['PhanRedefinedClassReference', 'PhanUnusedClosureParameter'],
-        'tests/Util/InputParserTest.php' => ['PhanRedefinedExtendedClass', 'PhanUnreferencedPublicMethod'],
+        'tests/Util/InputParserTest.php' => ['PhanUnreferencedPublicMethod'],
     ],
     // 'directory_suppressions' => ['src/directory_name' => ['PhanIssueName1', 'PhanIssueName2']] can be manually added if needed.
     // (directory_suppressions will currently be ignored by subsequent calls to --save-baseline, but may be preserved in future Phan releases)

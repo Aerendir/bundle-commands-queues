@@ -11,11 +11,6 @@ parameters:
 			path: src/Admin/Sonata/Entity/JobAdmin.php
 
 		-
-			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Admin\\\\Sonata\\\\Entity\\\\JobAdmin\\:\\:configureDatagridFilters\\(\\) has no return typehint specified\\.$#"
-			count: 1
-			path: src/Admin/Sonata/Entity/JobAdmin.php
-
-		-
 			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Admin\\\\Sonata\\\\Entity\\\\JobAdmin\\:\\:configureTabMenu\\(\\) has parameter \\$menu with no value type specified in iterable type Knp\\\\Menu\\\\ItemInterface\\.$#"
 			count: 1
 			path: src/Admin/Sonata/Entity/JobAdmin.php
@@ -76,6 +71,16 @@ parameters:
 			path: src/Command/TestRandomJobsCommand.php
 
 		-
+			message: "#^Instanceof between \\*NEVER\\* and Countable will always evaluate to false\\.$#"
+			count: 1
+			path: src/Command/TestRandomJobsCommand.php
+
+		-
+			message: "#^Result of \\|\\| is always true\\.$#"
+			count: 1
+			path: src/Command/TestRandomJobsCommand.php
+
+		-
 			message: "#^Class DateTime is unsafe to use\\. Its methods can return FALSE instead of throwing an exception\\. Please add 'use Safe\\\\DateTime;' at the beginning of the file to use the variant provided by the 'thecodingmachine/safe' library\\.$#"
 			count: 1
 			path: src/Command/TestRandomJobsCommand.php
@@ -117,6 +122,16 @@ parameters:
 
 		-
 			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Config\\\\DaemonConfig\\:\\:__construct\\(\\) has parameter \\$queues with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/Config/DaemonConfig.php
+
+		-
+			message: "#^Instanceof between \\*NEVER\\* and Countable will always evaluate to false\\.$#"
+			count: 1
+			path: src/Config/DaemonConfig.php
+
+		-
+			message: "#^Result of \\|\\| is always true\\.$#"
 			count: 1
 			path: src/Config/DaemonConfig.php
 
@@ -236,11 +251,6 @@ parameters:
 			path: src/Entity/Job.php
 
 		-
-			message: "#^Function ksort is unsafe to use\\. It can return FALSE instead of throwing an exception\\. Please add 'use function Safe\\\\ksort;' at the beginning of the file to use the variant provided by the 'thecodingmachine/safe' library\\.$#"
-			count: 2
-			path: src/Entity/Job.php
-
-		-
 			message: "#^Class SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Repository\\\\DaemonRepository extends generic class Doctrine\\\\ORM\\\\EntityRepository but does not specify its types\\: TEntityClass$#"
 			count: 1
 			path: src/Repository/DaemonRepository.php
@@ -321,7 +331,7 @@ parameters:
 			path: src/Service/QueuesDaemon.php
 
 		-
-			message: "#^Function gethostname is unsafe to use\\. It can return FALSE instead of throwing an exception\\. Please add 'use function Safe\\\\gethostname;' at the beginning of the file to use the variant provided by the 'thecodingmachine/safe' library\\.$#"
+			message: "#^Strict comparison using \\=\\=\\= between false and true will always evaluate to false\\.$#"
 			count: 1
 			path: src/Service/QueuesDaemon.php
 
@@ -342,11 +352,6 @@ parameters:
 
 		-
 			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Service\\\\QueuesDaemon\\:\\:retryFailedJob\\(\\) has parameter \\$info with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: src/Service/QueuesDaemon.php
-
-		-
-			message: "#^Variable \\$job in PHPDoc tag @var does not match assigned variable \\$stales\\.$#"
 			count: 1
 			path: src/Service/QueuesDaemon.php
 
@@ -381,11 +386,6 @@ parameters:
 			path: src/Util/InputParser.php
 
 		-
-			message: "#^Property SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Util\\\\InputParser\\:\\:\\$defaultPreparedInput has no typehint specified\\.$#"
-			count: 1
-			path: src/Util/InputParser.php
-
-		-
 			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Util\\\\InputParser\\:\\:parseInput\\(\\) has parameter \\$input with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: src/Util/InputParser.php
@@ -393,11 +393,6 @@ parameters:
 		-
 			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Util\\\\InputParser\\:\\:parseInput\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
-			path: src/Util/InputParser.php
-
-		-
-			message: "#^Function ksort is unsafe to use\\. It can return FALSE instead of throwing an exception\\. Please add 'use function Safe\\\\ksort;' at the beginning of the file to use the variant provided by the 'thecodingmachine/safe' library\\.$#"
-			count: 2
 			path: src/Util/InputParser.php
 
 		-
