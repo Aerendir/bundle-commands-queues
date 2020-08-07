@@ -20,7 +20,7 @@
         "ext-json": "*",
         "ext-pcntl": "*",
         "doctrine/common": "^2.5",
-        "doctrine/doctrine-bundle": "^1.7",
+        "doctrine/doctrine-bundle": "^1.7 || ^2.0",
         "doctrine/orm": "^2.6.3",
         "nesbot/carbon": "^2.0",
         "pagerfanta/pagerfanta": "^2.0",
