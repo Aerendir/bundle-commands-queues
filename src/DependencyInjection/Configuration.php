@@ -290,6 +290,7 @@ final class Configuration implements ConfigurationInterface
             }
 
             // Check the queue is not already assigned
+            $config[self::QUEUES] = array_unique($config[self::QUEUES]);
             foreach ($config[self::QUEUES] as $queue) {
                 if (\array_key_exists($queue, $this->foundQueues)) {
                     throw new InvalidConfigurationException(sprintf('Queue "%s" already assigned to daemon "%s". You cannot assign this queue also to daemon "%s".', $queue, $this->foundQueues[$queue], $daemon));
