@@ -53,7 +53,7 @@ final class SHQCommandsQueuesExtension extends Extension
 
         // The Jobs Manager
         $jobsManagerDefinition = (new Definition(JobsManager::class, [
-            $container->getParameter('kernel.root_dir'),
+            $container->getParameter('kernel.project_dir'),
         ]))->setPublic(false);
         $container->setDefinition(JobsManager::class, $jobsManagerDefinition);
 

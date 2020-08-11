@@ -43,18 +43,18 @@ final class JobsManager
     /** @var string $env */
     private $env;
 
-    /** @var string $kernelRootDir */
-    private $kernelRootDir;
+    /** @var string $kernelProjectDir */
+    private $kernelProjectDir;
 
     /** @var int $verbosity */
     private $verbosity;
 
     /**
-     * @param string $kernelRootDir
+     * @param string $kernelProjectDir
      */
-    public function __construct(string $kernelRootDir)
+    public function __construct(string $kernelProjectDir)
     {
-        $this->kernelRootDir = $kernelRootDir;
+        $this->kernelProjectDir = $kernelProjectDir;
     }
 
     /**
@@ -395,12 +395,12 @@ final class JobsManager
      */
     private function findConsole(): string
     {
-        if (\file_exists($this->kernelRootDir . '/console')) {
-            return $this->kernelRootDir . '/console';
+        if (\file_exists($this->kernelProjectDir . '/console')) {
+            return $this->kernelProjectDir . '/console';
         }
 
-        if (\file_exists($this->kernelRootDir . '/../bin/console')) {
-            return $this->kernelRootDir . '/../bin/console';
+        if (\file_exists($this->kernelProjectDir . '/bin/console')) {
+            return $this->kernelProjectDir . '/bin/console';
         }
 
         throw new RuntimeException('Unable to find the console file. You should check your Symfony installation. The console file should be in /app/ folder or in /bin/ folder.');
