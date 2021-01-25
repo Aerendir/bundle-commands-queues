@@ -16,7 +16,6 @@ namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Repository;
 use BadMethodCallException;
 use DateTime;
 use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\ORMException;
@@ -153,12 +152,12 @@ final class JobRepository extends EntityRepository
     }
 
     /**
-     * @param string   $queueName
-     * @param DateTime $maxRetentionDate
+     * @param string                       $queueName
+     * @param \DateTime|\DateTimeImmutable $maxRetentionDate
      *
      * @return array
      */
-    public function findExpiredJobs(string $queueName, DateTime $maxRetentionDate): array
+    public function findExpiredJobs(string $queueName, \DateTimeInterface $maxRetentionDate): array
     {
         $queryBuilder = $this->getEntityManager()->createQueryBuilder();
 

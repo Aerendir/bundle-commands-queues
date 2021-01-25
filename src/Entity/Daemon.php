@@ -49,7 +49,7 @@ class Daemon
     /**
      * @var int
      *
-     * @ORM\Column(name="id", type="integer", nullable=false)
+     * @ORM\Column(name="id", type="integer")
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="IDENTITY")
      */
@@ -58,28 +58,28 @@ class Daemon
     /**
      * @var DaemonConfig
      *
-     * @ORM\Column(name="config", type="array", nullable=false)
+     * @ORM\Column(name="config", type="array")
      */
     private $config;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="host", type="string", length=255, nullable=false)
+     * @ORM\Column(name="host", type="string", length=255)
      */
     private $host;
 
     /**
      * @var int
      *
-     * @ORM\Column(name="pid", type="integer", nullable=false)
+     * @ORM\Column(name="pid", type="integer")
      */
     private $pid;
 
     /**
      * @var DateTime
      *
-     * @ORM\Column(name="born_on", type="datetime", nullable=false)
+     * @ORM\Column(name="born_on", type="datetime")
      */
     private $bornOn;
 

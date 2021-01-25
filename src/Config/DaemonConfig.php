@@ -32,7 +32,7 @@ final class DaemonConfig extends AbstractConfig
     private $name;
 
     /** @var bool $prodAllowed If true, passes the --env=prod flag to the commands in the queue */
-    private $prodAllowed;
+    private $prodAllowed = false;
 
     /** @var int $aliveDaemonsCheckInterval */
     private $aliveDaemonsCheckInterval;
@@ -50,7 +50,7 @@ final class DaemonConfig extends AbstractConfig
     private $profilingInfoInterval;
 
     /** @var bool $printProfilingInfo */
-    private $printProfilingInfo;
+    private $printProfilingInfo = false;
 
     /**
      * @param array $daemons

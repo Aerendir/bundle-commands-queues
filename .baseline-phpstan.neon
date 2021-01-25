@@ -1,12 +1,27 @@
 parameters:
 	ignoreErrors:
 		-
+			message: "#^Class SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Admin\\\\Sonata\\\\Entity\\\\DaemonAdmin extends generic class Sonata\\\\AdminBundle\\\\Admin\\\\AbstractAdmin but does not specify its types\\: T$#"
+			count: 1
+			path: src/Admin/Sonata/Entity/DaemonAdmin.php
+
+		-
+			message: "#^Class SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Admin\\\\Sonata\\\\Entity\\\\JobAdmin extends generic class Sonata\\\\AdminBundle\\\\Admin\\\\AbstractAdmin but does not specify its types\\: T$#"
+			count: 1
+			path: src/Admin/Sonata/Entity/JobAdmin.php
+
+		-
 			message: "#^Property SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Admin\\\\Sonata\\\\Entity\\\\JobAdmin\\:\\:\\$datagridValues type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: src/Admin/Sonata/Entity/JobAdmin.php
 
 		-
 			message: "#^Property SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Admin\\\\Sonata\\\\Entity\\\\JobAdmin\\:\\:\\$perPageOptions type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/Admin/Sonata/Entity/JobAdmin.php
+
+		-
+			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Admin\\\\Sonata\\\\Entity\\\\JobAdmin\\:\\:configureTabMenu\\(\\) has parameter \\$childAdmin with generic interface Sonata\\\\AdminBundle\\\\Admin\\\\AdminInterface but does not specify its types\\: T$#"
 			count: 1
 			path: src/Admin/Sonata/Entity/JobAdmin.php
 
@@ -26,19 +41,14 @@ parameters:
 			path: src/Admin/Sonata/Twig/CommandsQueuesExtension.php
 
 		-
-			message: "#^Cannot cast array\\<string\\>\\|bool\\|string\\|null to int\\.$#"
-			count: 2
-			path: src/Command/InternalMarkAsCancelledCommand.php
-
-		-
 			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Command\\\\InternalMarkAsCancelledCommand\\:\\:cancelChildJobs\\(\\) has parameter \\$alreadyCancelledJobs with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: src/Command/InternalMarkAsCancelledCommand.php
 
 		-
-			message: "#^Binary operation \"\\.\" between 'I\\\\'m TestQueue \\#' and array\\<string\\>\\|bool\\|string\\|null results in an error\\.$#"
+			message: "#^PHPDoc tag @throws with type Doctrine\\\\Common\\\\Persistence\\\\Mapping\\\\MappingException\\|Exception is not subtype of Throwable$#"
 			count: 1
-			path: src/Command/TestFakeCommand.php
+			path: src/Command/RunCommand.php
 
 		-
 			message: "#^Property SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Command\\\\TestRandomJobsCommand\\:\\:\\$queues type has no value type specified in iterable type array\\.$#"
@@ -52,16 +62,6 @@ parameters:
 
 		-
 			message: "#^PHPDoc tag @var for variable \\$timeUnits has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: src/Command/TestRandomJobsCommand.php
-
-		-
-			message: "#^Cannot cast array\\<string\\>\\|string\\|null to int\\.$#"
-			count: 1
-			path: src/Command/TestRandomJobsCommand.php
-
-		-
-			message: "#^Cannot cast array\\<string\\>\\|bool\\|string\\|null to int\\.$#"
 			count: 1
 			path: src/Command/TestRandomJobsCommand.php
 
@@ -93,6 +93,11 @@ parameters:
 		-
 			message: "#^Unreachable statement \\- code above always terminates\\.$#"
 			count: 6
+			path: src/Command/TestRandomJobsCommand.php
+
+		-
+			message: "#^Parameter \\#2 \\$endOfTimeWindow of class SerendipityHQ\\\\Component\\\\ThenWhen\\\\Strategy\\\\TimeFixedStrategy constructor expects DateTimeInterface, int given\\.$#"
+			count: 1
 			path: src/Command/TestRandomJobsCommand.php
 
 		-
@@ -246,6 +251,11 @@ parameters:
 			path: src/Entity/Job.php
 
 		-
+			message: "#^Property SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Entity\\\\Job\\:\\:\\$executeAfterTime \\(DateTime\\|null\\) does not accept DateTime\\|DateTimeImmutable\\.$#"
+			count: 1
+			path: src/Entity/Job.php
+
+		-
 			message: "#^Class SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Repository\\\\DaemonRepository extends generic class Doctrine\\\\ORM\\\\EntityRepository but does not specify its types\\: TEntityClass$#"
 			count: 1
 			path: src/Repository/DaemonRepository.php
@@ -267,6 +277,11 @@ parameters:
 
 		-
 			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Repository\\\\JobRepository\\:\\:findExpiredJobs\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/Repository/JobRepository.php
+
+		-
+			message: "#^Access to constant DATETIME on an unknown class SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Repository\\\\Type\\.$#"
 			count: 1
 			path: src/Repository/JobRepository.php
 
@@ -331,6 +346,11 @@ parameters:
 			path: src/Service/QueuesDaemon.php
 
 		-
+			message: "#^Method Doctrine\\\\Persistence\\\\ObjectManager\\:\\:flush\\(\\) invoked with 1 parameter, 0 required\\.$#"
+			count: 3
+			path: src/Service/QueuesDaemon.php
+
+		-
 			message: "#^Class DateTime is unsafe to use\\. Its methods can return FALSE instead of throwing an exception\\. Please add 'use Safe\\\\DateTime;' at the beginning of the file to use the variant provided by the 'thecodingmachine/safe' library\\.$#"
 			count: 5
 			path: src/Service/QueuesDaemon.php
@@ -342,6 +362,16 @@ parameters:
 
 		-
 			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Service\\\\QueuesDaemon\\:\\:processRunningJob\\(\\) has parameter \\$runningJob with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/Service/QueuesDaemon.php
+
+		-
+			message: "#^PHPDoc tag @throws with type Doctrine\\\\Common\\\\Persistence\\\\Mapping\\\\MappingException\\|Exception is not subtype of Throwable$#"
+			count: 1
+			path: src/Service/QueuesDaemon.php
+
+		-
+			message: "#^PHPDoc tag @throws with type Doctrine\\\\Common\\\\Persistence\\\\Mapping\\\\MappingException\\|Doctrine\\\\ORM\\\\ORMException\\|Safe\\\\Exceptions\\\\StringsException is not subtype of Throwable$#"
 			count: 1
 			path: src/Service/QueuesDaemon.php
 
@@ -397,6 +427,11 @@ parameters:
 
 		-
 			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Util\\\\JobsMarker\\:\\:createReflectedJob\\(\\) return type with generic class ReflectionClass does not specify its types\\: T$#"
+			count: 1
+			path: src/Util/JobsMarker.php
+
+		-
+			message: "#^Class Doctrine\\\\Common\\\\Persistence\\\\Proxy not found\\.$#"
 			count: 1
 			path: src/Util/JobsMarker.php
 
@@ -489,9 +524,4 @@ parameters:
 			message: "#^Class DateTime is unsafe to use\\. Its methods can return FALSE instead of throwing an exception\\. Please add 'use Safe\\\\DateTime;' at the beginning of the file to use the variant provided by the 'thecodingmachine/safe' library\\.$#"
 			count: 1
 			path: src/Util/Profiler.php
-
-		-
-			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Tests\\\\Util\\\\InputParserTest\\:\\:getExpected\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: tests/Util/InputParserTest.php
 

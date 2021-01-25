@@ -1,37 +1,40 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<files psalm-version="3.13.1@afd8874a9e4562eac42a02de90e42e430c3a1db1">
-  <file src="src/Admin/Sonata/Entity/DaemonAdmin.php">
-    <PropertyNotSetInConstructor occurrences="1">
-      <code>DaemonAdmin</code>
-    </PropertyNotSetInConstructor>
-  </file>
-  <file src="src/Admin/Sonata/Entity/JobAdmin.php">
-    <PropertyNotSetInConstructor occurrences="1">
-      <code>JobAdmin</code>
-    </PropertyNotSetInConstructor>
-  </file>
+<files psalm-version="4.4.1@9fd7a7d885b3a216cff8dec9d8c21a132f275224">
   <file src="src/Command/AbstractQueuesCommand.php">
     <PropertyNotSetInConstructor occurrences="1">
       <code>$ioWriter</code>
     </PropertyNotSetInConstructor>
   </file>
+  <file src="src/Command/InternalMarkAsCancelledCommand.php">
+    <DeprecatedMethod occurrences="3">
+      <code>error</code>
+      <code>error</code>
+      <code>error</code>
+    </DeprecatedMethod>
+  </file>
   <file src="src/Command/RunCommand.php">
-    <DeprecatedMethod occurrences="1">
+    <DeprecatedMethod occurrences="7">
       <code>detach</code>
+      <code>info</code>
+      <code>note</code>
+      <code>success</code>
+      <code>success</code>
+      <code>table</code>
+      <code>writeln</code>
     </DeprecatedMethod>
     <MixedArgument occurrences="5">
-      <code>$queueName</code>
-      <code>$queueName</code>
-      <code>$queueName</code>
-      <code>$queueName</code>
       <code>$line</code>
+      <code>$queueName</code>
+      <code>$queueName</code>
+      <code>$queueName</code>
+      <code>$queueName</code>
     </MixedArgument>
     <MixedAssignment occurrences="5">
-      <code>$queueName</code>
-      <code>$queueName</code>
-      <code>$queueName</code>
-      <code>$queueName</code>
       <code>$line</code>
+      <code>$queueName</code>
+      <code>$queueName</code>
+      <code>$queueName</code>
+      <code>$queueName</code>
     </MixedAssignment>
     <MixedMethodCall occurrences="1">
       <code>advance</code>
@@ -40,6 +43,9 @@
       <code>$ioWriter</code>
       <code>$output</code>
     </PropertyNotSetInConstructor>
+    <UndefinedDocblockClass occurrences="1">
+      <code>MappingException</code>
+    </UndefinedDocblockClass>
   </file>
   <file src="src/Command/TestFakeCommand.php">
     <InvalidOperand occurrences="1">
@@ -47,16 +53,28 @@
     </InvalidOperand>
   </file>
   <file src="src/Command/TestRandomJobsCommand.php">
-    <DocblockTypeContradiction occurrences="1">
-      <code>0</code>
-    </DocblockTypeContradiction>
+    <DeprecatedMethod occurrences="7">
+      <code>error</code>
+      <code>error</code>
+      <code>error</code>
+      <code>info</code>
+      <code>success</code>
+      <code>title</code>
+      <code>write</code>
+    </DeprecatedMethod>
+    <InvalidArgument occurrences="1">
+      <code>$maxAttempts + $incrementBy</code>
+    </InvalidArgument>
     <InvalidOperand occurrences="2">
-      <code>$i + 1</code>
       <code>$days</code>
+      <code>$i + 1</code>
     </InvalidOperand>
     <MixedArgument occurrences="1">
       <code>$this-&gt;queues[$queue]</code>
     </MixedArgument>
+    <MixedArrayAccess occurrences="1">
+      <code>$this-&gt;queues[$queue]</code>
+    </MixedArrayAccess>
     <MixedAssignment occurrences="1">
       <code>$strategy</code>
     </MixedAssignment>
@@ -66,32 +84,32 @@
     <MixedReturnStatement occurrences="1">
       <code>$timeUnits[\random_int(0, \count($timeUnits) - 1)]</code>
     </MixedReturnStatement>
-    <UndefinedInterfaceMethod occurrences="1">
+    <PossiblyUndefinedMethod occurrences="1">
       <code>$this-&gt;queues</code>
-    </UndefinedInterfaceMethod>
+    </PossiblyUndefinedMethod>
   </file>
   <file src="src/Config/DaemonConfig.php">
-    <DocblockTypeContradiction occurrences="2">
-      <code>\is_array($this-&gt;daemons) || $this-&gt;daemons instanceof \Countable</code>
+    <DocblockTypeContradiction occurrences="1">
       <code>0</code>
     </DocblockTypeContradiction>
-    <MixedArgument occurrences="7">
+    <MixedArgument occurrences="8">
+      <code>$this-&gt;daemons</code>
+      <code>$this-&gt;daemons[$daemon]['queues']</code>
       <code>$this-&gt;daemons[$daemon][Configuration::DAEMON_ALIVE_DAEMONS_CHECK_INTERVAL_KEY]</code>
       <code>$this-&gt;daemons[$daemon][Configuration::DAEMON_MANAGED_ENTITIES_TRESHOLD_KEY]</code>
       <code>$this-&gt;daemons[$daemon][Configuration::DAEMON_MAX_RUNTIME_KEY]</code>
-      <code>$this-&gt;daemons[$daemon][Configuration::DAEMON_PROFILING_INFO_INTERVAL_KEY]</code>
       <code>$this-&gt;daemons[$daemon][Configuration::DAEMON_PRINT_PROFILING_INFO_KEY]</code>
+      <code>$this-&gt;daemons[$daemon][Configuration::DAEMON_PROFILING_INFO_INTERVAL_KEY]</code>
       <code>$this-&gt;daemons[$daemon][Configuration::DAEMON_SLEEP_FOR_KEY]</code>
-      <code>$this-&gt;daemons[$daemon]['queues']</code>
     </MixedArgument>
     <MixedArrayAccess occurrences="9">
-      <code>$this-&gt;daemons[$daemon][Configuration::DAEMON_ALIVE_DAEMONS_CHECK_INTERVAL_KEY]</code>
-      <code>$this-&gt;daemons[$daemon][Configuration::DAEMON_MANAGED_ENTITIES_TRESHOLD_KEY]</code>
-      <code>$this-&gt;daemons[$daemon][Configuration::DAEMON_MAX_RUNTIME_KEY]</code>
-      <code>$this-&gt;daemons[$daemon][Configuration::DAEMON_PROFILING_INFO_INTERVAL_KEY]</code>
-      <code>$this-&gt;daemons[$daemon][Configuration::DAEMON_PRINT_PROFILING_INFO_KEY]</code>
-      <code>$this-&gt;daemons[$daemon][Configuration::DAEMON_SLEEP_FOR_KEY]</code>
-      <code>$this-&gt;daemons[$daemon]['queues']</code>
+      <code>$this-&gt;daemons[$daemon]</code>
+      <code>$this-&gt;daemons[$daemon]</code>
+      <code>$this-&gt;daemons[$daemon]</code>
+      <code>$this-&gt;daemons[$daemon]</code>
+      <code>$this-&gt;daemons[$daemon]</code>
+      <code>$this-&gt;daemons[$daemon]</code>
+      <code>$this-&gt;daemons[$daemon]</code>
       <code>$this-&gt;queues[$queueName][Configuration::QUEUE_RETRY_STALE_JOBS_KEY]</code>
       <code>$this-&gt;queues[$queueName][Configuration::QUEUE_RUNNING_JOBS_CHECK_INTERVAL_KEY]</code>
     </MixedArrayAccess>
@@ -105,211 +123,206 @@
       <code>$this-&gt;queues[$queueName][Configuration::QUEUE_RETRY_STALE_JOBS_KEY]</code>
       <code>$this-&gt;queues[$queueName][Configuration::QUEUE_RUNNING_JOBS_CHECK_INTERVAL_KEY]</code>
     </MixedReturnStatement>
-    <PossiblyInvalidArgument occurrences="1">
+    <PossiblyUndefinedMethod occurrences="7">
       <code>$this-&gt;daemons</code>
-    </PossiblyInvalidArgument>
-    <PropertyNotSetInConstructor occurrences="8">
-      <code>$name</code>
-      <code>$prodAllowed</code>
+      <code>$this-&gt;daemons</code>
+      <code>$this-&gt;daemons</code>
+      <code>$this-&gt;daemons</code>
+      <code>$this-&gt;daemons</code>
+      <code>$this-&gt;daemons</code>
+      <code>$this-&gt;daemons</code>
+    </PossiblyUndefinedMethod>
+    <PropertyNotSetInConstructor occurrences="6">
       <code>$aliveDaemonsCheckInterval</code>
-      <code>$sleepFor</code>
       <code>$managedEntitiesTreshold</code>
       <code>$maxRuntime</code>
+      <code>$name</code>
       <code>$profilingInfoInterval</code>
-      <code>$printProfilingInfo</code>
+      <code>$sleepFor</code>
     </PropertyNotSetInConstructor>
     <RedundantConditionGivenDocblockType occurrences="1">
       <code>\is_array($this-&gt;daemons)</code>
     </RedundantConditionGivenDocblockType>
-    <UndefinedInterfaceMethod occurrences="7">
-      <code>$this-&gt;daemons</code>
-      <code>$this-&gt;daemons</code>
-      <code>$this-&gt;daemons</code>
-      <code>$this-&gt;daemons</code>
-      <code>$this-&gt;daemons</code>
-      <code>$this-&gt;daemons</code>
-      <code>$this-&gt;daemons</code>
-    </UndefinedInterfaceMethod>
   </file>
   <file src="src/DependencyInjection/Configuration.php">
     <MissingClosureParamType occurrences="2">
       <code>$tree</code>
       <code>$tree</code>
     </MissingClosureParamType>
-    <MixedArgument occurrences="8">
-      <code>$tree</code>
-      <code>$tree</code>
-      <code>$queue</code>
+    <MixedArgument occurrences="9">
       <code>$config</code>
+      <code>$config</code>
+      <code>$config[self::QUEUES]</code>
+      <code>$queue</code>
       <code>$returnConfig[self::QUEUES]</code>
       <code>$returnConfig[self::QUEUES]</code>
       <code>$this-&gt;foundQueues[$queue]</code>
-      <code>$config</code>
+      <code>$tree</code>
+      <code>$tree</code>
     </MixedArgument>
     <MixedArrayAccess occurrences="1">
       <code>$config[self::QUEUES]</code>
     </MixedArrayAccess>
-    <MixedArrayAssignment occurrences="5">
-      <code>$returnConfig[self::DAEMONS][Daemon::DEFAULT_DAEMON_NAME]</code>
-      <code>$returnConfig[self::DAEMONS][$daemon]</code>
-      <code>$returnConfig[self::QUEUES][$queue]</code>
-      <code>$returnConfig[self::QUEUES][$queue]</code>
+    <MixedArrayAssignment occurrences="6">
+      <code>$config[self::QUEUES]</code>
       <code>$config[self::QUEUES][]</code>
+      <code>$returnConfig[self::DAEMONS][$daemon]</code>
+      <code>$returnConfig[self::DAEMONS][Daemon::DEFAULT_DAEMON_NAME]</code>
+      <code>$returnConfig[self::QUEUES][$queue]</code>
+      <code>$returnConfig[self::QUEUES][$queue]</code>
     </MixedArrayAssignment>
     <MixedArrayOffset occurrences="1">
       <code>$this-&gt;foundQueues[$queue]</code>
     </MixedArrayOffset>
-    <MixedAssignment occurrences="4">
+    <MixedAssignment occurrences="5">
       <code>$config</code>
+      <code>$config</code>
+      <code>$config</code>
+      <code>$daemon</code>
       <code>$queue</code>
-      <code>$config</code>
-      <code>$config</code>
     </MixedAssignment>
     <MixedMethodCall occurrences="133">
-      <code>scalarNode</code>
-      <code>info</code>
-      <code>validate</code>
-      <code>ifNotInArray</code>
-      <code>thenInvalid</code>
-      <code>end</code>
-      <code>cannotBeOverwritten</code>
-      <code>defaultValue</code>
+      <code>arrayNode</code>
+      <code>arrayNode</code>
+      <code>arrayNode</code>
+      <code>booleanNode</code>
+      <code>booleanNode</code>
+      <code>booleanNode</code>
+      <code>booleanNode</code>
+      <code>booleanNode</code>
       <code>cannotBeEmpty</code>
-      <code>end</code>
-      <code>integerNode</code>
-      <code>info</code>
-      <code>defaultValue</code>
-      <code>end</code>
-      <code>integerNode</code>
-      <code>info</code>
-      <code>defaultValue</code>
-      <code>end</code>
-      <code>integerNode</code>
-      <code>info</code>
-      <code>defaultValue</code>
-      <code>end</code>
-      <code>integerNode</code>
-      <code>info</code>
-      <code>defaultValue</code>
-      <code>end</code>
-      <code>integerNode</code>
-      <code>info</code>
-      <code>defaultValue</code>
-      <code>end</code>
-      <code>booleanNode</code>
-      <code>info</code>
-      <code>defaultTrue</code>
-      <code>end</code>
-      <code>integerNode</code>
-      <code>info</code>
-      <code>defaultValue</code>
-      <code>end</code>
-      <code>integerNode</code>
-      <code>info</code>
-      <code>defaultValue</code>
-      <code>end</code>
-      <code>integerNode</code>
-      <code>info</code>
-      <code>defaultValue</code>
-      <code>end</code>
-      <code>booleanNode</code>
-      <code>info</code>
-      <code>defaultTrue</code>
-      <code>end</code>
-      <code>integerNode</code>
-      <code>info</code>
-      <code>defaultValue</code>
-      <code>end</code>
-      <code>arrayNode</code>
-      <code>useAttributeAsKey</code>
-      <code>prototype</code>
+      <code>cannotBeOverwritten</code>
       <code>children</code>
-      <code>integerNode</code>
-      <code>info</code>
-      <code>defaultNull</code>
-      <code>end</code>
-      <code>integerNode</code>
-      <code>info</code>
-      <code>defaultNull</code>
-      <code>end</code>
-      <code>integerNode</code>
-      <code>info</code>
-      <code>defaultNull</code>
-      <code>end</code>
-      <code>integerNode</code>
-      <code>info</code>
-      <code>defaultNull</code>
-      <code>end</code>
-      <code>booleanNode</code>
-      <code>info</code>
-      <code>defaultNull</code>
-      <code>end</code>
-      <code>integerNode</code>
-      <code>info</code>
-      <code>defaultNull</code>
-      <code>end</code>
-      <code>integerNode</code>
-      <code>info</code>
-      <code>defaultNull</code>
-      <code>end</code>
-      <code>integerNode</code>
-      <code>info</code>
-      <code>defaultNull</code>
-      <code>end</code>
-      <code>booleanNode</code>
-      <code>info</code>
-      <code>defaultNull</code>
-      <code>end</code>
-      <code>integerNode</code>
-      <code>info</code>
-      <code>defaultNull</code>
-      <code>end</code>
-      <code>arrayNode</code>
-      <code>prototype</code>
-      <code>end</code>
-      <code>end</code>
-      <code>end</code>
-      <code>end</code>
-      <code>end</code>
-      <code>arrayNode</code>
-      <code>useAttributeAsKey</code>
-      <code>prototype</code>
       <code>children</code>
-      <code>integerNode</code>
-      <code>info</code>
       <code>defaultNull</code>
-      <code>end</code>
-      <code>integerNode</code>
-      <code>info</code>
       <code>defaultNull</code>
-      <code>end</code>
-      <code>booleanNode</code>
-      <code>info</code>
       <code>defaultNull</code>
-      <code>end</code>
-      <code>integerNode</code>
-      <code>info</code>
       <code>defaultNull</code>
+      <code>defaultNull</code>
+      <code>defaultNull</code>
+      <code>defaultNull</code>
+      <code>defaultNull</code>
+      <code>defaultNull</code>
+      <code>defaultNull</code>
+      <code>defaultNull</code>
+      <code>defaultNull</code>
+      <code>defaultNull</code>
+      <code>defaultNull</code>
+      <code>defaultTrue</code>
+      <code>defaultTrue</code>
+      <code>defaultValue</code>
+      <code>defaultValue</code>
+      <code>defaultValue</code>
+      <code>defaultValue</code>
+      <code>defaultValue</code>
+      <code>defaultValue</code>
+      <code>defaultValue</code>
+      <code>defaultValue</code>
+      <code>defaultValue</code>
+      <code>defaultValue</code>
       <code>end</code>
       <code>end</code>
       <code>end</code>
       <code>end</code>
       <code>end</code>
-      <code>validate</code>
+      <code>end</code>
+      <code>end</code>
+      <code>end</code>
+      <code>end</code>
+      <code>end</code>
+      <code>end</code>
+      <code>end</code>
+      <code>end</code>
+      <code>end</code>
+      <code>end</code>
+      <code>end</code>
+      <code>end</code>
+      <code>end</code>
+      <code>end</code>
+      <code>end</code>
+      <code>end</code>
+      <code>end</code>
+      <code>end</code>
+      <code>end</code>
+      <code>end</code>
+      <code>end</code>
+      <code>end</code>
+      <code>end</code>
+      <code>end</code>
+      <code>end</code>
+      <code>end</code>
+      <code>end</code>
+      <code>end</code>
+      <code>end</code>
+      <code>end</code>
+      <code>end</code>
+      <code>end</code>
+      <code>ifNotInArray</code>
       <code>ifTrue</code>
+      <code>info</code>
+      <code>info</code>
+      <code>info</code>
+      <code>info</code>
+      <code>info</code>
+      <code>info</code>
+      <code>info</code>
+      <code>info</code>
+      <code>info</code>
+      <code>info</code>
+      <code>info</code>
+      <code>info</code>
+      <code>info</code>
+      <code>info</code>
+      <code>info</code>
+      <code>info</code>
+      <code>info</code>
+      <code>info</code>
+      <code>info</code>
+      <code>info</code>
+      <code>info</code>
+      <code>info</code>
+      <code>info</code>
+      <code>info</code>
+      <code>info</code>
+      <code>info</code>
+      <code>integerNode</code>
+      <code>integerNode</code>
+      <code>integerNode</code>
+      <code>integerNode</code>
+      <code>integerNode</code>
+      <code>integerNode</code>
+      <code>integerNode</code>
+      <code>integerNode</code>
+      <code>integerNode</code>
+      <code>integerNode</code>
+      <code>integerNode</code>
+      <code>integerNode</code>
+      <code>integerNode</code>
+      <code>integerNode</code>
+      <code>integerNode</code>
+      <code>integerNode</code>
+      <code>integerNode</code>
+      <code>integerNode</code>
+      <code>integerNode</code>
+      <code>integerNode</code>
+      <code>prototype</code>
+      <code>prototype</code>
+      <code>prototype</code>
+      <code>scalarNode</code>
       <code>then</code>
-      <code>end</code>
+      <code>thenInvalid</code>
+      <code>useAttributeAsKey</code>
+      <code>useAttributeAsKey</code>
+      <code>validate</code>
+      <code>validate</code>
     </MixedMethodCall>
     <PossibleRawObjectIteration occurrences="1">
       <code>$returnConfig[self::DAEMONS]</code>
     </PossibleRawObjectIteration>
-    <PossiblyFalseOperand occurrences="1">
-      <code>json_encode(self::getSupportedDrivers())</code>
-    </PossiblyFalseOperand>
     <PossiblyUndefinedMethod occurrences="3">
+      <code>$returnConfig[self::DAEMONS]</code>
+      <code>$returnConfig[self::DAEMONS]</code>
       <code>children</code>
-      <code>$returnConfig[self::DAEMONS]</code>
-      <code>$returnConfig[self::DAEMONS]</code>
     </PossiblyUndefinedMethod>
   </file>
   <file src="src/Entity/Daemon.php">
@@ -318,6 +331,9 @@
     </PropertyNotSetInConstructor>
   </file>
   <file src="src/Entity/Job.php">
+    <PossiblyInvalidPropertyAssignmentValue occurrences="1">
+      <code>$executeAfter</code>
+    </PossiblyInvalidPropertyAssignmentValue>
     <PossiblyNullArgument occurrences="1">
       <code>$this-&gt;getExecuteAfterTime()</code>
     </PossiblyNullArgument>
@@ -331,12 +347,12 @@
       <code>$this-&gt;input[self::SHORTCUTS]</code>
     </PossiblyNullArrayAssignment>
     <PropertyNotSetInConstructor occurrences="6">
-      <code>$id</code>
-      <code>$processedBy</code>
       <code>$cancellationReason</code>
       <code>$cannotBeDetachedBecause</code>
       <code>$cannotBeRemovedBecause</code>
       <code>$cannotRunBecause</code>
+      <code>$id</code>
+      <code>$processedBy</code>
     </PropertyNotSetInConstructor>
   </file>
   <file src="src/Repository/DaemonRepository.php">
@@ -348,44 +364,48 @@
     </MixedReturnStatement>
   </file>
   <file src="src/Repository/JobRepository.php">
-    <DeprecatedConstant occurrences="1">
-      <code>Type::DATETIME</code>
-    </DeprecatedConstant>
-    <MissingConstructor occurrences="1">
+    <MissingConstructor occurrences="2">
       <code>$config</code>
+      <code>$ioWriter</code>
     </MissingConstructor>
+    <MixedArgument occurrences="1">
+      <code>Type::DATETIME</code>
+    </MixedArgument>
     <MixedArrayAccess occurrences="1"/>
-    <MixedAssignment occurrences="4">
-      <code>$job</code>
+    <MixedAssignment occurrences="3">
       <code>$argument</code>
       <code>$value</code>
       <code>$value</code>
     </MixedAssignment>
     <MixedInferredReturnType occurrences="4">
+      <code>Job|null</code>
+      <code>Job|null</code>
       <code>array</code>
       <code>array|null</code>
-      <code>Job|null</code>
-      <code>Job|null</code>
     </MixedInferredReturnType>
     <MixedOperand occurrences="1">
       <code>$argument</code>
     </MixedOperand>
     <MixedReturnStatement occurrences="4">
-      <code>$queryBuilder-&gt;getQuery()-&gt;getResult()</code>
       <code>$queryBuilder-&gt;getQuery()-&gt;execute()</code>
-      <code>$queryBuilder-&gt;getQuery()-&gt;setMaxResults(1)-&gt;getOneOrNullResult()</code>
+      <code>$queryBuilder-&gt;getQuery()-&gt;getResult()</code>
       <code>$queryBuilder-&gt;getQuery()-&gt;setCacheable(false)-&gt;setMaxResults(1)-&gt;getOneOrNullResult()</code>
+      <code>$queryBuilder-&gt;getQuery()-&gt;setMaxResults(1)-&gt;getOneOrNullResult()</code>
     </MixedReturnStatement>
+    <UndefinedClass occurrences="1">
+      <code>Type</code>
+    </UndefinedClass>
   </file>
   <file src="src/Service/JobsManager.php">
-    <DeprecatedMethod occurrences="1">
+    <DeprecatedMethod occurrences="2">
       <code>detach</code>
+      <code>getInput</code>
     </DeprecatedMethod>
     <InvalidOperand occurrences="4">
-      <code>$jobInTreeId</code>
+      <code>$job-&gt;getId()</code>
       <code>$jobInTree-&gt;getId()</code>
       <code>$jobInTreeId</code>
-      <code>$job-&gt;getId()</code>
+      <code>$jobInTreeId</code>
     </InvalidOperand>
     <MixedArgumentTypeCoercion occurrences="2">
       <code>$cancelledJob</code>
@@ -407,9 +427,9 @@
     </MixedReturnTypeCoercion>
     <PossiblyNullArgument occurrences="4">
       <code>$job-&gt;getCancelledBy()</code>
-      <code>$job-&gt;getRetryOf()</code>
       <code>$job-&gt;getFirstRetriedJob()</code>
       <code>$job-&gt;getRetriedBy()</code>
+      <code>$job-&gt;getRetryOf()</code>
     </PossiblyNullArgument>
     <PossiblyNullReference occurrences="8">
       <code>getId</code>
@@ -432,9 +452,17 @@
     </RedundantCondition>
   </file>
   <file src="src/Service/QueuesDaemon.php">
-    <InternalMethod occurrences="1">
-      <code>setSQLLogger</code>
-    </InternalMethod>
+    <DeprecatedMethod occurrences="9">
+      <code>getInput</code>
+      <code>note</code>
+      <code>success</code>
+      <code>title</code>
+      <code>warning</code>
+      <code>warning</code>
+      <code>warning</code>
+      <code>writeln</code>
+      <code>writeln</code>
+    </DeprecatedMethod>
     <InvalidOperand occurrences="1">
       <code>\random_int(500, 1000) * 1E3</code>
     </InvalidOperand>
@@ -442,14 +470,14 @@
       <code>$signo</code>
     </MissingClosureParamType>
     <MixedArgument occurrences="8">
+      <code>$job</code>
+      <code>$maxRetentionDays</code>
       <code>$queueName</code>
-      <code>$this-&gt;runningJobs[$queueName]</code>
+      <code>$queueName</code>
+      <code>$queueName</code>
       <code>$runningJob</code>
       <code>$this-&gt;entityManager-&gt;getUnitOfWork()-&gt;getIdentityMap()[Job::class]</code>
-      <code>$job</code>
-      <code>$queueName</code>
-      <code>$queueName</code>
-      <code>$maxRetentionDays</code>
+      <code>$this-&gt;runningJobs[$queueName]</code>
     </MixedArgument>
     <MixedArrayAccess occurrences="4">
       <code>$job-&gt;getInput()[self::OPTIONS][self::__ID]</code>
@@ -463,23 +491,24 @@
     <MixedArrayOffset occurrences="1">
       <code>$this-&gt;runningJobs[$queueName][$index]</code>
     </MixedArrayOffset>
-    <MixedAssignment occurrences="9">
-      <code>$queueName</code>
+    <MixedAssignment occurrences="10">
       <code>$can</code>
       <code>$currentlyRunning</code>
+      <code>$index</code>
+      <code>$job</code>
+      <code>$maxRetentionDays</code>
+      <code>$queueName</code>
+      <code>$queueName</code>
+      <code>$queueName</code>
       <code>$runningJob</code>
       <code>$startJobId</code>
-      <code>$job</code>
-      <code>$queueName</code>
-      <code>$queueName</code>
-      <code>$maxRetentionDays</code>
     </MixedAssignment>
     <MixedInferredReturnType occurrences="1">
       <code>int</code>
     </MixedInferredReturnType>
     <MixedOperand occurrences="2">
-      <code>$this-&gt;getConfig()-&gt;getQueue($queueName)[Configuration::QUEUE_MAX_CONCURRENT_JOBS_KEY]</code>
       <code>$signo</code>
+      <code>$this-&gt;getConfig()-&gt;getQueue($queueName)[Configuration::QUEUE_MAX_CONCURRENT_JOBS_KEY]</code>
     </MixedOperand>
     <MixedReturnStatement occurrences="1">
       <code>$this-&gt;getConfig()-&gt;getQueue($queueName)[Configuration::QUEUE_MAX_CONCURRENT_JOBS_KEY] - $this-&gt;countRunningJobs($queueName)</code>
@@ -487,52 +516,59 @@
     <PossiblyNullArrayAccess occurrences="1">
       <code>$job-&gt;getInput()[self::OPTIONS]</code>
     </PossiblyNullArrayAccess>
-    <PropertyNotSetInConstructor occurrences="5">
-      <code>$me</code>
+    <PropertyNotSetInConstructor occurrences="3">
       <code>$ioWriter</code>
-      <code>$mustDie</code>
-      <code>$pcntlLoaded</code>
+      <code>$me</code>
       <code>$verbosity</code>
     </PropertyNotSetInConstructor>
     <RedundantCondition occurrences="1">
       <code>\is_string($hostname)</code>
     </RedundantCondition>
+    <TooManyArguments occurrences="3">
+      <code>flush</code>
+      <code>flush</code>
+      <code>flush</code>
+    </TooManyArguments>
     <TypeDoesNotContainType occurrences="1">
       <code>false === \is_string($hostname)</code>
     </TypeDoesNotContainType>
+    <UndefinedDocblockClass occurrences="2">
+      <code>MappingException</code>
+      <code>MappingException</code>
+    </UndefinedDocblockClass>
   </file>
   <file src="src/Util/InputParser.php">
     <MissingClosureParamType occurrences="2">
-      <code>$value</code>
       <code>$key</code>
+      <code>$value</code>
     </MissingClosureParamType>
     <MixedArgument occurrences="9">
       <code>$input[$commandKey]</code>
-      <code>$value</code>
-      <code>self::$preparedInput[self::OPTIONS]</code>
-      <code>self::$preparedInput[self::SHORTCUTS]</code>
       <code>$input[self::ARGUMENTS]</code>
       <code>$input[self::OPTIONS]</code>
       <code>$input[self::OPTIONS]</code>
       <code>$input[self::SHORTCUTS]</code>
       <code>$input[self::SHORTCUTS]</code>
-    </MixedArgument>
-    <MixedAssignment occurrences="6">
-      <code>self::$preparedInput[self::COMMAND]</code>
-      <code>self::$preparedInput[self::COMMAND]</code>
-      <code>self::$preparedInput[self::ARGUMENTS]</code>
+      <code>$value</code>
       <code>self::$preparedInput[self::OPTIONS]</code>
       <code>self::$preparedInput[self::SHORTCUTS]</code>
+    </MixedArgument>
+    <MixedAssignment occurrences="6">
       <code>$value</code>
+      <code>self::$preparedInput[self::ARGUMENTS]</code>
+      <code>self::$preparedInput[self::COMMAND]</code>
+      <code>self::$preparedInput[self::COMMAND]</code>
+      <code>self::$preparedInput[self::OPTIONS]</code>
+      <code>self::$preparedInput[self::SHORTCUTS]</code>
     </MixedAssignment>
     <MixedOperand occurrences="1">
       <code>$input[self::COMMAND]</code>
     </MixedOperand>
     <PossiblyNullArrayAssignment occurrences="5">
-      <code>self::$preparedInput[self::OPTIONS]</code>
-      <code>self::$preparedInput[self::SHORTCUTS]</code>
       <code>self::$preparedInput[self::ARGUMENTS]</code>
       <code>self::$preparedInput[self::OPTIONS]</code>
+      <code>self::$preparedInput[self::OPTIONS]</code>
+      <code>self::$preparedInput[self::SHORTCUTS]</code>
       <code>self::$preparedInput[self::SHORTCUTS]</code>
     </PossiblyNullArrayAssignment>
     <PossiblyNullArrayOffset occurrences="1">
@@ -543,6 +579,9 @@
     </RedundantConditionGivenDocblockType>
   </file>
   <file src="src/Util/JobsMarker.php">
+    <DeprecatedMethod occurrences="1">
+      <code>error</code>
+    </DeprecatedMethod>
     <MixedArgumentTypeCoercion occurrences="1">
       <code>$childDependency</code>
     </MixedArgumentTypeCoercion>
@@ -552,6 +591,12 @@
     <MixedAssignment occurrences="1">
       <code>$value</code>
     </MixedAssignment>
+    <MixedInferredReturnType occurrences="1">
+      <code>ReflectionClass</code>
+    </MixedInferredReturnType>
+    <UndefinedClass occurrences="1">
+      <code>Proxy</code>
+    </UndefinedClass>
   </file>
   <file src="src/Util/JobsUtil.php">
     <MixedAssignment occurrences="1">
@@ -559,26 +604,40 @@
     </MixedAssignment>
   </file>
   <file src="src/Util/Profiler.php">
+    <DeprecatedMethod occurrences="1">
+      <code>table</code>
+    </DeprecatedMethod>
     <InvalidOperand occurrences="17">
+      <code>$currentHighestUowSize</code>
+      <code>$currentUowSize</code>
       <code>$job-&gt;getId()</code>
       <code>$memoryDifference / $this-&gt;lastMemoryUsage * 100</code>
       <code>$memoryDifferenceReal / $this-&gt;lastMemoryUsageReal * 100</code>
       <code>$memoryPeakDifference / $this-&gt;highestMemoryPeak * 100</code>
       <code>$memoryPeakDifferenceReal / $this-&gt;highestMemoryPeakReal * 100</code>
-      <code>$uowSizeDifference / $this-&gt;lastUowSize * 100</code>
-      <code>$uowHighestSizeDifference / $this-&gt;highestUowSize * 100</code>
-      <code>\abs($memoryDifferenceReal)</code>
-      <code>\abs($memoryPeakDifferenceReal)</code>
-      <code>\abs($memoryDifference)</code>
-      <code>\abs($memoryPeakDifference)</code>
-      <code>$this-&gt;lastUowSize</code>
-      <code>$currentUowSize</code>
-      <code>\abs($uowSizeDifference)</code>
       <code>$this-&gt;highestUowSize</code>
-      <code>$currentHighestUowSize</code>
+      <code>$this-&gt;lastUowSize</code>
+      <code>$uowHighestSizeDifference / $this-&gt;highestUowSize * 100</code>
+      <code>$uowSizeDifference / $this-&gt;lastUowSize * 100</code>
+      <code>\abs($memoryDifference)</code>
+      <code>\abs($memoryDifferenceReal)</code>
+      <code>\abs($memoryPeakDifference)</code>
+      <code>\abs($memoryPeakDifferenceReal)</code>
       <code>\abs($uowHighestSizeDifference)</code>
+      <code>\abs($uowSizeDifference)</code>
     </InvalidOperand>
-    <MissingConstructor occurrences="1">
+    <MissingConstructor occurrences="12">
+      <code>$aliveDaemonsLastCheckedAt</code>
+      <code>$highestMemoryPeak</code>
+      <code>$highestMemoryPeakReal</code>
+      <code>$highestUowSize</code>
+      <code>$lastMemoryUsage</code>
+      <code>$lastMemoryUsageReal</code>
+      <code>$lastMicrotime</code>
+      <code>$lastOptimizationAt</code>
+      <code>$lastUowSize</code>
+      <code>$maxRuntime</code>
+      <code>$pid</code>
       <code>$startTime</code>
     </MissingConstructor>
     <MixedArgument occurrences="1">
@@ -594,14 +653,14 @@
       <code>float</code>
     </MixedInferredReturnType>
     <MixedOperand occurrences="8">
-      <code>Helper::formatMemory($this-&gt;lastMemoryUsageReal)</code>
-      <code>Helper::formatMemory($currentMemoryUsageReal)</code>
-      <code>Helper::formatMemory($this-&gt;highestMemoryPeakReal)</code>
-      <code>Helper::formatMemory($currentMemoryPeakReal)</code>
-      <code>Helper::formatMemory($this-&gt;lastMemoryUsage)</code>
-      <code>Helper::formatMemory($currentMemoryUsage)</code>
-      <code>Helper::formatMemory($this-&gt;highestMemoryPeak)</code>
       <code>Helper::formatMemory($currentMemoryPeak)</code>
+      <code>Helper::formatMemory($currentMemoryPeakReal)</code>
+      <code>Helper::formatMemory($currentMemoryUsage)</code>
+      <code>Helper::formatMemory($currentMemoryUsageReal)</code>
+      <code>Helper::formatMemory($this-&gt;highestMemoryPeak)</code>
+      <code>Helper::formatMemory($this-&gt;highestMemoryPeakReal)</code>
+      <code>Helper::formatMemory($this-&gt;lastMemoryUsage)</code>
+      <code>Helper::formatMemory($this-&gt;lastMemoryUsageReal)</code>
     </MixedOperand>
     <MixedReturnStatement occurrences="1">
       <code>$this-&gt;runningJobsLastCheckedAt[$queueName]</code>
@@ -611,5 +670,10 @@
     <MissingClosureReturnType occurrences="1">
       <code>function (ProgressBar $bar, OutputInterface $output) {</code>
     </MissingClosureReturnType>
+  </file>
+  <file src="tests/Util/InputParserTest.php">
+    <MissingDependency occurrences="1">
+      <code>TestCase</code>
+    </MissingDependency>
   </file>
 </files>

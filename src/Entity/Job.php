@@ -159,7 +159,7 @@ class Job
     /**
      * @var int The ID of the Job
      *
-     * @ORM\Column(name="id", type="integer", nullable=false)
+     * @ORM\Column(name="id", type="integer")
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="IDENTITY")
      */
@@ -168,7 +168,7 @@ class Job
     /**
      * @var string
      *
-     * @ORM\Column(name="command", type="string", length=255, nullable=false)
+     * @ORM\Column(name="command", type="string", length=255)
      */
     private $command;
 
@@ -182,7 +182,7 @@ class Job
     /**
      * @var bool
      *
-     * @ORM\Column(name="self_aware", type="boolean", nullable=false)
+     * @ORM\Column(name="self_aware", type="boolean")
      */
     private $awareOfJob = false;
 
@@ -196,7 +196,7 @@ class Job
     /**
      * @var DateTime
      *
-     * @ORM\Column(name="created_at", type="datetime", nullable=false)
+     * @ORM\Column(name="created_at", type="datetime")
      */
     private $createdAt;
 
@@ -224,7 +224,7 @@ class Job
     /**
      * @var int
      *
-     * @ORM\Column(name="priority", type="smallint", nullable=false)
+     * @ORM\Column(name="priority", type="smallint")
      */
     private $priority;
 
@@ -240,14 +240,14 @@ class Job
     /**
      * @var string
      *
-     * @ORM\Column(name="queue", type="string", length=255, nullable=false)
+     * @ORM\Column(name="queue", type="string", length=255)
      */
     private $queue;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="status", type="string", length=255, nullable=false)
+     * @ORM\Column(name="status", type="string", length=255)
      */
     private $status;
 
@@ -262,7 +262,7 @@ class Job
      * @var Job|null
      *
      * @ORM\ManyToOne(targetEntity="SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job", inversedBy="cancelledJobs")
-     * @ORM\JoinColumn(name="cancelled_by", referencedColumnName="id")
+     * @ORM\JoinColumn(name="cancelled_by")
      */
     private $cancelledBy;
 
@@ -308,7 +308,7 @@ class Job
     /**
      * @var StrategyInterface
      *
-     * @ORM\Column(name="retry_strategy", type="array", nullable=false)
+     * @ORM\Column(name="retry_strategy", type="array")
      */
     private $retryStrategy;
 
@@ -316,7 +316,7 @@ class Job
      * @var Job|null If this Job is a retry of another job, here there is the Job of which this is the retry
      *
      * @ORM\OneToOne(targetEntity="SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job", inversedBy="retriedBy")
-     * @ORM\JoinColumn(name="retry_of", referencedColumnName="id")
+     * @ORM\JoinColumn(name="retry_of")
      */
     private $retryOf;
 
@@ -331,7 +331,7 @@ class Job
      * @var Job|null If this Job is a retry of another retried job, here there is the first retried Job
      *
      * @ORM\ManyToOne(targetEntity="SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job", inversedBy="retryingJobs")
-     * @ORM\JoinColumn(name="first_retried_job", referencedColumnName="id", nullable=true)
+     * @ORM\JoinColumn(name="first_retried_job")
      */
     private $firstRetriedJob;
 
@@ -1236,9 +1236,9 @@ class Job
     }
 
     /**
-     * @param DateTime $executeAfter
+     * @param \DateTime|\DateTimeImmutable $executeAfter
      */
-    public function setExecuteAfterTime(DateTime $executeAfter): self
+    public function setExecuteAfterTime(\DateTimeInterface $executeAfter): self
     {
         $this->executeAfterTime = $executeAfter;
 

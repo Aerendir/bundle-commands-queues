@@ -101,10 +101,10 @@ final class QueuesDaemon
      *           This will be true when a PCNTL SIGTERM signal is intercepted or when the max runtime execution
      *           is reached.
      */
-    private $mustDie;
+    private $mustDie = false;
 
     /** @var bool $pcntlLoaded */
-    private $pcntlLoaded;
+    private $pcntlLoaded = false;
 
     /** @var Profiler $profiler */
     private $profiler;
@@ -114,6 +114,10 @@ final class QueuesDaemon
 
     /** @var int $verbosity */
     private $verbosity;
+    /**
+     * @var \Doctrine\ORM\Configuration
+     */
+    private $configuration;
 
     /**
      * @param DaemonConfig           $config
@@ -122,7 +126,7 @@ final class QueuesDaemon
      * @param JobsMarker             $jobsMarker
      * @param Profiler               $profiler
      */
-    public function __construct(DaemonConfig $config, EntityManagerInterface $entityManager, JobsManager $jobsManager, JobsMarker $jobsMarker, Profiler $profiler)
+    public function __construct(DaemonConfig $config, EntityManagerInterface $entityManager, JobsManager $jobsManager, JobsMarker $jobsMarker, Profiler $profiler, \Doctrine\ORM\Configuration $configuration)
     {
         $this->config        = $config;
         $this->entityManager = $entityManager;
@@ -133,6 +137,7 @@ final class QueuesDaemon
         /** @var JobRepository $jobsRepo */
         $jobsRepo            = $this->entityManager->getRepository(Job::class);
         $this->jobsRepo      = $jobsRepo;
+        $this->configuration = $configuration;
     }
 
     /**
@@ -183,8 +188,8 @@ final class QueuesDaemon
         $this->jobsManager->initialize($this->entityManager, $ioWriter);
 
         // Disable logging in Doctrine
-        $this->entityManager->getConfiguration()->setSQLLogger();
-        $this->entityManager->getConfiguration()->setSecondLevelCacheEnabled(false);
+        $this->configuration->setSQLLogger();
+        $this->configuration->setSecondLevelCacheEnabled(false);
 
         // Configure the repository
         $this->jobsRepo->configure($this->config->getRepoConfig(), $this->ioWriter);
@@ -825,7 +830,7 @@ final class QueuesDaemon
      * @throws ORMException
      * @throws Exception
      */
-    final protected function handleFailedJob(Job $job, Process $process): void
+    final private function handleFailedJob(Job $job, Process $process): void
     {
         $info = $this->jobsManager->buildDefaultInfo($process);
 
@@ -857,7 +862,7 @@ final class QueuesDaemon
      *
      * @throws Exception
      */
-    final protected function handleSuccessfulJob(Job $job, Process $process): void
+    final private function handleSuccessfulJob(Job $job, Process $process): void
     {
         $info = $this->jobsManager->buildDefaultInfo($process);
         $this->jobsMarker->markJobAsFinished($job, $info);
@@ -876,7 +881,7 @@ final class QueuesDaemon
      *
      * @return bool|Job Returns false or the Job object
      */
-    final protected function handleChildsOfFailedJob(Job $job)
+    final private function handleChildsOfFailedJob(Job $job)
     {
         if ($job->getChildDependencies()->count() > 0) {
             if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
