@@ -39,7 +39,7 @@
         "roave/security-advisories": "dev-master",
         "sonata-project/admin-bundle": "^3.48",
         "symfony/var-dumper": "^4.4|^5.2",
-        "phpstan/phpstan": "0.12.65",
+        "phpstan/phpstan": "0.12.69",
         "phpstan/phpstan-phpunit": "0.12.17",
         "phpstan/phpstan-doctrine": "0.12.26",
         "phpstan/phpstan-symfony": "0.12.12",
