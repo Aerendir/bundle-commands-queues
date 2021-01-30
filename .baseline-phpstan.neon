@@ -525,3 +525,8 @@ parameters:
 			count: 1
 			path: src/Util/Profiler.php
 
+		-
+			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Tests\\\\Util\\\\InputParserTest\\:\\:getExpected\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: tests/Util/InputParserTest.php
+

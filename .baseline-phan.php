@@ -13,12 +13,11 @@ return [
     // PhanUnreferencedPublicMethod : 40+ occurrences
     // PhanDeprecatedFunction : 30+ occurrences
     // PhanPluginUnreachableCode : 15+ occurrences
-    // PhanUndeclaredStaticMethod : 10+ occurrences
     // PhanReadOnlyPrivateProperty : 9 occurrences
     // PhanTypeArraySuspiciousNullable : 7 occurrences
     // PhanRedefinedExtendedClass : 6 occurrences
     // PhanTypeMismatchArgumentNullable : 5 occurrences
-    // PhanUnreferencedClass : 5 occurrences
+    // PhanUnreferencedClass : 4 occurrences
     // PhanParamTooMany : 3 occurrences
     // PhanUndeclaredTypeThrowsType : 3 occurrences
     // PhanUnreferencedClosure : 2 occurrences
@@ -31,7 +30,6 @@ return [
     // PhanTypeNoPropertiesForeach : 1 occurrence
     // PhanUndeclaredClassConstant : 1 occurrence
     // PhanUndeclaredClassInstanceof : 1 occurrence
-    // PhanUndeclaredExtendedClass : 1 occurrence
     // PhanUndeclaredMethod : 1 occurrence
     // PhanUnreferencedPrivateMethod : 1 occurrence
 
@@ -60,7 +58,7 @@ return [
         'src/Util/JobsMarker.php' => ['PhanDeprecatedFunction', 'PhanRedefinedClassReference', 'PhanUndeclaredClassInstanceof'],
         'src/Util/Profiler.php' => ['ConstReferenceClassNotImported', 'ConstReferenceConstNotFound', 'PhanDeprecatedFunction', 'PhanRedefinedClassReference', 'PhanUnreferencedPublicMethod'],
         'src/Util/ProgressBarFactory.php' => ['PhanRedefinedClassReference', 'PhanUnusedClosureParameter'],
-        'tests/Util/InputParserTest.php' => ['PhanUndeclaredExtendedClass', 'PhanUndeclaredStaticMethod', 'PhanUnreferencedClass', 'PhanUnreferencedPublicMethod'],
+        'tests/Util/InputParserTest.php' => ['PhanUnreferencedPublicMethod'],
     ],
     // 'directory_suppressions' => ['src/directory_name' => ['PhanIssueName1', 'PhanIssueName2']] can be manually added if needed.
     // (directory_suppressions will currently be ignored by subsequent calls to --save-baseline, but may be preserved in future Phan releases)
