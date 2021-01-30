@@ -583,7 +583,7 @@ class Job
     /**
      * @return array|null
      */
-    public function getInput(): ? array
+    public function getInput(): ?array
     {
         return $this->input;
     }
@@ -599,7 +599,7 @@ class Job
     /**
      * @return DateTime|null
      */
-    public function getStartedAt(): ? DateTime
+    public function getStartedAt(): ?DateTime
     {
         return $this->startedAt;
     }
@@ -607,7 +607,7 @@ class Job
     /**
      * @return DateTime|null
      */
-    public function getClosedAt(): ? DateTime
+    public function getClosedAt(): ?DateTime
     {
         return $this->closedAt;
     }
@@ -615,7 +615,7 @@ class Job
     /**
      * @return array|null Null if the process finished with success
      */
-    public function getDebug(): ? array
+    public function getDebug(): ?array
     {
         return $this->debug;
     }
@@ -623,7 +623,7 @@ class Job
     /**
      * @return DateTime|null
      */
-    public function getExecuteAfterTime(): ? DateTime
+    public function getExecuteAfterTime(): ?DateTime
     {
         return $this->executeAfterTime;
     }
@@ -671,7 +671,7 @@ class Job
     /**
      * @return Job|null
      */
-    public function getCancelledBy(): ? Job
+    public function getCancelledBy(): ?Job
     {
         return $this->cancelledBy;
     }
@@ -687,7 +687,7 @@ class Job
     /**
      * @return string|null Null if no output were produced by the process
      */
-    public function getOutput(): ? string
+    public function getOutput(): ?string
     {
         return $this->output;
     }
@@ -695,7 +695,7 @@ class Job
     /**
      * @return int|null Null if the process was not already started
      */
-    public function getExitCode(): ? int
+    public function getExitCode(): ?int
     {
         return $this->exitCode;
     }
@@ -735,7 +735,7 @@ class Job
     /**
      * @return Job|null
      */
-    public function getRetryOf(): ? Job
+    public function getRetryOf(): ?Job
     {
         return $this->retryOf;
     }

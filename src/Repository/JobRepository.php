@@ -93,7 +93,7 @@ final class JobRepository extends EntityRepository
      *
      * @return Job|null
      */
-    public function findNextRunnableJob(string $queueName): ? Job
+    public function findNextRunnableJob(string $queueName): ?Job
     {
         // Collects the Jobs that have to be excluded from the next findNextJob() call
         $excludedJobs = [];
@@ -260,7 +260,7 @@ final class JobRepository extends EntityRepository
      *
      * @return Job|null
      */
-    public function findNextStaleJob(array $knownAsStale): ? Job
+    public function findNextStaleJob(array $knownAsStale): ?Job
     {
         $queryBuilder = $this->getEntityManager()->createQueryBuilder();
         $queryBuilder->select('j')->from(Job::class, 'j')

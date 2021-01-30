@@ -1,11 +1,6 @@
 parameters:
 	ignoreErrors:
 		-
-			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Admin\\\\Sonata\\\\SHQAnsiTheme\\:\\:asArray\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: src/Admin/Sonata/SHQAnsiTheme.php
-
-		-
 			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Command\\\\InternalMarkAsCancelledCommand\\:\\:cancelChildJobs\\(\\) has parameter \\$alreadyCancelledJobs with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: src/Command/InternalMarkAsCancelledCommand.php
