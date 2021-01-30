@@ -1,5 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <files psalm-version="4.4.1@9fd7a7d885b3a216cff8dec9d8c21a132f275224">
+  <file src="src/Admin/Sonata/Entity/DaemonAdmin.php">
+    <UndefinedClass occurrences="1">
+      <code>AbstractAdmin</code>
+    </UndefinedClass>
+  </file>
+  <file src="src/Admin/Sonata/Entity/JobAdmin.php">
+    <UndefinedClass occurrences="1">
+      <code>AbstractAdmin</code>
+    </UndefinedClass>
+  </file>
+  <file src="src/Admin/Sonata/Twig/CommandsQueuesExtension.php">
+    <UndefinedClass occurrences="1">
+      <code>AbstractExtension</code>
+    </UndefinedClass>
+  </file>
   <file src="src/Command/AbstractQueuesCommand.php">
     <PropertyNotSetInConstructor occurrences="1">
       <code>$ioWriter</code>

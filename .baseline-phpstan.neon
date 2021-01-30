@@ -1,44 +1,9 @@
 parameters:
 	ignoreErrors:
 		-
-			message: "#^Class SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Admin\\\\Sonata\\\\Entity\\\\DaemonAdmin extends generic class Sonata\\\\AdminBundle\\\\Admin\\\\AbstractAdmin but does not specify its types\\: T$#"
-			count: 1
-			path: src/Admin/Sonata/Entity/DaemonAdmin.php
-
-		-
-			message: "#^Class SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Admin\\\\Sonata\\\\Entity\\\\JobAdmin extends generic class Sonata\\\\AdminBundle\\\\Admin\\\\AbstractAdmin but does not specify its types\\: T$#"
-			count: 1
-			path: src/Admin/Sonata/Entity/JobAdmin.php
-
-		-
-			message: "#^Property SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Admin\\\\Sonata\\\\Entity\\\\JobAdmin\\:\\:\\$datagridValues type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: src/Admin/Sonata/Entity/JobAdmin.php
-
-		-
-			message: "#^Property SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Admin\\\\Sonata\\\\Entity\\\\JobAdmin\\:\\:\\$perPageOptions type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: src/Admin/Sonata/Entity/JobAdmin.php
-
-		-
-			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Admin\\\\Sonata\\\\Entity\\\\JobAdmin\\:\\:configureTabMenu\\(\\) has parameter \\$childAdmin with generic interface Sonata\\\\AdminBundle\\\\Admin\\\\AdminInterface but does not specify its types\\: T$#"
-			count: 1
-			path: src/Admin/Sonata/Entity/JobAdmin.php
-
-		-
-			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Admin\\\\Sonata\\\\Entity\\\\JobAdmin\\:\\:configureTabMenu\\(\\) has parameter \\$menu with no value type specified in iterable type Knp\\\\Menu\\\\ItemInterface\\.$#"
-			count: 1
-			path: src/Admin/Sonata/Entity/JobAdmin.php
-
-		-
 			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Admin\\\\Sonata\\\\SHQAnsiTheme\\:\\:asArray\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: src/Admin/Sonata/SHQAnsiTheme.php
-
-		-
-			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Admin\\\\Sonata\\\\Twig\\\\CommandsQueuesExtension\\:\\:getRenderedInput\\(\\) has parameter \\$input with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: src/Admin/Sonata/Twig/CommandsQueuesExtension.php
 
 		-
 			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Command\\\\InternalMarkAsCancelledCommand\\:\\:cancelChildJobs\\(\\) has parameter \\$alreadyCancelledJobs with no value type specified in iterable type array\\.$#"

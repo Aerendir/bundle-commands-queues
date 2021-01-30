@@ -13,14 +13,20 @@ return [
     // PhanUnreferencedPublicMethod : 40+ occurrences
     // PhanDeprecatedFunction : 30+ occurrences
     // PhanPluginUnreachableCode : 15+ occurrences
+    // PhanUndeclaredClassMethod : 15+ occurrences
+    // PhanUndeclaredMethod : 10+ occurrences
     // PhanReadOnlyPrivateProperty : 9 occurrences
     // PhanTypeArraySuspiciousNullable : 7 occurrences
+    // PhanUndeclaredTypeParameter : 7 occurrences
+    // PhanUnreferencedProtectedProperty : 7 occurrences
     // PhanRedefinedExtendedClass : 6 occurrences
+    // PhanUnreferencedClass : 6 occurrences
+    // PhanUnreferencedProtectedMethod : 6 occurrences
     // PhanTypeMismatchArgumentNullable : 5 occurrences
-    // PhanUnreferencedClass : 4 occurrences
+    // PhanUnreferencedClosure : 4 occurrences
     // PhanParamTooMany : 3 occurrences
+    // PhanUndeclaredExtendedClass : 3 occurrences
     // PhanUndeclaredTypeThrowsType : 3 occurrences
-    // PhanUnreferencedClosure : 2 occurrences
     // PhanUnusedClosureParameter : 2 occurrences
     // PhanUnusedProtectedFinalMethodParameter : 2 occurrences
     // ConstReferenceClassNotImported : 1 occurrence
@@ -28,15 +34,18 @@ return [
     // PhanTypeInvalidDimOffset : 1 occurrence
     // PhanTypeMismatchArgumentReal : 1 occurrence
     // PhanTypeNoPropertiesForeach : 1 occurrence
+    // PhanUndeclaredClass : 1 occurrence
     // PhanUndeclaredClassConstant : 1 occurrence
     // PhanUndeclaredClassInstanceof : 1 occurrence
-    // PhanUndeclaredMethod : 1 occurrence
+    // PhanUndeclaredClassReference : 1 occurrence
     // PhanUnreferencedPrivateMethod : 1 occurrence
 
     // Currently, file_suppressions and directory_suppressions are the only supported suppressions
     'file_suppressions' => [
+        'src/Admin/Sonata/Entity/DaemonAdmin.php' => ['PhanUndeclaredClassMethod', 'PhanUndeclaredExtendedClass', 'PhanUndeclaredTypeParameter', 'PhanUnreferencedClass', 'PhanUnreferencedProtectedMethod', 'PhanUnreferencedProtectedProperty'],
+        'src/Admin/Sonata/Entity/JobAdmin.php' => ['PhanUndeclaredClass', 'PhanUndeclaredClassMethod', 'PhanUndeclaredExtendedClass', 'PhanUndeclaredMethod', 'PhanUndeclaredTypeParameter', 'PhanUnreferencedClass', 'PhanUnreferencedProtectedMethod', 'PhanUnreferencedProtectedProperty'],
         'src/Admin/Sonata/SHQAnsiTheme.php' => ['PhanUnreferencedClass'],
-        'src/Admin/Sonata/Twig/CommandsQueuesExtension.php' => ['PhanUnreferencedClass', 'PhanUnreferencedPublicMethod'],
+        'src/Admin/Sonata/Twig/CommandsQueuesExtension.php' => ['PhanUndeclaredClassMethod', 'PhanUndeclaredExtendedClass', 'PhanUnreferencedClass', 'PhanUnreferencedClosure', 'PhanUnreferencedPublicMethod'],
         'src/Command/AbstractQueuesCommand.php' => ['PhanRedefinedClassReference', 'PhanRedefinedExtendedClass'],
         'src/Command/InternalMarkAsCancelledCommand.php' => ['PhanDeprecatedFunction', 'PhanRedefinedClassReference'],
         'src/Command/RunCommand.php' => ['PhanDeprecatedFunction', 'PhanRedefinedClassReference', 'PhanRedefinedExtendedClass', 'PhanUndeclaredTypeThrowsType'],
@@ -45,7 +54,7 @@ return [
         'src/Command/TestRandomJobsCommand.php' => ['PhanDeprecatedFunction', 'PhanPluginUnreachableCode', 'PhanRedefinedClassReference', 'PhanTypeInvalidDimOffset', 'PhanTypeMismatchArgumentReal'],
         'src/Config/DaemonConfig.php' => ['PhanUnreferencedPublicMethod'],
         'src/DependencyInjection/Configuration.php' => ['PhanTypeNoPropertiesForeach', 'PhanUndeclaredMethod', 'PhanUnreferencedClosure'],
-        'src/DependencyInjection/SHQCommandsQueuesExtension.php' => ['PhanUnreferencedClass'],
+        'src/DependencyInjection/SHQCommandsQueuesExtension.php' => ['PhanUndeclaredClassReference', 'PhanUnreferencedClass'],
         'src/Entity/Daemon.php' => ['PhanReadOnlyPrivateProperty', 'PhanRedefinedClassReference', 'PhanUnreferencedPublicMethod'],
         'src/Entity/Job.php' => ['PhanPluginUnreachableCode', 'PhanReadOnlyPrivateProperty', 'PhanRedefinedClassReference', 'PhanTypeArraySuspiciousNullable', 'PhanTypeMismatchArgumentNullable', 'PhanUnreferencedPublicMethod'],
         'src/Repository/DaemonRepository.php' => ['PhanRedefinedClassReference', 'PhanRedefinedExtendedClass', 'PhanUnreferencedPublicMethod'],
