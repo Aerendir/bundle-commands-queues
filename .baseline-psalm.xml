@@ -671,9 +671,4 @@
       <code>function (ProgressBar $bar, OutputInterface $output) {</code>
     </MissingClosureReturnType>
   </file>
-  <file src="tests/Util/InputParserTest.php">
-    <MissingDependency occurrences="1">
-      <code>TestCase</code>
-    </MissingDependency>
-  </file>
 </files>
