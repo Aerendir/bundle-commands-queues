@@ -17,6 +17,7 @@ parameters:
         - tests
     excludes_analyse:
         - */src/DependencyInjection/Configuration.php
+        - */src/Admin/Sonata/*
     ignoreErrors:
         -
             message: '#Function memprof_dump_callgrind not found.#'
