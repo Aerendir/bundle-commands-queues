@@ -149,7 +149,7 @@ class Daemon
     /**
      * @return DateTime|null
      */
-    public function getDiedOn(): ? DateTime
+    public function getDiedOn(): ?DateTime
     {
         return $this->diedOn;
     }
@@ -157,7 +157,7 @@ class Daemon
     /**
      * @return string|null
      */
-    public function getMortisCausa(): ? string
+    public function getMortisCausa(): ?string
     {
         return $this->mortisCausa;
     }
