@@ -1,8 +1,10 @@
+*Do you like this bundle? [**Leave a &#9733;**](#js-repo-pjax-container) or run `composer global require symfony/thanks && composer thanks` to say thank you to all libraries you use in your current project, this included!*
+
 The basic way to create a `Job` in your code is this:
 
     // Create the Job object
     $scheduledJob = new Job('queues:test', '-v --argument=value');
-    
+
     // Save it to the database using the `queues` service
     $this->get('queues')->schedule($scheduledJob);
 
@@ -17,14 +19,14 @@ So, for example, you want to create the `Job` today, but you want it will be exe
 It is really easy to do this:
 
     $job = new Job('queues:test', $arguments = '--id=the_job_id');
-    
+
     // Get the NOW time
     $tomorrow = new \DateTime();
     $tomorrow->modify('+1 days');
-    
+
     // Set the Job to be executed tomorrow
     $job->setExecuteAfterTime($tomorrow);
-    
+
     // Save it to the database using the `queues` service
     $this->get('queues')->schedule($scheduledJob);
 
@@ -38,7 +40,7 @@ There are times where you want to know from inside your command which Job execut
 In these situations you can make your Command aware of the calling Job.
 
 To make your command aware of the Job that called it you have to do two things:
- 
+
  1. Call the `Job::makeAwareOfJob` method;
  2. Make your command ready to get the Job id.
 
@@ -47,7 +49,7 @@ To make your command aware of the Job that called it you have to do two things:
 This is as simple as
 
     $job = new Job('queues:test', $arguments = '--id=the_job_id');
-    
+
     // Set the Job to be executed tomorrow
     $job->makeAwareOfJob();
 
@@ -75,11 +77,11 @@ to do this you have to add an argument to your command:
             $this
                 ->setName('my:awesome:command')
                 ->setDescription('This command is used to launch the skyrocket that will go on Mars.')
-                
+
                 /** Add this Option! **/
                 ->addOption('job-id', null, InputOption::VALUE_REQUIRED, 'The ID of the processing Job.');
         }
-    
+
         /**
          * @param InputInterface  $input
          * @param OutputInterface $output
@@ -89,10 +91,10 @@ to do this you have to add an argument to your command:
         protected function execute(InputInterface $input, OutputInterface $output)
         {
             ...
-            
+
             /** Here you can get the processing Job ID **/
             $jobId = $input->getOption('job-id');
-            
+
             ...
         }
 
@@ -104,3 +106,15 @@ The daemon will shut down when it will intercept a `SIGTERM` or a `SIGINT` signa
 
 Those signals are managed by `pcntl` and are meant to gracefully stop the daemon, giving it some time to complete still running Jobs.
 This means that the more Jobs you process concurrently, the more time requires the daemon to intercept the signals, the more time it requires to shut down.
+
+<hr />
+<h3 align="center">
+    <b>Do you like this bundle?</b><br />
+    <b><a href="#js-repo-pjax-container">LEAVE A &#9733;</a></b>
+</h3>
+<p align="center">
+    or run<br />
+    <code>composer global require symfony/thanks && composer thanks</code><br />
+    to say thank you to all libraries you use in your current project, this included!
+</p>
+<hr />

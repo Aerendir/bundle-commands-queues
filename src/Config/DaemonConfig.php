@@ -3,16 +3,12 @@
 declare(strict_types=1);
 
 /*
- * This file is part of the SHQCommandsQueuesBundle.
+ * This file is part of the Serendipity HQ Commands Queues Bundle.
  *
- * Copyright Adamo Aerendir Crespi 2017.
+ * Copyright (c) Adamo Aerendir Crespi <aerendir@serendipityhq.com>.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
- *
- * @author    Adamo Aerendir Crespi <hello@aerendir.me>
- * @copyright Copyright (C) 2017 Aerendir. All rights reserved.
- * @license   MIT License.
  */
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Config;
@@ -24,7 +20,7 @@ use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Daemon;
 /**
  * Manages the configuration of a Daemon.
  */
-class DaemonConfig extends AbstractConfig
+final class DaemonConfig extends AbstractConfig
 {
     /** @var array $daemons */
     private $daemons;
@@ -36,7 +32,7 @@ class DaemonConfig extends AbstractConfig
     private $name;
 
     /** @var bool $prodAllowed If true, passes the --env=prod flag to the commands in the queue */
-    private $prodAllowed;
+    private $prodAllowed = false;
 
     /** @var int $aliveDaemonsCheckInterval */
     private $aliveDaemonsCheckInterval;
@@ -54,7 +50,7 @@ class DaemonConfig extends AbstractConfig
     private $profilingInfoInterval;
 
     /** @var bool $printProfilingInfo */
-    private $printProfilingInfo;
+    private $printProfilingInfo = false;
 
     /**
      * @param array $daemons
@@ -73,14 +69,12 @@ class DaemonConfig extends AbstractConfig
     public function initialize(?string $daemon, bool $allowProd): void
     {
         if (null === $daemon) {
-            if (count($this->daemons) > 1) {
-                throw new InvalidArgumentException(
-                    'More than one Daemon is configured: you MUST specify the Daemon you want to run passing it as the first argument argument.'
-                );
+            if ((\is_array($this->daemons) || $this->daemons instanceof \Countable ? \count($this->daemons) : 0) > 1) {
+                throw new InvalidArgumentException('More than one Daemon is configured: you MUST specify the Daemon you want to run passing it as the first argument argument.');
             }
 
             // Use as Daemon the only one configured
-            $daemon = (string) key($this->daemons);
+            $daemon = (string) \key($this->daemons);
         }
 
         if (empty($daemon)) {
@@ -97,10 +91,10 @@ class DaemonConfig extends AbstractConfig
         $this->setSleepFor($this->daemons[$daemon][Configuration::DAEMON_SLEEP_FOR_KEY]);
 
         // Remove non needed queues configurations
-        $queues = array_keys($this->queues);
+        $queues = \array_keys($this->queues);
         foreach ($queues as $queue) {
             // Do not unset the default queue
-            if (Daemon::DEFAULT_QUEUE_NAME !== $queue && false === in_array($queue, $this->daemons[$daemon]['queues'], true)) {
+            if (Daemon::DEFAULT_QUEUE_NAME !== $queue && false === \in_array($queue, $this->daemons[$daemon]['queues'], true)) {
                 unset($this->queues[$queue]);
             }
         }
@@ -121,7 +115,7 @@ class DaemonConfig extends AbstractConfig
      */
     public function getQueues(): array
     {
-        return array_keys($this->queues);
+        return \array_keys($this->queues);
     }
 
     /**
@@ -219,7 +213,7 @@ class DaemonConfig extends AbstractConfig
     {
         // Return the list of queues to include
         return [
-            'included_queues' => array_keys($this->queues),
+            'included_queues' => \array_keys($this->queues),
         ];
     }
 

@@ -3,16 +3,12 @@
 declare(strict_types=1);
 
 /*
- * This file is part of the SHQCommandsQueuesBundle.
+ * This file is part of the Serendipity HQ Commands Queues Bundle.
  *
- * Copyright Adamo Aerendir Crespi 2017.
+ * Copyright (c) Adamo Aerendir Crespi <aerendir@serendipityhq.com>.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
- *
- * @author    Adamo Aerendir Crespi <hello@aerendir.me>
- * @copyright Copyright (C) 2017 Aerendir. All rights reserved.
- * @license   MIT License.
  */
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Admin\Sonata\Twig;
@@ -28,8 +24,16 @@ use Twig\TwigFilter;
 /**
  * {@inheritdoc}
  */
-class CommandsQueuesExtension extends AbstractExtension
+final class CommandsQueuesExtension extends AbstractExtension
 {
+    /**
+     * @var string
+     */
+    private const OPTIONS = 'options';
+    /**
+     * @var string
+     */
+    private const __ID = '--id';
     /** @var UrlGeneratorInterface $generator */
     private $generator;
 
@@ -47,8 +51,12 @@ class CommandsQueuesExtension extends AbstractExtension
     public function getFilters(): array
     {
         return [
-            new TwigFilter('commands_queues_get_id_option_value', [$this, 'getIdOptionValue']),
-            new TwigFilter('commands_queues_render_input', [$this, 'getRenderedInput']),
+            new TwigFilter('commands_queues_get_id_option_value', function (Job $job): ?string {
+                return $this->getIdOptionValue($job);
+            }),
+            new TwigFilter('commands_queues_render_input', function (?array $input): ?string {
+                return $this->getRenderedInput($input);
+            }),
         ];
     }
 
@@ -62,10 +70,10 @@ class CommandsQueuesExtension extends AbstractExtension
     public function getIdOptionValue(Job $job): ?string
     {
         $input = $job->getInput();
-        if (null !== $input && false === array_key_exists('options', $input) && isset($input['options']['--id'])) {
-            $url = $this->generator->generate('admin_serendipityhq_commandsqueues_job_show', ['id' => $input['options']['--id']], UrlGeneratorInterface::ABSOLUTE_PATH);
+        if (null !== $input && false === \array_key_exists(self::OPTIONS, $input) && isset($input[self::OPTIONS][self::__ID])) {
+            $url = $this->generator->generate('admin_serendipityhq_commandsqueues_job_show', ['id' => $input[self::OPTIONS][self::__ID]], UrlGeneratorInterface::ABSOLUTE_PATH);
 
-            return sprintf('<a href="%s">#%s</a>', $url, $input['options']['--id']);
+            return sprintf('<a href="%s">#%s</a>', $url, $input[self::OPTIONS][self::__ID]);
         }
 
         return null;

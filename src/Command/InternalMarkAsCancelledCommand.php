@@ -3,16 +3,12 @@
 declare(strict_types=1);
 
 /*
- * This file is part of the SHQCommandsQueuesBundle.
+ * This file is part of the Serendipity HQ Commands Queues Bundle.
  *
- * Copyright Adamo Aerendir Crespi 2017.
+ * Copyright (c) Adamo Aerendir Crespi <aerendir@serendipityhq.com>.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
- *
- * @author    Adamo Aerendir Crespi <hello@aerendir.me>
- * @copyright Copyright (C) 2017 Aerendir. All rights reserved.
- * @license   MIT License.
  */
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Command;
@@ -36,8 +32,16 @@ use Symfony\Component\Console\Output\OutputInterface;
  * On very deep trees of Jobs the marking may require a lot of time. Using a dedicated command allows the Daemon to
  * continue running while this command, in the background, marks the Jobs and its childs as cancelled.
  */
-class InternalMarkAsCancelledCommand extends AbstractQueuesCommand
+final class InternalMarkAsCancelledCommand extends AbstractQueuesCommand
 {
+    /**
+     * @var string
+     */
+    private const ID = 'id';
+    /**
+     * @var string
+     */
+    private const CANCELLING_JOB_ID = 'cancelling-job-id';
     /** @var string */
     public static $defaultName = 'queues:internal:mark-as-cancelled';
 
@@ -64,11 +68,11 @@ class InternalMarkAsCancelledCommand extends AbstractQueuesCommand
     {
         $this
             ->setDescription('[INTERNAL] Marks the given Job and its childs as CANCELLED.')
-            ->addOption('id', 'id', InputOption::VALUE_REQUIRED)
-            ->addOption('cancelling-job-id', 'cancelling-job-id', InputOption::VALUE_REQUIRED);
+            ->addOption(self::ID, self::ID, InputOption::VALUE_REQUIRED)
+            ->addOption(self::CANCELLING_JOB_ID, self::CANCELLING_JOB_ID, InputOption::VALUE_REQUIRED);
 
         // Only available since Symfony 3.2
-        if (method_exists($this, 'setHidden')) {
+        if (\method_exists($this, 'setHidden')) {
             $this->setHidden(true);
         }
     }
@@ -84,16 +88,16 @@ class InternalMarkAsCancelledCommand extends AbstractQueuesCommand
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         parent::execute($input, $output);
-        $jobId           = $input->getOption('id');
-        $cancellingJobId = $input->getOption('cancelling-job-id');
+        $jobId           = $input->getOption(self::ID);
+        $cancellingJobId = $input->getOption(self::CANCELLING_JOB_ID);
 
-        if (false === is_numeric($jobId)) {
+        if (false === \is_numeric($jobId)) {
             $this->getIoWriter()->error("The Job ID is not valid: maybe you mispelled it or it doesn't exist at all.");
 
             return 1;
         }
 
-        if (false === is_numeric($cancellingJobId)) {
+        if (false === \is_numeric($cancellingJobId)) {
             $this->getIoWriter()->error("The Cancelling Job ID is not valid: maybe you mispelled it or it doesn't exist at all.");
 
             return 1;
@@ -161,7 +165,7 @@ class InternalMarkAsCancelledCommand extends AbstractQueuesCommand
         /** @var Job $childDependency */
         foreach ($markedJob->getChildDependencies() as $childDependency) {
             // If this is already processed...
-            if (array_key_exists($childDependency->getId(), $alreadyCancelledJobs)) {
+            if (\array_key_exists($childDependency->getId(), $alreadyCancelledJobs)) {
                 continue;
             }
 
@@ -176,7 +180,7 @@ class InternalMarkAsCancelledCommand extends AbstractQueuesCommand
             }
 
             // If this is not in the already cancelled Jobs array...
-            if (false === array_key_exists($childDependency->getId(), $alreadyCancelledJobs)) {
+            if (false === \array_key_exists($childDependency->getId(), $alreadyCancelledJobs)) {
                 $this->getJobsMarker()->markJobAsCancelled($childDependency, $childInfo);
                 $alreadyCancelledJobs[$childDependency->getId()] = $childDependency->getId();
             }
@@ -188,7 +192,7 @@ class InternalMarkAsCancelledCommand extends AbstractQueuesCommand
             }
         }
 
-        $cancelledChilds = implode(', ', $cancelledChilds);
+        $cancelledChilds = \implode(', ', $cancelledChilds);
         $this->getIoWriter()->noteLineNoBg(sprintf(
             '[%s] Job #%s@%s: Cancelled childs are: %s', JobsUtil::getFormattedTime($markedJob, 'getClosedAt'), $markedJob->getId(), $markedJob->getQueue(), $cancelledChilds
         ));

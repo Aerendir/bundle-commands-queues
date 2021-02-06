@@ -1,15 +1,15 @@
-name: PHP CS Fixer
+name: Rector
 
 on: [ push, pull_request ]
 
 jobs:
-    phpcs:
+    rector:
         runs-on: ${{ matrix.os }}
         strategy:
             fail-fast: false
             matrix:
                 os: [ ubuntu-latest ]
-                php: [ '7.4' ]
+                php: [ '7.3' ]
 
         steps:
             -   name: Checkout
@@ -37,6 +37,6 @@ jobs:
                 run: |
                     composer update --no-interaction
 
-            -   name: Run PHP CS Fixer
+            -   name: Run Rector
                 run: |
-                    ./vendor/bin/php-cs-fixer fix --allow-risky yes --dry-run -v
+                    ./vendor/bin/rector process --dry-run

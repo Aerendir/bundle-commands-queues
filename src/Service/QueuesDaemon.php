@@ -3,16 +3,12 @@
 declare(strict_types=1);
 
 /*
- * This file is part of the SHQCommandsQueuesBundle.
+ * This file is part of the Serendipity HQ Commands Queues Bundle.
  *
- * Copyright Adamo Aerendir Crespi 2017.
+ * Copyright (c) Adamo Aerendir Crespi <aerendir@serendipityhq.com>.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
- *
- * @author    Adamo Aerendir Crespi <hello@aerendir.me>
- * @copyright Copyright (C) 2017 Aerendir. All rights reserved.
- * @license   MIT License.
  */
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Service;
@@ -21,7 +17,6 @@ use Carbon\Carbon;
 use Countable;
 use DateTime;
 use Doctrine\Common\Persistence\Mapping\MappingException;
-use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\OptimisticLockException;
@@ -55,8 +50,28 @@ use Throwable;
 /**
  * The Daemon that listens for new jobs to process.
  */
-class QueuesDaemon
+final class QueuesDaemon
 {
+    /**
+     * @var string
+     */
+    private const OPTIONS = 'options';
+    /**
+     * @var string
+     */
+    private const __ID = '--id';
+    /**
+     * @var string
+     */
+    private const JOB = 'job';
+    /**
+     * @var string
+     */
+    private const PROCESS = 'process';
+    /**
+     * @var string
+     */
+    private const GET_CLOSED_AT = 'getClosedAt';
     /** @var Daemon $me Is the Daemon object */
     private $me;
 
@@ -66,7 +81,7 @@ class QueuesDaemon
     /** @var DaemonConfig $config */
     private $config;
 
-    /** @var EntityManager $entityManager */
+    /** @var EntityManagerInterface $entityManager */
     private $entityManager;
 
     /** @var JobsManager $jobsManager */
@@ -86,10 +101,10 @@ class QueuesDaemon
      *           This will be true when a PCNTL SIGTERM signal is intercepted or when the max runtime execution
      *           is reached.
      */
-    private $mustDie;
+    private $mustDie = false;
 
     /** @var bool $pcntlLoaded */
-    private $pcntlLoaded;
+    private $pcntlLoaded = false;
 
     /** @var Profiler $profiler */
     private $profiler;
@@ -99,6 +114,10 @@ class QueuesDaemon
 
     /** @var int $verbosity */
     private $verbosity;
+    /**
+     * @var \Doctrine\ORM\Configuration
+     */
+    private $configuration;
 
     /**
      * @param DaemonConfig           $config
@@ -107,13 +126,8 @@ class QueuesDaemon
      * @param JobsMarker             $jobsMarker
      * @param Profiler               $profiler
      */
-    public function __construct(DaemonConfig $config, EntityManagerInterface $entityManager, JobsManager $jobsManager, JobsMarker $jobsMarker, Profiler $profiler)
+    public function __construct(DaemonConfig $config, EntityManagerInterface $entityManager, JobsManager $jobsManager, JobsMarker $jobsMarker, Profiler $profiler, \Doctrine\ORM\Configuration $configuration)
     {
-        // This is to make static analysis pass
-        if ( ! $entityManager instanceof EntityManager) {
-            throw new RuntimeException('You need to pass an EntityManager instance.');
-        }
-
         $this->config        = $config;
         $this->entityManager = $entityManager;
         $this->jobsManager   = $jobsManager;
@@ -121,8 +135,9 @@ class QueuesDaemon
         $this->profiler      = $profiler;
 
         /** @var JobRepository $jobsRepo */
-        $jobsRepo       = $this->entityManager->getRepository(Job::class);
-        $this->jobsRepo = $jobsRepo;
+        $jobsRepo            = $this->entityManager->getRepository(Job::class);
+        $this->jobsRepo      = $jobsRepo;
+        $this->configuration = $configuration;
     }
 
     /**
@@ -149,8 +164,8 @@ class QueuesDaemon
         $this->config->initialize($daemon, $allowProd);
 
         // Save the Daemon to the Database
-        $hostname = gethostname();
-        if (false === is_string($hostname)) {
+        $hostname = \Safe\gethostname();
+        if (false === \is_string($hostname)) {
             throw new RuntimeException('Impossible to get the host name.');
         }
         $this->me = new Daemon($hostname, getmypid(), $this->config);
@@ -173,14 +188,14 @@ class QueuesDaemon
         $this->jobsManager->initialize($this->entityManager, $ioWriter);
 
         // Disable logging in Doctrine
-        $this->entityManager->getConfiguration()->setSQLLogger();
-        $this->entityManager->getConfiguration()->setSecondLevelCacheEnabled(false);
+        $this->configuration->setSQLLogger();
+        $this->configuration->setSecondLevelCacheEnabled(false);
 
         // Configure the repository
         $this->jobsRepo->configure($this->config->getRepoConfig(), $this->ioWriter);
 
         // Force garbage collection (used by JobsMarker::markJobAsClosed()
-        gc_enable();
+        \gc_enable();
 
         // Setup pcntl signals so it is possible to manage process
         $this->setupPcntlSignals();
@@ -315,7 +330,7 @@ class QueuesDaemon
             if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
                 $this->ioWriter->warningLineNoBg(sprintf(
                     '[%s] Job <success-nobg>#%s</success-nobg> on Queue <success-nobg>%s</success-nobg>: This will mark as CANCELLED childs of #%s.',
-                    $now->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue(), $job->getInput()['options']['--id']
+                    $now->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue(), $job->getInput()[self::OPTIONS][self::__ID]
                 ));
             }
 
@@ -342,10 +357,10 @@ class QueuesDaemon
         // Try to start the process
         try {
             $process->start();
-        } catch (Throwable $e) {
+        } catch (Throwable $throwable) {
             // Something went wrong starting the process: close it as failed
             $info['output']                = 'Failing start the process.';
-            $info['debug']['output_error'] = $e->getMessage();
+            $info['debug']['output_error'] = $throwable->getMessage();
 
             // Check if it can be retried and if the retry were successful
             if ($job->getRetryStrategy()->canRetry()) {
@@ -382,8 +397,8 @@ class QueuesDaemon
         $this->jobsMarker->markJobAsPending($job, $info, $this->me);
 
         // Now add the process to the runningJobs list to keep track of it later
-        $info['job']     = $job;
-        $info['process'] = $process;
+        $info[self::JOB]     = $job;
+        $info[self::PROCESS] = $process;
         // This info is already in the Job itself, so we don't need it anymore
         unset($info['started_at']);
 
@@ -419,7 +434,7 @@ class QueuesDaemon
             return false;
         }
 
-        return microtime(true) - $this->getProfiler()->getAliveDaemonsLastCheckedAt() >= $this->getConfig()->getAliveDaemonsCheckInterval();
+        return \microtime(true) - $this->getProfiler()->getAliveDaemonsLastCheckedAt() >= $this->getConfig()->getAliveDaemonsCheckInterval();
     }
 
     /**
@@ -430,7 +445,7 @@ class QueuesDaemon
     public function hasToCheckRunningJobs(string $queueName): bool
     {
         // The number of iterations is reached and the queue has currently running Jobs
-        return microtime(true) - $this->getProfiler()->getRunningJobsLastCheckedAt($queueName) >= $this->getConfig()->getRunningJobsCheckInterval($queueName)
+        return \microtime(true) - $this->getProfiler()->getRunningJobsLastCheckedAt($queueName) >= $this->getConfig()->getRunningJobsCheckInterval($queueName)
                && $this->hasRunningJobs($queueName);
     }
 
@@ -457,14 +472,14 @@ class QueuesDaemon
         if (null === $queueName) {
             $runningJobs = 0;
             foreach ($this->runningJobs as $currentlyRunning) {
-                $runningJobs += is_array($currentlyRunning) || $currentlyRunning instanceof Countable ? count($currentlyRunning) : 0;
+                $runningJobs += \is_countable($currentlyRunning) ? \count($currentlyRunning) : 0;
             }
 
             // Return the overall amount
             return $runningJobs;
         }
 
-        return isset($this->runningJobs[$queueName]) ? count($this->runningJobs[$queueName]) : 0;
+        return isset($this->runningJobs[$queueName]) ? \count($this->runningJobs[$queueName]) : 0;
     }
 
     /**
@@ -485,9 +500,9 @@ class QueuesDaemon
             $now = new DateTime();
 
             /** @var Job $checkingJob */
-            $checkingJob = $runningJob['job'];
+            $checkingJob = $runningJob[self::JOB];
             /** @var Process $checkingProcess */
-            $checkingProcess = $runningJob['process'];
+            $checkingProcess = $runningJob[self::PROCESS];
 
             if (null !== $progressBar) {
                 $progressBar->advance();
@@ -526,10 +541,10 @@ class QueuesDaemon
         $now = new DateTime();
 
         /** @var Job $job */
-        $job = $runningJob['job'];
+        $job = $runningJob[self::JOB];
 
         /** @var Process $process */
-        $process = $runningJob['process'];
+        $process = $runningJob[self::PROCESS];
 
         //  If it is not already terminated...
         if (false === $process->isTerminated()) {
@@ -563,11 +578,11 @@ class QueuesDaemon
         if ($job->isTypeCancelling()) {
             $startJobId = null;
             $input      = $job->getInput();
-            if (null !== $input && isset($input['options']['--id'])) {
-                $startJobId = $input['options']['--id'];
+            if (null !== $input && isset($input[self::OPTIONS][self::__ID])) {
+                $startJobId = $input[self::OPTIONS][self::__ID];
             }
 
-            if (false === is_numeric($startJobId)) {
+            if (false === \is_numeric($startJobId)) {
                 throw new RuntimeException('Impossible to obtain the start Job ID.');
             }
 
@@ -605,9 +620,9 @@ class QueuesDaemon
         }
 
         return $this->getConfig()->getManagedEntitiesTreshold() < (
-            is_array($this->entityManager->getUnitOfWork()->getIdentityMap()[Job::class]) ||
+            \is_array($this->entityManager->getUnitOfWork()->getIdentityMap()[Job::class]) ||
             $this->entityManager->getUnitOfWork()->getIdentityMap()[Job::class] instanceof Countable
-                ? count($this->entityManager->getUnitOfWork()->getIdentityMap()[Job::class])
+                ? \count($this->entityManager->getUnitOfWork()->getIdentityMap()[Job::class])
                 : 0
             );
     }
@@ -617,7 +632,7 @@ class QueuesDaemon
      */
     public function hasToProfile(): bool
     {
-        return microtime(true) - $this->getProfiler()->getLastMicrotime() >= $this->getConfig()->getProfilingInfoInterval();
+        return \microtime(true) - $this->getProfiler()->getLastMicrotime() >= $this->getConfig()->getProfilingInfoInterval();
     }
 
     /**
@@ -671,7 +686,7 @@ class QueuesDaemon
         }
 
         // Force the garbage collection
-        $cycles = gc_collect_cycles();
+        $cycles = \gc_collect_cycles();
         if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
             $this->ioWriter->infoLineNoBg(sprintf('Collected <success-nobg>%s</success-nobg> cycles.', $cycles));
         }
@@ -756,8 +771,8 @@ class QueuesDaemon
         // 1E3 = 10 to the power of 3 = 1000.
         // This returns a type double and not an int as it may be expected.
         // https://stackoverflow.com/q/55772858/1399706
-        $waitTimeInMs = random_int(500, 1000) * 1E3;
-        usleep((int) $waitTimeInMs);
+        $waitTimeInMs = \random_int(500, 1000) * 1E3;
+        \usleep((int) $waitTimeInMs);
     }
 
     /**
@@ -815,7 +830,7 @@ class QueuesDaemon
      * @throws ORMException
      * @throws Exception
      */
-    final protected function handleFailedJob(Job $job, Process $process): void
+    final private function handleFailedJob(Job $job, Process $process): void
     {
         $info = $this->jobsManager->buildDefaultInfo($process);
 
@@ -831,7 +846,7 @@ class QueuesDaemon
 
         $message = sprintf(
             '[%s] Job <success-nobg>#%s</success-nobg> on Queue <success-nobg>%s</success-nobg>: Job failed (no retries allowed).',
-            JobsUtil::getFormattedTime($job, 'getClosedAt'), $job->getId(), $job->getQueue()
+            JobsUtil::getFormattedTime($job, self::GET_CLOSED_AT), $job->getId(), $job->getQueue()
         );
 
         if ($cancellingJob instanceof Job) {
@@ -847,14 +862,14 @@ class QueuesDaemon
      *
      * @throws Exception
      */
-    final protected function handleSuccessfulJob(Job $job, Process $process): void
+    final private function handleSuccessfulJob(Job $job, Process $process): void
     {
         $info = $this->jobsManager->buildDefaultInfo($process);
         $this->jobsMarker->markJobAsFinished($job, $info);
 
         $this->ioWriter->successLineNoBg(sprintf(
             '[%s] Job <success-nobg>#%s</success-nobg> on Queue <success-nobg>%s</success-nobg>: Process succeded.',
-            JobsUtil::getFormattedTime($job, 'getClosedAt'), $job->getId(), $job->getQueue()));
+            JobsUtil::getFormattedTime($job, self::GET_CLOSED_AT), $job->getId(), $job->getQueue()));
     }
 
     /**
@@ -866,7 +881,7 @@ class QueuesDaemon
      *
      * @return bool|Job Returns false or the Job object
      */
-    final protected function handleChildsOfFailedJob(Job $job)
+    final private function handleChildsOfFailedJob(Job $job)
     {
         if ($job->getChildDependencies()->count() > 0) {
             if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
@@ -916,7 +931,7 @@ class QueuesDaemon
     private function setupPcntlSignals(): void
     {
         // The callback to use as signal handler
-        $signalHandler = function ($signo) {
+        $signalHandler = function ($signo): void {
             switch ($signo) {
                 case SIGTERM:
                     $signal        = 'SIGTERM';
@@ -935,7 +950,7 @@ class QueuesDaemon
             }
         };
 
-        $this->pcntlLoaded = extension_loaded('pcntl');
+        $this->pcntlLoaded = \extension_loaded('pcntl');
 
         // If the PCNTL extension is not loded ...
         if (false === $this->pcntlLoaded) {
@@ -947,8 +962,8 @@ class QueuesDaemon
         }
 
         // PCNTL Signals are available: configure them
-        pcntl_signal(SIGTERM, $signalHandler);
-        pcntl_signal(SIGINT, $signalHandler);
+        \pcntl_signal(SIGTERM, $signalHandler);
+        \pcntl_signal(SIGINT, $signalHandler);
 
         if ($this->verbosity >= OutputInterface::VERBOSITY_NORMAL) {
             $this->ioWriter->successLineNoBg('PCNTL is available: signals will be processed.');
@@ -971,12 +986,12 @@ class QueuesDaemon
         $retryJob = $this->jobsMarker->markFailedJobAsRetried($job, $info);
         $this->ioWriter->warningLineNoBg(sprintf(
                 '[%s] Job <success-nobg>#%s</success-nobg> on Queue <success-nobg>%s</success-nobg>: %s.',
-                JobsUtil::getFormattedTime($job, 'getClosedAt'), $job->getId(), $job->getQueue(), $retryReason)
+                JobsUtil::getFormattedTime($job, self::GET_CLOSED_AT), $job->getId(), $job->getQueue(), $retryReason)
         );
         if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
             $this->ioWriter->noteLineNoBg(sprintf(
                     '[%s] Job <success-nobg>#%s</success-nobg> on Queue "%s": Retry with Job "#%s" (Attempt #%s/%s).',
-                    JobsUtil::getFormattedTime($job, 'getClosedAt'), $job->getId(), $job->getQueue(), $retryJob->getId(), $retryJob->getRetryStrategy()->getAttempts(), $retryJob->getRetryStrategy()->getMaxAttempts())
+                    JobsUtil::getFormattedTime($job, self::GET_CLOSED_AT), $job->getId(), $job->getQueue(), $retryJob->getId(), $retryJob->getRetryStrategy()->getAttempts(), $retryJob->getRetryStrategy()->getMaxAttempts())
             );
         }
 
@@ -1019,7 +1034,6 @@ class QueuesDaemon
             $this->ioWriter->infoLineNoBg(sprintf('Found <success-nobg>%s</success-nobg> stale Jobs: start processing them.', $staleJobsCount));
         }
 
-        /** @var Job $job */
         $stales = [];
         while (null !== $job = $this->jobsRepo->findNextStaleJob($stales)) {
             $info     = [];
@@ -1043,7 +1057,7 @@ class QueuesDaemon
             $this->jobsMarker->markJobAsFailed($job, $info);
             $this->ioWriter->errorLineNoBg(sprintf(
                 '[%s] Job <success-nobg>#%s</success-nobg> on Queue <success-nobg>%s</success-nobg>: Process were stale so it were marked as FAILED.',
-                JobsUtil::getFormattedTime($job, 'getClosedAt'), $job->getId(), $job->getQueue()
+                JobsUtil::getFormattedTime($job, self::GET_CLOSED_AT), $job->getId(), $job->getQueue()
             ));
 
             $this->handleChildsOfFailedJob($job);
@@ -1066,11 +1080,11 @@ class QueuesDaemon
         $retryingJob = $this->jobsMarker->markStaleJobAsRetried($job, $info);
         $this->ioWriter->warningLineNoBg(sprintf(
                 '[%s] Job <success-nobg>#%s</success-nobg> on Queue <success-nobg>%s</success-nobg>: %s.',
-                JobsUtil::getFormattedTime($job, 'getClosedAt'), $job->getId(), $job->getQueue(), $retryReason)
+                JobsUtil::getFormattedTime($job, self::GET_CLOSED_AT), $job->getId(), $job->getQueue(), $retryReason)
         );
         $this->ioWriter->noteLineNoBg(sprintf(
                 '[%s] Job <success-nobg>#%s</success-nobg> on Queue "%s": This will be retried with Job <success-nobg>#%s</success-nobg> (already retried %s times of %s).',
-                JobsUtil::getFormattedTime($job, 'getClosedAt'), $job->getId(), $job->getQueue(), $retryingJob->getId(), $retryingJob->getRetryStrategy()->getAttempts(), $retryingJob->getRetryStrategy()->getMaxAttempts())
+                JobsUtil::getFormattedTime($job, self::GET_CLOSED_AT), $job->getId(), $job->getQueue(), $retryingJob->getId(), $retryingJob->getRetryStrategy()->getAttempts(), $retryingJob->getRetryStrategy()->getMaxAttempts())
         );
 
         return true;

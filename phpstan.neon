@@ -1,11 +1,12 @@
 includes:
-    - vendor-bin/phpstan/vendor/phpstan/phpstan-doctrine/extension.neon
-    - vendor-bin/phpstan/vendor/phpstan/phpstan-doctrine/rules.neon
-    - vendor-bin/phpstan/vendor/phpstan/phpstan-phpunit/extension.neon
-    - vendor-bin/phpstan/vendor/phpstan/phpstan-phpunit/rules.neon
-    - vendor-bin/phpstan/vendor/phpstan/phpstan-symfony/extension.neon
-    - vendor-bin/phpstan/vendor/phpstan/phpstan-symfony/rules.neon
-    - vendor-bin/phpstan/vendor/thecodingmachine/phpstan-safe-rule/phpstan-safe-rule.neon
+    - .baseline-phpstan.neon
+    - vendor/phpstan/phpstan-doctrine/extension.neon
+    - vendor/phpstan/phpstan-doctrine/rules.neon
+    - vendor/phpstan/phpstan-phpunit/extension.neon
+    - vendor/phpstan/phpstan-phpunit/rules.neon
+    - vendor/phpstan/phpstan-symfony/extension.neon
+    - vendor/phpstan/phpstan-symfony/rules.neon
+    - vendor/thecodingmachine/phpstan-safe-rule/phpstan-safe-rule.neon
 
 parameters:
     level: max
@@ -16,6 +17,7 @@ parameters:
         - tests
     excludes_analyse:
         - */src/DependencyInjection/Configuration.php
+        - */src/Admin/Sonata/*
     ignoreErrors:
         -
             message: '#Function memprof_dump_callgrind not found.#'

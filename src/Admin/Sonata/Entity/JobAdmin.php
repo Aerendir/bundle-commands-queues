@@ -3,16 +3,12 @@
 declare(strict_types=1);
 
 /*
- * This file is part of the SHQCommandsQueuesBundle.
+ * This file is part of the Serendipity HQ Commands Queues Bundle.
  *
- * Copyright Adamo Aerendir Crespi 2017.
+ * Copyright (c) Adamo Aerendir Crespi <aerendir@serendipityhq.com>.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
- *
- * @author    Adamo Aerendir Crespi <hello@aerendir.me>
- * @copyright Copyright (C) 2017 Aerendir. All rights reserved.
- * @license   MIT License.
  */
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Admin\Sonata\Entity;
@@ -29,8 +25,16 @@ use Sonata\AdminBundle\Route\RouteCollection;
 /**
  * {@inheritdoc}
  */
-class JobAdmin extends AbstractAdmin
+final class JobAdmin extends AbstractAdmin
 {
+    /**
+     * @var string
+     */
+    private const DOCTRINE_ORM_DATE_RANGE = 'doctrine_orm_date_range';
+    /**
+     * @var string
+     */
+    private const URI = 'uri';
     /**
      * {@inheritdoc}
      */
@@ -73,7 +77,7 @@ class JobAdmin extends AbstractAdmin
     /**
      * {@inheritdoc}
      */
-    protected function configureDatagridFilters(DatagridMapper $datagridMapper)
+    protected function configureDatagridFilters(DatagridMapper $datagridMapper): void
     {
         $datagridMapper
             ->add('status')
@@ -82,10 +86,10 @@ class JobAdmin extends AbstractAdmin
             ->add('queue')
             ->add('exitCode')
             ->add('priority')
-            ->add('createdAt', 'doctrine_orm_date_range')
-            ->add('startedAt', 'doctrine_orm_date_range')
-            ->add('closedAt', 'doctrine_orm_date_range')
-            ->add('executeAfterTime', 'doctrine_orm_date_range');
+            ->add('createdAt', self::DOCTRINE_ORM_DATE_RANGE)
+            ->add('startedAt', self::DOCTRINE_ORM_DATE_RANGE)
+            ->add('closedAt', self::DOCTRINE_ORM_DATE_RANGE)
+            ->add('executeAfterTime', self::DOCTRINE_ORM_DATE_RANGE);
     }
 
     /**
@@ -100,34 +104,34 @@ class JobAdmin extends AbstractAdmin
         }
 
         $menu->addChild('tab_status_new', [
-            'uri' => $admin->generateUrl('list', ['filter[status][value]' => Job::STATUS_NEW]),
+            self::URI => $admin->generateUrl('list', ['filter[status][value]' => Job::STATUS_NEW]),
         ]);
         $menu->addChild('tab_status_pending', [
-            'uri' => $admin->generateUrl('list', ['filter[status][value]' => Job::STATUS_PENDING]),
+            self::URI => $admin->generateUrl('list', ['filter[status][value]' => Job::STATUS_PENDING]),
         ]);
         $menu->addChild('tab_status_running', [
-            'uri' => $admin->generateUrl('list', ['filter[status][value]' => Job::STATUS_RUNNING]),
+            self::URI => $admin->generateUrl('list', ['filter[status][value]' => Job::STATUS_RUNNING]),
         ]);
         $menu->addChild('tab_status_succeeded', [
-            'uri' => $admin->generateUrl('list', ['filter[status][value]' => Job::STATUS_SUCCEEDED]),
+            self::URI => $admin->generateUrl('list', ['filter[status][value]' => Job::STATUS_SUCCEEDED]),
         ]);
         $menu->addChild('tab_status_failed', [
-            'uri' => $admin->generateUrl('list', ['filter[status][value]' => Job::STATUS_FAILED]),
+            self::URI => $admin->generateUrl('list', ['filter[status][value]' => Job::STATUS_FAILED]),
         ]);
         $menu->addChild('tab_status_aborted', [
-            'uri' => $admin->generateUrl('list', ['filter[status][value]' => Job::STATUS_ABORTED]),
+            self::URI => $admin->generateUrl('list', ['filter[status][value]' => Job::STATUS_ABORTED]),
         ]);
         $menu->addChild('tab_status_cancelled', [
-            'uri' => $admin->generateUrl('list', ['filter[status][value]' => Job::STATUS_CANCELLED]),
+            self::URI => $admin->generateUrl('list', ['filter[status][value]' => Job::STATUS_CANCELLED]),
         ]);
         $menu->addChild('tab_status_retried', [
-            'uri' => $admin->generateUrl('list', ['filter[status][value]' => Job::STATUS_RETRIED]),
+            self::URI => $admin->generateUrl('list', ['filter[status][value]' => Job::STATUS_RETRIED]),
         ]);
         $menu->addChild('tab_status_retry_succeeded', [
-            'uri' => $admin->generateUrl('list', ['filter[status][value]' => Job::STATUS_RETRY_SUCCEEDED]),
+            self::URI => $admin->generateUrl('list', ['filter[status][value]' => Job::STATUS_RETRY_SUCCEEDED]),
         ]);
         $menu->addChild('tab_status_retry_failed', [
-            'uri' => $admin->generateUrl('list', ['filter[status][value]' => Job::STATUS_RETRY_FAILED]),
+            self::URI => $admin->generateUrl('list', ['filter[status][value]' => Job::STATUS_RETRY_FAILED]),
         ]);
 
         parent::configureTabMenu($menu, $action, $childAdmin);

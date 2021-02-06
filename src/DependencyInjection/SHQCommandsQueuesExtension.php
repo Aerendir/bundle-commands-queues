@@ -3,16 +3,12 @@
 declare(strict_types=1);
 
 /*
- * This file is part of the SHQCommandsQueuesBundle.
+ * This file is part of the Serendipity HQ Commands Queues Bundle.
  *
- * Copyright Adamo Aerendir Crespi 2017.
+ * Copyright (c) Adamo Aerendir Crespi <aerendir@serendipityhq.com>.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
- *
- * @author    Adamo Aerendir Crespi <hello@aerendir.me>
- * @copyright Copyright (C) 2017 Aerendir. All rights reserved.
- * @license   MIT License.
  */
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\DependencyInjection;
@@ -39,7 +35,7 @@ use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 /**
  * {@inheritdoc}
  */
-class SHQCommandsQueuesExtension extends Extension
+final class SHQCommandsQueuesExtension extends Extension
 {
     /**
      * {@inheritdoc}
@@ -57,7 +53,7 @@ class SHQCommandsQueuesExtension extends Extension
 
         // The Jobs Manager
         $jobsManagerDefinition = (new Definition(JobsManager::class, [
-            $container->getParameter('kernel.root_dir'),
+            $container->getParameter('kernel.project_dir'),
         ]))->setPublic(false);
         $container->setDefinition(JobsManager::class, $jobsManagerDefinition);
 
@@ -98,7 +94,7 @@ class SHQCommandsQueuesExtension extends Extension
         $internalMarkAsCancelledCommandDefinition = (new Definition(InternalMarkAsCancelledCommand::class))->addTag('console.command')->setAutowired(true);
         $container->setDefinition(InternalMarkAsCancelledCommand::class, $internalMarkAsCancelledCommandDefinition);
 
-        if (class_exists(SonataAdminBundle::class)) {
+        if (\class_exists(SonataAdminBundle::class)) {
             $sonataLoader = new YamlFileLoader($container, new FileLocator(__DIR__ . '/../Admin/Sonata/Resources/config'));
             $sonataLoader->load('sonata_admin.yaml');
         }

@@ -3,16 +3,12 @@
 declare(strict_types=1);
 
 /*
- * This file is part of the SHQCommandsQueuesBundle.
+ * This file is part of the Serendipity HQ Commands Queues Bundle.
  *
- * Copyright Adamo Aerendir Crespi 2017.
+ * Copyright (c) Adamo Aerendir Crespi <aerendir@serendipityhq.com>.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
- *
- * @author    Adamo Aerendir Crespi <hello@aerendir.me>
- * @copyright Copyright (C) 2017 Aerendir. All rights reserved.
- * @license   MIT License.
  */
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Entity;
@@ -45,7 +41,7 @@ class Daemon
      */
     public const MORTIS_SIGNAL = 'signal';
 
-    /** Used when a Daemon is not found anymore during the check of queues:run checkAliveDamons
+    /** Used when a Daemon is not found anymore during the check of queues:run checkAliveDamons.
      *
      * @var string */
     public const MORTIS_STRAGGLER = 'straggler';
@@ -53,7 +49,7 @@ class Daemon
     /**
      * @var int
      *
-     * @ORM\Column(name="id", type="integer", nullable=false)
+     * @ORM\Column(name="id", type="integer")
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="IDENTITY")
      */
@@ -62,28 +58,28 @@ class Daemon
     /**
      * @var DaemonConfig
      *
-     * @ORM\Column(name="config", type="array", nullable=false)
+     * @ORM\Column(name="config", type="array")
      */
     private $config;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="host", type="string", length=255, nullable=false)
+     * @ORM\Column(name="host", type="string", length=255)
      */
     private $host;
 
     /**
      * @var int
      *
-     * @ORM\Column(name="pid", type="integer", nullable=false)
+     * @ORM\Column(name="pid", type="integer")
      */
     private $pid;
 
     /**
      * @var DateTime
      *
-     * @ORM\Column(name="born_on", type="datetime", nullable=false)
+     * @ORM\Column(name="born_on", type="datetime")
      */
     private $bornOn;
 
@@ -153,7 +149,7 @@ class Daemon
     /**
      * @return DateTime|null
      */
-    public function getDiedOn(): ? DateTime
+    public function getDiedOn(): ?DateTime
     {
         return $this->diedOn;
     }
@@ -161,7 +157,7 @@ class Daemon
     /**
      * @return string|null
      */
-    public function getMortisCausa(): ? string
+    public function getMortisCausa(): ?string
     {
         return $this->mortisCausa;
     }

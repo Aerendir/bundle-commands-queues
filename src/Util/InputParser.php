@@ -3,16 +3,12 @@
 declare(strict_types=1);
 
 /*
- * This file is part of the SHQCommandsQueuesBundle.
+ * This file is part of the Serendipity HQ Commands Queues Bundle.
  *
- * Copyright Adamo Aerendir Crespi 2017.
+ * Copyright (c) Adamo Aerendir Crespi <aerendir@serendipityhq.com>.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
- *
- * @author    Adamo Aerendir Crespi <hello@aerendir.me>
- * @copyright Copyright (C) 2017 Aerendir. All rights reserved.
- * @license   MIT License.
  */
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Util;
@@ -28,8 +24,31 @@ use function Safe\sprintf;
  *
  * Passing an array that contains both the result of this class and other
  */
-class InputParser
+final class InputParser
 {
+    /** @var null[] $preparedInput */
+    private const DEFAULT_PREPARED_INPUT = [
+        self::COMMAND   => null,
+        self::ARGUMENTS => null,
+        self::OPTIONS   => null,
+        self::SHORTCUTS => null,
+    ];
+    /**
+     * @var string
+     */
+    private const COMMAND = 'command';
+    /**
+     * @var string
+     */
+    private const ARGUMENTS = 'arguments';
+    /**
+     * @var string
+     */
+    private const OPTIONS = 'options';
+    /**
+     * @var string
+     */
+    private const SHORTCUTS = 'shortcuts';
     /** @var string|null $foundArgument */
     private static $foundArgument;
 
@@ -41,14 +60,6 @@ class InputParser
 
     /** @var array|null $preparedInput */
     private static $preparedInput;
-
-    /** @var array $preparedInput */
-    private static $defaultPreparedInput = [
-        'command'   => null,
-        'arguments' => null,
-        'options'   => null,
-        'shortcuts' => null,
-    ];
 
     /**
      * Ensures the $arguments is only a string or an array.
@@ -67,57 +78,57 @@ class InputParser
      */
     public static function parseInput($input = [], bool $hasCommand = true): array
     {
-        self::$preparedInput = self::$defaultPreparedInput;
+        self::$preparedInput = self::DEFAULT_PREPARED_INPUT;
         $wasString           = false;
 
         if (null === $input) {
             return self::$preparedInput;
         }
 
-        if (is_string($input)) {
-            $input = str_replace('=', ' ', $input);
+        if (\is_string($input)) {
+            $input = \str_replace('=', ' ', $input);
 
             // Transform into an array
-            $input = explode(' ', $input);
+            $input = \explode(' ', $input);
 
             // And remove leading and trailing spaces
-            $input     = array_map('trim', $input);
+            $input     = \array_map('trim', $input);
             $wasString = true;
         }
 
         if ($hasCommand && $wasString) {
-            $commandKey                     = array_key_first($input);
+            $commandKey                     = \array_key_first($input);
 
             if (false === self::isArgument($input[$commandKey])) {
                 throw new InvalidArgumentException(sprintf('The given command "%s" seems not to be a valid command.', $input[$commandKey]));
             }
 
-            self::$preparedInput['command'] = $input[$commandKey];
+            self::$preparedInput[self::COMMAND] = $input[$commandKey];
             unset($input[$commandKey]);
         }
 
-        if (array_key_exists('command', $input)) {
-            self::$preparedInput['command'] = $input['command'];
-            unset($input['command']);
+        if (\array_key_exists(self::COMMAND, $input)) {
+            self::$preparedInput[self::COMMAND] = $input[self::COMMAND];
+            unset($input[self::COMMAND]);
         }
 
-        if (array_key_exists('arguments', $input)) {
-            self::$preparedInput['arguments'] = $input['arguments'];
-            unset($input['arguments']);
+        if (\array_key_exists(self::ARGUMENTS, $input)) {
+            self::$preparedInput[self::ARGUMENTS] = $input[self::ARGUMENTS];
+            unset($input[self::ARGUMENTS]);
         }
 
-        if (array_key_exists('options', $input)) {
-            self::$preparedInput['options'] = $input['options'];
-            unset($input['options']);
+        if (\array_key_exists(self::OPTIONS, $input)) {
+            self::$preparedInput[self::OPTIONS] = $input[self::OPTIONS];
+            unset($input[self::OPTIONS]);
         }
 
-        if (array_key_exists('shortcuts', $input)) {
-            self::$preparedInput['shortcuts'] = $input['shortcuts'];
-            unset($input['shortcuts']);
+        if (\array_key_exists(self::SHORTCUTS, $input)) {
+            self::$preparedInput[self::SHORTCUTS] = $input[self::SHORTCUTS];
+            unset($input[self::SHORTCUTS]);
         }
 
         foreach ($input as $key => $value) {
-            if (null !== $key && false === is_numeric($key)) {
+            if (null !== $key && false === \is_numeric($key)) {
                 self::parseValue($key);
             }
 
@@ -131,12 +142,12 @@ class InputParser
         self::$foundShortcut = null;
 
         // Don't reorder the arguments as their order is relevant
-        if (array_key_exists('options', self::$preparedInput) && null !== self::$preparedInput['options']) {
-            ksort(self::$preparedInput['options'], SORT_NATURAL);
+        if (\array_key_exists(self::OPTIONS, self::$preparedInput) && null !== self::$preparedInput[self::OPTIONS]) {
+            \Safe\ksort(self::$preparedInput[self::OPTIONS], SORT_NATURAL);
         }
 
-        if (array_key_exists('shortcuts', self::$preparedInput) && null !== self::$preparedInput['shortcuts']) {
-            ksort(self::$preparedInput['shortcuts'], SORT_NATURAL);
+        if (\array_key_exists(self::SHORTCUTS, self::$preparedInput) && null !== self::$preparedInput[self::SHORTCUTS]) {
+            \Safe\ksort(self::$preparedInput[self::SHORTCUTS], SORT_NATURAL);
         }
 
         return self::$preparedInput;
@@ -148,10 +159,10 @@ class InputParser
      *
      * @return string|null
      */
-    public static function stringify(?array $input = [], $withCommand = false): ?string
+    public static function stringify(?array $input = [], bool $withCommand = false): ?string
     {
         $preparedInput    = '';
-        $stringifyClosure = static function ($value, $key) {
+        $stringifyClosure = static function ($value, $key): string {
             return sprintf('%s=%s', $key, $value);
         };
 
@@ -159,30 +170,30 @@ class InputParser
             return null;
         }
 
-        if ($withCommand && array_key_exists('command', $input)) {
-            $preparedInput .= $input['command'];
+        if ($withCommand && \array_key_exists(self::COMMAND, $input)) {
+            $preparedInput .= $input[self::COMMAND];
         }
 
-        if (array_key_exists('arguments', $input) && null !== $input['arguments']) {
-            $arguments = implode(' ', $input['arguments']);
+        if (\array_key_exists(self::ARGUMENTS, $input) && null !== $input[self::ARGUMENTS]) {
+            $arguments = \implode(' ', $input[self::ARGUMENTS]);
             $preparedInput .= ' ' . $arguments;
         }
 
-        if (array_key_exists('options', $input) && null !== $input['options']) {
-            $optionsKeys = array_keys($input['options']);
-            $options     = array_map($stringifyClosure, $input['options'], $optionsKeys);
-            $options     = implode(' ', $options);
+        if (\array_key_exists(self::OPTIONS, $input) && null !== $input[self::OPTIONS]) {
+            $optionsKeys = \array_keys($input[self::OPTIONS]);
+            $options     = \array_map($stringifyClosure, $input[self::OPTIONS], $optionsKeys);
+            $options     = \implode(' ', $options);
             $preparedInput .= ' ' . $options;
         }
 
-        if (array_key_exists('shortcuts', $input) && null !== $input['shortcuts']) {
-            $shortcutsKeys = array_keys($input['shortcuts']);
-            $shortcuts     = array_map($stringifyClosure, $input['shortcuts'], $shortcutsKeys);
-            $shortcuts     = implode(' ', $shortcuts);
+        if (\array_key_exists(self::SHORTCUTS, $input) && null !== $input[self::SHORTCUTS]) {
+            $shortcutsKeys = \array_keys($input[self::SHORTCUTS]);
+            $shortcuts     = \array_map($stringifyClosure, $input[self::SHORTCUTS], $shortcutsKeys);
+            $shortcuts     = \implode(' ', $shortcuts);
             $preparedInput .= ' ' . $shortcuts;
         }
 
-        $preparedInput = trim($preparedInput);
+        $preparedInput = \trim($preparedInput);
 
         return '' !== $preparedInput ? $preparedInput : null;
     }
@@ -204,7 +215,7 @@ class InputParser
      */
     public static function isOption(string $option): bool
     {
-        return 0 === strpos($option, '--');
+        return 0 === \strpos($option, '--');
     }
 
     /**
@@ -214,7 +225,7 @@ class InputParser
      */
     public static function isShortcut(string $shortcut): bool
     {
-        return false === self::isOption($shortcut) && 0 === strpos($shortcut, '-');
+        return false === self::isOption($shortcut) && 0 === \strpos($shortcut, '-');
     }
 
     /**
@@ -227,30 +238,30 @@ class InputParser
         }
 
         if (self::isOption($value)) {
-            self::$preparedInput['options'][$value] = null;
-            self::$foundOption                      = $value;
-            self::$foundShortcut                    = null;
+            self::$preparedInput[self::OPTIONS][$value] = null;
+            self::$foundOption                          = $value;
+            self::$foundShortcut                        = null;
         }
 
         if (self::isShortcut($value)) {
-            self::$preparedInput['shortcuts'][$value] = null;
-            self::$foundShortcut                      = $value;
-            self::$foundOption                        = null;
+            self::$preparedInput[self::SHORTCUTS][$value] = null;
+            self::$foundShortcut                          = $value;
+            self::$foundOption                            = null;
         }
 
         if (null !== self::$foundArgument) {
-            self::$preparedInput['arguments'][] = self::$foundArgument;
-            self::$foundArgument                = null;
+            self::$preparedInput[self::ARGUMENTS][] = self::$foundArgument;
+            self::$foundArgument                    = null;
         }
 
         if (null !== self::$foundOption && self::$foundOption !== $value && false === self::isOption($value) && false === self::isShortcut($value)) {
-            self::$preparedInput['options'][self::$foundOption] = $value;
-            self::$foundOption                                  = null;
+            self::$preparedInput[self::OPTIONS][self::$foundOption] = $value;
+            self::$foundOption                                      = null;
         }
 
         if (null !== self::$foundShortcut && self::$foundShortcut !== $value && false === self::isOption($value) && false === self::isShortcut($value)) {
-            self::$preparedInput['shortcuts'][self::$foundShortcut] = $value;
-            self::$foundShortcut                                    = null;
+            self::$preparedInput[self::SHORTCUTS][self::$foundShortcut] = $value;
+            self::$foundShortcut                                        = null;
         }
     }
 }

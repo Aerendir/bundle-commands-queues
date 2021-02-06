@@ -3,16 +3,12 @@
 declare(strict_types=1);
 
 /*
- * This file is part of the SHQCommandsQueuesBundle.
+ * This file is part of the Serendipity HQ Commands Queues Bundle.
  *
- * Copyright Adamo Aerendir Crespi 2017.
+ * Copyright (c) Adamo Aerendir Crespi <aerendir@serendipityhq.com>.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
- *
- * @author    Adamo Aerendir Crespi <hello@aerendir.me>
- * @copyright Copyright (C) 2017 Aerendir. All rights reserved.
- * @license   MIT License.
  */
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Command;
@@ -41,7 +37,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * Creates random Jobs.
  */
-class TestRandomJobsCommand extends AbstractQueuesCommand
+final class TestRandomJobsCommand extends AbstractQueuesCommand
 {
     /** @var string $defaultName */
     protected static $defaultName = 'queues:test:random-jobs';
@@ -99,21 +95,21 @@ class TestRandomJobsCommand extends AbstractQueuesCommand
         /** @var array $timeUnits */
         $timeUnits = $input->getOption('time-units');
 
-        if (null !== $howManyJobs && false === is_numeric($howManyJobs)) {
+        if (null !== $howManyJobs && false === \is_numeric($howManyJobs)) {
             $this->getIoWriter()->error('The number of jobs has to be a numeric value.');
 
             return 1;
         }
         $howManyJobs = (int) $howManyJobs;
 
-        if (null !== $batch && false === is_numeric($batch)) {
+        if (null !== $batch && false === \is_numeric($batch)) {
             $this->getIoWriter()->error('--batch accepts only numeric values.');
 
             return 1;
         }
         $batch = (int) $batch;
 
-        if (null !== $noFutureJobs && false === is_bool($noFutureJobs)) {
+        if (null !== $noFutureJobs && false === \is_bool($noFutureJobs)) {
             $this->getIoWriter()->error("--no-future-jobs doesn't accept any value.");
 
             return 1;
@@ -135,19 +131,19 @@ class TestRandomJobsCommand extends AbstractQueuesCommand
             $scheduledJob = new Job(TestFakeCommand::$defaultName, $arguments);
 
             // Set a random queue
-            $queue = random_int(0, count($this->queues) - 1);
+            $queue = \random_int(0, (\is_array($this->queues) || $this->queues instanceof \Countable ? \count($this->queues) : 0) - 1);
             $scheduledJob->setQueue($this->queues[$queue]);
 
             // Set a random retry strategy
-            if (0 < count($retryStrategies)) {
+            if (0 < \count($retryStrategies)) {
                 $scheduledJob->setRetryStrategy($this->getRandomRetryStrategy($retryStrategies, $timeUnits));
             }
 
             // Decide if this will be executed in the future
             if (false === $noFutureJobs) {
-                $condition = random_int(0, 10);
+                $condition = \random_int(0, 10);
                 if (7 <= $condition) {
-                    $days   = random_int(1, 10);
+                    $days   = \random_int(1, 10);
                     $future = new DateTime();
                     $future->modify('+' . $days . ' day');
                     $scheduledJob->setExecuteAfterTime($future);
@@ -155,14 +151,14 @@ class TestRandomJobsCommand extends AbstractQueuesCommand
             }
 
             // Decide if this has a dependency on another job
-            $condition = random_int(0, 10);
+            $condition = \random_int(0, 10);
             // Be sure there is at least one already created Job!!!
-            if (7 <= $condition && 1 < count($jobs)) {
+            if (7 <= $condition && 1 < \count($jobs)) {
                 // Decide how many dependencies it has
-                $howManyDeps = random_int(1, count($jobs) - 1);
+                $howManyDeps = \random_int(1, \count($jobs) - 1);
 
                 for ($ii = 0; $ii <= $howManyDeps; ++$ii) {
-                    $parentJob = random_int(0, count($jobs) - 1);
+                    $parentJob = \random_int(0, \count($jobs) - 1);
                     $scheduledJob->addParentDependency($jobs[$parentJob]);
                 }
             }
@@ -199,9 +195,9 @@ class TestRandomJobsCommand extends AbstractQueuesCommand
     private function getRandomRetryStrategy(array $strategies, array $timeUnits): StrategyInterface
     {
         // Pick a random strategy
-        $strategy    = $strategies[random_int(0, count($strategies) - 1)];
-        $maxAttempts = random_int(1, 3);
-        $incrementBy = random_int(1, 10);
+        $strategy    = $strategies[\random_int(0, \count($strategies) - 1)];
+        $maxAttempts = \random_int(1, 3);
+        $incrementBy = \random_int(1, 10);
         $timeUnit    = $this->getRandomTimeUnit($timeUnits);
 
         switch ($strategy) {
@@ -209,7 +205,7 @@ class TestRandomJobsCommand extends AbstractQueuesCommand
                 return new ConstantStrategy($maxAttempts, $incrementBy, $timeUnit);
                 break;
             case 'exponential':
-                $exponentialBase = random_int(2, 5);
+                $exponentialBase = \random_int(2, 5);
 
                 return new ExponentialStrategy($maxAttempts, $incrementBy, $timeUnit, $exponentialBase);
                 break;
@@ -239,6 +235,6 @@ class TestRandomJobsCommand extends AbstractQueuesCommand
      */
     private function getRandomTimeUnit(array $timeUnits): string
     {
-        return $timeUnits[random_int(0, count($timeUnits) - 1)];
+        return $timeUnits[\random_int(0, \count($timeUnits) - 1)];
     }
 }

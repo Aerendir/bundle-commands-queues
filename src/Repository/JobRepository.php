@@ -3,16 +3,12 @@
 declare(strict_types=1);
 
 /*
- * This file is part of the SHQCommandsQueuesBundle.
+ * This file is part of the Serendipity HQ Commands Queues Bundle.
  *
- * Copyright Adamo Aerendir Crespi 2017.
+ * Copyright (c) Adamo Aerendir Crespi <aerendir@serendipityhq.com>.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
- *
- * @author    Adamo Aerendir Crespi <hello@aerendir.me>
- * @copyright Copyright (C) 2017 Aerendir. All rights reserved.
- * @license   MIT License.
  */
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Repository;
@@ -20,7 +16,6 @@ namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Repository;
 use BadMethodCallException;
 use DateTime;
 use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\ORMException;
@@ -36,8 +31,24 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * {@inheritdoc}
  */
-class JobRepository extends EntityRepository
+final class JobRepository extends EntityRepository
 {
+    /**
+     * @var string
+     */
+    private const ARGUMENTS = 'arguments';
+    /**
+     * @var string
+     */
+    private const OPTIONS = 'options';
+    /**
+     * @var string
+     */
+    private const SHORTCUTS = 'shortcuts';
+    /**
+     * @var string
+     */
+    private const ASC = 'ASC';
     /** @var array $config */
     private $config;
 
@@ -82,7 +93,7 @@ class JobRepository extends EntityRepository
      *
      * @return Job|null
      */
-    public function findNextRunnableJob(string $queueName): ? Job
+    public function findNextRunnableJob(string $queueName): ?Job
     {
         // Collects the Jobs that have to be excluded from the next findNextJob() call
         $excludedJobs = [];
@@ -141,12 +152,12 @@ class JobRepository extends EntityRepository
     }
 
     /**
-     * @param string   $queueName
-     * @param DateTime $maxRetentionDate
+     * @param string                       $queueName
+     * @param \DateTime|\DateTimeImmutable $maxRetentionDate
      *
      * @return array
      */
-    public function findExpiredJobs(string $queueName, DateTime $maxRetentionDate): array
+    public function findExpiredJobs(string $queueName, \DateTimeInterface $maxRetentionDate): array
     {
         $queryBuilder = $this->getEntityManager()->createQueryBuilder();
 
@@ -220,21 +231,21 @@ class JobRepository extends EntityRepository
         }
 
         if (null !== $input) {
-            if (isset($input['arguments']) && is_array($input['arguments'])) {
-                foreach ($input['arguments'] as $argument) {
+            if (isset($input[self::ARGUMENTS]) && \is_array($input[self::ARGUMENTS])) {
+                foreach ($input[self::ARGUMENTS] as $argument) {
                     $queryBuilder->andWhere($queryBuilder->expr()->like('j.input', $queryBuilder->expr()->literal('%' . $argument . '%')));
                 }
             }
 
-            if (isset($input['options']) && is_array($input['options'])) {
-                foreach ($input['options'] as $option => $value) {
-                    $queryBuilder->andWhere($queryBuilder->expr()->like('j.input', $queryBuilder->expr()->literal('%' . serialize([$option => $value]) . '%')));
+            if (isset($input[self::OPTIONS]) && \is_array($input[self::OPTIONS])) {
+                foreach ($input[self::OPTIONS] as $option => $value) {
+                    $queryBuilder->andWhere($queryBuilder->expr()->like('j.input', $queryBuilder->expr()->literal('%' . \serialize([$option => $value]) . '%')));
                 }
             }
 
-            if (isset($input['shortcuts']) && is_array($input['shortcuts'])) {
-                foreach ($input['shortcuts'] as $shortcut => $value) {
-                    $queryBuilder->andWhere($queryBuilder->expr()->like('j.input', $queryBuilder->expr()->literal('%' . serialize([$shortcut => $value]) . '%')));
+            if (isset($input[self::SHORTCUTS]) && \is_array($input[self::SHORTCUTS])) {
+                foreach ($input[self::SHORTCUTS] as $shortcut => $value) {
+                    $queryBuilder->andWhere($queryBuilder->expr()->like('j.input', $queryBuilder->expr()->literal('%' . \serialize([$shortcut => $value]) . '%')));
                 }
             }
         }
@@ -249,7 +260,7 @@ class JobRepository extends EntityRepository
      *
      * @return Job|null
      */
-    public function findNextStaleJob(array $knownAsStale): ? Job
+    public function findNextStaleJob(array $knownAsStale): ?Job
     {
         $queryBuilder = $this->getEntityManager()->createQueryBuilder();
         $queryBuilder->select('j')->from(Job::class, 'j')
@@ -289,9 +300,9 @@ class JobRepository extends EntityRepository
     {
         $queryBuilder = $this->getEntityManager()->createQueryBuilder();
         $queryBuilder->select('j')->from(Job::class, 'j')
-                     ->orderBy('j.priority', 'ASC')
-                     ->addOrderBy('j.createdAt', 'ASC')
-                     ->addOrderBy('j.id', 'ASC')
+                     ->orderBy('j.priority', self::ASC)
+                     ->addOrderBy('j.createdAt', self::ASC)
+                     ->addOrderBy('j.id', self::ASC)
             // The status MUST be NEW
                      ->where($queryBuilder->expr()->eq('j.status', ':status'))->setParameter('status', Job::STATUS_NEW)
             // It hasn't an executeAfterTime set or the set time is in the past

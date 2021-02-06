@@ -1,4 +1,4 @@
-*Do you like this bundle? [**Leave a &#9733;**](#js-repo-pjax-container) or run `composer global require symfony/thanks && composer thanks` to say thank you to all libraries you use in your current project, this one too!*
+*Do you like this bundle? [**Leave a &#9733;**](#js-repo-pjax-container) or run `composer global require symfony/thanks && composer thanks` to say thank you to all libraries you use in your current project, this included!*
 
 How to install Serendipity HQ Commands Quesus Bundle
 ====================================================
@@ -57,5 +57,17 @@ For this reason we have prepared a fast start tutorial to help you test the bund
 The next chapter is dedicated to the automatic creation of some Jobs that will help you understand the behaviors of the `SHQCommandsQueuesBundle`.
 
 Read the next chapter [Start in less than 5 minutes](20-Fast-Start.md) to create hundreds (or thusands!) of fake jobs to test the bundle: then you will be guided through the steps required to make your app able to use the queues.
+
+<hr />
+<h3 align="center">
+    <b>Do you like this bundle?</b><br />
+    <b><a href="#js-repo-pjax-container">LEAVE A &#9733;</a></b>
+</h3>
+<p align="center">
+    or run<br />
+    <code>composer global require symfony/thanks && composer thanks</code><br />
+    to say thank you to all libraries you use in your current project, this included!
+</p>
+<hr />
 
 ([Go back to index](00-Index.md)) | Next step: [Start in less than 5 minutes](20-Fast-Start.md)

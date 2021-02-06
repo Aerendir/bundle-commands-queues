@@ -1,4 +1,4 @@
-*Do you like this bundle? [**Leave a &#9733;**](#js-repo-pjax-container) or run `composer global require symfony/thanks && composer thanks` to say thank you to all libraries you use in your current project, this one too!*
+*Do you like this bundle? [**Leave a &#9733;**](#js-repo-pjax-container) or run `composer global require symfony/thanks && composer thanks` to say thank you to all libraries you use in your current project, this included!*
 
 START IN LESS THEN 5 MINUTES WITH `SHQCommandsQueuesBundle`
 ===========================================================
@@ -44,7 +44,7 @@ With this configuration we have:
 1. Set a generic configuration for `daemon_max_runtime` parameter: this will be used by the daemon (and can be overwritten for each single daemon)
 2. Created 1 daemon calling it "daemon_1";
 3. Assigned to the daemon "daemon_1" the processing of queues "queue_1", "queue_2", "queue_3", "queue_4" and "queue_5";
-4. Explicitly configured the parameter `queue_max_concurrent_jobs` only for the "queue_1": this queue will process 3 jobs concurrently, while all the others will process only 1 ("1" is the default value set by the bundle) 
+4. Explicitly configured the parameter `queue_max_concurrent_jobs` only for the "queue_1": this queue will process 3 jobs concurrently, while all the others will process only 1 ("1" is the default value set by the bundle)
 
 Step 2: generate the random jobs
 --------------------------------
@@ -70,16 +70,16 @@ In a matter of seconds you will see your console printing the logs of the `SHQCo
 
     SerendipityHQ Queue Bundle Daemon
     =================================
-    
-                                                                                                                            
-     [INFO] Starting generating 1000 random jobs...                                                                         
-                                                                                                                            
-    
+
+
+     [INFO] Starting generating 1000 random jobs...
+
+
     1000/1000 [============================] 100% 3 secs/3 secs (38.0 MiB)
-    
-                                                                                                                            
-     [✔] All done: 1000 random jobs generated!                                                                              
-                                                                                                                            
+
+
+     [✔] All done: 1000 random jobs generated!
+
 
 There are other arguments you can pass the command: see its
  [`configure()` method](https://github.com/Aerendir/bundle-commands-queues/blob/master/Command/RandomJobsCommand.php)
@@ -101,48 +101,48 @@ To start processing the Jobs, you need to start the daemon:
 So, if it is `prod`, then the Jobs will run the commands in the `prod` env; if it is `dev` the commands in the queues will be run using anyway `--env=dev`.*
 
 Once you start the daemon, you will start to see its output:
-    
+
     SerendipityHQ Queue Bundle Daemon
     =================================
-    
-    [>] Starting the Daemon...                                                                                              
-    [✔] I'm Daemon "4945@MacBook-Pro-di-Aerendir.local" (ID: 1).                                                            
-    [✔] PCNTL is available: signals will be processed.                                                                      
+
+    [>] Starting the Daemon...
+    [✔] I'm Daemon "4945@MacBook-Pro-di-Aerendir.local" (ID: 1).
+    [✔] PCNTL is available: signals will be processed.
     [>] No Struggler Daemons found.
-    
-     --- -------------------------------- ---------------------------- 
-          Profiling info                                               
-     --- -------------------------------- ---------------------------- 
-          Microtime                        2017-02-23 17:43:01.682624  
-          Last Microtime                   2017-02-23 17:43:01.646300  
-          Memory Usage (real)              20 mb                       
-          Memory Peak (real)               20 mb                       
-          Current Iteration                0                           
-          Elapsed Time                     0.036324024200439           
-      ✖   Memory Usage Difference (real)   +11.11%                     
-      ✖   Memory Peak Difference (real)    +11.11%                     
-     --- -------------------------------- ---------------------------- 
-    
-                                                                                                                            
-     [✔] Waiting for new ScheduledJobs to process...                                                                        
-                                                                                                                            
-    
-     // To quit the Queues Daemon use CONTROL-C.                                                                            
-    [>] [2017-02-23 18:43:01] Job "3" on Queue "queue_1": Initializing the process.                                         
-    [>] [2017-02-23 18:43:02] Job "10" on Queue "queue_1": Initializing the process.                                        
-    [>] [2017-02-23 18:43:03] Job "12" on Queue "queue_1": Initializing the process.                                        
-    [>] [2017-02-23 18:43:03] Job "11" on Queue "queue_2": Initializing the process.                                        
-    [>] [2017-02-23 18:43:04] Job "2" on Queue "queue_3": Initializing the process.                                         
-    [>] [2017-02-23 18:43:05] Job "1" on Queue "queue_4": Initializing the process.                                         
-    [>] [2017-02-23 18:43:05] Job "22" on Queue "queue_5": Initializing the process.                                        
-    [!] [2017-02-23 18:43:11] Job "3" on Queue "queue_1": Process failed but can be retried..                               
-    [✔] [2017-02-23 18:43:12] Job "10" on Queue "queue_1": Process succeded.                                                
-    [!] [2017-02-23 18:43:13] Job "12" on Queue "queue_1": Process failed but can be retried..                              
-    [!] [2017-02-23 18:43:14] Job "11" on Queue "queue_2": Process failed but can be retried..                              
-    [!] [2017-02-23 18:43:15] Job "2" on Queue "queue_3": Process failed but can be retried..                               
-    [!] [2017-02-23 18:43:16] Job "1" on Queue "queue_4": Process failed but can be retried..                               
-    [>] [2017-02-23 18:43:16] Job "1001" on Queue "queue_1": Initializing the process.                                      
-    [>] [2017-02-23 18:43:17] Job "1002" on Queue "queue_1": Initializing the process.                                      
+
+     --- -------------------------------- ----------------------------
+          Profiling info
+     --- -------------------------------- ----------------------------
+          Microtime                        2017-02-23 17:43:01.682624
+          Last Microtime                   2017-02-23 17:43:01.646300
+          Memory Usage (real)              20 mb
+          Memory Peak (real)               20 mb
+          Current Iteration                0
+          Elapsed Time                     0.036324024200439
+      ✖   Memory Usage Difference (real)   +11.11%
+      ✖   Memory Peak Difference (real)    +11.11%
+     --- -------------------------------- ----------------------------
+
+
+     [✔] Waiting for new ScheduledJobs to process...
+
+
+     // To quit the Queues Daemon use CONTROL-C.
+    [>] [2017-02-23 18:43:01] Job "3" on Queue "queue_1": Initializing the process.
+    [>] [2017-02-23 18:43:02] Job "10" on Queue "queue_1": Initializing the process.
+    [>] [2017-02-23 18:43:03] Job "12" on Queue "queue_1": Initializing the process.
+    [>] [2017-02-23 18:43:03] Job "11" on Queue "queue_2": Initializing the process.
+    [>] [2017-02-23 18:43:04] Job "2" on Queue "queue_3": Initializing the process.
+    [>] [2017-02-23 18:43:05] Job "1" on Queue "queue_4": Initializing the process.
+    [>] [2017-02-23 18:43:05] Job "22" on Queue "queue_5": Initializing the process.
+    [!] [2017-02-23 18:43:11] Job "3" on Queue "queue_1": Process failed but can be retried..
+    [✔] [2017-02-23 18:43:12] Job "10" on Queue "queue_1": Process succeded.
+    [!] [2017-02-23 18:43:13] Job "12" on Queue "queue_1": Process failed but can be retried..
+    [!] [2017-02-23 18:43:14] Job "11" on Queue "queue_2": Process failed but can be retried..
+    [!] [2017-02-23 18:43:15] Job "2" on Queue "queue_3": Process failed but can be retried..
+    [!] [2017-02-23 18:43:16] Job "1" on Queue "queue_4": Process failed but can be retried..
+    [>] [2017-02-23 18:43:16] Job "1001" on Queue "queue_1": Initializing the process.
+    [>] [2017-02-23 18:43:17] Job "1002" on Queue "queue_1": Initializing the process.
     [>] [2017-02-23 18:43:18] Job "31" on Queue "queue_1": Initializing the process.
     ...
 
@@ -156,6 +156,16 @@ You can also test the behavior of failing jobs:
 
 Now that you have a basic understanding of how `SHQCommandsQueuesBundle`works, you can [start customizing it to your needs](30-Use-the-ShqCommandsQueuesBundle.md).
 
-*Do you like this bundle? [**Leave a &#9733;**](#js-repo-pjax-container) or run `composer global require symfony/thanks && composer thanks` to say thank you to all libraries you use in your current project, this one too!*
+<hr />
+<h3 align="center">
+    <b>Do you like this bundle?</b><br />
+    <b><a href="#js-repo-pjax-container">LEAVE A &#9733;</a></b>
+</h3>
+<p align="center">
+    or run<br />
+    <code>composer global require symfony/thanks && composer thanks</code><br />
+    to say thank you to all libraries you use in your current project, this included!
+</p>
+<hr />
 
 ([Go back to index](00-Index.md)) | Next step: [How to use the SHQCommandsQueuesBundle](30-Use-the-ShqCommandsQueuesBundle.md)

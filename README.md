@@ -10,9 +10,8 @@
     <a href="https://github.com/Aerendir/bundle-commands-queues/releases"><img src="https://img.shields.io/packagist/v/serendipity_hq/bundle-commands-queues.svg?style=flat-square"></a>
     <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square"></a>
     <a href="https://github.com/Aerendir/bundle-commands-queues/releases"><img src="https://img.shields.io/packagist/php-v/serendipity_hq/bundle-commands-queues?color=%238892BF&style=flat-square&logo=php" /></a>
-    <a title="Tested with Symfony ^3.4" href="https://github.com/Aerendir/bundle-commands-queues/actions?query=branch%3Adev"><img title="Tested with Symfony ^3.4" src="https://img.shields.io/badge/Symfony-%5E3.4-333?style=flat-square&logo=symfony" /></a>
-    <a title="Tested with Symfony ^4.4" href="https://github.com/Aerendir/bundle-commands-queues/actions?query=branch%3Adev"><img title="Tested with Symfony ^4.4" src="https://img.shields.io/badge/Symfony-%5E4.4-333?style=flat-square&logo=symfony" /></a>
-    <a title="Tested with Symfony ^5.0" href="https://github.com/Aerendir/bundle-commands-queues/actions?query=branch%3Adev"><img title="Tested with Symfony ^5.0" src="https://img.shields.io/badge/Symfony-%5E5.0-333?style=flat-square&logo=symfony" /></a>
+    <a title="Tested with Symfony ^4.4" href="https://github.com/Aerendir/bundle-aws-ses-monitor/actions?query=branch%3Adev"><img title="Tested with Symfony ^4.4" src="https://img.shields.io/badge/Symfony-%5E4.4-333?style=flat-square&logo=symfony" /></a>
+    <a title="Tested with Symfony ^5.2" href="https://github.com/Aerendir/bundle-aws-ses-monitor/actions?query=branch%3Adev"><img title="Tested with Symfony ^5.2" src="https://img.shields.io/badge/Symfony-%5E5.2-333?style=flat-square&logo=symfony" /></a>
 </p>
 <p align="center">
     <a href="https://www.php.net/manual/en/book.json.php"><img src="https://img.shields.io/badge/Requires-ext--json-%238892BF?style=flat-square&logo=php"></a>
@@ -44,8 +43,30 @@ It is possible to run a single job or start a daemon that listens for new jobs a
 
 It automatically integrates with SonataAdminBundle for an easier administration.
 
-Do you like this bundle? [**Leave a &#9733;**](#js-repo-pjax-container)!
+<hr />
+<h3 align="center">
+    <b>Do you like this bundle?</b><br />
+    <b><a href="#js-repo-pjax-container">LEAVE A &#9733;</a></b>
+</h3>
+<p align="center">
+    or run<br />
+    <code>composer global require symfony/thanks && composer thanks</code><br />
+    to say thank you to all libraries you use in your current project, this included!
+</p>
+<hr />
 
 # Documentation
 
 You can read how to install, configure, test and use the SerendipityHQ Queues Bundle in the [documentation](docs/00-Index.md).
+
+<hr />
+<h3 align="center">
+    <b>Do you like this bundle?</b><br />
+    <b><a href="#js-repo-pjax-container">LEAVE A &#9733;</a></b>
+</h3>
+<p align="center">
+    or run<br />
+    <code>composer global require symfony/thanks && composer thanks</code><br />
+    to say thank you to all libraries you use in your current project, this included!
+</p>
+<hr />
