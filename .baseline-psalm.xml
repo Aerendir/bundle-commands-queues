@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<files psalm-version="4.4.1@9fd7a7d885b3a216cff8dec9d8c21a132f275224">
+<files psalm-version="4.5.1@257a1ca672a79dedc852be1285a7b97154646418">
   <file src="src/Admin/Sonata/Entity/DaemonAdmin.php">
     <UndefinedClass occurrences="1">
       <code>AbstractAdmin</code>
@@ -26,6 +26,9 @@
       <code>error</code>
       <code>error</code>
     </DeprecatedMethod>
+    <NonInvariantDocblockPropertyType occurrences="1">
+      <code>$defaultName</code>
+    </NonInvariantDocblockPropertyType>
   </file>
   <file src="src/Command/RunCommand.php">
     <DeprecatedMethod occurrences="7">
@@ -54,6 +57,9 @@
     <MixedMethodCall occurrences="1">
       <code>advance</code>
     </MixedMethodCall>
+    <NonInvariantDocblockPropertyType occurrences="1">
+      <code>$defaultName</code>
+    </NonInvariantDocblockPropertyType>
     <PropertyNotSetInConstructor occurrences="2">
       <code>$ioWriter</code>
       <code>$output</code>
@@ -62,10 +68,18 @@
       <code>MappingException</code>
     </UndefinedDocblockClass>
   </file>
+  <file src="src/Command/TestFailingJobsCommand.php">
+    <NonInvariantDocblockPropertyType occurrences="1">
+      <code>$defaultName</code>
+    </NonInvariantDocblockPropertyType>
+  </file>
   <file src="src/Command/TestFakeCommand.php">
     <InvalidOperand occurrences="1">
       <code>$duration</code>
     </InvalidOperand>
+    <NonInvariantDocblockPropertyType occurrences="1">
+      <code>$defaultName</code>
+    </NonInvariantDocblockPropertyType>
   </file>
   <file src="src/Command/TestRandomJobsCommand.php">
     <DeprecatedMethod occurrences="7">
@@ -99,6 +113,9 @@
     <MixedReturnStatement occurrences="1">
       <code>$timeUnits[\random_int(0, \count($timeUnits) - 1)]</code>
     </MixedReturnStatement>
+    <NonInvariantDocblockPropertyType occurrences="1">
+      <code>$defaultName</code>
+    </NonInvariantDocblockPropertyType>
     <PossiblyUndefinedMethod occurrences="1">
       <code>$this-&gt;queues</code>
     </PossiblyUndefinedMethod>
@@ -422,11 +439,13 @@
       <code>$jobInTreeId</code>
       <code>$jobInTreeId</code>
     </InvalidOperand>
-    <MixedArgumentTypeCoercion occurrences="2">
+    <MixedArgument occurrences="2">
       <code>$cancelledJob</code>
       <code>$retryingJob</code>
-    </MixedArgumentTypeCoercion>
-    <MixedAssignment occurrences="2">
+    </MixedArgument>
+    <MixedAssignment occurrences="4">
+      <code>$cancelledJob</code>
+      <code>$retryingJob</code>
       <code>$tree[]</code>
       <code>$tree[]</code>
     </MixedAssignment>
@@ -597,13 +616,14 @@
     <DeprecatedMethod occurrences="1">
       <code>error</code>
     </DeprecatedMethod>
-    <MixedArgumentTypeCoercion occurrences="1">
+    <MixedArgument occurrences="1">
       <code>$childDependency</code>
-    </MixedArgumentTypeCoercion>
+    </MixedArgument>
     <MixedArrayAccess occurrences="1">
       <code>$info[self::DEBUG]['cancellation_reason']</code>
     </MixedArrayAccess>
-    <MixedAssignment occurrences="1">
+    <MixedAssignment occurrences="2">
+      <code>$childDependency</code>
       <code>$value</code>
     </MixedAssignment>
     <MixedInferredReturnType occurrences="1">
