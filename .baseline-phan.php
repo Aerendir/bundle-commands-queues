@@ -33,7 +33,6 @@ return [
     // ConstReferenceConstNotFound : 1 occurrence
     // PhanTypeInvalidDimOffset : 1 occurrence
     // PhanTypeMismatchArgumentReal : 1 occurrence
-    // PhanTypeNoPropertiesForeach : 1 occurrence
     // PhanUndeclaredClass : 1 occurrence
     // PhanUndeclaredClassConstant : 1 occurrence
     // PhanUndeclaredClassInstanceof : 1 occurrence
@@ -53,7 +52,7 @@ return [
         'src/Command/TestFakeCommand.php' => ['PhanRedefinedClassReference', 'PhanRedefinedExtendedClass'],
         'src/Command/TestRandomJobsCommand.php' => ['PhanDeprecatedFunction', 'PhanPluginUnreachableCode', 'PhanRedefinedClassReference', 'PhanTypeInvalidDimOffset', 'PhanTypeMismatchArgumentReal'],
         'src/Config/DaemonConfig.php' => ['PhanUnreferencedPublicMethod'],
-        'src/DependencyInjection/Configuration.php' => ['PhanTypeNoPropertiesForeach', 'PhanUndeclaredMethod', 'PhanUnreferencedClosure'],
+        'src/DependencyInjection/Configuration.php' => ['PhanUndeclaredMethod', 'PhanUnreferencedClosure'],
         'src/DependencyInjection/SHQCommandsQueuesExtension.php' => ['PhanUndeclaredClassReference', 'PhanUnreferencedClass'],
         'src/Entity/Daemon.php' => ['PhanReadOnlyPrivateProperty', 'PhanRedefinedClassReference', 'PhanUnreferencedPublicMethod'],
         'src/Entity/Job.php' => ['PhanPluginUnreachableCode', 'PhanReadOnlyPrivateProperty', 'PhanRedefinedClassReference', 'PhanTypeArraySuspiciousNullable', 'PhanTypeMismatchArgumentNullable', 'PhanUnreferencedPublicMethod'],
