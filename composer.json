@@ -43,7 +43,7 @@
         "phpstan/phpstan-doctrine": "0.12.33",
         "phpstan/phpstan-symfony": "0.12.20",
         "thecodingmachine/phpstan-safe-rule": "1.0.1",
-        "rector/rector": "0.9.31"
+        "rector/rector": "0.9.33"
     },
     "suggest":{
         "sonata-project/admin-bundle": "Allows to view what's going on with your queues and commands jobs using automatic integration with SonataAdminBundle."
