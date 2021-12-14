@@ -184,6 +184,7 @@ final class RunCommand extends Command
                         $this->ioWriter->infoLineNoBg(sprintf('Trying to initialize <success-nobg>%s</success-nobg> new Jobs for queue <success-nobg>%s</success-nobg>...', $jobsToLoad, $queueName));
                         $initializingJobs = ProgressBarFactory::createProgressBar(ProgressBarFactory::FORMAT_INITIALIZING_JOBS, $output, $jobsToLoad);
                     }
+
                     for ($i = 0; $i < $jobsToLoad; ++$i) {
                         // Start processing the next Job in the queue
                         if (false === $this->daemon->processNextJob($queueName)) {
@@ -210,6 +211,7 @@ final class RunCommand extends Command
                 if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
                     $this->ioWriter->infoLineNoBg('Checking alive Daemons...');
                 }
+
                 $this->checkAliveDaemons();
             }
 
@@ -218,6 +220,7 @@ final class RunCommand extends Command
                 if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
                     $this->ioWriter->info('Optimizing the Daemons...');
                 }
+
                 $this->daemon->optimize();
             }
 
@@ -250,6 +253,7 @@ final class RunCommand extends Command
                         'No Jobs to process. Idling for <success-nobg>%s seconds<success-nobg>...', $this->daemon->getConfig()->getSleepFor()
                     ));
                 }
+
                 $this->daemon->sleep();
             }
         }
@@ -260,6 +264,7 @@ final class RunCommand extends Command
         if ($this->daemon->hasRunningJobs()) {
             $this->ioWriter->infoLineNoBg('Emptying the queue of still running Jobs...');
         }
+
         while ($this->daemon->hasRunningJobs()) {
             foreach ($this->daemon->getConfig()->getQueues() as $queueName) {
                 if ($this->daemon->hasRunningJobs($queueName)) {
@@ -336,6 +341,7 @@ final class RunCommand extends Command
                 $strugglerDaemon->getMortisCausa(),
             ];
         }
+
         $this->ioWriter->table(
             ['', 'PID', 'Host', 'Born on', 'Died On', 'Age', 'Mortis Causa'],
             $table
@@ -386,6 +392,7 @@ final class RunCommand extends Command
             ));
             $currentlyRunningProgress = ProgressBarFactory::createProgressBar(ProgressBarFactory::FORMAT_PROCESS_RUNNING_JOBS, $this->output, $this->daemon->countRunningJobs($queueName));
         }
+
         $this->daemon->checkRunningJobs($queueName, $currentlyRunningProgress);
     }
 }

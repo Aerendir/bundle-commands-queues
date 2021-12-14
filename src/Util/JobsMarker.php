@@ -43,6 +43,7 @@ final class JobsMarker
      * @var string
      */
     private const DEBUG = 'debug';
+
     /** @var EntityManager $entityManager */
     private static $entityManager;
 
@@ -345,6 +346,7 @@ final class JobsMarker
                 if ($ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
                     Profiler::printUnitOfWork();
                 }
+
                 throw $e;
             });
 

@@ -89,10 +89,12 @@ final class Configuration implements ConfigurationInterface
 
     /** @var string */
     public const QUEUE_RUNNING_JOBS_CHECK_INTERVAL_DESCRIPTION = 'The number of seconds after which the running jobs have to be checked.';
+
     /**
      * @var string
      */
     private const DAEMONS = 'daemons';
+
     /**
      * @var string
      */

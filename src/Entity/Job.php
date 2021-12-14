@@ -147,10 +147,12 @@ class Job
      *
      * @var string */
     public const TYPE_RETRY = 'retry';
+
     /**
      * @var string
      */
     private const OPTIONS = 'options';
+
     /**
      * @var string
      */
@@ -194,21 +196,21 @@ class Job
     private $executeAfterTime;
 
     /**
-     * @var DateTime
+     * @var \DateTimeInterface
      *
      * @ORM\Column(name="created_at", type="datetime")
      */
     private $createdAt;
 
     /**
-     * @var DateTime|null
+     * @var \DateTimeInterface|null
      *
      * @ORM\Column(name="started_at", type="datetime", nullable=true)
      */
     private $startedAt;
 
     /**
-     * @var DateTime|null when the Job is marked as Finished, Failed or Terminated
+     * @var \DateTimeInterface|null when the Job is marked as Finished, Failed or Terminated
      *
      * @ORM\Column(name="closed_at", type="datetime", nullable=true)
      */
@@ -589,25 +591,25 @@ class Job
     }
 
     /**
-     * @return DateTime
+     * @return \DateTime|\DateTimeImmutable
      */
-    public function getCreatedAt(): DateTime
+    public function getCreatedAt(): \DateTimeInterface
     {
         return $this->createdAt;
     }
 
     /**
-     * @return DateTime|null
+     * @return \DateTime|\DateTimeImmutable|null
      */
-    public function getStartedAt(): ?DateTime
+    public function getStartedAt(): ?\DateTimeInterface
     {
         return $this->startedAt;
     }
 
     /**
-     * @return DateTime|null
+     * @return \DateTime|\DateTimeImmutable|null
      */
-    public function getClosedAt(): ?DateTime
+    public function getClosedAt(): ?\DateTimeInterface
     {
         return $this->closedAt;
     }
@@ -621,9 +623,9 @@ class Job
     }
 
     /**
-     * @return DateTime|null
+     * @return \DateTime|\DateTimeImmutable|null
      */
-    public function getExecuteAfterTime(): ?DateTime
+    public function getExecuteAfterTime(): ?\DateTimeInterface
     {
         return $this->executeAfterTime;
     }

@@ -42,10 +42,12 @@ final class Profiler
      * @var string
      */
     private const SUCCESS_NOBG = 'success-nobg';
+
     /**
      * @var string
      */
     private const ERROR_NOBG = 'error-nobg';
+
     /** @var float $startTime */
     private $startTime;
 
@@ -306,6 +308,7 @@ final class Profiler
             if (false === \file_exists('app/logs/callgrind')) {
                 mkdir('app/logs/callgrind', 0777, true);
             }
+
             $callgrind = fopen(
                 sprintf(
                     'app/logs/callgrind/callgrind.out.%s.%s.%s',

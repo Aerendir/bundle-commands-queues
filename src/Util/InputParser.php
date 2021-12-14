@@ -33,22 +33,27 @@ final class InputParser
         self::OPTIONS   => null,
         self::SHORTCUTS => null,
     ];
+
     /**
      * @var string
      */
     private const COMMAND = 'command';
+
     /**
      * @var string
      */
     private const ARGUMENTS = 'arguments';
+
     /**
      * @var string
      */
     private const OPTIONS = 'options';
+
     /**
      * @var string
      */
     private const SHORTCUTS = 'shortcuts';
+
     /** @var string|null $foundArgument */
     private static $foundArgument;
 

@@ -77,14 +77,14 @@ class Daemon
     private $pid;
 
     /**
-     * @var DateTime
+     * @var \DateTimeInterface
      *
      * @ORM\Column(name="born_on", type="datetime")
      */
     private $bornOn;
 
     /**
-     * @var DateTime|null
+     * @var \DateTimeInterface|null
      *
      * @ORM\Column(name="died_on", type="datetime", nullable=true)
      */
@@ -131,9 +131,9 @@ class Daemon
     }
 
     /**
-     * @return DateTime
+     * @return \DateTime|\DateTimeImmutable
      */
-    public function getBornOn(): DateTime
+    public function getBornOn(): \DateTimeInterface
     {
         return $this->bornOn;
     }
@@ -147,9 +147,9 @@ class Daemon
     }
 
     /**
-     * @return DateTime|null
+     * @return \DateTime|\DateTimeImmutable|null
      */
-    public function getDiedOn(): ?DateTime
+    public function getDiedOn(): ?\DateTimeInterface
     {
         return $this->diedOn;
     }

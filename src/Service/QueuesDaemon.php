@@ -56,22 +56,27 @@ final class QueuesDaemon
      * @var string
      */
     private const OPTIONS = 'options';
+
     /**
      * @var string
      */
     private const __ID = '--id';
+
     /**
      * @var string
      */
     private const JOB = 'job';
+
     /**
      * @var string
      */
     private const PROCESS = 'process';
+
     /**
      * @var string
      */
     private const GET_CLOSED_AT = 'getClosedAt';
+
     /** @var Daemon $me Is the Daemon object */
     private $me;
 
@@ -114,6 +119,7 @@ final class QueuesDaemon
 
     /** @var int $verbosity */
     private $verbosity;
+
     /**
      * @var \Doctrine\ORM\Configuration
      */
@@ -168,6 +174,7 @@ final class QueuesDaemon
         if (false === \is_string($hostname)) {
             throw new RuntimeException('Impossible to get the host name.');
         }
+
         $this->me = new Daemon($hostname, getmypid(), $this->config);
         $this->entityManager->persist($this->me);
         $this->entityManager->flush($this->me);
@@ -345,6 +352,7 @@ final class QueuesDaemon
             if (null === $jobRetryOf) {
                 throw new RuntimeException(sprintf('The job of which this one (ID: %s) is a retry is not set.', $job->getId()));
             }
+
             $this->ioWriter->noteLineNoBg(sprintf(
                 '[%s] Job <success-nobg>#%s</success-nobg> on Queue <success-nobg>%s</success-nobg>: This is a retry of original Job <success-nobg>#%s</success-nobg> (Childs: %s).',
                 $now->format('Y-m-d H:i:s'), $job->getId(), $job->getQueue(), $jobRetryOf->getId(), $job->getChildDependencies()->count()
@@ -663,6 +671,7 @@ final class QueuesDaemon
                 $this->ioWriter->warning(sprintf('Trying to hard detach all Jobs to free more space.'));
                 $this->ioWriter->infoLineNoBg('Emptying the queue of still running Jobs...');
             }
+
             // Wait for the currently running jobs to finish
             while ($this->hasRunningJobs()) {
                 foreach ($this->getConfig()->getQueues() as $queueName) {
@@ -1043,6 +1052,7 @@ final class QueuesDaemon
                 if (null !== $progressBar) {
                     $progressBar->advance();
                 }
+
                 $this->ioWriter->writeln('');
             }
 

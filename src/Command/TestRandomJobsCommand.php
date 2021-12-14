@@ -100,6 +100,7 @@ final class TestRandomJobsCommand extends AbstractQueuesCommand
 
             return 1;
         }
+
         $howManyJobs = (int) $howManyJobs;
 
         if (null !== $batch && false === \is_numeric($batch)) {
@@ -107,6 +108,7 @@ final class TestRandomJobsCommand extends AbstractQueuesCommand
 
             return 1;
         }
+
         $batch = (int) $batch;
 
         if (null !== $noFutureJobs && false === \is_bool($noFutureJobs)) {
@@ -135,7 +137,7 @@ final class TestRandomJobsCommand extends AbstractQueuesCommand
             $scheduledJob->setQueue($this->queues[$queue]);
 
             // Set a random retry strategy
-            if (0 < \count($retryStrategies)) {
+            if ([] !== $retryStrategies) {
                 $scheduledJob->setRetryStrategy($this->getRandomRetryStrategy($retryStrategies, $timeUnits));
             }
 

@@ -38,10 +38,12 @@ final class InternalMarkAsCancelledCommand extends AbstractQueuesCommand
      * @var string
      */
     private const ID = 'id';
+
     /**
      * @var string
      */
     private const CANCELLING_JOB_ID = 'cancelling-job-id';
+
     /** @var string */
     public static $defaultName = 'queues:internal:mark-as-cancelled';
 

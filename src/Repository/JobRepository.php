@@ -37,18 +37,22 @@ final class JobRepository extends EntityRepository
      * @var string
      */
     private const ARGUMENTS = 'arguments';
+
     /**
      * @var string
      */
     private const OPTIONS = 'options';
+
     /**
      * @var string
      */
     private const SHORTCUTS = 'shortcuts';
+
     /**
      * @var string
      */
     private const ASC = 'ASC';
+
     /** @var array $config */
     private $config;
 

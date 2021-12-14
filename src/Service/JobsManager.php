@@ -107,6 +107,7 @@ final class JobsManager
                         $jobInTreeId
                     ));
                 }
+
                 continue;
             }
 
@@ -128,6 +129,7 @@ final class JobsManager
             if (self::$ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_DEBUG) {
                 self::$ioWriter->successLineNoBg(sprintf('Job <info-nobg>#%s</info-nobg> detached.', $jobInTree->getId()));
             }
+
             // Add the current Job to the already detached
             $jobInTreeId            = $jobInTree->getId();
             $detached[$jobInTreeId] = '#' . $jobInTreeId;
