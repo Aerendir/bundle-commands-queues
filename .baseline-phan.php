@@ -11,7 +11,7 @@ return [
     // # Issue statistics:
     // PhanRedefinedClassReference : 500+ occurrences
     // PhanUnreferencedPublicMethod : 40+ occurrences
-    // PhanDeprecatedFunction : 30+ occurrences
+    // PhanDeprecatedFunction : 25+ occurrences
     // PhanPluginUnreachableCode : 15+ occurrences
     // PhanUndeclaredClassMethod : 15+ occurrences
     // PhanUndeclaredMethod : 10+ occurrences
@@ -31,7 +31,6 @@ return [
     // PhanUnusedProtectedFinalMethodParameter : 2 occurrences
     // ConstReferenceClassNotImported : 1 occurrence
     // ConstReferenceConstNotFound : 1 occurrence
-    // PhanTypeInvalidDimOffset : 1 occurrence
     // PhanTypeMismatchArgumentReal : 1 occurrence
     // PhanUndeclaredClass : 1 occurrence
     // PhanUndeclaredClassConstant : 1 occurrence
@@ -50,7 +49,7 @@ return [
         'src/Command/RunCommand.php' => ['PhanDeprecatedFunction', 'PhanRedefinedClassReference', 'PhanRedefinedExtendedClass', 'PhanUndeclaredTypeThrowsType'],
         'src/Command/TestFailingJobsCommand.php' => ['PhanRedefinedClassReference', 'PhanRedefinedExtendedClass', 'PhanUnusedProtectedFinalMethodParameter'],
         'src/Command/TestFakeCommand.php' => ['PhanRedefinedClassReference', 'PhanRedefinedExtendedClass'],
-        'src/Command/TestRandomJobsCommand.php' => ['PhanDeprecatedFunction', 'PhanPluginUnreachableCode', 'PhanRedefinedClassReference', 'PhanTypeInvalidDimOffset', 'PhanTypeMismatchArgumentReal'],
+        'src/Command/TestRandomJobsCommand.php' => ['PhanDeprecatedFunction', 'PhanPluginUnreachableCode', 'PhanRedefinedClassReference', 'PhanTypeMismatchArgumentReal'],
         'src/Config/DaemonConfig.php' => ['PhanUnreferencedPublicMethod'],
         'src/DependencyInjection/Configuration.php' => ['PhanUndeclaredMethod', 'PhanUnreferencedClosure'],
         'src/DependencyInjection/SHQCommandsQueuesExtension.php' => ['PhanUndeclaredClassReference', 'PhanUnreferencedClass'],
