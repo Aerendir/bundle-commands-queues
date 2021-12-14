@@ -830,7 +830,7 @@ final class QueuesDaemon
      * @throws ORMException
      * @throws Exception
      */
-    final private function handleFailedJob(Job $job, Process $process): void
+    private function handleFailedJob(Job $job, Process $process): void
     {
         $info = $this->jobsManager->buildDefaultInfo($process);
 
@@ -862,7 +862,7 @@ final class QueuesDaemon
      *
      * @throws Exception
      */
-    final private function handleSuccessfulJob(Job $job, Process $process): void
+    private function handleSuccessfulJob(Job $job, Process $process): void
     {
         $info = $this->jobsManager->buildDefaultInfo($process);
         $this->jobsMarker->markJobAsFinished($job, $info);
@@ -881,7 +881,7 @@ final class QueuesDaemon
      *
      * @return bool|Job Returns false or the Job object
      */
-    final private function handleChildsOfFailedJob(Job $job)
+    private function handleChildsOfFailedJob(Job $job)
     {
         if ($job->getChildDependencies()->count() > 0) {
             if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
