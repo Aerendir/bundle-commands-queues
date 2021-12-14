@@ -33,24 +33,16 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 final class JobRepository extends EntityRepository
 {
-    /**
-     * @var string
-     */
+    /** @var string */
     private const ARGUMENTS = 'arguments';
 
-    /**
-     * @var string
-     */
+    /** @var string */
     private const OPTIONS = 'options';
 
-    /**
-     * @var string
-     */
+    /** @var string */
     private const SHORTCUTS = 'shortcuts';
 
-    /**
-     * @var string
-     */
+    /** @var string */
     private const ASC = 'ASC';
 
     /** @var array $config */
