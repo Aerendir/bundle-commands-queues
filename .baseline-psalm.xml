@@ -31,8 +31,7 @@
     </NonInvariantDocblockPropertyType>
   </file>
   <file src="src/Command/RunCommand.php">
-    <DeprecatedMethod occurrences="7">
-      <code>detach</code>
+    <DeprecatedMethod occurrences="6">
       <code>info</code>
       <code>note</code>
       <code>success</code>
@@ -74,8 +73,9 @@
     </NonInvariantDocblockPropertyType>
   </file>
   <file src="src/Command/TestFakeCommand.php">
-    <InvalidOperand occurrences="1">
+    <InvalidOperand occurrences="2">
       <code>$duration</code>
+      <code>$id</code>
     </InvalidOperand>
     <NonInvariantDocblockPropertyType occurrences="1">
       <code>$defaultName</code>
@@ -357,12 +357,36 @@
       <code>children</code>
     </PossiblyUndefinedMethod>
   </file>
+  <file src="src/DependencyInjection/SHQCommandsQueuesExtension.php">
+    <ReservedWord occurrences="2">
+      <code>$loader-&gt;load('services.yml')</code>
+      <code>$sonataLoader-&gt;load('sonata_admin.yaml')</code>
+    </ReservedWord>
+  </file>
   <file src="src/Entity/Daemon.php">
+    <LessSpecificReturnStatement occurrences="2">
+      <code>$this-&gt;bornOn</code>
+      <code>$this-&gt;diedOn</code>
+    </LessSpecificReturnStatement>
+    <MoreSpecificReturnType occurrences="2">
+      <code>\DateTime|\DateTimeImmutable</code>
+      <code>\DateTime|\DateTimeImmutable|null</code>
+    </MoreSpecificReturnType>
     <PropertyNotSetInConstructor occurrences="1">
       <code>$id</code>
     </PropertyNotSetInConstructor>
   </file>
   <file src="src/Entity/Job.php">
+    <LessSpecificReturnStatement occurrences="3">
+      <code>$this-&gt;closedAt</code>
+      <code>$this-&gt;createdAt</code>
+      <code>$this-&gt;startedAt</code>
+    </LessSpecificReturnStatement>
+    <MoreSpecificReturnType occurrences="3">
+      <code>\DateTime|\DateTimeImmutable</code>
+      <code>\DateTime|\DateTimeImmutable|null</code>
+      <code>\DateTime|\DateTimeImmutable|null</code>
+    </MoreSpecificReturnType>
     <PossiblyInvalidPropertyAssignmentValue occurrences="1">
       <code>$executeAfter</code>
     </PossiblyInvalidPropertyAssignmentValue>
@@ -429,8 +453,7 @@
     </UndefinedClass>
   </file>
   <file src="src/Service/JobsManager.php">
-    <DeprecatedMethod occurrences="2">
-      <code>detach</code>
+    <DeprecatedMethod occurrences="1">
       <code>getInput</code>
     </DeprecatedMethod>
     <InvalidOperand occurrences="4">
@@ -443,8 +466,9 @@
       <code>$cancelledJob</code>
       <code>$retryingJob</code>
     </MixedArgument>
-    <MixedAssignment occurrences="4">
+    <MixedAssignment occurrences="5">
       <code>$cancelledJob</code>
+      <code>$env</code>
       <code>$retryingJob</code>
       <code>$tree[]</code>
       <code>$tree[]</code>
@@ -486,6 +510,9 @@
     </RedundantCondition>
   </file>
   <file src="src/Service/QueuesDaemon.php">
+    <ArgumentTypeCoercion occurrences="1">
+      <code>$job</code>
+    </ArgumentTypeCoercion>
     <DeprecatedMethod occurrences="9">
       <code>getInput</code>
       <code>note</code>
@@ -503,14 +530,12 @@
     <MissingClosureParamType occurrences="1">
       <code>$signo</code>
     </MissingClosureParamType>
-    <MixedArgument occurrences="8">
-      <code>$job</code>
+    <MixedArgument occurrences="6">
       <code>$maxRetentionDays</code>
       <code>$queueName</code>
       <code>$queueName</code>
       <code>$queueName</code>
       <code>$runningJob</code>
-      <code>$this-&gt;entityManager-&gt;getUnitOfWork()-&gt;getIdentityMap()[Job::class]</code>
       <code>$this-&gt;runningJobs[$queueName]</code>
     </MixedArgument>
     <MixedArrayAccess occurrences="4">
@@ -525,11 +550,10 @@
     <MixedArrayOffset occurrences="1">
       <code>$this-&gt;runningJobs[$queueName][$index]</code>
     </MixedArrayOffset>
-    <MixedAssignment occurrences="10">
+    <MixedAssignment occurrences="9">
       <code>$can</code>
       <code>$currentlyRunning</code>
       <code>$index</code>
-      <code>$job</code>
       <code>$maxRetentionDays</code>
       <code>$queueName</code>
       <code>$queueName</code>
@@ -547,6 +571,9 @@
     <MixedReturnStatement occurrences="1">
       <code>$this-&gt;getConfig()-&gt;getQueue($queueName)[Configuration::QUEUE_MAX_CONCURRENT_JOBS_KEY] - $this-&gt;countRunningJobs($queueName)</code>
     </MixedReturnStatement>
+    <PossiblyNullArgument occurrences="1">
+      <code>$job</code>
+    </PossiblyNullArgument>
     <PossiblyNullArrayAccess occurrences="1">
       <code>$job-&gt;getInput()[self::OPTIONS]</code>
     </PossiblyNullArrayAccess>
@@ -558,6 +585,9 @@
     <RedundantCondition occurrences="1">
       <code>\is_string($hostname)</code>
     </RedundantCondition>
+    <RedundantConditionGivenDocblockType occurrences="1">
+      <code>\is_array($this-&gt;entityManager-&gt;getUnitOfWork()-&gt;getIdentityMap()[Job::class])</code>
+    </RedundantConditionGivenDocblockType>
     <TooManyArguments occurrences="3">
       <code>flush</code>
       <code>flush</code>
@@ -675,9 +705,6 @@
       <code>$pid</code>
       <code>$startTime</code>
     </MissingConstructor>
-    <MixedArgument occurrences="1">
-      <code>self::$uow-&gt;getIdentityMap()[Job::class]</code>
-    </MixedArgument>
     <MixedArrayOffset occurrences="1">
       <code>$this-&gt;runningJobsLastCheckedAt[$queue]</code>
     </MixedArrayOffset>
