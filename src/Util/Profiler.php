@@ -38,14 +38,10 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 final class Profiler
 {
-    /**
-     * @var string
-     */
+    /** @var string */
     private const SUCCESS_NOBG = 'success-nobg';
 
-    /**
-     * @var string
-     */
+    /** @var string */
     private const ERROR_NOBG = 'error-nobg';
 
     /** @var float $startTime */
@@ -299,7 +295,7 @@ final class Profiler
         $this->lastMemoryUsage       = $currentMemoryUsage;
         $this->lastMemoryUsageReal   = $currentMemoryUsageReal;
         $this->lastUowSize           = $currentUowSize;
-        $this->highestMemoryPeak     = $this->highestMemoryPeak < $currentMemoryPeak ? $currentMemoryPeak : $this->highestMemoryPeak;
+        $this->highestMemoryPeak     = $this->highestMemoryPeak     < $currentMemoryPeak ? $currentMemoryPeak : $this->highestMemoryPeak;
         $this->highestMemoryPeakReal = $this->highestMemoryPeakReal < $currentMemoryPeakReal ? $currentMemoryPeakReal : $this->highestMemoryPeakReal;
         $this->highestUowSize        = $currentHighestUowSize;
 

@@ -271,15 +271,19 @@ final class JobsManager
         switch (self::$entityManager->getUnitOfWork()->getEntityState($job)) {
             case UnitOfWork::STATE_DETACHED:
                 $state = 'Detached';
+
                 break;
             case UnitOfWork::STATE_NEW:
                 $state = 'New';
+
                 break;
             case UnitOfWork::STATE_MANAGED:
                 $state = 'Managed';
+
                 break;
             case UnitOfWork::STATE_REMOVED:
                 $state = 'Removed';
+
                 break;
             default:
                 $state = 'Unknown';
@@ -416,15 +420,19 @@ final class JobsManager
         switch ($this->verbosity) {
             case OutputInterface::VERBOSITY_QUIET:
                 return '-q';
+
                 break;
             case OutputInterface::VERBOSITY_VERBOSE:
                 return '-vv';
+
                 break;
             case OutputInterface::VERBOSITY_VERY_VERBOSE:
                 return '-vv';
+
                 break;
             case OutputInterface::VERBOSITY_DEBUG:
                 return '-vvv';
+
                 break;
             case OutputInterface::VERBOSITY_NORMAL:
             default:

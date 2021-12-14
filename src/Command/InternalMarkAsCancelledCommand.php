@@ -34,14 +34,10 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 final class InternalMarkAsCancelledCommand extends AbstractQueuesCommand
 {
-    /**
-     * @var string
-     */
+    /** @var string */
     private const ID = 'id';
 
-    /**
-     * @var string
-     */
+    /** @var string */
     private const CANCELLING_JOB_ID = 'cancelling-job-id';
 
     /** @var string */

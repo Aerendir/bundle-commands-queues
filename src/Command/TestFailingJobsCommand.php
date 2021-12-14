@@ -31,9 +31,7 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 final class TestFailingJobsCommand extends Command
 {
-    /**
-     * @var string
-     */
+    /** @var string */
     private const QUEUE_1 = 'queue_1';
 
     /** @var string $defaultName */
