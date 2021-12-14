@@ -18,6 +18,15 @@ parameters:
     excludePaths:
         - */src/DependencyInjection/Configuration.php
         - */src/Admin/Sonata/*
+        - */src/Repository/JobRepository.php
+        - */src/Util/JobsMarker.php
+        - */src/Util/Profiler.php
+        - */src/Command/TestRandomJobsCommand.php
+        - */src/Command/AbstractQueuesCommand.php
+        - */src/Command/InternalMarkAsCancelledCommand.php
+        - */src/Command/RunCommand.php
+        - */src/Service/QueuesDaemon.php
+        - */src/Service/JobsManager.php
     ignoreErrors:
         -
             message: '#Function memprof_dump_callgrind not found.#'
