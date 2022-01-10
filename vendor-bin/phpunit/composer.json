@@ -5,5 +5,10 @@
         "symfony/phpunit-bridge": "6.0.0",
         "vimeo/psalm": "4.15.0",
         "weirdan/doctrine-psalm-plugin": "1.0.0"
+    },
+    "config": {
+        "allow-plugins": {
+            "composer/package-versions-deprecated": true
+        }
     }
 }
