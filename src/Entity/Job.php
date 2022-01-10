@@ -148,14 +148,10 @@ class Job
      * @var string */
     public const TYPE_RETRY = 'retry';
 
-    /**
-     * @var string
-     */
+    /** @var string */
     private const OPTIONS = 'options';
 
-    /**
-     * @var string
-     */
+    /** @var string */
     private const SHORTCUTS = 'shortcuts';
 
     /**

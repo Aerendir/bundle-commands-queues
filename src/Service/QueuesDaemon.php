@@ -52,29 +52,19 @@ use Throwable;
  */
 final class QueuesDaemon
 {
-    /**
-     * @var string
-     */
+    /** @var string */
     private const OPTIONS = 'options';
 
-    /**
-     * @var string
-     */
+    /** @var string */
     private const __ID = '--id';
 
-    /**
-     * @var string
-     */
+    /** @var string */
     private const JOB = 'job';
 
-    /**
-     * @var string
-     */
+    /** @var string */
     private const PROCESS = 'process';
 
-    /**
-     * @var string
-     */
+    /** @var string */
     private const GET_CLOSED_AT = 'getClosedAt';
 
     /** @var Daemon $me Is the Daemon object */
@@ -120,9 +110,7 @@ final class QueuesDaemon
     /** @var int $verbosity */
     private $verbosity;
 
-    /**
-     * @var \Doctrine\ORM\Configuration
-     */
+    /** @var \Doctrine\ORM\Configuration */
     private $configuration;
 
     /**

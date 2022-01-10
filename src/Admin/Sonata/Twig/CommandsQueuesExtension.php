@@ -26,13 +26,9 @@ use Twig\TwigFilter;
  */
 final class CommandsQueuesExtension extends AbstractExtension
 {
-    /**
-     * @var string
-     */
+    /** @var string */
     private const OPTIONS = 'options';
-    /**
-     * @var string
-     */
+    /** @var string */
     private const __ID = '--id';
     /** @var UrlGeneratorInterface $generator */
     private $generator;

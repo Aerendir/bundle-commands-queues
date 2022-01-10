@@ -35,24 +35,16 @@ final class InputParser
         self::SHORTCUTS => null,
     ];
 
-    /**
-     * @var string
-     */
+    /** @var string */
     private const COMMAND = 'command';
 
-    /**
-     * @var string
-     */
+    /** @var string */
     private const ARGUMENTS = 'arguments';
 
-    /**
-     * @var string
-     */
+    /** @var string */
     private const OPTIONS = 'options';
 
-    /**
-     * @var string
-     */
+    /** @var string */
     private const SHORTCUTS = 'shortcuts';
 
     /** @var string|null $foundArgument */

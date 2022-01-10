@@ -27,27 +27,17 @@ use Sonata\AdminBundle\Route\RouteCollection;
  */
 final class JobAdmin extends AbstractAdmin
 {
-    /**
-     * @var string
-     */
+    /** @var string */
     private const DOCTRINE_ORM_DATE_RANGE = 'doctrine_orm_date_range';
-    /**
-     * @var string
-     */
+    /** @var string */
     private const URI = 'uri';
-    /**
-     * {@inheritdoc}
-     */
+    /** {@inheritdoc} */
     protected $translationDomain = 'shq_commands_queues';
 
-    /**
-     * {@inheritdoc}
-     */
+    /** {@inheritdoc} */
     protected $baseRoutePattern = 'jobs';
 
-    /**
-     * {@inheritdoc}
-     */
+    /** {@inheritdoc} */
     protected $datagridValues = [
         '_page'     => 1,
         '_per_page' => 50,
