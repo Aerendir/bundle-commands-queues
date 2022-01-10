@@ -46,10 +46,25 @@ return static function (ContainerConfigurator $containerConfigurator) : void {
     $containerConfigurator->import(SetList::SAFE_07);
     $containerConfigurator->import(SetList::TYPE_DECLARATION);
 
+    $parameters->set(Option::AUTO_IMPORT_NAMES, true);
+    $parameters->set(Option::IMPORT_DOC_BLOCKS, true);
+    $parameters->set(Option::IMPORT_SHORT_CLASSES, false);
+
     $parameters->set(
         Option::SKIP,
         [
             __DIR__ . '/src/Admin/Sonata',
+            __DIR__ . '/src/Command/AbstractQueuesCommand.php',
+            __DIR__ . '/src/Command/InternalMarkAsCancelledCommand.php',
+            __DIR__ . '/src/Command/RunCommand.php',
+            __DIR__ . '/src/Command/TestRandomJobsCommand.php',
+            __DIR__ . '/src/Repository/DaemonRepository.php',
+            __DIR__ . '/src/Entity/Job.php',
+            __DIR__ . '/src/Repository/JobRepository.php',
+            __DIR__ . '/src/Service/JobsManager.php',
+            __DIR__ . '/src/Service/QueuesDaemon.php',
+            __DIR__ . '/src/Util/JobsMarker.php',
+            __DIR__ . '/src/Util/Profiler.php',
             Rector\CodeQuality\Rector\Catch_\ThrowWithPreviousExceptionRector::class,
             Rector\CodeQuality\Rector\Concat\JoinStringConcatRector::class,
             Rector\CodeQuality\Rector\Identical\SimplifyBoolIdenticalTrueRector::class,

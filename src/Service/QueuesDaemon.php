@@ -945,10 +945,12 @@ final class QueuesDaemon
                 case SIGTERM:
                     $signal        = 'SIGTERM';
                     $this->mustDie = true;
+
                     break;
                 case SIGINT:
                     $signal        = 'SIGINT';
                     $this->mustDie = true;
+
                     break;
                 default:
                     $signal = 'Unknown ' . $signo;
@@ -1061,6 +1063,7 @@ final class QueuesDaemon
 
             if ($this->getConfig()->getRetryStaleJobs($job->getQueue())) {
                 $this->retryStaleJob($job, $info, 'Job were stale.');
+
                 continue;
             }
 

@@ -299,7 +299,7 @@ final class Profiler
         $this->lastMemoryUsage       = $currentMemoryUsage;
         $this->lastMemoryUsageReal   = $currentMemoryUsageReal;
         $this->lastUowSize           = $currentUowSize;
-        $this->highestMemoryPeak     = $this->highestMemoryPeak < $currentMemoryPeak ? $currentMemoryPeak : $this->highestMemoryPeak;
+        $this->highestMemoryPeak     = $this->highestMemoryPeak     < $currentMemoryPeak ? $currentMemoryPeak : $this->highestMemoryPeak;
         $this->highestMemoryPeakReal = $this->highestMemoryPeakReal < $currentMemoryPeakReal ? $currentMemoryPeakReal : $this->highestMemoryPeakReal;
         $this->highestUowSize        = $currentHighestUowSize;
 

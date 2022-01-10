@@ -407,24 +407,31 @@ final class JobsMarker
             switch ($property) {
                 case 'cancelled_by':
                     $reflectedProperty = $reflectedClass->getProperty('cancelledBy');
+
                     break;
                 case 'closed_at':
                     $reflectedProperty = $reflectedClass->getProperty('closedAt');
+
                     break;
                 case self::DEBUG:
                     $reflectedProperty = $reflectedClass->getProperty(self::DEBUG);
+
                     break;
                 case 'output':
                     $reflectedProperty = $reflectedClass->getProperty('output');
+
                     break;
                 case 'exit_code':
                     $reflectedProperty = $reflectedClass->getProperty('exitCode');
+
                     break;
                 case 'started_at':
                     $reflectedProperty = $reflectedClass->getProperty('startedAt');
+
                     break;
                 case 'cancellation_reason':
                     $reflectedProperty = $reflectedClass->getProperty('cancellationReason');
+
                     break;
                 default:
                     throw new RuntimeException(sprintf('The property %s is not managed. Manage it or verify its spelling is correct.', $property));

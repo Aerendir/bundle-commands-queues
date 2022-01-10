@@ -205,25 +205,31 @@ final class TestRandomJobsCommand extends AbstractQueuesCommand
         switch ($strategy) {
             case 'constant':
                 return new ConstantStrategy($maxAttempts, $incrementBy, $timeUnit);
+
                 break;
             case 'exponential':
                 $exponentialBase = \random_int(2, 5);
 
                 return new ExponentialStrategy($maxAttempts, $incrementBy, $timeUnit, $exponentialBase);
+
                 break;
             case 'linear':
                 return new LinearStrategy($maxAttempts, $incrementBy, $timeUnit);
+
                 break;
             case 'live':
                 return new LiveStrategy($maxAttempts);
+
                 break;
             case 'time_fixed':
                 // Sum $maxAttempts and $incrementBy to be sure the time window is sufficiently large
                 return new TimeFixedStrategy($maxAttempts, $maxAttempts + $incrementBy, $timeUnit);
+
                 break;
             case 'never_retry':
             default:
                 return new NeverRetryStrategy();
+
                 break;
         }
     }

@@ -841,6 +841,7 @@ class Job
                     );
 
                     return false;
+
                     break;
                 case self::STATUS_RETRIED:
                     $this->cannotBeDetachedBecause = sprintf(
@@ -849,6 +850,7 @@ class Job
                     );
 
                     return false;
+
                     break;
 
                 // Working dependencies
@@ -919,6 +921,7 @@ class Job
                     );
 
                     return false;
+
                     break;
                 case self::STATUS_RETRIED:
                     $this->cannotRunBecause = sprintf(
@@ -927,6 +930,7 @@ class Job
                     );
 
                     return false;
+
                     break;
 
                 // Working dependencies
@@ -1117,6 +1121,7 @@ class Job
         switch ($this->getType()) {
             case self::TYPE_CANCELLING:
                 return true;
+
                 break;
 
             case self::TYPE_JOB:

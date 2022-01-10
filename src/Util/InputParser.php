@@ -15,6 +15,7 @@ namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Util;
 
 use InvalidArgumentException;
 use Safe\Exceptions\StringsException;
+use function Safe\ksort;
 use function Safe\sprintf;
 
 /**
@@ -148,11 +149,11 @@ final class InputParser
 
         // Don't reorder the arguments as their order is relevant
         if (\array_key_exists(self::OPTIONS, self::$preparedInput) && null !== self::$preparedInput[self::OPTIONS]) {
-            \Safe\ksort(self::$preparedInput[self::OPTIONS], SORT_NATURAL);
+            ksort(self::$preparedInput[self::OPTIONS], SORT_NATURAL);
         }
 
         if (\array_key_exists(self::SHORTCUTS, self::$preparedInput) && null !== self::$preparedInput[self::SHORTCUTS]) {
-            \Safe\ksort(self::$preparedInput[self::SHORTCUTS], SORT_NATURAL);
+            ksort(self::$preparedInput[self::SHORTCUTS], SORT_NATURAL);
         }
 
         return self::$preparedInput;
