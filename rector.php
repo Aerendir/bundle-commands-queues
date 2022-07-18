@@ -1,9 +1,9 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 /*
- * This file is part of the Serendipity HQ Aws Ses Bundle.
+ * This file is part of the Serendipity HQ Commands Queues Bundle.
  *
  * Copyright (c) Adamo Aerendir Crespi <aerendir@serendipityhq.com>.
  *
@@ -11,19 +11,19 @@ declare(strict_types = 1);
  * file that was distributed with this source code.
  */
 
-use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Rector\Core\Configuration\Option;
 use Rector\Core\ValueObject\PhpVersion;
 use Rector\Set\ValueObject\SetList;
+use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 
-return static function (ContainerConfigurator $containerConfigurator) : void {
+return static function (ContainerConfigurator $containerConfigurator): void {
     $parameters = $containerConfigurator->parameters();
 
     $parameters->set(Option::PHP_VERSION_FEATURES, PhpVersion::PHP_74);
 
     $parameters->set(Option::PATHS, [
         __DIR__ . '/src',
-        __DIR__ . '/tests'
+        __DIR__ . '/tests',
     ]);
 
     $parameters->set(Option::BOOTSTRAP_FILES, [__DIR__ . '/vendor-bin/phpunit/vendor/autoload.php']);
