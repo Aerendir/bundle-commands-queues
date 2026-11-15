@@ -13,15 +13,8 @@ declare(strict_types=1);
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Command;
 
-use Symfony\Component\Console\Attribute\AsCommand;
-use Doctrine\ORM\Exception\ORMException;
-use Doctrine\Persistence\Mapping\MappingException;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\OptimisticLockException;
-use Doctrine\ORM\TransactionRequiredException;
-use Exception;
-use RuntimeException;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Daemon;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Repository\DaemonRepository;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Service\QueuesDaemon;
@@ -30,6 +23,7 @@ use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\Profiler;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\ProgressBarFactory;
 use SerendipityHQ\Bundle\ConsoleStyles\Console\Formatter\SerendipityHQOutputFormatter;
 use SerendipityHQ\Bundle\ConsoleStyles\Console\Style\SerendipityHQStyle;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputDefinition;
@@ -40,35 +34,29 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * Runs the daemon that listens for new Joobs to process.
  */
-#[AsCommand(name: 'queues:run', description: 'Start the daemon to continuously process the queue.')]
+#[AsCommand(name: self::NAME, description: 'Start the daemon to continuously process the queue.')]
 final class RunCommand extends Command
 {
+    /** @var string */
+    public const NAME = 'queues:run';
+
     /** @var EntityManager $entityManager */
     private readonly EntityManagerInterface $entityManager;
 
     private ?SerendipityHQStyle $ioWriter = null;
+    private ?OutputInterface $output      = null;
 
-    private ?OutputInterface $output = null;
-
-    /**
-     * @param QueuesDaemon           $daemon
-     * @param EntityManagerInterface $entityManager
-     * @param JobsMarker             $jobsMarker
-     */
     public function __construct(private readonly QueuesDaemon $daemon, EntityManagerInterface $entityManager, private readonly JobsMarker $jobsMarker)
     {
         // This is to make static analysis pass
         if ( ! $entityManager instanceof EntityManager) {
-            throw new RuntimeException('You need to pass an EntityManager instance.');
+            throw new \RuntimeException('You need to pass an EntityManager instance.');
         }
         $this->entityManager = $entityManager;
 
         parent::__construct();
     }
 
-    /**
-     * {@inheritdoc}
-     */
     protected function configure(): void
     {
         $this
@@ -82,15 +70,6 @@ final class RunCommand extends Command
     }
 
     /**
-     * @param InputInterface  $input
-     * @param OutputInterface $output
-     *
-     * @throws ORMException
-     * @throws OptimisticLockException
-     * @throws MappingException
-     * @throws TransactionRequiredException
-     * @throws Exception
-     *
      * @return int The status code of the command
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -258,10 +237,6 @@ final class RunCommand extends Command
 
     /**
      * Checks that the Damons in the database without a didedOn date are still alive (running).
-     *
-     * @throws OptimisticLockException
-     * @throws ORMException
-     * @throws Exception
      */
     private function checkAliveDaemons(): void
     {
@@ -298,7 +273,7 @@ final class RunCommand extends Command
             $strugglerDaemonDieOn = $strugglerDaemon->getDiedOn();
 
             if (null === $strugglerDaemonDieOn) {
-                throw new RuntimeException(sprintf("The daemon %s is being processed as struggler, but it hasn't a die date.", $strugglerDaemon->getId()));
+                throw new \RuntimeException(sprintf("The daemon %s is being processed as struggler, but it hasn't a die date.", $strugglerDaemon->getId()));
             }
 
             $age     = $strugglerDaemonDieOn->diff($strugglerDaemon->getBornOn());
@@ -323,10 +298,6 @@ final class RunCommand extends Command
 
     /**
      * Checks a Daemon is still running checking its process still exists.
-     *
-     * @param Daemon $daemon
-     *
-     * @return bool
      */
     private function isDaemonStillRunning(Daemon $daemon): bool
     {
@@ -343,13 +314,6 @@ final class RunCommand extends Command
         return false;
     }
 
-    /**
-     * @param string $queueName
-     *
-     * @throws ORMException
-     * @throws OptimisticLockException
-     * @throws TransactionRequiredException
-     */
     private function processRunningJobs(string $queueName): void
     {
         $currentlyRunningProgress = null;

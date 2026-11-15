@@ -13,16 +13,11 @@ declare(strict_types=1);
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Entity;
 
-use SerendipityHQ\Bundle\CommandsQueuesBundle\Repository\JobRepository;
-use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use Exception;
-use InvalidArgumentException;
-use LogicException;
-use RuntimeException;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Command\InternalMarkAsCancelledCommand;
+use SerendipityHQ\Bundle\CommandsQueuesBundle\Repository\JobRepository;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\InputParser;
 use SerendipityHQ\Component\ThenWhen\Strategy\LiveStrategy;
 use SerendipityHQ\Component\ThenWhen\Strategy\NeverRetryStrategy;
@@ -152,50 +147,36 @@ class Job implements \Stringable
     /** @var string */
     private const SHORTCUTS = 'shortcuts';
 
-    /**
-     * @var int The ID of the Job
-     */
+    /** @var int The ID of the Job */
     #[ORM\Column(name: 'id', type: 'integer')]
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'IDENTITY')]
     private $id;
 
-    /**
-     * @var array|null
-     */
+    /** @var array|null */
     #[ORM\Column(name: 'input', type: 'array', nullable: true)]
     private $input;
 
-    /**
-     * @var bool
-     */
+    /** @var bool */
     #[ORM\Column(name: 'self_aware', type: 'boolean')]
     private $awareOfJob = false;
 
-    /**
-     * @var DateTime|null
-     */
+    /** @var \DateTime|null */
     #[ORM\Column(name: 'execute_after_time', type: 'datetime', nullable: true)]
     private $executeAfterTime;
 
     #[ORM\Column(name: 'created_at', type: 'datetime')]
     private \DateTime $createdAt;
 
-    /**
-     * @var \DateTimeInterface|null
-     */
+    /** @var \DateTimeInterface|null */
     #[ORM\Column(name: 'started_at', type: 'datetime', nullable: true)]
     private $startedAt;
 
-    /**
-     * @var \DateTimeInterface|null when the Job is marked as Finished, Failed or Terminated
-     */
+    /** @var \DateTimeInterface|null when the Job is marked as Finished, Failed or Terminated */
     #[ORM\Column(name: 'closed_at', type: 'datetime', nullable: true)]
     private $closedAt;
 
-    /**
-     * @var array|null The error produced by the job (usually an exception)
-     */
+    /** @var array|null The error produced by the job (usually an exception) */
     #[ORM\Column(name: 'debug', type: 'array', nullable: true)]
     private $debug = [];
 
@@ -206,7 +187,9 @@ class Job implements \Stringable
      * @var Daemon the Daemon that processed the Job
      *
      * @ ORM\Column(name="processed_by_damon", type="integer", nullable=true)
+     *
      * @ ORM\ManyToOne(targetEntity="SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Daemon", inversedBy="processedJobs")
+     *
      * @ ORM\JoinColumn(name="id", referencedColumnName="id")
      */
     private $processedBy;
@@ -214,81 +197,57 @@ class Job implements \Stringable
     #[ORM\Column(name: 'status', type: 'string', length: 255)]
     private string $status;
 
-    /**
-     * @var string If the status is self::STATUS_CANCELLED this property tells the why
-     */
+    /** @var string If the status is self::STATUS_CANCELLED this property tells the why */
     #[ORM\Column(name: 'cancellation_reason', type: 'string', length: 255, nullable: true)]
     private $cancellationReason;
 
-    /**
-     * @var Job|null
-     */
+    /** @var Job|null */
     #[ORM\JoinColumn(name: 'cancelled_by')]
     #[ORM\ManyToOne(targetEntity: Job::class, inversedBy: 'cancelledJobs')]
     private $cancelledBy;
 
-    /**
-     * @var Collection
-     */
+    /** @var Collection */
     #[ORM\OneToMany(targetEntity: Job::class, mappedBy: 'cancelledBy')]
     private $cancelledJobs;
 
-    /**
-     * @var string|null The output produced by the job
-     */
+    /** @var string|null The output produced by the job */
     #[ORM\Column(name: 'output', type: 'text', nullable: true)]
     private $output;
 
-    /**
-     * @var int|null The code with which the process exited
-     */
+    /** @var int|null The code with which the process exited */
     #[ORM\Column(name: 'exit_code', type: 'integer', nullable: true)]
     private $exitCode;
 
-    /**
-     * @var Collection
-     */
+    /** @var Collection */
     #[ORM\JoinTable(name: 'queues_jobs_dependencies')]
     #[ORM\JoinColumn(name: 'parent_job', referencedColumnName: 'id')]
     #[ORM\InverseJoinColumn(name: 'child_job', referencedColumnName: 'id')]
     #[ORM\ManyToMany(targetEntity: Job::class, inversedBy: 'parentDependencies')]
     private $childDependencies;
 
-    /**
-     * @var Collection
-     */
+    /** @var Collection */
     #[ORM\ManyToMany(targetEntity: Job::class, mappedBy: 'childDependencies')]
     private $parentDependencies;
 
-    /**
-     * @var StrategyInterface
-     */
+    /** @var StrategyInterface */
     #[ORM\Column(name: 'retry_strategy', type: 'array')]
     private $retryStrategy;
 
-    /**
-     * @var Job|null If this Job is a retry of another job, here there is the Job of which this is the retry
-     */
+    /** @var Job|null If this Job is a retry of another job, here there is the Job of which this is the retry */
     #[ORM\JoinColumn(name: 'retry_of')]
     #[ORM\OneToOne(targetEntity: Job::class, inversedBy: 'retriedBy')]
     private $retryOf;
 
-    /**
-     * @var Job|null
-     */
+    /** @var Job|null */
     #[ORM\OneToOne(targetEntity: Job::class, mappedBy: 'retryOf')]
     private $retriedBy;
 
-    /**
-     * @var Job|null If this Job is a retry of another retried job, here there is the first retried Job
-     */
+    /** @var Job|null If this Job is a retry of another retried job, here there is the first retried Job */
     #[ORM\JoinColumn(name: 'first_retried_job')]
     #[ORM\ManyToOne(targetEntity: Job::class, inversedBy: 'retryingJobs')]
     private $firstRetriedJob;
 
-    /**
-     * @var Collection The Jobs used to retry this one
-     */
+    /** @var Collection The Jobs used to retry this one */
     #[ORM\OneToMany(targetEntity: Job::class, mappedBy: 'firstRetriedJob')]
     private $retryingJobs;
 
@@ -302,20 +261,16 @@ class Job implements \Stringable
     private ?string $cannotRunBecause = null;
 
     /**
-     * @param string       $command
      * @param array|string $input
-     * @param string       $queue
-     *
-     * @throws Exception
      */
     public function __construct(#[ORM\Column(name: 'command', type: 'string', length: 255)]
-    private string $command, $input = [], #[ORM\Column(name: 'queue', type: 'string', length: 255)]
-    private string $queue = Daemon::DEFAULT_QUEUE_NAME)
+        private string $command, $input = [], #[ORM\Column(name: 'queue', type: 'string', length: 255)]
+        private string $queue = Daemon::DEFAULT_QUEUE_NAME)
     {
         $this->input              = InputParser::parseInput($input, false);
         $this->priority           = 1;
         $this->status             = self::STATUS_NEW;
-        $this->createdAt          = new DateTime();
+        $this->createdAt          = new \DateTime();
         $this->cancelledJobs      = new ArrayCollection();
         $this->childDependencies  = new ArrayCollection();
         $this->parentDependencies = new ArrayCollection();
@@ -326,14 +281,20 @@ class Job implements \Stringable
     }
 
     /**
+     * This is useful in case of exceptions thrown during flushing.
+     */
+    public function __toString(): string
+    {
+        return (string) $this->getId();
+    }
+
+    /**
      * This method accepts a string like "argument".
-     *
-     * @param string $value
      */
     public function addArgument(string $value): self
     {
         if (false === InputParser::isArgument($value)) {
-            throw new InvalidArgumentException("Job::addArgument() doesn't accept options nor shortcuts.");
+            throw new \InvalidArgumentException("Job::addArgument() doesn't accept options nor shortcuts.");
         }
 
         $this->input['arguments'][] = $value;
@@ -343,14 +304,11 @@ class Job implements \Stringable
 
     /**
      * This method accepts a string like "--option".
-     *
-     * @param string      $option
-     * @param string|null $value
      */
     public function addOption(string $option, ?string $value = null): self
     {
         if (false === InputParser::isOption($option)) {
-            throw new InvalidArgumentException('Job::addAOption() accepts only strings that start with "--".');
+            throw new \InvalidArgumentException('Job::addAOption() accepts only strings that start with "--".');
         }
 
         if (false === \is_array($this->input[self::OPTIONS])) {
@@ -358,7 +316,7 @@ class Job implements \Stringable
         }
 
         if (\array_key_exists($option, $this->input[self::OPTIONS])) {
-            throw new InvalidArgumentException(sprintf('The option "%s" was already added to the command.', $option));
+            throw new \InvalidArgumentException(sprintf('The option "%s" was already added to the command.', $option));
         }
 
         $this->input[self::OPTIONS][$option] = $value;
@@ -366,14 +324,10 @@ class Job implements \Stringable
         return $this;
     }
 
-    /**
-     * @param string      $option
-     * @param string|null $value
-     */
     public function addShortcut(string $option, ?string $value = null): self
     {
         if (false === InputParser::isShortcut($option)) {
-            throw new InvalidArgumentException('Job::addShortcut() accepts only strings that start with "-".');
+            throw new \InvalidArgumentException('Job::addShortcut() accepts only strings that start with "-".');
         }
 
         if (false === \is_array($this->input[self::SHORTCUTS])) {
@@ -381,7 +335,7 @@ class Job implements \Stringable
         }
 
         if (\array_key_exists($option, $this->input[self::SHORTCUTS])) {
-            throw new InvalidArgumentException(sprintf('The shortcut "%s" was already added to the command.', $option));
+            throw new \InvalidArgumentException(sprintf('The shortcut "%s" was already added to the command.', $option));
         }
 
         $this->input[self::SHORTCUTS][$option] = $value;
@@ -389,17 +343,14 @@ class Job implements \Stringable
         return $this;
     }
 
-    /**
-     * @param Job $job
-     */
     public function addChildDependency(Job $job): self
     {
         if ($this === $job) {
-            throw new LogicException('You cannot add as dependency the object itself.' . ' Check your addParentDependency() and addChildDependency() method.');
+            throw new \LogicException('You cannot add as dependency the object itself. Check your addParentDependency() and addChildDependency() method.');
         }
 
         if ($this->parentDependencies->contains($job)) {
-            throw new LogicException('You cannot add a child dependecy that is already a parent dependency.' . ' This will create an unresolvable circular reference.');
+            throw new \LogicException('You cannot add a child dependecy that is already a parent dependency. This will create an unresolvable circular reference.');
         }
 
         if (false === $this->childDependencies->contains($job)) {
@@ -410,23 +361,20 @@ class Job implements \Stringable
         return $this;
     }
 
-    /**
-     * @param Job $job
-     */
     public function addParentDependency(Job $job): self
     {
         if ($this === $job) {
-            throw new LogicException('You cannot add as dependency the object itself.' . ' Check your addParentDependency() and addChildDependency() method.');
+            throw new \LogicException('You cannot add as dependency the object itself. Check your addParentDependency() and addChildDependency() method.');
         }
 
         // This Job is already started...
         $status = $this->getStatus();
         if (self::STATUS_PENDING === $status || self::STATUS_RUNNING === $status) {
-            throw new LogicException(sprintf('The Job %s has already started. You cannot add the parent dependency %s.', $this->getId(), $job->getId()));
+            throw new \LogicException(sprintf('The Job %s has already started. You cannot add the parent dependency %s.', $this->getId(), $job->getId()));
         }
 
         if (true === $this->childDependencies->contains($job)) {
-            throw new LogicException(sprintf('You cannot add a parent dependecy (%s) that is already a child dependency.' . ' This will create an unresolvable circular reference.', $job->getId()));
+            throw new \LogicException(sprintf('You cannot add a parent dependecy (%s) that is already a child dependency. This will create an unresolvable circular reference.', $job->getId()));
         }
 
         if (false === $this->parentDependencies->contains($job)) {
@@ -437,15 +385,10 @@ class Job implements \Stringable
         return $this;
     }
 
-    /**
-     * @throws Exception
-     *
-     * @return Job
-     */
     public function createCancelChildsJob(): Job
     {
         // If the Job as child Jobs, create a process to mark them as cancelled
-        return (new Job(InternalMarkAsCancelledCommand::$defaultName))
+        return (new Job(InternalMarkAsCancelledCommand::NAME))
             ->addOption('--id', (string) $this->getId())
             ->setQueue($this->getQueue())
             // This Job has to be successful!
@@ -454,17 +397,12 @@ class Job implements \Stringable
             ->setQueue($this->getQueue());
     }
 
-    /**
-     * @throws Exception
-     *
-     * @return Job
-     */
     public function createRetryForFailed(): Job
     {
         $retryOn = $this->getRetryStrategy()->retryOn();
 
         if (false === $retryOn) {
-            throw new LogicException("The set retry strategy doesn't allow for a retry.");
+            throw new \LogicException("The set retry strategy doesn't allow for a retry.");
         }
 
         // Create a new Job that will retry the original one
@@ -480,11 +418,6 @@ class Job implements \Stringable
             ->setFirstRetriedJob($this->getFirstRetriedJob() ?? $this);
     }
 
-    /**
-     * @throws Exception
-     *
-     * @return Job
-     */
     public function createRetryForStale(): Job
     {
         // Create a new Job that will retry the original one
@@ -505,25 +438,16 @@ class Job implements \Stringable
         return $retryJob;
     }
 
-    /**
-     * @return int
-     */
     public function getId(): int
     {
         return $this->id;
     }
 
-    /**
-     * @return string
-     */
     public function getCommand(): string
     {
         return $this->command;
     }
 
-    /**
-     * @return array|null
-     */
     public function getInput(): ?array
     {
         return $this->input;
@@ -569,57 +493,36 @@ class Job implements \Stringable
         return $this->executeAfterTime;
     }
 
-    /**
-     * @return int
-     */
     public function getPriority(): int
     {
         return $this->priority;
     }
 
-    /**
-     * @return Daemon
-     */
     public function getProcessedBy(): Daemon
     {
         return $this->processedBy;
     }
 
-    /**
-     * @return string
-     */
     public function getQueue(): string
     {
         return $this->queue;
     }
 
-    /**
-     * @return string
-     */
     public function getStatus(): string
     {
         return $this->status;
     }
 
-    /**
-     * @return string
-     */
     public function getCancellationReason(): string
     {
         return $this->cancellationReason;
     }
 
-    /**
-     * @return Job|null
-     */
     public function getCancelledBy(): ?Job
     {
         return $this->cancelledBy;
     }
 
-    /**
-     * @return Collection
-     */
     public function getCancelledJobs(): Collection
     {
         return $this->cancelledJobs;
@@ -641,57 +544,36 @@ class Job implements \Stringable
         return $this->exitCode;
     }
 
-    /**
-     * @return Collection
-     */
     public function getChildDependencies(): Collection
     {
         return $this->childDependencies;
     }
 
-    /**
-     * @return Collection
-     */
     public function getParentDependencies(): Collection
     {
         return $this->parentDependencies;
     }
 
-    /**
-     * @return Collection
-     */
     public function getRetryingJobs(): Collection
     {
         return $this->retryingJobs;
     }
 
-    /**
-     * @return StrategyInterface
-     */
     public function getRetryStrategy(): StrategyInterface
     {
         return $this->retryStrategy;
     }
 
-    /**
-     * @return Job|null
-     */
     public function getRetryOf(): ?Job
     {
         return $this->retryOf;
     }
 
-    /**
-     * @return Job|null
-     */
     public function getRetriedBy(): ?Job
     {
         return $this->retriedBy;
     }
 
-    /**
-     * @return Job|null
-     */
     public function getFirstRetriedJob(): ?Job
     {
         return $this->firstRetriedJob;
@@ -699,8 +581,6 @@ class Job implements \Stringable
 
     /**
      * Returns the type of Job.
-     *
-     * @return string
      */
     public function getType(): string
     {
@@ -715,25 +595,16 @@ class Job implements \Stringable
         return self::TYPE_JOB;
     }
 
-    /**
-     * @return string
-     */
     public function getCannotBeDetachedBecause(): string
     {
         return $this->cannotBeDetachedBecause;
     }
 
-    /**
-     * @return string
-     */
     public function getCannotBeRemovedBecause(): string
     {
         return $this->cannotBeRemovedBecause;
     }
 
-    /**
-     * @return string
-     */
     public function getCannotRunBecause(): string
     {
         return $this->cannotRunBecause;
@@ -741,8 +612,6 @@ class Job implements \Stringable
 
     /**
      * Checks if a Job can or cannot be detached.
-     *
-     * @return bool
      */
     public function canBeDetached(): bool
     {
@@ -757,8 +626,8 @@ class Job implements \Stringable
         // Is being retried.
         $retriedBy = $this->getRetriedBy();
         if ($this->isStatusRetried()) {
-            if (!$retriedBy instanceof \SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job) {
-                throw new RuntimeException('This is a retried Job but the retrying Job is not set and this is not possible.');
+            if ( ! $retriedBy instanceof Job) {
+                throw new \RuntimeException('This is a retried Job but the retrying Job is not set and this is not possible.');
             }
 
             // It has to be flushed at the end
@@ -790,7 +659,7 @@ class Job implements \Stringable
 
                     break;
 
-                // Working dependencies
+                    // Working dependencies
                 case self::STATUS_PENDING:
                     $this->cannotBeDetachedBecause = sprintf(
                         'has parent Job #%s@%s that is being processed (%s)',
@@ -812,9 +681,6 @@ class Job implements \Stringable
         return true;
     }
 
-    /**
-     * @return bool
-     */
     public function canBeRemoved(): bool
     {
         // Until this Job has retrying Jobs not still removed, it cannot be remvoed, too
@@ -834,9 +700,6 @@ class Job implements \Stringable
         return true;
     }
 
-    /**
-     * @return bool
-     */
     public function canRun(): bool
     {
         if ($this->isStatusFinished()) {
@@ -868,7 +731,7 @@ class Job implements \Stringable
 
                     break;
 
-                // Working dependencies
+                    // Working dependencies
                 case self::STATUS_PENDING:
                     $this->cannotRunBecause = sprintf(
                         'has parent Job #%s@%s that is being processed (%s)',
@@ -889,136 +752,91 @@ class Job implements \Stringable
         return true;
     }
 
-    /**
-     * @return bool
-     */
     public function hasChildDependencies(): bool
     {
         return $this->getChildDependencies()->count() > 0;
     }
 
-    /**
-     * @return bool
-     */
     public function hasParentDependencies(): bool
     {
         return $this->getParentDependencies()->count() > 0;
     }
 
-    /**
-     * @return bool
-     */
     public function isAwareOfJob(): bool
     {
         return $this->awareOfJob;
     }
 
-    /**
-     * @return bool
-     */
     public function isStatusAborted(): bool
     {
         return self::STATUS_ABORTED === $this->getStatus();
     }
 
-    /**
-     * @return bool
-     */
     public function isStatusCancelled(): bool
     {
         return self::STATUS_CANCELLED === $this->getStatus();
     }
 
-    /**
-     * @return bool
-     */
     public function isStatusNew(): bool
     {
         return self::STATUS_NEW === $this->getStatus();
     }
 
-    /**
-     * @return bool
-     */
     public function isStatusPending(): bool
     {
         return self::STATUS_PENDING === $this->getStatus();
     }
 
-    /**
-     * @return bool
-     */
     public function isStatusRetried(): bool
     {
         return self::STATUS_RETRIED === $this->getStatus();
     }
 
-    /**
-     * @return bool
-     */
     public function isStatusRunning(): bool
     {
         return self::STATUS_RUNNING === $this->getStatus();
     }
 
-    /**
-     * @return bool
-     */
     public function isStatusFailed(): bool
     {
         return match ($this->getStatus()) {
             self::STATUS_CANCELLED, self::STATUS_FAILED, self::STATUS_RETRY_FAILED, self::STATUS_ABORTED => true,
-            default => false,
+            default                                                                                      => false,
         };
     }
 
-    /**
-     * @return bool
-     */
     public function isStatusFinished(): bool
     {
         return match ($this->getStatus()) {
             self::STATUS_ABORTED, self::STATUS_CANCELLED, self::STATUS_FAILED, self::STATUS_RETRIED, self::STATUS_RETRY_FAILED, self::STATUS_RETRY_SUCCEEDED, self::STATUS_SUCCEEDED => true,
-            default => false,
+            default                                                                                                                                                                  => false,
         };
     }
 
-    /**
-     * @return bool
-     */
     public function isStatusSuccessful(): bool
     {
         return match ($this->getStatus()) {
             self::STATUS_SUCCEEDED, self::STATUS_RETRY_SUCCEEDED => true,
-            default => false,
+            default                                              => false,
         };
     }
 
-    /**
-     * @return bool
-     */
     public function isStatusWaiting(): bool
     {
         return match ($this->getStatus()) {
             self::STATUS_NEW, self::STATUS_RETRIED => true,
-            default => false,
+            default                                => false,
         };
     }
 
-    /**
-     * @return bool
-     */
     public function isStatusWorking(): bool
     {
         return match ($this->getStatus()) {
             self::STATUS_PENDING, self::STATUS_RUNNING => true,
-            default => false,
+            default                                    => false,
         };
     }
 
-    /**
-     * @return bool
-     */
     public function isTypeCancelling(): bool
     {
         return str_contains($this->getCommand(), 'mark-as-cancelled');
@@ -1026,40 +844,31 @@ class Job implements \Stringable
 
     /**
      * Is internal a Job used to manage internal tasks as cancelling childs of failed Jobs.
-     *
-     * @return bool
      */
     public function isTypeInternal(): bool
     {
         return match ($this->getType()) {
             self::TYPE_CANCELLING => true,
-            default => false,
+            default               => false,
         };
     }
 
     /**
      * If this Job is a retry of another job this will return true.
-     *
-     * @return bool
      */
     public function isTypeRetrying(): bool
     {
-        return $this->getRetryOf() instanceof \SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
+        return $this->getRetryOf() instanceof Job;
     }
 
     /**
      * If this Job has a retried job.
-     *
-     * @return bool
      */
     public function isTypeRetried(): bool
     {
-        return $this->getRetriedBy() instanceof \SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
+        return $this->getRetriedBy() instanceof Job;
     }
 
-    /**
-     * @param bool $awareOfJobId
-     */
     public function makeAwareOfJob(bool $awareOfJobId = true): self
     {
         $this->awareOfJob = $awareOfJobId;
@@ -1067,9 +876,6 @@ class Job implements \Stringable
         return $this;
     }
 
-    /**
-     * @param Job $job
-     */
     public function removeChildDependency(Job $job): self
     {
         if ($this->childDependencies->contains($job)) {
@@ -1080,9 +886,6 @@ class Job implements \Stringable
         return $this;
     }
 
-    /**
-     * @param Job $job
-     */
     public function removeParentDependency(Job $job): self
     {
         if ($this->parentDependencies->contains($job)) {
@@ -1105,9 +908,6 @@ class Job implements \Stringable
         return $this;
     }
 
-    /**
-     * @param Job $job
-     */
     public function removeCancelledJob(Job $job): self
     {
         if ($this->cancelledJobs->contains($job)) {
@@ -1159,9 +959,6 @@ class Job implements \Stringable
         return $this;
     }
 
-    /**
-     * @param int $priority
-     */
     public function setPriority(int $priority): self
     {
         $this->priority = $priority;
@@ -1169,9 +966,6 @@ class Job implements \Stringable
         return $this;
     }
 
-    /**
-     * @param string $queue
-     */
     public function setQueue(string $queue): self
     {
         $this->queue = $queue;
@@ -1179,9 +973,6 @@ class Job implements \Stringable
         return $this;
     }
 
-    /**
-     * @param StrategyInterface $retryStrategy
-     */
     public function setRetryStrategy(StrategyInterface $retryStrategy): self
     {
         $this->retryStrategy = $retryStrategy;
@@ -1193,8 +984,6 @@ class Job implements \Stringable
      * Sets this Job as a retry of another Job.
      *
      * Maintain this method private! It is used through reflection by Job#createRetryJob().
-     *
-     * @param Job $retriedJob
      */
     public function setRetryOf(Job $retriedJob): self
     {
@@ -1218,9 +1007,6 @@ class Job implements \Stringable
         }
     }
 
-    /**
-     * @param Job $retryingJob
-     */
     protected function setRetriedBy(Job $retryingJob): self
     {
         $this->retriedBy = $retryingJob;
@@ -1228,23 +1014,10 @@ class Job implements \Stringable
         return $this;
     }
 
-    /**
-     * @param Job $firstRetriedJob
-     */
     protected function setFirstRetriedJob(Job $firstRetriedJob): self
     {
         $this->firstRetriedJob = $firstRetriedJob;
 
         return $this;
-    }
-
-    /**
-     * This is useful in case of exceptions thrown during flushing.
-     *
-     * @return string
-     */
-    public function __toString(): string
-    {
-        return (string) $this->getId();
     }
 }

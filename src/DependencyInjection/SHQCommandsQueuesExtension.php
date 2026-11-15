@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\DependencyInjection;
 
-use Exception;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Command\InternalMarkAsCancelledCommand;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Command\RunCommand;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Command\TestFailingJobsCommand;
@@ -29,13 +28,10 @@ use Sonata\AdminBundle\SonataAdminBundle;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
+use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
-use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 
-/**
- * {@inheritdoc}
- */
 final class SHQCommandsQueuesExtension extends Extension implements PrependExtensionInterface
 {
     /**
@@ -50,11 +46,6 @@ final class SHQCommandsQueuesExtension extends Extension implements PrependExten
         $container->prependExtensionConfig('doctrine', ['dbal' => ['types' => [ArrayType::NAME => ArrayType::class]]]);
     }
 
-    /**
-     * {@inheritdoc}
-     *
-     * @throws Exception
-     */
     public function load(array $configs, ContainerBuilder $container): void
     {
         $configuration = new Configuration();

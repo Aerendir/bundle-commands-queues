@@ -58,7 +58,15 @@ final class ArrayType extends Type
             throw new ConversionException(\sprintf('Could not convert database value of type "%s" to Doctrine Type "%s".', get_debug_type($value), self::NAME));
         }
 
-        $converted = @unserialize($value);
+        // A malformed value raises a notice or a warning: the ConversionException below reports it instead
+        set_error_handler(static fn (): bool => true);
+
+        try {
+            $converted = unserialize($value);
+        } finally {
+            restore_error_handler();
+        }
+
         if (false === $converted && 'b:0;' !== $value) {
             throw new ConversionException(\sprintf('Could not convert database value "%s" to Doctrine Type "%s".', substr($value, 0, 32), self::NAME));
         }

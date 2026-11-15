@@ -13,14 +13,13 @@ declare(strict_types=1);
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Command;
 
-use Symfony\Component\Console\Attribute\AsCommand;
-use Symfony\Component\Console\Command\Command;
 use Doctrine\ORM\EntityManagerInterface;
-use Exception;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Repository\JobRepository;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\JobsMarker;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\JobsUtil;
+use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -32,9 +31,12 @@ use Symfony\Component\Console\Output\OutputInterface;
  * On very deep trees of Jobs the marking may require a lot of time. Using a dedicated command allows the Daemon to
  * continue running while this command, in the background, marks the Jobs and its childs as cancelled.
  */
-#[AsCommand(name: 'queues:internal:mark-as-cancelled', description: '[INTERNAL] Marks the given Job and its childs as CANCELLED.', hidden: true)]
+#[AsCommand(name: self::NAME, description: '[INTERNAL] Marks the given Job and its childs as CANCELLED.', hidden: true)]
 final class InternalMarkAsCancelledCommand extends AbstractQueuesCommand
 {
+    /** @var string */
+    public const NAME = 'queues:internal:mark-as-cancelled';
+
     /** @var string */
     private const ID = 'id';
 
@@ -44,10 +46,6 @@ final class InternalMarkAsCancelledCommand extends AbstractQueuesCommand
     /** @var JobRepository $jobsRepo */
     private $jobsRepo;
 
-    /**
-     * @param EntityManagerInterface $entityManager
-     * @param JobsMarker             $doNotUseJobsMarker
-     */
     public function __construct(EntityManagerInterface $entityManager, JobsMarker $doNotUseJobsMarker)
     {
         parent::__construct($entityManager, $doNotUseJobsMarker);
@@ -57,9 +55,6 @@ final class InternalMarkAsCancelledCommand extends AbstractQueuesCommand
         $this->jobsRepo = $jobsRepo;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     protected function configure(): void
     {
         $this
@@ -67,12 +62,6 @@ final class InternalMarkAsCancelledCommand extends AbstractQueuesCommand
             ->addOption(self::CANCELLING_JOB_ID, self::CANCELLING_JOB_ID, InputOption::VALUE_REQUIRED);
     }
 
-    /**
-     * @param InputInterface  $input
-     * @param OutputInterface $output
-     *
-     * @return int
-     */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         parent::execute($input, $output);
@@ -115,16 +104,6 @@ final class InternalMarkAsCancelledCommand extends AbstractQueuesCommand
         return Command::SUCCESS;
     }
 
-    /**
-     * @param Job    $markedJob
-     * @param Job    $cancellingJob
-     * @param string $cancellationReason
-     * @param array  $alreadyCancelledJobs
-     *
-     * @throws Exception
-     *
-     * @return int
-     */
     private function cancelChildJobs(Job $markedJob, Job $cancellingJob, string $cancellationReason, array $alreadyCancelledJobs = []): int
     {
         $this->getIoWriter()->infoLineNoBg(sprintf('Start cancelling child Jobs of Job #%s@%s.', $markedJob->getId(), $markedJob->getQueue()));
@@ -144,8 +123,8 @@ final class InternalMarkAsCancelledCommand extends AbstractQueuesCommand
         ];
 
         $this->getIoWriter()->noteLineNoBg(sprintf(
-                '[%s] Job #%s@%s: Found %s child dependencies. Start marking them.',
-                JobsUtil::getFormattedTime($markedJob, 'getClosedAt'), $markedJob->getId(), $markedJob->getQueue(), $markedJob->getChildDependencies()->count())
+            '[%s] Job #%s@%s: Found %s child dependencies. Start marking them.',
+            JobsUtil::getFormattedTime($markedJob, 'getClosedAt'), $markedJob->getId(), $markedJob->getQueue(), $markedJob->getChildDependencies()->count())
         );
 
         $cancelledChilds = [];

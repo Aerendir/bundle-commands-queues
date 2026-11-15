@@ -13,11 +13,7 @@ declare(strict_types=1);
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Command;
 
-use Symfony\Component\Console\Attribute\AsCommand;
-use Symfony\Component\Console\Command\Command;
-use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
-use Exception;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\JobsMarker;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\ProgressBarFactory;
@@ -28,6 +24,8 @@ use SerendipityHQ\Component\ThenWhen\Strategy\LiveStrategy;
 use SerendipityHQ\Component\ThenWhen\Strategy\NeverRetryStrategy;
 use SerendipityHQ\Component\ThenWhen\Strategy\StrategyInterface;
 use SerendipityHQ\Component\ThenWhen\Strategy\TimeFixedStrategy;
+use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -36,25 +34,21 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * Creates random Jobs.
  */
-#[AsCommand(name: 'queues:test:random-jobs', description: '[INTERNAL] Generates random Jobs to test SHQCommandsQueuesBundle.')]
+#[AsCommand(name: self::NAME, description: '[INTERNAL] Generates random Jobs to test SHQCommandsQueuesBundle.')]
 final class TestRandomJobsCommand extends AbstractQueuesCommand
 {
+    /** @var string */
+    public const NAME = 'queues:test:random-jobs';
+
     private array $queues = [
         'queue_1', 'queue_2', 'queue_3', 'queue_4', 'queue_5',
     ];
 
-    /**
-     * @param EntityManagerInterface $entityManager
-     * @param JobsMarker             $doNotUseJobsMarker
-     */
     public function __construct(EntityManagerInterface $entityManager, JobsMarker $doNotUseJobsMarker)
     {
         parent::__construct($entityManager, $doNotUseJobsMarker);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     protected function configure(): void
     {
         $this
@@ -65,14 +59,6 @@ final class TestRandomJobsCommand extends AbstractQueuesCommand
             ->addOption('time-units', null, InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, 'The allowed time units.', StrategyInterface::TIME_UNITS);
     }
 
-    /**
-     * @param InputInterface  $input
-     * @param OutputInterface $output
-     *
-     * @throws Exception
-     *
-     * @return int
-     */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         parent::execute($input, $output);
@@ -122,7 +108,7 @@ final class TestRandomJobsCommand extends AbstractQueuesCommand
         for ($i = 0; $i < $howManyJobs; ++$i) {
             // First: we create a Job to push to the queue
             $arguments    = '--id=' . ($i + 1);
-            $scheduledJob = new Job(TestFakeCommand::$defaultName, $arguments);
+            $scheduledJob = new Job(TestFakeCommand::NAME, $arguments);
 
             // Set a random queue
             $queue = \random_int(0, (is_countable($this->queues) ? \count($this->queues) : 0) - 1);
@@ -138,7 +124,7 @@ final class TestRandomJobsCommand extends AbstractQueuesCommand
                 $condition = \random_int(0, 10);
                 if (7 <= $condition) {
                     $days   = \random_int(1, 10);
-                    $future = new DateTime();
+                    $future = new \DateTime();
                     $future->modify('+' . $days . ' day');
                     $scheduledJob->setExecuteAfterTime($future);
                 }
@@ -178,14 +164,6 @@ final class TestRandomJobsCommand extends AbstractQueuesCommand
         return Command::SUCCESS;
     }
 
-    /**
-     * @param array $strategies
-     * @param array $timeUnits
-     *
-     * @throws Exception
-     *
-     * @return StrategyInterface
-     */
     private function getRandomRetryStrategy(array $strategies, array $timeUnits): StrategyInterface
     {
         // Pick a random strategy
@@ -226,13 +204,6 @@ final class TestRandomJobsCommand extends AbstractQueuesCommand
         }
     }
 
-    /**
-     * @param array $timeUnits
-     *
-     * @throws Exception
-     *
-     * @return string
-     */
     private function getRandomTimeUnit(array $timeUnits): string
     {
         return $timeUnits[\random_int(0, \count($timeUnits) - 1)];

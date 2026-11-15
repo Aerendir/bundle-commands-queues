@@ -13,22 +13,15 @@ declare(strict_types=1);
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Repository;
 
-use Doctrine\ORM\Exception\ORMException;
-use BadMethodCallException;
-use DateTime;
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\EntityRepository;
-use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\QueryBuilder;
-use RuntimeException;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Service\JobsManager;
 use SerendipityHQ\Bundle\ConsoleStyles\Console\Style\SerendipityHQStyle;
 use Symfony\Component\Console\Output\OutputInterface;
 
-/**
- * {@inheritdoc}
- */
 final class JobRepository extends EntityRepository
 {
     /** @var string */
@@ -43,30 +36,20 @@ final class JobRepository extends EntityRepository
     /** @var string */
     private const ASC = 'ASC';
 
-    private ?array $config = null;
-
+    private ?array $config                = null;
     private ?SerendipityHQStyle $ioWriter = null;
 
-    /**
-     * @param array              $config
-     * @param SerendipityHQStyle $ioWriter
-     */
     public function configure(array $config, SerendipityHQStyle $ioWriter): void
     {
         $this->config   = $config;
         $this->ioWriter = $ioWriter;
     }
 
-    /**
-     * @param int $id
-     *
-     * @return Job|null
-     */
     public function findOneById(int $id): ?Job
     {
         $job = $this->findOneBy(['id' => $id]);
         if (null !== $job && ! $job instanceof Job) {
-            throw new RuntimeException('The returned result is not null and is not a Job: this is not possible, investigate further.');
+            throw new \RuntimeException('The returned result is not null and is not a Job: this is not possible, investigate further.');
         }
 
         return $job;
@@ -77,12 +60,6 @@ final class JobRepository extends EntityRepository
      *
      * A Job can be run if it hasn't a startDate in the future and if its parent Jobs are already terminated with
      * success.
-     *
-     * @param string $queueName
-     *
-     * @throws ORMException
-     *
-     * @return Job|null
      */
     public function findNextRunnableJob(string $queueName): ?Job
     {
@@ -117,11 +94,6 @@ final class JobRepository extends EntityRepository
         return null;
     }
 
-    /**
-     * @throws NonUniqueResultException
-     *
-     * @return int
-     */
     public function countStaleJobs(): int
     {
         $queryBuilder = $this->getEntityManager()->createQueryBuilder();
@@ -143,10 +115,7 @@ final class JobRepository extends EntityRepository
     }
 
     /**
-     * @param string                       $queueName
      * @param \DateTime|\DateTimeImmutable $maxRetentionDate
-     *
-     * @return array
      */
     public function findExpiredJobs(string $queueName, \DateTimeInterface $maxRetentionDate): array
     {
@@ -181,7 +150,7 @@ final class JobRepository extends EntityRepository
                              $queryBuilder->expr()->eq('j.status', ':cancelled')
                          )
                      ))
-                     ->setParameter('max_date', $maxRetentionDate, Type::DATETIME)
+                     ->setParameter('max_date', $maxRetentionDate, Types::DATETIME_MUTABLE)
                      ->orderBy('j.closedAt', 'DESC');
 
         return $queryBuilder->getQuery()->getResult();
@@ -190,17 +159,12 @@ final class JobRepository extends EntityRepository
     /**
      * Checks if the given Job exists or not.
      *
-     * @param string|null $command
-     * @param array|null  $input
-     * @param string|null $queue
-     * @param bool        $fullSearch If false, will search only in the not already started jobs
-     *
-     * @return array|null
+     * @param bool $fullSearch If false, will search only in the not already started jobs
      */
     public function findBySearch(?string $command = null, ?array $input = null, ?string $queue = 'default', bool $fullSearch = false): ?array
     {
-        if (null === $command && (null === $input || $input === []) && null === $queue) {
-            throw new BadMethodCallException('You should pass at least one between "command", "input" and "queue".');
+        if (null === $command && (null === $input || [] === $input) && null === $queue) {
+            throw new \BadMethodCallException('You should pass at least one between "command", "input" and "queue".');
         }
 
         $queryBuilder = $this->getEntityManager()->createQueryBuilder();
@@ -244,28 +208,21 @@ final class JobRepository extends EntityRepository
         return $queryBuilder->getQuery()->execute();
     }
 
-    /**
-     * @param array $knownAsStale
-     *
-     * @throws NonUniqueResultException
-     *
-     * @return Job|null
-     */
     public function findNextStaleJob(array $knownAsStale): ?Job
     {
         $queryBuilder = $this->getEntityManager()->createQueryBuilder();
         $queryBuilder->select('j')->from(Job::class, 'j')
             // The status MUST be NEW (just inserted) or PENDING (waiting for the process to start)
                      ->where(
-                $queryBuilder->expr()->orX(
-                    $queryBuilder->expr()->eq('j.status', ':running'),
-                    $queryBuilder->expr()->eq('j.status', ':pending')
-                )
-            )
+                         $queryBuilder->expr()->orX(
+                             $queryBuilder->expr()->eq('j.status', ':running'),
+                             $queryBuilder->expr()->eq('j.status', ':pending')
+                         )
+                     )
                      ->setParameter('running', Job::STATUS_PENDING)->setParameter('pending', Job::STATUS_RUNNING);
 
         // If there are already known stale Jobs...
-        if ($knownAsStale !== []) {
+        if ([] !== $knownAsStale) {
             // The ID hasn't to be one of them
             $queryBuilder->andWhere(
                 $queryBuilder->expr()->notIn('j.id', ':knownAsStale')
@@ -280,12 +237,7 @@ final class JobRepository extends EntityRepository
     /**
      * Finds the next Job to process.
      *
-     * @param string $queueName
-     * @param array  $excludedJobs The Jobs that have to be excluded from the SELECT
-     *
-     * @throws NonUniqueResultException
-     *
-     * @return Job|null
+     * @param array $excludedJobs The Jobs that have to be excluded from the SELECT
      */
     private function findNextJob(string $queueName, array $excludedJobs = []): ?Job
     {
@@ -298,15 +250,15 @@ final class JobRepository extends EntityRepository
                      ->where($queryBuilder->expr()->eq('j.status', ':status'))->setParameter('status', Job::STATUS_NEW)
             // It hasn't an executeAfterTime set or the set time is in the past
                      ->andWhere(
-                $queryBuilder->expr()->orX(
-                    $queryBuilder->expr()->isNull('j.executeAfterTime'),
-                    $queryBuilder->expr()->lt('j.executeAfterTime', ':now')
-                )
-            )->setParameter('now', new DateTime(), 'datetime')
+                         $queryBuilder->expr()->orX(
+                             $queryBuilder->expr()->isNull('j.executeAfterTime'),
+                             $queryBuilder->expr()->lt('j.executeAfterTime', ':now')
+                         )
+                     )->setParameter('now', new \DateTime(), 'datetime')
                      ->andWhere($queryBuilder->expr()->eq('j.queue', ':queue'))->setParameter('queue', $queueName);
 
         // If there are excluded Jobs...
-        if ($excludedJobs !== []) {
+        if ([] !== $excludedJobs) {
             // The ID hasn't to be one of them
             $queryBuilder->andWhere(
                 $queryBuilder->expr()->notIn('j.id', ':excludedJobs')
@@ -320,8 +272,6 @@ final class JobRepository extends EntityRepository
 
     /**
      * Configures in the query the queues to include.
-     *
-     * @param QueryBuilder $queryBuilder
      */
     private function configureQueues(QueryBuilder $queryBuilder): void
     {

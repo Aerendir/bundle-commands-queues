@@ -29,21 +29,11 @@ abstract class AbstractQueuesCommand extends Command
 {
     private ?SerendipityHQStyle $ioWriter = null;
 
-    /**
-     * @param EntityManagerInterface $entityManager
-     * @param JobsMarker $jobsMarker
-     */
     public function __construct(private readonly EntityManagerInterface $entityManager, private readonly JobsMarker $jobsMarker)
     {
         parent::__construct();
     }
 
-    /**
-     * @param InputInterface  $input
-     * @param OutputInterface $output
-     *
-     * @return int
-     */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         // Create the Input/Output writer
@@ -55,25 +45,16 @@ abstract class AbstractQueuesCommand extends Command
         return Command::SUCCESS;
     }
 
-    /**
-     * @return EntityManagerInterface
-     */
     final protected function getEntityManager(): EntityManagerInterface
     {
         return $this->entityManager;
     }
 
-    /**
-     * @return JobsMarker
-     */
     final protected function getJobsMarker(): JobsMarker
     {
         return $this->jobsMarker;
     }
 
-    /**
-     * @return SerendipityHQStyle
-     */
     final protected function getIoWriter(): SerendipityHQStyle
     {
         return $this->ioWriter;
