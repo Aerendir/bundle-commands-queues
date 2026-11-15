@@ -54,6 +54,11 @@ jobs:
                 with:
                     working-directory: './vendor-bin/phpunit'
 
+            -   name: Remove the Flex-generated Kernel
+                # The framework-bundle recipe Flex applies creates src/Kernel.php, which is not part of the bundle
+                run: |
+                    rm -f ./src/Kernel.php
+
             -   name: Run PHPStan
                 run: |
                     ./vendor/bin/phpstan analyse --no-progress
