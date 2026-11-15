@@ -21,8 +21,6 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 /**
  * @author Audrius Karabanovas <audrius@karabanovas.net>
  * @author Adamo Aerendir Crespi <hello@aerendir.me>
- *
- * {@inheritdoc}
  */
 final class Configuration implements ConfigurationInterface
 {
@@ -97,17 +95,12 @@ final class Configuration implements ConfigurationInterface
 
     /**
      * The list of supported ORM drivers.
-     *
-     * @return array
      */
     public static function getSupportedDrivers(): array
     {
         return ['orm'];
     }
 
-    /**
-     * @return TreeBuilder
-     */
     public function getConfigTreeBuilder(): TreeBuilder
     {
         $treeBuilder = new TreeBuilder('shq_commands_queues');
@@ -252,19 +245,14 @@ final class Configuration implements ConfigurationInterface
         ->end()
             ->validate()
             // Deeply validate the full config tree
-            ->ifTrue(fn($tree): bool => $this->validateConfiguration($tree))
+            ->ifTrue(fn ($tree): bool => $this->validateConfiguration($tree))
             // Re-elaborate the tree removing unuseful values and preparing useful ones
-            ->then(fn($tree): array => $this->prepareConfiguration($tree))
+            ->then(fn ($tree): array => $this->prepareConfiguration($tree))
             ->end();
 
         return $treeBuilder;
     }
 
-    /**
-     * @param array $tree
-     *
-     * @return bool
-     */
     private function validateConfiguration(array $tree): bool
     {
         if (1 > $tree[self::DAEMON_ALIVE_DAEMONS_CHECK_INTERVAL_KEY]) {
@@ -293,10 +281,6 @@ final class Configuration implements ConfigurationInterface
 
     /**
      * Prepares the definitive configuration.
-     *
-     * @param array $tree
-     *
-     * @return array
      */
     private function prepareConfiguration(array $tree): array
     {
@@ -334,12 +318,6 @@ final class Configuration implements ConfigurationInterface
         return $returnConfig;
     }
 
-    /**
-     * @param array $config
-     * @param array $tree
-     *
-     * @return array
-     */
     private function configureDaemon(array $config, array $tree): array
     {
         if (false === isset($config[self::QUEUES])) {
@@ -350,28 +328,21 @@ final class Configuration implements ConfigurationInterface
         return [
             // Daemon specific configurations
             self::DAEMON_ALIVE_DAEMONS_CHECK_INTERVAL_KEY     => $config[self::DAEMON_ALIVE_DAEMONS_CHECK_INTERVAL_KEY] ?? $tree[self::DAEMON_ALIVE_DAEMONS_CHECK_INTERVAL_KEY],
-            self::DAEMON_MANAGED_ENTITIES_TRESHOLD_KEY        => $config[self::DAEMON_MANAGED_ENTITIES_TRESHOLD_KEY] ?? $tree[self::DAEMON_MANAGED_ENTITIES_TRESHOLD_KEY],
-            self::DAEMON_MAX_RUNTIME_KEY                      => $config[self::DAEMON_MAX_RUNTIME_KEY] ?? $tree[self::DAEMON_MAX_RUNTIME_KEY],
-            self::DAEMON_PROFILING_INFO_INTERVAL_KEY          => $config[self::DAEMON_PROFILING_INFO_INTERVAL_KEY] ?? $tree[self::DAEMON_PROFILING_INFO_INTERVAL_KEY],
-            self::DAEMON_PRINT_PROFILING_INFO_KEY             => $config[self::DAEMON_PRINT_PROFILING_INFO_KEY] ?? $tree[self::DAEMON_PRINT_PROFILING_INFO_KEY],
-            self::DAEMON_SLEEP_FOR_KEY                        => $config[self::DAEMON_SLEEP_FOR_KEY] ?? $tree[self::DAEMON_SLEEP_FOR_KEY],
+            self::DAEMON_MANAGED_ENTITIES_TRESHOLD_KEY        => $config[self::DAEMON_MANAGED_ENTITIES_TRESHOLD_KEY]    ?? $tree[self::DAEMON_MANAGED_ENTITIES_TRESHOLD_KEY],
+            self::DAEMON_MAX_RUNTIME_KEY                      => $config[self::DAEMON_MAX_RUNTIME_KEY]                  ?? $tree[self::DAEMON_MAX_RUNTIME_KEY],
+            self::DAEMON_PROFILING_INFO_INTERVAL_KEY          => $config[self::DAEMON_PROFILING_INFO_INTERVAL_KEY]      ?? $tree[self::DAEMON_PROFILING_INFO_INTERVAL_KEY],
+            self::DAEMON_PRINT_PROFILING_INFO_KEY             => $config[self::DAEMON_PRINT_PROFILING_INFO_KEY]         ?? $tree[self::DAEMON_PRINT_PROFILING_INFO_KEY],
+            self::DAEMON_SLEEP_FOR_KEY                        => $config[self::DAEMON_SLEEP_FOR_KEY]                    ?? $tree[self::DAEMON_SLEEP_FOR_KEY],
             self::QUEUES                                      => $config[self::QUEUES],
         ];
     }
 
-    /**
-     * @param string $daemon
-     * @param array  $config
-     * @param array  $tree
-     *
-     * @return array
-     */
     private function configureQueue(string $daemon, array $config, array $tree): array
     {
         return [
-            self::QUEUE_MAX_CONCURRENT_JOBS_KEY         => $config[self::QUEUE_MAX_CONCURRENT_JOBS_KEY] ?? $tree[self::DAEMONS][$daemon][self::QUEUE_MAX_CONCURRENT_JOBS_KEY] ?? $tree[self::QUEUE_MAX_CONCURRENT_JOBS_KEY],
-            self::QUEUE_MAX_RETENTION_DAYS_KEY          => $config[self::QUEUE_MAX_RETENTION_DAYS_KEY] ?? $tree[self::DAEMONS][$daemon][self::QUEUE_MAX_RETENTION_DAYS_KEY] ?? $tree[self::QUEUE_MAX_RETENTION_DAYS_KEY],
-            self::QUEUE_RETRY_STALE_JOBS_KEY            => $config[self::QUEUE_RETRY_STALE_JOBS_KEY] ?? $tree[self::DAEMONS][$daemon][self::QUEUE_RETRY_STALE_JOBS_KEY] ?? $tree[self::QUEUE_RETRY_STALE_JOBS_KEY],
+            self::QUEUE_MAX_CONCURRENT_JOBS_KEY         => $config[self::QUEUE_MAX_CONCURRENT_JOBS_KEY]         ?? $tree[self::DAEMONS][$daemon][self::QUEUE_MAX_CONCURRENT_JOBS_KEY] ?? $tree[self::QUEUE_MAX_CONCURRENT_JOBS_KEY],
+            self::QUEUE_MAX_RETENTION_DAYS_KEY          => $config[self::QUEUE_MAX_RETENTION_DAYS_KEY]          ?? $tree[self::DAEMONS][$daemon][self::QUEUE_MAX_RETENTION_DAYS_KEY] ?? $tree[self::QUEUE_MAX_RETENTION_DAYS_KEY],
+            self::QUEUE_RETRY_STALE_JOBS_KEY            => $config[self::QUEUE_RETRY_STALE_JOBS_KEY]            ?? $tree[self::DAEMONS][$daemon][self::QUEUE_RETRY_STALE_JOBS_KEY] ?? $tree[self::QUEUE_RETRY_STALE_JOBS_KEY],
             self::QUEUE_RUNNING_JOBS_CHECK_INTERVAL_KEY => $config[self::QUEUE_RUNNING_JOBS_CHECK_INTERVAL_KEY] ?? $tree[self::DAEMONS][$daemon][self::QUEUE_RUNNING_JOBS_CHECK_INTERVAL_KEY] ?? $tree[self::QUEUE_RUNNING_JOBS_CHECK_INTERVAL_KEY],
         ];
     }

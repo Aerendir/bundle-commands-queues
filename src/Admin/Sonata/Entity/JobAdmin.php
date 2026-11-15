@@ -15,8 +15,8 @@ namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Admin\Sonata\Entity;
 
 use Knp\Menu\ItemInterface;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
-use Sonata\AdminBundle\Admin\AdminInterface;
 use Sonata\AdminBundle\Admin\AbstractAdmin;
+use Sonata\AdminBundle\Admin\AdminInterface;
 use Sonata\AdminBundle\Datagrid\DatagridInterface;
 use Sonata\AdminBundle\Datagrid\DatagridMapper;
 use Sonata\AdminBundle\Datagrid\ListMapper;

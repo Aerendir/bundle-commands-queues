@@ -13,9 +13,7 @@ declare(strict_types=1);
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Util;
 
-use DateTime;
 use Doctrine\ORM\UnitOfWork;
-use RuntimeException;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Service\JobsManager;
 use SerendipityHQ\Bundle\ConsoleStyles\Console\Style\SerendipityHQStyle;
@@ -45,15 +43,11 @@ final class Profiler
     /** @var float $lastOptimizationAt The last time the optimization were done */
     private $lastOptimizationAt;
 
-    private ?int $lastMemoryUsage = null;
-
-    private ?int $lastMemoryUsageReal = null;
-
-    private ?int $lastUowSize = null;
-
+    private ?int $lastMemoryUsage           = null;
+    private ?int $lastMemoryUsageReal       = null;
+    private ?int $lastUowSize               = null;
     private array $runningJobsLastCheckedAt = [];
-
-    private ?int $highestMemoryPeak = null;
+    private ?int $highestMemoryPeak         = null;
 
     /** @var int $highestMemoryPeak */
     private $highestMemoryPeakReal;
@@ -72,15 +66,10 @@ final class Profiler
     /** @var int $pid The PID of the Daemon to be used to mark the callgrindout file */
     private ?int $pid = null;
 
-    private array $profilingInfo = [];
-
-    private static ?UnitOfWork $uow = null;
-
+    private array $profilingInfo                 = [];
+    private static ?UnitOfWork $uow              = null;
     private static ?SerendipityHQStyle $ioWriter = null;
 
-    /**
-     * @return string
-     */
     public static function buildJobsList(): string
     {
         if (false === isset(self::$uow->getIdentityMap()[Job::class])) {
@@ -99,20 +88,13 @@ final class Profiler
         return \implode(', ', $managedEntities);
     }
 
-    /**
-     * @param SerendipityHQStyle $ioWriter
-     * @param UnitOfWork         $uow
-     */
     public static function setDependencies(SerendipityHQStyle $ioWriter, UnitOfWork $uow): void
     {
         self::$ioWriter = $ioWriter;
         self::$uow      = $uow;
     }
 
-    /**
-     * @param string|null $where
-     */
-    public static function printUnitOfWork(string $where = null): void
+    public static function printUnitOfWork(?string $where = null): void
     {
         if (self::$ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
             $count   = isset(self::$uow->getIdentityMap()[Job::class]) ? \count(self::$uow->getIdentityMap()[Job::class]) : 0;
@@ -138,7 +120,6 @@ final class Profiler
     /**
      * Start the profiler.
      *
-     * @param int   $pid
      * @param int   $maxRuntime after this amount of time the Daemon MUST die
      * @param array $queues     The configured queues
      */
@@ -172,8 +153,6 @@ final class Profiler
     }
 
     /**
-     * @return array
-     *
      * @suppress PhanUndeclaredFunction
      */
     public function profile(): array
@@ -273,31 +252,31 @@ final class Profiler
         if (\function_exists('memprof_dump_callgrind') && $this->isMemprofEnabled()) {
             // Create the directory if it doesn't exist
             if (false === \file_exists('app/logs/callgrind') && false === \mkdir('app/logs/callgrind', 0777, true)) {
-                throw new RuntimeException('Impossible to create the directory app/logs/callgrind.');
+                throw new \RuntimeException('Impossible to create the directory app/logs/callgrind.');
             }
 
             $callgrindPath = sprintf(
                 'app/logs/callgrind/callgrind.out.%s.%s.%s',
-                (new DateTime())->format('Y-m-d'), $this->pid, $this->getCurrentIteration()
+                (new \DateTime())->format('Y-m-d'), $this->pid, $this->getCurrentIteration()
             );
             // "w": writing only; "b": binary safe
             $callgrind = \fopen($callgrindPath, 'wb');
             if (false === $callgrind) {
-                throw new RuntimeException(sprintf('Impossible to open the file %s.', $callgrindPath));
+                throw new \RuntimeException(sprintf('Impossible to open the file %s.', $callgrindPath));
             }
 
             \memprof_dump_callgrind($callgrind);
             $contents = \stream_get_contents($callgrind);
             if (false === $contents) {
-                throw new RuntimeException(sprintf('Impossible to read the file %s.', $callgrindPath));
+                throw new \RuntimeException(sprintf('Impossible to read the file %s.', $callgrindPath));
             }
 
             if (false === \fwrite($callgrind, $contents)) {
-                throw new RuntimeException(sprintf('Impossible to write the file %s.', $callgrindPath));
+                throw new \RuntimeException(sprintf('Impossible to write the file %s.', $callgrindPath));
             }
 
             if (false === \fclose($callgrind)) {
-                throw new RuntimeException(sprintf('Impossible to close the file %s.', $callgrindPath));
+                throw new \RuntimeException(sprintf('Impossible to close the file %s.', $callgrindPath));
             }
         }
 
@@ -315,43 +294,26 @@ final class Profiler
         );
     }
 
-    /**
-     * @return int
-     */
     public function getCurrentIteration(): int
     {
         return $this->iterations;
     }
 
-    /**
-     * @return float
-     */
     public function getAliveDaemonsLastCheckedAt(): float
     {
         return $this->aliveDaemonsLastCheckedAt;
     }
 
-    /**
-     * @return float
-     */
     public function getLastMicrotime(): float
     {
         return $this->lastMicrotime;
     }
 
-    /**
-     * @return float
-     */
     public function getLastOptimizationAt(): float
     {
         return $this->lastOptimizationAt;
     }
 
-    /**
-     * @param string $queueName
-     *
-     * @return float
-     */
     public function getRunningJobsLastCheckedAt(string $queueName): float
     {
         return $this->runningJobsLastCheckedAt[$queueName];
@@ -381,17 +343,11 @@ final class Profiler
         ++$this->iterations;
     }
 
-    /**
-     * @param string $queueName
-     */
     public function runningJobsJustChecked(string $queueName): void
     {
         $this->runningJobsLastCheckedAt[$queueName] = \microtime(true);
     }
 
-    /**
-     * @return bool
-     */
     public function isMaxRuntimeReached(): bool
     {
         if (0 === $this->maxRuntime) {
@@ -401,9 +357,6 @@ final class Profiler
         return \microtime(true) - $this->startTime > $this->maxRuntime;
     }
 
-    /**
-     * @return bool
-     */
     public function isMemprofEnabled(): bool
     {
         return $this->memprofEnabled;
@@ -426,17 +379,12 @@ final class Profiler
         return false;
     }
 
-    /**
-     * @param float $time
-     *
-     * @return string
-     */
     private function formatTime(float $time): string
     {
-        $date = DateTime::createFromFormat('U.u', \number_format($time, 6, '.', ''));
+        $date = \DateTime::createFromFormat('U.u', \number_format($time, 6, '.', ''));
 
-        if ( ! $date instanceof DateTime) {
-            throw new RuntimeException('Impossible to parse the string into a valid DateTime object.');
+        if ( ! $date instanceof \DateTime) {
+            throw new \RuntimeException('Impossible to parse the string into a valid DateTime object.');
         }
 
         return $date->format('Y-m-d H:i:s.u');

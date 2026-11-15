@@ -13,8 +13,6 @@ declare(strict_types=1);
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Util;
 
-use InvalidArgumentException;
-
 /**
  * An helper class to manage the input of a command.
  *
@@ -45,12 +43,9 @@ final class InputParser
     private const SHORTCUTS = 'shortcuts';
 
     private static ?string $foundArgument = null;
-
-    private static ?string $foundOption = null;
-
+    private static ?string $foundOption   = null;
     private static ?string $foundShortcut = null;
-
-    private static ?array $preparedInput = null;
+    private static ?array $preparedInput  = null;
 
     /**
      * Ensures the $arguments is only a string or an array.
@@ -62,7 +57,6 @@ final class InputParser
      * @param array|string|null $input
      * @param bool              $hasCommand If the input contains also the command name or not
      *
-     * @return array
      * @suppress PhanTypeMismatchDimFetch
      */
     public static function parseInput($input = [], bool $hasCommand = true): array
@@ -89,7 +83,7 @@ final class InputParser
             $commandKey                     = \array_key_first($input);
 
             if (false === self::isArgument($input[$commandKey])) {
-                throw new InvalidArgumentException(sprintf('The given command "%s" seems not to be a valid command.', $input[$commandKey]));
+                throw new \InvalidArgumentException(sprintf('The given command "%s" seems not to be a valid command.', $input[$commandKey]));
             }
 
             self::$preparedInput[self::COMMAND] = $input[$commandKey];
@@ -142,16 +136,10 @@ final class InputParser
         return self::$preparedInput;
     }
 
-    /**
-     * @param array|null $input
-     * @param bool       $withCommand
-     *
-     * @return string|null
-     */
     public static function stringify(?array $input = [], bool $withCommand = false): ?string
     {
         $preparedInput    = '';
-        $stringifyClosure = (static fn($value, $key): string => sprintf('%s=%s', $key, $value));
+        $stringifyClosure = (static fn ($value, $key): string => sprintf('%s=%s', $key, $value));
 
         if (null === $input) {
             return null;
@@ -185,39 +173,21 @@ final class InputParser
         return '' !== $preparedInput ? $preparedInput : null;
     }
 
-    /**
-     * @param string $argument
-     *
-     * @return bool
-     */
     public static function isArgument(string $argument): bool
     {
         return false === self::isOption($argument) && false === self::isShortcut($argument);
     }
 
-    /**
-     * @param string $option
-     *
-     * @return bool
-     */
     public static function isOption(string $option): bool
     {
         return str_starts_with($option, '--');
     }
 
-    /**
-     * @param string $shortcut
-     *
-     * @return bool
-     */
     public static function isShortcut(string $shortcut): bool
     {
         return false === self::isOption($shortcut) && str_starts_with($shortcut, '-');
     }
 
-    /**
-     * @param string $value
-     */
     private static function parseValue(string $value): void
     {
         if (null === self::$foundOption && null === self::$foundShortcut && self::isArgument($value)) {

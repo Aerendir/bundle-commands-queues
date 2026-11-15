@@ -13,13 +13,11 @@ declare(strict_types=1);
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Entity;
 
-use SerendipityHQ\Bundle\CommandsQueuesBundle\Repository\DaemonRepository;
-use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use Exception;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Config\DaemonConfig;
+use SerendipityHQ\Bundle\CommandsQueuesBundle\Repository\DaemonRepository;
 
 /**
  * Represents a Daemon.
@@ -46,9 +44,7 @@ class Daemon implements \Stringable
      * @var string */
     public const MORTIS_STRAGGLER = 'straggler';
 
-    /**
-     * @var int
-     */
+    /** @var int */
     #[ORM\Column(name: 'id', type: 'integer')]
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'IDENTITY')]
@@ -57,15 +53,11 @@ class Daemon implements \Stringable
     #[ORM\Column(name: 'born_on', type: 'datetime')]
     private \DateTime $bornOn;
 
-    /**
-     * @var \DateTimeInterface|null
-     */
+    /** @var \DateTimeInterface|null */
     #[ORM\Column(name: 'died_on', type: 'datetime', nullable: true)]
     private $diedOn;
 
-    /**
-     * @var string|null
-     */
+    /** @var string|null */
     #[ORM\Column(name: 'mortis_causa', type: 'string', length: 255, nullable: true)]
     private $mortisCausa;
 
@@ -78,25 +70,24 @@ class Daemon implements \Stringable
 
     /**
      * Daemon constructor.
-     *
-     * @param string       $host
-     * @param int          $pid
-     * @param DaemonConfig $config
-     *
-     * @throws Exception
      */
     public function __construct(#[ORM\Column(name: 'host', type: 'string', length: 255)]
-    private string $host, #[ORM\Column(name: 'pid', type: 'integer')]
-    private int $pid, #[ORM\Column(name: 'config', type: 'array')]
-    private DaemonConfig $config)
+        private string $host, #[ORM\Column(name: 'pid', type: 'integer')]
+        private int $pid, #[ORM\Column(name: 'config', type: 'array')]
+        private DaemonConfig $config)
     {
-        $this->bornOn        = new DateTime();
+        $this->bornOn        = new \DateTime();
         $this->processedJobs = new ArrayCollection();
     }
 
     /**
-     * @return int
+     * This is required to solve cascade persisting issues.
      */
+    public function __toString(): string
+    {
+        return (string) $this->id;
+    }
+
     public function getId(): int
     {
         return $this->id;
@@ -110,9 +101,6 @@ class Daemon implements \Stringable
         return $this->bornOn;
     }
 
-    /**
-     * @return DaemonConfig
-     */
     public function getConfig(): DaemonConfig
     {
         return $this->config;
@@ -126,33 +114,21 @@ class Daemon implements \Stringable
         return $this->diedOn;
     }
 
-    /**
-     * @return string|null
-     */
     public function getMortisCausa(): ?string
     {
         return $this->mortisCausa;
     }
 
-    /**
-     * @return string
-     */
     public function getHost(): string
     {
         return $this->host;
     }
 
-    /**
-     * @return int
-     */
     public function getPid(): int
     {
         return $this->pid;
     }
 
-    /**
-     * @return Collection
-     */
     public function getProcessedJobs(): Collection
     {
         return $this->processedJobs;
@@ -162,24 +138,10 @@ class Daemon implements \Stringable
      * Sets the date on which the daemon died.
      *
      * Requiescat In Pace (I'm Resting In Pace).
-     *
-     * @param string $mortisCausa
-     *
-     * @throws Exception
      */
     public function requiescatInPace(string $mortisCausa = self::MORTIS_SIGNAL): void
     {
-        $this->diedOn      = new DateTime();
+        $this->diedOn      = new \DateTime();
         $this->mortisCausa = $mortisCausa;
-    }
-
-    /**
-     * This is required to solve cascade persisting issues.
-     *
-     * @return string
-     */
-    public function __toString(): string
-    {
-        return (string) $this->id;
     }
 }

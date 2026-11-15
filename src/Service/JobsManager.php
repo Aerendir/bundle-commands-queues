@@ -14,14 +14,9 @@ declare(strict_types=1);
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Service;
 
 use Doctrine\Common\Collections\Collection;
-use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\OptimisticLockException;
-use Doctrine\ORM\ORMInvalidArgumentException;
-use Doctrine\ORM\TransactionRequiredException;
 use Doctrine\ORM\UnitOfWork;
-use RuntimeException;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\InputParser;
 use SerendipityHQ\Bundle\ConsoleStyles\Console\Style\SerendipityHQStyle;
@@ -34,29 +29,19 @@ use Symfony\Component\Process\Process;
 final class JobsManager
 {
     private static ?EntityManager $entityManager = null;
-
     private static ?SerendipityHQStyle $ioWriter = null;
+    private ?string $env                         = null;
+    private ?int $verbosity                      = null;
 
-    private ?string $env = null;
-
-    private ?int $verbosity = null;
-
-    /**
-     * @param string $kernelProjectDir
-     */
     public function __construct(private readonly string $kernelProjectDir)
     {
     }
 
-    /**
-     * @param EntityManagerInterface $entityManager
-     * @param SerendipityHQStyle     $ioWriter
-     */
     public function initialize(EntityManagerInterface $entityManager, SerendipityHQStyle $ioWriter): void
     {
         // This is to make static analysis pass
         if ( ! $entityManager instanceof EntityManager) {
-            throw new RuntimeException('You need to pass an EntityManager instance.');
+            throw new \RuntimeException('You need to pass an EntityManager instance.');
         }
 
         $env                 = $ioWriter->getInput()->getOption('env');
@@ -70,13 +55,6 @@ final class JobsManager
      * Handles the detach of a Job.
      *
      * IMplements a custom logic to detach Jobs linked to the detaching one.
-     *
-     * @param Job $job
-     *
-     * @throws OptimisticLockException
-     * @throws ORMInvalidArgumentException
-     * @throws TransactionRequiredException
-     * @throws ORMException
      */
     public static function detach(Job $job): void
     {
@@ -131,22 +109,17 @@ final class JobsManager
             ));
 
             // Print detached
-            if ($detached !== []) {
+            if ([] !== $detached) {
                 self::$ioWriter->commentLineNoBg(sprintf('Detached: %s', \implode(', ', $detached)));
             }
 
             // Print not detached
-            if ($notDetached !== []) {
+            if ([] !== $notDetached) {
                 self::$ioWriter->commentLineNoBg(sprintf('Not Detached: %s', \implode(', ', $notDetached)));
             }
         }
     }
 
-    /**
-     * @param Job $removingJob
-     *
-     * @throws ORMException
-     */
     public function remove(Job $removingJob): void
     {
         // When the Job is being removed from the database, it has to first
@@ -169,13 +142,6 @@ final class JobsManager
      * This has to be used to be sure that all the Job that are
      * in any way linked with the given Job are managed by the Entitymanager
      * to avoid errors about new not managed entities.
-     *
-     * @param Job $job
-     *
-     * @throws OptimisticLockException
-     * @throws ORMInvalidArgumentException
-     * @throws TransactionRequiredException
-     * @throws ORMException
      */
     public function refreshTree(Job $job): void
     {
@@ -190,11 +156,6 @@ final class JobsManager
         }
     }
 
-    /**
-     * @param Process $process
-     *
-     * @return array
-     */
     public function buildDefaultInfo(Process $process): array
     {
         return [
@@ -210,12 +171,6 @@ final class JobsManager
         ];
     }
 
-    /**
-     * @param Job  $job
-     * @param bool $allowProd
-     *
-     * @return Process
-     */
     public function createJobProcess(Job $job, bool $allowProd): Process
     {
         $command = [];
@@ -251,19 +206,14 @@ final class JobsManager
         return new Process($command);
     }
 
-    /**
-     * @param Job $job
-     *
-     * @return string
-     */
     public static function guessJobEmState(Job $job): string
     {
         $state = match (self::$entityManager->getUnitOfWork()->getEntityState($job)) {
             UnitOfWork::STATE_DETACHED => 'Detached',
-            UnitOfWork::STATE_NEW => 'New',
-            UnitOfWork::STATE_MANAGED => 'Managed',
-            UnitOfWork::STATE_REMOVED => 'Removed',
-            default => 'Unknown',
+            UnitOfWork::STATE_NEW      => 'New',
+            UnitOfWork::STATE_MANAGED  => 'Managed',
+            UnitOfWork::STATE_REMOVED  => 'Removed',
+            default                    => 'Unknown',
         };
 
         return $state;
@@ -274,7 +224,6 @@ final class JobsManager
      *
      * It adds to the tree all childs and parents, and all other linked Jobs to the one given and its childs.
      *
-     * @param Job   $job
      * @param array $tree The build tree
      *
      * @return int[]
@@ -315,7 +264,7 @@ final class JobsManager
             self::calculateJobsTree($job->getCancelledBy(), $tree);
         }
 
-        /* @var Job $retryingDependency Detach cancelled Jobs **/
+        // @var Job $retryingDependency Detach cancelled Jobs
         if (0 < $job->getCancelledJobs()->count()) {
             foreach ($job->getCancelledJobs() as $cancelledJob) {
                 if (false === \in_array($cancelledJob->getId(), $tree, true)) {
@@ -353,7 +302,7 @@ final class JobsManager
         }
 
         // And all the retrying Jobs
-        /* @var Job $retryingDependency Detach retryingDeps **/
+        // @var Job $retryingDependency Detach retryingDeps
         if ($job->getRetryingJobs() instanceof Collection && 0 < \count($job->getRetryingJobs())) {
             foreach ($job->getRetryingJobs() as $retryingJob) {
                 if (false === \in_array($retryingJob->getId(), $tree, true)) {
@@ -371,10 +320,6 @@ final class JobsManager
 
     /**
      * Finds the path to the console file.
-     *
-     * @throws RuntimeException if the console file cannot be found
-     *
-     * @return string
      */
     private function findConsole(): string
     {
@@ -386,19 +331,16 @@ final class JobsManager
             return $this->kernelProjectDir . '/bin/console';
         }
 
-        throw new RuntimeException('Unable to find the console file. You should check your Symfony installation. The console file should be in /app/ folder or in /bin/ folder.');
+        throw new \RuntimeException('Unable to find the console file. You should check your Symfony installation. The console file should be in /app/ folder or in /bin/ folder.');
     }
 
-    /**
-     * @return string
-     */
     private function guessVerbosityLevel(): string
     {
         return match ($this->verbosity) {
-            OutputInterface::VERBOSITY_QUIET => '-q',
-            OutputInterface::VERBOSITY_VERBOSE => '-vv',
+            OutputInterface::VERBOSITY_QUIET        => '-q',
+            OutputInterface::VERBOSITY_VERBOSE      => '-vv',
             OutputInterface::VERBOSITY_VERY_VERBOSE => '-vv',
-            OutputInterface::VERBOSITY_DEBUG => '-vvv',
+            OutputInterface::VERBOSITY_DEBUG        => '-vvv',
             // This WILL NEVER be reached as default
             default => '',
         };

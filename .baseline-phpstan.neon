@@ -1,237 +1,524 @@
 parameters:
 	ignoreErrors:
 		-
-			message: "#^Instanceof between \\*NEVER\\* and Countable will always evaluate to false\\.$#"
+			message: '#^Strict comparison using \=\=\= between false and int will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: src/Command/TestFakeCommand.php
+
+		-
+			message: '#^Call to function is_countable\(\) with array will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
 			count: 1
 			path: src/Config/DaemonConfig.php
 
 		-
-			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Config\\\\DaemonConfig\\:\\:__construct\\(\\) has parameter \\$daemons with no value type specified in iterable type array\\.$#"
+			message: '#^Cannot access offset ''daemon_alive_daemons_check_interval'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
 			path: src/Config/DaemonConfig.php
 
 		-
-			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Config\\\\DaemonConfig\\:\\:__construct\\(\\) has parameter \\$queues with no value type specified in iterable type array\\.$#"
+			message: '#^Cannot access offset ''daemon_managed_entities_treshold'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
 			path: src/Config/DaemonConfig.php
 
 		-
-			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Config\\\\DaemonConfig\\:\\:getQueue\\(\\) return type has no value type specified in iterable type array\\.$#"
+			message: '#^Cannot access offset ''daemon_max_runtime'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
 			path: src/Config/DaemonConfig.php
 
 		-
-			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Config\\\\DaemonConfig\\:\\:getQueues\\(\\) return type has no value type specified in iterable type array\\.$#"
+			message: '#^Cannot access offset ''daemon_print_profiling_info'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
 			path: src/Config/DaemonConfig.php
 
 		-
-			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Config\\\\DaemonConfig\\:\\:getRepoConfig\\(\\) return type has no value type specified in iterable type array\\.$#"
+			message: '#^Cannot access offset ''daemon_profiling_info_interval'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
 			path: src/Config/DaemonConfig.php
 
 		-
-			message: "#^Property SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Config\\\\DaemonConfig\\:\\:\\$daemons type has no value type specified in iterable type array\\.$#"
+			message: '#^Cannot access offset ''daemon_sleep_for'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
 			path: src/Config/DaemonConfig.php
 
 		-
-			message: "#^Property SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Config\\\\DaemonConfig\\:\\:\\$queues type has no value type specified in iterable type array\\.$#"
+			message: '#^Cannot access offset ''queue_retry_stale_jobs'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
 			path: src/Config/DaemonConfig.php
 
 		-
-			message: "#^Result of \\|\\| is always true\\.$#"
+			message: '#^Cannot access offset ''queue_running_jobs_check_interval'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
 			path: src/Config/DaemonConfig.php
 
 		-
-			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Entity\\\\Daemon\\:\\:getProcessedJobs\\(\\) return type with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
+			message: '#^Cannot access offset ''queues'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/Config/DaemonConfig.php
+
+		-
+			message: '#^Method SerendipityHQ\\Bundle\\CommandsQueuesBundle\\Config\\DaemonConfig\:\:__construct\(\) has parameter \$daemons with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Config/DaemonConfig.php
+
+		-
+			message: '#^Method SerendipityHQ\\Bundle\\CommandsQueuesBundle\\Config\\DaemonConfig\:\:__construct\(\) has parameter \$queues with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Config/DaemonConfig.php
+
+		-
+			message: '#^Method SerendipityHQ\\Bundle\\CommandsQueuesBundle\\Config\\DaemonConfig\:\:getName\(\) should return string but returns string\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Config/DaemonConfig.php
+
+		-
+			message: '#^Method SerendipityHQ\\Bundle\\CommandsQueuesBundle\\Config\\DaemonConfig\:\:getQueue\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Config/DaemonConfig.php
+
+		-
+			message: '#^Method SerendipityHQ\\Bundle\\CommandsQueuesBundle\\Config\\DaemonConfig\:\:getQueue\(\) should return array but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Config/DaemonConfig.php
+
+		-
+			message: '#^Method SerendipityHQ\\Bundle\\CommandsQueuesBundle\\Config\\DaemonConfig\:\:getQueues\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Config/DaemonConfig.php
+
+		-
+			message: '#^Method SerendipityHQ\\Bundle\\CommandsQueuesBundle\\Config\\DaemonConfig\:\:getRepoConfig\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Config/DaemonConfig.php
+
+		-
+			message: '#^Method SerendipityHQ\\Bundle\\CommandsQueuesBundle\\Config\\DaemonConfig\:\:getRetryStaleJobs\(\) should return bool but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Config/DaemonConfig.php
+
+		-
+			message: '#^Method SerendipityHQ\\Bundle\\CommandsQueuesBundle\\Config\\DaemonConfig\:\:getRunningJobsCheckInterval\(\) should return int but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Config/DaemonConfig.php
+
+		-
+			message: '#^Parameter \#1 \$aliveDaemonsCheckInterval of method SerendipityHQ\\Bundle\\CommandsQueuesBundle\\Config\\DaemonConfig\:\:setAliveDaemonsCheckInterval\(\) expects int, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Config/DaemonConfig.php
+
+		-
+			message: '#^Parameter \#1 \$managedEntitiesTreshold of method SerendipityHQ\\Bundle\\CommandsQueuesBundle\\Config\\DaemonConfig\:\:setManagedEntitiesTreshold\(\) expects int, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Config/DaemonConfig.php
+
+		-
+			message: '#^Parameter \#1 \$maxRuntime of method SerendipityHQ\\Bundle\\CommandsQueuesBundle\\Config\\DaemonConfig\:\:setMaxRuntime\(\) expects int, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Config/DaemonConfig.php
+
+		-
+			message: '#^Parameter \#1 \$printProfilingInfo of method SerendipityHQ\\Bundle\\CommandsQueuesBundle\\Config\\DaemonConfig\:\:setPrintProfilingInfo\(\) expects bool, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Config/DaemonConfig.php
+
+		-
+			message: '#^Parameter \#1 \$printProfilingInfoInterval of method SerendipityHQ\\Bundle\\CommandsQueuesBundle\\Config\\DaemonConfig\:\:setProfilingInfoInterval\(\) expects int, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Config/DaemonConfig.php
+
+		-
+			message: '#^Parameter \#1 \$sleepFor of method SerendipityHQ\\Bundle\\CommandsQueuesBundle\\Config\\DaemonConfig\:\:setSleepFor\(\) expects int, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Config/DaemonConfig.php
+
+		-
+			message: '#^Parameter \#2 \$haystack of function in_array expects array, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Config/DaemonConfig.php
+
+		-
+			message: '#^Method SerendipityHQ\\Bundle\\CommandsQueuesBundle\\Entity\\Daemon\:\:getProcessedJobs\(\) return type with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
 			count: 1
 			path: src/Entity/Daemon.php
 
 		-
-			message: "#^Property SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Entity\\\\Daemon\\:\\:\\$id is never written, only read\\.$#"
+			message: '#^PHPDoc tag @var for property SerendipityHQ\\Bundle\\CommandsQueuesBundle\\Entity\\Daemon\:\:\$processedJobs with type Doctrine\\Common\\Collections\\Collection is not subtype of native type Doctrine\\Common\\Collections\\ArrayCollection\.$#'
+			identifier: property.phpDocType
 			count: 1
 			path: src/Entity/Daemon.php
 
 		-
-			message: "#^Property SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Entity\\\\Daemon\\:\\:\\$processedJobs with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
+			message: '#^Property SerendipityHQ\\Bundle\\CommandsQueuesBundle\\Entity\\Daemon\:\:\$processedJobs with generic class Doctrine\\Common\\Collections\\ArrayCollection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
 			count: 1
 			path: src/Entity/Daemon.php
 
 		-
-			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Entity\\\\Job\\:\\:__construct\\(\\) has parameter \\$input with no value type specified in iterable type array\\.$#"
+			message: '#^Cannot access an offset on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
 			path: src/Entity/Job.php
 
 		-
-			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Entity\\\\Job\\:\\:getCancelledJobs\\(\\) return type with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
+			message: '#^Method SerendipityHQ\\Bundle\\CommandsQueuesBundle\\Entity\\Job\:\:__construct\(\) has parameter \$input with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: src/Entity/Job.php
 
 		-
-			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Entity\\\\Job\\:\\:getChildDependencies\\(\\) return type with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
+			message: '#^Method SerendipityHQ\\Bundle\\CommandsQueuesBundle\\Entity\\Job\:\:getCancelledJobs\(\) return type with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
 			count: 1
 			path: src/Entity/Job.php
 
 		-
-			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Entity\\\\Job\\:\\:getDebug\\(\\) return type has no value type specified in iterable type array\\.$#"
+			message: '#^Method SerendipityHQ\\Bundle\\CommandsQueuesBundle\\Entity\\Job\:\:getCannotBeDetachedBecause\(\) should return string but returns string\|null\.$#'
+			identifier: return.type
 			count: 1
 			path: src/Entity/Job.php
 
 		-
-			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Entity\\\\Job\\:\\:getInput\\(\\) return type has no value type specified in iterable type array\\.$#"
+			message: '#^Method SerendipityHQ\\Bundle\\CommandsQueuesBundle\\Entity\\Job\:\:getCannotBeRemovedBecause\(\) should return string but returns string\|null\.$#'
+			identifier: return.type
 			count: 1
 			path: src/Entity/Job.php
 
 		-
-			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Entity\\\\Job\\:\\:getParentDependencies\\(\\) return type with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
+			message: '#^Method SerendipityHQ\\Bundle\\CommandsQueuesBundle\\Entity\\Job\:\:getCannotRunBecause\(\) should return string but returns string\|null\.$#'
+			identifier: return.type
 			count: 1
 			path: src/Entity/Job.php
 
 		-
-			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Entity\\\\Job\\:\\:getRetryingJobs\\(\\) return type with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
+			message: '#^Method SerendipityHQ\\Bundle\\CommandsQueuesBundle\\Entity\\Job\:\:getChildDependencies\(\) return type with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
 			count: 1
 			path: src/Entity/Job.php
 
 		-
-			message: "#^Offset 'options' does not exist on array\\|null\\.$#"
-			count: 2
-			path: src/Entity/Job.php
-
-		-
-			message: "#^Offset 'shortcuts' does not exist on array\\|null\\.$#"
-			count: 2
-			path: src/Entity/Job.php
-
-		-
-			message: "#^Property SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Entity\\\\Job\\:\\:\\$cancellationReason is never written, only read\\.$#"
+			message: '#^Method SerendipityHQ\\Bundle\\CommandsQueuesBundle\\Entity\\Job\:\:getDebug\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: src/Entity/Job.php
 
 		-
-			message: "#^Property SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Entity\\\\Job\\:\\:\\$cancelledJobs with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
+			message: '#^Method SerendipityHQ\\Bundle\\CommandsQueuesBundle\\Entity\\Job\:\:getInput\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: src/Entity/Job.php
 
 		-
-			message: "#^Property SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Entity\\\\Job\\:\\:\\$childDependencies with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
+			message: '#^Method SerendipityHQ\\Bundle\\CommandsQueuesBundle\\Entity\\Job\:\:getParentDependencies\(\) return type with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
 			count: 1
 			path: src/Entity/Job.php
 
 		-
-			message: "#^Property SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Entity\\\\Job\\:\\:\\$closedAt is never written, only read\\.$#"
+			message: '#^Method SerendipityHQ\\Bundle\\CommandsQueuesBundle\\Entity\\Job\:\:getRetryingJobs\(\) return type with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
 			count: 1
 			path: src/Entity/Job.php
 
 		-
-			message: "#^Property SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Entity\\\\Job\\:\\:\\$debug type has no value type specified in iterable type array\\.$#"
+			message: '#^Offset ''options'' might not exist on array\|null\.$#'
+			identifier: offsetAccess.notFound
 			count: 1
 			path: src/Entity/Job.php
 
 		-
-			message: "#^Property SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Entity\\\\Job\\:\\:\\$executeAfterTime \\(DateTime\\|null\\) does not accept DateTime\\|DateTimeImmutable\\.$#"
+			message: '#^Offset ''shortcuts'' might not exist on array\|null\.$#'
+			identifier: offsetAccess.notFound
 			count: 1
 			path: src/Entity/Job.php
 
 		-
-			message: "#^Property SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Entity\\\\Job\\:\\:\\$exitCode is never written, only read\\.$#"
+			message: '#^Property SerendipityHQ\\Bundle\\CommandsQueuesBundle\\Entity\\Job\:\:\$cancellationReason is never written, only read\.$#'
+			identifier: property.onlyRead
 			count: 1
 			path: src/Entity/Job.php
 
 		-
-			message: "#^Property SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Entity\\\\Job\\:\\:\\$id is never written, only read\\.$#"
+			message: '#^Property SerendipityHQ\\Bundle\\CommandsQueuesBundle\\Entity\\Job\:\:\$cancellationReason type mapping mismatch\: database can contain string\|null but property expects string\.$#'
+			identifier: doctrine.columnType
 			count: 1
 			path: src/Entity/Job.php
 
 		-
-			message: "#^Property SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Entity\\\\Job\\:\\:\\$input type has no value type specified in iterable type array\\.$#"
+			message: '#^Property SerendipityHQ\\Bundle\\CommandsQueuesBundle\\Entity\\Job\:\:\$cancelledJobs type mapping mismatch\: property can contain Doctrine\\Common\\Collections\\Collection but database expects Doctrine\\Common\\Collections\\Collection&iterable\<SerendipityHQ\\Bundle\\CommandsQueuesBundle\\Entity\\Job\>\.$#'
+			identifier: doctrine.associationType
 			count: 1
 			path: src/Entity/Job.php
 
 		-
-			message: "#^Property SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Entity\\\\Job\\:\\:\\$output is never written, only read\\.$#"
+			message: '#^Property SerendipityHQ\\Bundle\\CommandsQueuesBundle\\Entity\\Job\:\:\$cancelledJobs with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
 			count: 1
 			path: src/Entity/Job.php
 
 		-
-			message: "#^Property SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Entity\\\\Job\\:\\:\\$parentDependencies with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
+			message: '#^Property SerendipityHQ\\Bundle\\CommandsQueuesBundle\\Entity\\Job\:\:\$childDependencies type mapping mismatch\: property can contain Doctrine\\Common\\Collections\\Collection but database expects Doctrine\\Common\\Collections\\Collection&iterable\<SerendipityHQ\\Bundle\\CommandsQueuesBundle\\Entity\\Job\>\.$#'
+			identifier: doctrine.associationType
 			count: 1
 			path: src/Entity/Job.php
 
 		-
-			message: "#^Property SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Entity\\\\Job\\:\\:\\$processedBy is never written, only read\\.$#"
+			message: '#^Property SerendipityHQ\\Bundle\\CommandsQueuesBundle\\Entity\\Job\:\:\$childDependencies with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
 			count: 1
 			path: src/Entity/Job.php
 
 		-
-			message: "#^Property SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Entity\\\\Job\\:\\:\\$retryingJobs with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
+			message: '#^Property SerendipityHQ\\Bundle\\CommandsQueuesBundle\\Entity\\Job\:\:\$closedAt is never written, only read\.$#'
+			identifier: property.onlyRead
 			count: 1
 			path: src/Entity/Job.php
 
 		-
-			message: "#^Property SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Entity\\\\Job\\:\\:\\$startedAt is never written, only read\\.$#"
+			message: '#^Property SerendipityHQ\\Bundle\\CommandsQueuesBundle\\Entity\\Job\:\:\$debug type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: src/Entity/Job.php
 
 		-
-			message: "#^Unreachable statement \\- code above always terminates\\.$#"
-			count: 5
+			message: '#^Property SerendipityHQ\\Bundle\\CommandsQueuesBundle\\Entity\\Job\:\:\$executeAfterTime \(DateTime\|null\) does not accept DateTime\|DateTimeImmutable\.$#'
+			identifier: assign.propertyType
+			count: 1
 			path: src/Entity/Job.php
 
 		-
-			message: "#^Class SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Repository\\\\DaemonRepository extends generic class Doctrine\\\\ORM\\\\EntityRepository but does not specify its types\\: TEntityClass$#"
+			message: '#^Property SerendipityHQ\\Bundle\\CommandsQueuesBundle\\Entity\\Job\:\:\$exitCode is never written, only read\.$#'
+			identifier: property.onlyRead
+			count: 1
+			path: src/Entity/Job.php
+
+		-
+			message: '#^Property SerendipityHQ\\Bundle\\CommandsQueuesBundle\\Entity\\Job\:\:\$input type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Entity/Job.php
+
+		-
+			message: '#^Property SerendipityHQ\\Bundle\\CommandsQueuesBundle\\Entity\\Job\:\:\$output is never written, only read\.$#'
+			identifier: property.onlyRead
+			count: 1
+			path: src/Entity/Job.php
+
+		-
+			message: '#^Property SerendipityHQ\\Bundle\\CommandsQueuesBundle\\Entity\\Job\:\:\$parentDependencies type mapping mismatch\: property can contain Doctrine\\Common\\Collections\\Collection but database expects Doctrine\\Common\\Collections\\Collection&iterable\<SerendipityHQ\\Bundle\\CommandsQueuesBundle\\Entity\\Job\>\.$#'
+			identifier: doctrine.associationType
+			count: 1
+			path: src/Entity/Job.php
+
+		-
+			message: '#^Property SerendipityHQ\\Bundle\\CommandsQueuesBundle\\Entity\\Job\:\:\$parentDependencies with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Entity/Job.php
+
+		-
+			message: '#^Property SerendipityHQ\\Bundle\\CommandsQueuesBundle\\Entity\\Job\:\:\$processedBy is never written, only read\.$#'
+			identifier: property.onlyRead
+			count: 1
+			path: src/Entity/Job.php
+
+		-
+			message: '#^Property SerendipityHQ\\Bundle\\CommandsQueuesBundle\\Entity\\Job\:\:\$retryingJobs type mapping mismatch\: property can contain Doctrine\\Common\\Collections\\Collection but database expects Doctrine\\Common\\Collections\\Collection&iterable\<SerendipityHQ\\Bundle\\CommandsQueuesBundle\\Entity\\Job\>\.$#'
+			identifier: doctrine.associationType
+			count: 1
+			path: src/Entity/Job.php
+
+		-
+			message: '#^Property SerendipityHQ\\Bundle\\CommandsQueuesBundle\\Entity\\Job\:\:\$retryingJobs with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Entity/Job.php
+
+		-
+			message: '#^Property SerendipityHQ\\Bundle\\CommandsQueuesBundle\\Entity\\Job\:\:\$startedAt is never written, only read\.$#'
+			identifier: property.onlyRead
+			count: 1
+			path: src/Entity/Job.php
+
+		-
+			message: '#^Unreachable statement \- code above always terminates\.$#'
+			identifier: deadCode.unreachable
+			count: 4
+			path: src/Entity/Job.php
+
+		-
+			message: '#^Class SerendipityHQ\\Bundle\\CommandsQueuesBundle\\Repository\\DaemonRepository extends generic class Doctrine\\ORM\\EntityRepository but does not specify its types\: T$#'
+			identifier: missingType.generics
 			count: 1
 			path: src/Repository/DaemonRepository.php
 
 		-
-			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Repository\\\\DaemonRepository\\:\\:findNextAlive\\(\\) should return SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Entity\\\\Daemon\\|null but returns mixed\\.$#"
+			message: '#^Method SerendipityHQ\\Bundle\\CommandsQueuesBundle\\Repository\\DaemonRepository\:\:findNextAlive\(\) should return SerendipityHQ\\Bundle\\CommandsQueuesBundle\\Entity\\Daemon\|null but returns mixed\.$#'
+			identifier: return.type
 			count: 1
 			path: src/Repository/DaemonRepository.php
 
 		-
-			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Service\\\\QueuesManager\\:\\:exists\\(\\) has parameter \\$input with no value type specified in iterable type array\\.$#"
+			message: '#^Method SerendipityHQ\\Bundle\\CommandsQueuesBundle\\Service\\QueuesManager\:\:exists\(\) has parameter \$input with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: src/Service/QueuesManager.php
 
 		-
-			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Service\\\\QueuesManager\\:\\:find\\(\\) has parameter \\$input with no value type specified in iterable type array\\.$#"
+			message: '#^Method SerendipityHQ\\Bundle\\CommandsQueuesBundle\\Service\\QueuesManager\:\:find\(\) has parameter \$input with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: src/Service/QueuesManager.php
 
 		-
-			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Service\\\\QueuesManager\\:\\:find\\(\\) return type has no value type specified in iterable type array\\.$#"
+			message: '#^Method SerendipityHQ\\Bundle\\CommandsQueuesBundle\\Service\\QueuesManager\:\:find\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: src/Service/QueuesManager.php
 
 		-
-			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Service\\\\QueuesManager\\:\\:findByJob\\(\\) return type has no value type specified in iterable type array\\.$#"
+			message: '#^Method SerendipityHQ\\Bundle\\CommandsQueuesBundle\\Service\\QueuesManager\:\:findByJob\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: src/Service/QueuesManager.php
 
 		-
-			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Util\\\\InputParser\\:\\:parseInput\\(\\) has parameter \\$input with no value type specified in iterable type array\\.$#"
+			message: '#^Binary operation "\.\=" between '''' and mixed results in an error\.$#'
+			identifier: assignOp.invalid
 			count: 1
 			path: src/Util/InputParser.php
 
 		-
-			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Util\\\\InputParser\\:\\:parseInput\\(\\) return type has no value type specified in iterable type array\\.$#"
+			message: '#^Cannot access an offset on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
 			path: src/Util/InputParser.php
 
 		-
-			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Util\\\\InputParser\\:\\:stringify\\(\\) has parameter \\$input with no value type specified in iterable type array\\.$#"
+			message: '#^Cannot access offset string on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 4
+			path: src/Util/InputParser.php
+
+		-
+			message: '#^Method SerendipityHQ\\Bundle\\CommandsQueuesBundle\\Util\\InputParser\:\:parseInput\(\) has parameter \$input with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: src/Util/InputParser.php
 
 		-
-			message: "#^Property SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Util\\\\InputParser\\:\\:\\$preparedInput type has no value type specified in iterable type array\\.$#"
+			message: '#^Method SerendipityHQ\\Bundle\\CommandsQueuesBundle\\Util\\InputParser\:\:parseInput\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: src/Util/InputParser.php
 
 		-
-			message: "#^Method SerendipityHQ\\\\Bundle\\\\CommandsQueuesBundle\\\\Tests\\\\Util\\\\InputParserTest\\:\\:getExpected\\(\\) return type has no value type specified in iterable type array\\.$#"
+			message: '#^Method SerendipityHQ\\Bundle\\CommandsQueuesBundle\\Util\\InputParser\:\:parseInput\(\) should return array but returns array\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Util/InputParser.php
+
+		-
+			message: '#^Method SerendipityHQ\\Bundle\\CommandsQueuesBundle\\Util\\InputParser\:\:stringify\(\) has parameter \$input with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Util/InputParser.php
+
+		-
+			message: '#^Parameter \#1 \$array of function array_keys expects array, mixed given\.$#'
+			identifier: argument.type
+			count: 2
+			path: src/Util/InputParser.php
+
+		-
+			message: '#^Parameter \#1 \$array of function ksort expects array, mixed given\.$#'
+			identifier: argument.type
+			count: 2
+			path: src/Util/InputParser.php
+
+		-
+			message: '#^Parameter \#1 \$value of static method SerendipityHQ\\Bundle\\CommandsQueuesBundle\\Util\\InputParser\:\:parseValue\(\) expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Util/InputParser.php
+
+		-
+			message: '#^Parameter \#2 \$array of function array_key_exists expects array, array\|null given\.$#'
+			identifier: argument.type
+			count: 2
+			path: src/Util/InputParser.php
+
+		-
+			message: '#^Parameter \#2 \$array of function array_map expects array, mixed given\.$#'
+			identifier: argument.type
+			count: 2
+			path: src/Util/InputParser.php
+
+		-
+			message: '#^Parameter \#2 \$array of function implode expects array, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Util/InputParser.php
+
+		-
+			message: '#^Parameter \#2 \.\.\.\$values of function sprintf expects bool\|float\|int\|string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Util/InputParser.php
+
+		-
+			message: '#^Parameter \#3 \.\.\.\$values of function sprintf expects bool\|float\|int\|string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Util/InputParser.php
+
+		-
+			message: '#^Property SerendipityHQ\\Bundle\\CommandsQueuesBundle\\Util\\InputParser\:\:\$preparedInput type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Util/InputParser.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between null and \(int\|string\) will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 1
+			path: src/Util/InputParser.php
+
+		-
+			message: '#^Parameter \#2 \$callable of static method Symfony\\Component\\Console\\Helper\\ProgressBar\:\:setPlaceholderFormatterDefinition\(\) expects callable\(Symfony\\Component\\Console\\Helper\\ProgressBar\)\: string, Closure\(Symfony\\Component\\Console\\Helper\\ProgressBar, Symfony\\Component\\Console\\Output\\OutputInterface\)\: string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Util/ProgressBarFactory.php
+
+		-
+			message: '#^Method SerendipityHQ\\Bundle\\CommandsQueuesBundle\\Tests\\Util\\InputParserTest\:\:getExpected\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: tests/Util/InputParserTest.php
 

@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Util;
 
-use DateTime;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
 
 /**
@@ -24,12 +23,6 @@ final class JobsUtil
     /** @var string */
     public const TIME_FORMAT = 'Y-m-d H:i:s';
 
-    /**
-     * @param Job    $job
-     * @param string $getTime
-     *
-     * @return string
-     */
     public static function getFormattedTime(Job $job, string $getTime): string
     {
         $time = 'XXXX-XX-XX XX:XX:XX';
@@ -39,7 +32,7 @@ final class JobsUtil
         }
 
         $jobTime = $job->$getTime();
-        if ($jobTime instanceof DateTime) {
+        if ($jobTime instanceof \DateTime) {
             $time = $jobTime->format(self::TIME_FORMAT);
         }
 

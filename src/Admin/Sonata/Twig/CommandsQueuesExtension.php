@@ -19,39 +19,26 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 
-/**
- * {@inheritdoc}
- */
 final class CommandsQueuesExtension extends AbstractExtension
 {
     /** @var string */
     private const OPTIONS = 'options';
+
     /** @var string */
     private const __ID = '--id';
 
-    /**
-     * @param UrlGeneratorInterface $generator
-     */
     public function __construct(private readonly UrlGeneratorInterface $generator)
     {
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getFilters(): array
     {
         return [
-            new TwigFilter('commands_queues_get_id_option_value', fn(Job $job): ?string => $this->getIdOptionValue($job)),
-            new TwigFilter('commands_queues_render_input', fn(?array $input): ?string => $this->getRenderedInput($input)),
+            new TwigFilter('commands_queues_get_id_option_value', fn (Job $job): ?string => $this->getIdOptionValue($job)),
+            new TwigFilter('commands_queues_render_input', fn (?array $input): ?string => $this->getRenderedInput($input)),
         ];
     }
 
-    /**
-     * @param Job $job
-     *
-     * @return string|null
-     */
     public function getIdOptionValue(Job $job): ?string
     {
         $input = $job->getInput();
@@ -64,19 +51,11 @@ final class CommandsQueuesExtension extends AbstractExtension
         return null;
     }
 
-    /**
-     * @param array|null $input
-     *
-     * @return string|null
-     */
     public function getRenderedInput(?array $input): ?string
     {
         return InputParser::stringify($input);
     }
 
-    /**
-     * @return string
-     */
     public function getName(): string
     {
         return 'commands_queues';

@@ -13,11 +13,8 @@ declare(strict_types=1);
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Service;
 
-use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\OptimisticLockException;
-use RuntimeException;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Daemon;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Repository\JobRepository;
@@ -31,14 +28,11 @@ final readonly class QueuesManager
     /** @var EntityManager */
     private EntityManagerInterface $entityManager;
 
-    /**
-     * @param EntityManagerInterface $entityManager
-     */
     public function __construct(EntityManagerInterface $entityManager)
     {
         // This is to make static analysis pass
         if ( ! $entityManager instanceof EntityManager) {
-            throw new RuntimeException('You need to pass an EntityManager instance.');
+            throw new \RuntimeException('You need to pass an EntityManager instance.');
         }
 
         $this->entityManager = $entityManager;
@@ -53,10 +47,7 @@ final readonly class QueuesManager
      *
      * Returns (bool) false if it doesn't exist or the scheduled Job if it exists.
      *
-     * @param Job  $job
      * @param bool $fullSearch If false, searches only not yet started jobs
-     *
-     * @return bool
      */
     public function jobExists(Job $job, bool $fullSearch = false): bool
     {
@@ -72,10 +63,7 @@ final readonly class QueuesManager
      *
      * Returns null if it doesn't exist or the scheduled Job if it exists.
      *
-     * @param Job  $job
      * @param bool $fullSearch If false, searches only not yet started jobs
-     *
-     * @return array|null
      */
     public function findByJob(Job $job, bool $fullSearch = false): ?array
     {
@@ -87,12 +75,8 @@ final readonly class QueuesManager
      *
      * Returns (bool) false if it doesn't exist or the scheduled Job if it exists.
      *
-     * @param string            $command
      * @param array|string|null $input
-     * @param string            $queue
      * @param bool              $fullSearch If false, searches only not yet started jobs
-     *
-     * @return bool
      */
     public function exists(string $command, $input = null, string $queue = Daemon::DEFAULT_QUEUE_NAME, bool $fullSearch = false): bool
     {
@@ -106,14 +90,10 @@ final readonly class QueuesManager
      *
      * Returns null if it doesn't exist or the scheduled Job if it exists.
      *
-     * @param string|null       $command
      * @param array|string|null $input
-     * @param string|null       $queue
      * @param bool              $fullSearch If false, searches only not yet started jobs
-     *
-     * @return array|null
      */
-    public function find(string $command = null, $input = null, ?string $queue = Daemon::DEFAULT_QUEUE_NAME, bool $fullSearch = false): ?array
+    public function find(?string $command = null, $input = null, ?string $queue = Daemon::DEFAULT_QUEUE_NAME, bool $fullSearch = false): ?array
     {
         /** @var JobRepository $jobsRepo */
         $jobsRepo = $this->entityManager->getRepository(Job::class);
@@ -128,11 +108,6 @@ final readonly class QueuesManager
 
     /**
      * persists a job and flushes it to the database.
-     *
-     * @param Job $job
-     *
-     * @throws OptimisticLockException
-     * @throws ORMException
      */
     public function schedule(Job $job): void
     {
