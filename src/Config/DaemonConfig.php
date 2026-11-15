@@ -27,16 +27,11 @@ final class DaemonConfig extends AbstractConfig
     private bool $prodAllowed = false;
 
     private int $aliveDaemonsCheckInterval = 0;
-
-    private int $sleepFor = 0;
-
-    private int $managedEntitiesTreshold = 0;
-
-    private int $maxRuntime = 0;
-
-    private int $profilingInfoInterval = 0;
-
-    private bool $printProfilingInfo = false;
+    private int $sleepFor                  = 0;
+    private int $managedEntitiesTreshold   = 0;
+    private int $maxRuntime                = 0;
+    private int $profilingInfoInterval     = 0;
+    private bool $printProfilingInfo       = false;
 
     public function __construct(private array $daemons, private array $queues)
     {
