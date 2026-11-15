@@ -27,24 +27,15 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 abstract class AbstractQueuesCommand extends Command
 {
-    /** @var EntityManagerInterface $entityManager */
-    private $entityManager;
-
-    /** @var SerendipityHQStyle */
-    private $ioWriter;
-
-    /** @var JobsMarker $jobsMarker */
-    private $jobsMarker;
+    private ?SerendipityHQStyle $ioWriter = null;
 
     /**
      * @param EntityManagerInterface $entityManager
-     * @param JobsMarker             $doNotUseJobsMarker
+     * @param JobsMarker $jobsMarker
      */
-    public function __construct(EntityManagerInterface $entityManager, JobsMarker $doNotUseJobsMarker)
+    public function __construct(private readonly EntityManagerInterface $entityManager, private readonly JobsMarker $jobsMarker)
     {
         parent::__construct();
-        $this->entityManager = $entityManager;
-        $this->jobsMarker    = $doNotUseJobsMarker;
     }
 
     /**
@@ -61,7 +52,7 @@ abstract class AbstractQueuesCommand extends Command
 
         Profiler::setDependencies($this->getIoWriter(), $this->getEntityManager()->getUnitOfWork());
 
-        return 0;
+        return Command::SUCCESS;
     }
 
     /**

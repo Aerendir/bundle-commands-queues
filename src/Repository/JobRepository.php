@@ -13,12 +13,12 @@ declare(strict_types=1);
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Repository;
 
+use Doctrine\ORM\Exception\ORMException;
 use BadMethodCallException;
 use DateTime;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
-use Doctrine\ORM\ORMException;
 use Doctrine\ORM\QueryBuilder;
 use RuntimeException;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
@@ -43,11 +43,9 @@ final class JobRepository extends EntityRepository
     /** @var string */
     private const ASC = 'ASC';
 
-    /** @var array $config */
-    private $config;
+    private ?array $config = null;
 
-    /** @var SerendipityHQStyle $ioWriter */
-    private $ioWriter;
+    private ?SerendipityHQStyle $ioWriter = null;
 
     /**
      * @param array              $config
@@ -91,7 +89,7 @@ final class JobRepository extends EntityRepository
         // Collects the Jobs that have to be excluded from the next findNextJob() call
         $excludedJobs = [];
 
-        while (null !== $job = $this->findNextJob($queueName, $excludedJobs)) {
+        while (($job = $this->findNextJob($queueName, $excludedJobs)) instanceof Job) {
             // If it can be run...
             if ($job->canRun()) {
                 // Refresh the Job to get loaded again child and parent Jobs that were eventually detached
@@ -201,7 +199,7 @@ final class JobRepository extends EntityRepository
      */
     public function findBySearch(?string $command = null, ?array $input = null, ?string $queue = 'default', bool $fullSearch = false): ?array
     {
-        if (null === $command && (null === $input || empty($input)) && null === $queue) {
+        if (null === $command && (null === $input || $input === []) && null === $queue) {
             throw new BadMethodCallException('You should pass at least one between "command", "input" and "queue".');
         }
 
@@ -267,7 +265,7 @@ final class JobRepository extends EntityRepository
                      ->setParameter('running', Job::STATUS_PENDING)->setParameter('pending', Job::STATUS_RUNNING);
 
         // If there are already known stale Jobs...
-        if (false === empty($knownAsStale)) {
+        if ($knownAsStale !== []) {
             // The ID hasn't to be one of them
             $queryBuilder->andWhere(
                 $queryBuilder->expr()->notIn('j.id', ':knownAsStale')
@@ -308,7 +306,7 @@ final class JobRepository extends EntityRepository
                      ->andWhere($queryBuilder->expr()->eq('j.queue', ':queue'))->setParameter('queue', $queueName);
 
         // If there are excluded Jobs...
-        if (false === empty($excludedJobs)) {
+        if ($excludedJobs !== []) {
             // The ID hasn't to be one of them
             $queryBuilder->andWhere(
                 $queryBuilder->expr()->notIn('j.id', ':excludedJobs')

@@ -14,123 +14,95 @@ declare(strict_types=1);
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Admin\Sonata\Entity;
 
 use Knp\Menu\ItemInterface;
-use RuntimeException;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
-use Sonata\AdminBundle\Admin\AbstractAdmin;
 use Sonata\AdminBundle\Admin\AdminInterface;
+use Sonata\AdminBundle\Admin\AbstractAdmin;
+use Sonata\AdminBundle\Datagrid\DatagridInterface;
 use Sonata\AdminBundle\Datagrid\DatagridMapper;
 use Sonata\AdminBundle\Datagrid\ListMapper;
-use Sonata\AdminBundle\Route\RouteCollection;
+use Sonata\AdminBundle\Route\RouteCollectionInterface;
+use Sonata\DoctrineORMAdminBundle\Filter\DateRangeFilter;
 
 /**
- * {@inheritdoc}
+ * @extends AbstractAdmin<Job>
  */
 final class JobAdmin extends AbstractAdmin
 {
     /** @var string */
-    private const DOCTRINE_ORM_DATE_RANGE = 'doctrine_orm_date_range';
-    /** @var string */
     private const URI = 'uri';
-    /** {@inheritdoc} */
-    protected $translationDomain = 'shq_commands_queues';
 
-    /** {@inheritdoc} */
-    protected $baseRoutePattern = 'jobs';
-
-    /** {@inheritdoc} */
-    protected $datagridValues = [
-        '_page'     => 1,
-        '_per_page' => 50,
-
-        // reverse order (default = 'ASC')
-        '_sort_order' => 'DESC',
-
-        // name of the ordered field (default = the model's id field, if any)
-        '_sort_by' => 'id',
+    /** @var array<string, string> */
+    private const STATUS_TABS = [
+        'tab_status_new'             => Job::STATUS_NEW,
+        'tab_status_pending'         => Job::STATUS_PENDING,
+        'tab_status_running'         => Job::STATUS_RUNNING,
+        'tab_status_succeeded'       => Job::STATUS_SUCCEEDED,
+        'tab_status_failed'          => Job::STATUS_FAILED,
+        'tab_status_aborted'         => Job::STATUS_ABORTED,
+        'tab_status_cancelled'       => Job::STATUS_CANCELLED,
+        'tab_status_retried'         => Job::STATUS_RETRIED,
+        'tab_status_retry_succeeded' => Job::STATUS_RETRY_SUCCEEDED,
+        'tab_status_retry_failed'    => Job::STATUS_RETRY_FAILED,
     ];
 
-    protected $perPageOptions = [50, 100, 1000, 10000];
-
-    protected $maxPerPage = 50;
-
     /**
-     * {@inheritdoc}
+     * @return array<int>
      */
-    protected function configureListFields(ListMapper $listMapper): void
+    public function getPerPageOptions(): array
     {
-        $listMapper
+        return [50, 100, 1000, 10000];
+    }
+
+    protected function generateBaseRoutePattern(bool $isChildAdmin = false): string
+    {
+        return 'jobs';
+    }
+
+    protected function configureDefaultSortValues(array &$sortValues): void
+    {
+        $sortValues[DatagridInterface::PAGE]       = 1;
+        $sortValues[DatagridInterface::PER_PAGE]   = 50;
+        $sortValues[DatagridInterface::SORT_ORDER] = 'DESC';
+        $sortValues[DatagridInterface::SORT_BY]    = 'id';
+    }
+
+    protected function configureListFields(ListMapper $list): void
+    {
+        $list
             ->addIdentifier('id')
             ->add('command')
             ->add('dependencies');
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function configureDatagridFilters(DatagridMapper $datagridMapper): void
+    protected function configureDatagridFilters(DatagridMapper $filter): void
     {
-        $datagridMapper
+        $filter
             ->add('status')
             ->add('command')
             ->add('input')
             ->add('queue')
             ->add('exitCode')
             ->add('priority')
-            ->add('createdAt', self::DOCTRINE_ORM_DATE_RANGE)
-            ->add('startedAt', self::DOCTRINE_ORM_DATE_RANGE)
-            ->add('closedAt', self::DOCTRINE_ORM_DATE_RANGE)
-            ->add('executeAfterTime', self::DOCTRINE_ORM_DATE_RANGE);
+            ->add('createdAt', DateRangeFilter::class)
+            ->add('startedAt', DateRangeFilter::class)
+            ->add('closedAt', DateRangeFilter::class)
+            ->add('executeAfterTime', DateRangeFilter::class);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function configureTabMenu(ItemInterface $menu, $action, AdminInterface $childAdmin = null): void
+    protected function configureTabMenu(ItemInterface $menu, string $action, ?AdminInterface $childAdmin = null): void
     {
         $admin = $this->isChild() ? $this->getParent() : $this;
 
-        if (null === $admin) {
-            throw new RuntimeException('Impossible to get the $admin.');
+        foreach (self::STATUS_TABS as $tab => $status) {
+            $menu->addChild($tab, [
+                self::URI => $admin->generateUrl('list', ['filter[status][value]' => $status]),
+            ]);
         }
-
-        $menu->addChild('tab_status_new', [
-            self::URI => $admin->generateUrl('list', ['filter[status][value]' => Job::STATUS_NEW]),
-        ]);
-        $menu->addChild('tab_status_pending', [
-            self::URI => $admin->generateUrl('list', ['filter[status][value]' => Job::STATUS_PENDING]),
-        ]);
-        $menu->addChild('tab_status_running', [
-            self::URI => $admin->generateUrl('list', ['filter[status][value]' => Job::STATUS_RUNNING]),
-        ]);
-        $menu->addChild('tab_status_succeeded', [
-            self::URI => $admin->generateUrl('list', ['filter[status][value]' => Job::STATUS_SUCCEEDED]),
-        ]);
-        $menu->addChild('tab_status_failed', [
-            self::URI => $admin->generateUrl('list', ['filter[status][value]' => Job::STATUS_FAILED]),
-        ]);
-        $menu->addChild('tab_status_aborted', [
-            self::URI => $admin->generateUrl('list', ['filter[status][value]' => Job::STATUS_ABORTED]),
-        ]);
-        $menu->addChild('tab_status_cancelled', [
-            self::URI => $admin->generateUrl('list', ['filter[status][value]' => Job::STATUS_CANCELLED]),
-        ]);
-        $menu->addChild('tab_status_retried', [
-            self::URI => $admin->generateUrl('list', ['filter[status][value]' => Job::STATUS_RETRIED]),
-        ]);
-        $menu->addChild('tab_status_retry_succeeded', [
-            self::URI => $admin->generateUrl('list', ['filter[status][value]' => Job::STATUS_RETRY_SUCCEEDED]),
-        ]);
-        $menu->addChild('tab_status_retry_failed', [
-            self::URI => $admin->generateUrl('list', ['filter[status][value]' => Job::STATUS_RETRY_FAILED]),
-        ]);
 
         parent::configureTabMenu($menu, $action, $childAdmin);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function configureRoutes(RouteCollection $collection): void
+    protected function configureRoutes(RouteCollectionInterface $collection): void
     {
         $collection
             ->remove('create')

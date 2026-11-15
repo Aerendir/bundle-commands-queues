@@ -13,27 +13,24 @@ declare(strict_types=1);
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Admin\Sonata\Entity;
 
+use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Daemon;
 use Sonata\AdminBundle\Admin\AbstractAdmin;
 use Sonata\AdminBundle\Datagrid\ListMapper;
-use Sonata\AdminBundle\Route\RouteCollection;
+use Sonata\AdminBundle\Route\RouteCollectionInterface;
 
 /**
- * {@inheritdoc}
+ * @extends AbstractAdmin<Daemon>
  */
 final class DaemonAdmin extends AbstractAdmin
 {
-    /** {@inheritdoc} */
-    protected $translationDomain = 'shq_commands_queues';
-
-    /** {@inheritdoc} */
-    protected $baseRoutePattern = 'daemons';
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function configureListFields(ListMapper $listMapper): void
+    protected function generateBaseRoutePattern(bool $isChildAdmin = false): string
     {
-        $listMapper
+        return 'daemons';
+    }
+
+    protected function configureListFields(ListMapper $list): void
+    {
+        $list
             ->addIdentifier('id')
             ->add('host')
             ->add('pid')
@@ -42,10 +39,7 @@ final class DaemonAdmin extends AbstractAdmin
             ->add('mortisCausa');
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function configureRoutes(RouteCollection $collection): void
+    protected function configureRoutes(RouteCollectionInterface $collection): void
     {
         $collection
             ->remove('create')

@@ -13,11 +13,11 @@ declare(strict_types=1);
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Util;
 
+use Doctrine\Persistence\Proxy;
+use Doctrine\ORM\Exception\ORMException;
 use DateTime;
-use Doctrine\Common\Persistence\Proxy;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\ORMException;
 use Doctrine\ORM\ORMInvalidArgumentException;
 use Exception;
 use InvalidArgumentException;
@@ -40,10 +40,9 @@ final class JobsMarker
     private const DEBUG = 'debug';
 
     /** @var EntityManager $entityManager */
-    private static $entityManager;
+    private static EntityManagerInterface $entityManager;
 
-    /** @var SerendipityHQStyle $ioWriter */
-    private static $ioWriter;
+    private static ?SerendipityHQStyle $ioWriter = null;
 
     /**
      * @param EntityManagerInterface $entityManager
@@ -316,7 +315,7 @@ final class JobsMarker
                 if (
                     ! $e instanceof ORMInvalidArgumentException
                     && $e instanceof InvalidArgumentException
-                    && false === \strpos($e->getMessage(), 'Entity has to be managed or scheduled for removal for single computation')
+                    && !str_contains($e->getMessage(), 'Entity has to be managed or scheduled for removal for single computation')
                 ) {
                     throw $e;
                 }
@@ -349,11 +348,11 @@ final class JobsMarker
                  */
                 if ($job->isTypeRetried()) {
                     // Flush the new retrying Job
-                    self::$entityManager->flush($job->getRetriedBy());
+                    self::$entityManager->flush();
                 }
 
                 // Flush the original Job
-                self::$entityManager->flush($job);
+                self::$entityManager->flush();
             });
     }
 
@@ -372,20 +371,17 @@ final class JobsMarker
 
         // First of all set the current status
         $reflectedProperty = $reflectedClass->getProperty('status');
-        $reflectedProperty->setAccessible(true);
         $reflectedProperty->setValue($job, $status);
 
         // If the Job is cancelled, set the reason
         if (Job::STATUS_CANCELLED === $status) {
             $reflectedProperty = $reflectedClass->getProperty('cancellationReason');
-            $reflectedProperty->setAccessible(true);
             $reflectedProperty->setValue($job, $info[self::DEBUG]['cancellation_reason']);
         }
 
         // Then set the processing Daemon
-        if (null !== $daemon) {
+        if ($daemon instanceof Daemon) {
             $reflectedProperty = $reflectedClass->getProperty('processedBy');
-            $reflectedProperty->setAccessible(true);
             $reflectedProperty->setValue($job, $daemon);
 
             self::$entityManager->persist($daemon);
@@ -393,41 +389,16 @@ final class JobsMarker
 
         // Now set the other info
         foreach ($info as $property => $value) {
-            switch ($property) {
-                case 'cancelled_by':
-                    $reflectedProperty = $reflectedClass->getProperty('cancelledBy');
-
-                    break;
-                case 'closed_at':
-                    $reflectedProperty = $reflectedClass->getProperty('closedAt');
-
-                    break;
-                case self::DEBUG:
-                    $reflectedProperty = $reflectedClass->getProperty(self::DEBUG);
-
-                    break;
-                case 'output':
-                    $reflectedProperty = $reflectedClass->getProperty('output');
-
-                    break;
-                case 'exit_code':
-                    $reflectedProperty = $reflectedClass->getProperty('exitCode');
-
-                    break;
-                case 'started_at':
-                    $reflectedProperty = $reflectedClass->getProperty('startedAt');
-
-                    break;
-                case 'cancellation_reason':
-                    $reflectedProperty = $reflectedClass->getProperty('cancellationReason');
-
-                    break;
-                default:
-                    throw new RuntimeException(sprintf('The property %s is not managed. Manage it or verify its spelling is correct.', $property));
-            }
-
-            // Set the property as accessible
-            $reflectedProperty->setAccessible(true);
+            $reflectedProperty = match ($property) {
+                'cancelled_by' => $reflectedClass->getProperty('cancelledBy'),
+                'closed_at' => $reflectedClass->getProperty('closedAt'),
+                self::DEBUG => $reflectedClass->getProperty(self::DEBUG),
+                'output' => $reflectedClass->getProperty('output'),
+                'exit_code' => $reflectedClass->getProperty('exitCode'),
+                'started_at' => $reflectedClass->getProperty('startedAt'),
+                'cancellation_reason' => $reflectedClass->getProperty('cancellationReason'),
+                default => throw new RuntimeException(sprintf('The property %s is not managed. Manage it or verify its spelling is correct.', $property)),
+            };
             $reflectedProperty->setValue($job, $value);
         }
     }

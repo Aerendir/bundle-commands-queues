@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Command;
 
+use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Command\Command;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -34,13 +36,12 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * Creates random Jobs.
  */
+#[AsCommand(name: 'queues:test:random-jobs', description: '[INTERNAL] Generates random Jobs to test SHQCommandsQueuesBundle.')]
 final class TestRandomJobsCommand extends AbstractQueuesCommand
 {
-    /** @var string $defaultName */
-    protected static $defaultName = 'queues:test:random-jobs';
-
-    /** @var array $queues */
-    private $queues;
+    private array $queues = [
+        'queue_1', 'queue_2', 'queue_3', 'queue_4', 'queue_5',
+    ];
 
     /**
      * @param EntityManagerInterface $entityManager
@@ -49,9 +50,6 @@ final class TestRandomJobsCommand extends AbstractQueuesCommand
     public function __construct(EntityManagerInterface $entityManager, JobsMarker $doNotUseJobsMarker)
     {
         parent::__construct($entityManager, $doNotUseJobsMarker);
-        $this->queues = [
-            'queue_1', 'queue_2', 'queue_3', 'queue_4', 'queue_5',
-        ];
     }
 
     /**
@@ -60,7 +58,6 @@ final class TestRandomJobsCommand extends AbstractQueuesCommand
     protected function configure(): void
     {
         $this
-            ->setDescription('[INTERNAL] Generates random Jobs to test SHQCommandsQueuesBundle.')
             ->addArgument('how-many-jobs', InputArgument::OPTIONAL, 'How many random Jobs would you like to create?', '10')
             ->addOption('batch', null, InputOption::VALUE_OPTIONAL, 'The number of Jobs in a batch.', '10')
             ->addOption('no-future-jobs', null, InputOption::VALUE_NONE)
@@ -93,7 +90,7 @@ final class TestRandomJobsCommand extends AbstractQueuesCommand
         if (null !== $howManyJobs && false === \is_numeric($howManyJobs)) {
             $this->getIoWriter()->error('The number of jobs has to be a numeric value.');
 
-            return 1;
+            return Command::FAILURE;
         }
 
         $howManyJobs = (int) $howManyJobs;
@@ -101,7 +98,7 @@ final class TestRandomJobsCommand extends AbstractQueuesCommand
         if (null !== $batch && false === \is_numeric($batch)) {
             $this->getIoWriter()->error('--batch accepts only numeric values.');
 
-            return 1;
+            return Command::FAILURE;
         }
 
         $batch = (int) $batch;
@@ -109,7 +106,7 @@ final class TestRandomJobsCommand extends AbstractQueuesCommand
         if (null !== $noFutureJobs && false === \is_bool($noFutureJobs)) {
             $this->getIoWriter()->error("--no-future-jobs doesn't accept any value.");
 
-            return 1;
+            return Command::FAILURE;
         }
 
         $this->getIoWriter()->title('SerendipityHQ Queue Bundle Daemon');
@@ -128,7 +125,7 @@ final class TestRandomJobsCommand extends AbstractQueuesCommand
             $scheduledJob = new Job(TestFakeCommand::$defaultName, $arguments);
 
             // Set a random queue
-            $queue = \random_int(0, (\is_array($this->queues) || $this->queues instanceof \Countable ? \count($this->queues) : 0) - 1);
+            $queue = \random_int(0, (is_countable($this->queues) ? \count($this->queues) : 0) - 1);
             $scheduledJob->setQueue($this->queues[$queue]);
 
             // Set a random retry strategy
@@ -178,7 +175,7 @@ final class TestRandomJobsCommand extends AbstractQueuesCommand
         $this->getIoWriter()->write("\n\n");
         $this->getIoWriter()->success(sprintf('All done: %s random jobs generated!', $howManyJobs));
 
-        return 0;
+        return Command::SUCCESS;
     }
 
     /**

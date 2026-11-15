@@ -22,44 +22,34 @@ use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Daemon;
  */
 final class DaemonConfig extends AbstractConfig
 {
-    /** @var array $daemons */
-    private $daemons;
-
-    /** @var array $queues */
-    private $queues;
-
-    /** @var string $name */
-    private $name;
+    private ?string $name = null;
 
     /** @var bool $prodAllowed If true, passes the --env=prod flag to the commands in the queue */
-    private $prodAllowed = false;
+    private bool $prodAllowed = false;
 
     /** @var int $aliveDaemonsCheckInterval */
-    private $aliveDaemonsCheckInterval;
+    private int $aliveDaemonsCheckInterval = 0;
 
     /** @var int $sleepFor */
-    private $sleepFor;
+    private int $sleepFor = 0;
 
     /** @var int $managedEntitiesTreshold */
-    private $managedEntitiesTreshold;
+    private int $managedEntitiesTreshold = 0;
 
     /** @var int $maxRuntime */
-    private $maxRuntime;
+    private int $maxRuntime = 0;
 
     /** @var int $profilingInfoInterval */
-    private $profilingInfoInterval;
+    private int $profilingInfoInterval = 0;
 
-    /** @var bool $printProfilingInfo */
-    private $printProfilingInfo = false;
+    private bool $printProfilingInfo = false;
 
     /**
      * @param array $daemons
      * @param array $queues
      */
-    public function __construct(array $daemons, array $queues)
+    public function __construct(private array $daemons, private array $queues)
     {
-        $this->daemons = $daemons;
-        $this->queues  = $queues;
     }
 
     /**
@@ -69,7 +59,7 @@ final class DaemonConfig extends AbstractConfig
     public function initialize(?string $daemon, bool $allowProd): void
     {
         if (null === $daemon) {
-            if ((\is_array($this->daemons) || $this->daemons instanceof \Countable ? \count($this->daemons) : 0) > 1) {
+            if ((is_countable($this->daemons) ? \count($this->daemons) : 0) > 1) {
                 throw new InvalidArgumentException('More than one Daemon is configured: you MUST specify the Daemon you want to run passing it as the first argument argument.');
             }
 

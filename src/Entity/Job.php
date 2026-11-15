@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Entity;
 
+use SerendipityHQ\Bundle\CommandsQueuesBundle\Repository\JobRepository;
 use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -29,12 +30,11 @@ use SerendipityHQ\Component\ThenWhen\Strategy\StrategyInterface;
 
 /**
  * Basic properties and methods o a Job.
- *
- * @ORM\Entity(repositoryClass="SerendipityHQ\Bundle\CommandsQueuesBundle\Repository\JobRepository")
- * @ORM\Table(name="queues_scheduled_jobs")
- * @ORM\HasLifecycleCallbacks
  */
-class Job
+#[ORM\Table(name: 'queues_scheduled_jobs')]
+#[ORM\Entity(repositoryClass: JobRepository::class)]
+#[ORM\HasLifecycleCallbacks]
+class Job implements \Stringable
 {
     /**
      * This is initial state of each newly scheduled job.
@@ -154,75 +154,53 @@ class Job
 
     /**
      * @var int The ID of the Job
-     *
-     * @ORM\Column(name="id", type="integer")
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="IDENTITY")
      */
+    #[ORM\Column(name: 'id', type: 'integer')]
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'IDENTITY')]
     private $id;
 
     /**
-     * @var string
-     *
-     * @ORM\Column(name="command", type="string", length=255)
-     */
-    private $command;
-
-    /**
      * @var array|null
-     *
-     * @ORM\Column(name="input", type="array", nullable=true)
      */
+    #[ORM\Column(name: 'input', type: 'array', nullable: true)]
     private $input;
 
     /**
      * @var bool
-     *
-     * @ORM\Column(name="self_aware", type="boolean")
      */
+    #[ORM\Column(name: 'self_aware', type: 'boolean')]
     private $awareOfJob = false;
 
     /**
      * @var DateTime|null
-     *
-     * @ORM\Column(name="execute_after_time", type="datetime", nullable=true)
      */
+    #[ORM\Column(name: 'execute_after_time', type: 'datetime', nullable: true)]
     private $executeAfterTime;
 
-    /**
-     * @var \DateTimeInterface
-     *
-     * @ORM\Column(name="created_at", type="datetime")
-     */
-    private $createdAt;
+    #[ORM\Column(name: 'created_at', type: 'datetime')]
+    private \DateTime $createdAt;
 
     /**
      * @var \DateTimeInterface|null
-     *
-     * @ORM\Column(name="started_at", type="datetime", nullable=true)
      */
+    #[ORM\Column(name: 'started_at', type: 'datetime', nullable: true)]
     private $startedAt;
 
     /**
      * @var \DateTimeInterface|null when the Job is marked as Finished, Failed or Terminated
-     *
-     * @ORM\Column(name="closed_at", type="datetime", nullable=true)
      */
+    #[ORM\Column(name: 'closed_at', type: 'datetime', nullable: true)]
     private $closedAt;
 
     /**
      * @var array|null The error produced by the job (usually an exception)
-     *
-     * @ORM\Column(name="debug", type="array", nullable=true)
      */
+    #[ORM\Column(name: 'debug', type: 'array', nullable: true)]
     private $debug = [];
 
-    /**
-     * @var int
-     *
-     * @ORM\Column(name="priority", type="smallint")
-     */
-    private $priority;
+    #[ORM\Column(name: 'priority', type: 'smallint')]
+    private int $priority;
 
     /**
      * @var Daemon the Daemon that processed the Job
@@ -233,119 +211,95 @@ class Job
      */
     private $processedBy;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="queue", type="string", length=255)
-     */
-    private $queue;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="status", type="string", length=255)
-     */
-    private $status;
+    #[ORM\Column(name: 'status', type: 'string', length: 255)]
+    private string $status;
 
     /**
      * @var string If the status is self::STATUS_CANCELLED this property tells the why
-     *
-     * @ORM\Column(name="cancellation_reason", type="string", length=255, nullable=true)
      */
+    #[ORM\Column(name: 'cancellation_reason', type: 'string', length: 255, nullable: true)]
     private $cancellationReason;
 
     /**
      * @var Job|null
-     *
-     * @ORM\ManyToOne(targetEntity="SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job", inversedBy="cancelledJobs")
-     * @ORM\JoinColumn(name="cancelled_by")
      */
+    #[ORM\JoinColumn(name: 'cancelled_by')]
+    #[ORM\ManyToOne(targetEntity: Job::class, inversedBy: 'cancelledJobs')]
     private $cancelledBy;
 
     /**
      * @var Collection
-     *
-     * @ORM\OneToMany(targetEntity="SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job", mappedBy="cancelledBy")
      */
+    #[ORM\OneToMany(targetEntity: Job::class, mappedBy: 'cancelledBy')]
     private $cancelledJobs;
 
     /**
      * @var string|null The output produced by the job
-     *
-     * @ORM\Column(name="output", type="text", nullable=true)
      */
+    #[ORM\Column(name: 'output', type: 'text', nullable: true)]
     private $output;
 
     /**
      * @var int|null The code with which the process exited
-     *
-     * @ORM\Column(name="exit_code", type="integer", nullable=true)
      */
+    #[ORM\Column(name: 'exit_code', type: 'integer', nullable: true)]
     private $exitCode;
 
     /**
      * @var Collection
-     *
-     * @ORM\ManyToMany(targetEntity="SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job", inversedBy="parentDependencies")
-     * @ORM\JoinTable(name="queues_jobs_dependencies",
-     *     joinColumns={@ORM\JoinColumn(name="parent_job", referencedColumnName="id")},
-     *     inverseJoinColumns={@ORM\JoinColumn(name="child_job", referencedColumnName="id")}
-     *     )
      */
+    #[ORM\JoinTable(name: 'queues_jobs_dependencies')]
+    #[ORM\JoinColumn(name: 'parent_job', referencedColumnName: 'id')]
+    #[ORM\InverseJoinColumn(name: 'child_job', referencedColumnName: 'id')]
+    #[ORM\ManyToMany(targetEntity: Job::class, inversedBy: 'parentDependencies')]
     private $childDependencies;
 
     /**
      * @var Collection
-     *
-     * @ORM\ManyToMany(targetEntity="SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job", mappedBy="childDependencies")
      */
+    #[ORM\ManyToMany(targetEntity: Job::class, mappedBy: 'childDependencies')]
     private $parentDependencies;
 
     /**
      * @var StrategyInterface
-     *
-     * @ORM\Column(name="retry_strategy", type="array")
      */
+    #[ORM\Column(name: 'retry_strategy', type: 'array')]
     private $retryStrategy;
 
     /**
      * @var Job|null If this Job is a retry of another job, here there is the Job of which this is the retry
-     *
-     * @ORM\OneToOne(targetEntity="SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job", inversedBy="retriedBy")
-     * @ORM\JoinColumn(name="retry_of")
      */
+    #[ORM\JoinColumn(name: 'retry_of')]
+    #[ORM\OneToOne(targetEntity: Job::class, inversedBy: 'retriedBy')]
     private $retryOf;
 
     /**
      * @var Job|null
-     *
-     * @ORM\OneToOne(targetEntity="SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job", mappedBy="retryOf")
      */
+    #[ORM\OneToOne(targetEntity: Job::class, mappedBy: 'retryOf')]
     private $retriedBy;
 
     /**
      * @var Job|null If this Job is a retry of another retried job, here there is the first retried Job
-     *
-     * @ORM\ManyToOne(targetEntity="SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job", inversedBy="retryingJobs")
-     * @ORM\JoinColumn(name="first_retried_job")
      */
+    #[ORM\JoinColumn(name: 'first_retried_job')]
+    #[ORM\ManyToOne(targetEntity: Job::class, inversedBy: 'retryingJobs')]
     private $firstRetriedJob;
 
     /**
      * @var Collection The Jobs used to retry this one
-     *
-     * @ORM\OneToMany(targetEntity="SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job", mappedBy="firstRetriedJob")
      */
+    #[ORM\OneToMany(targetEntity: Job::class, mappedBy: 'firstRetriedJob')]
     private $retryingJobs;
 
     /** @var string $cannotBeDetachedBecause This is not persisted. It is used to give the reason why the Job cannot be detached. */
-    private $cannotBeDetachedBecause;
+    private ?string $cannotBeDetachedBecause = null;
 
     /** @var string $cannotBeRemovedBecause This is not persisted. It is used to give the reason why the Job cannot be removed. */
-    private $cannotBeRemovedBecause;
+    private ?string $cannotBeRemovedBecause = null;
 
     /** @var string $cannotRunBecause This is not persisted. It is used to give the reason why the Job cannot run. */
-    private $cannotRunBecause;
+    private ?string $cannotRunBecause = null;
 
     /**
      * @param string       $command
@@ -354,12 +308,12 @@ class Job
      *
      * @throws Exception
      */
-    public function __construct(string $command, $input = [], string $queue = Daemon::DEFAULT_QUEUE_NAME)
+    public function __construct(#[ORM\Column(name: 'command', type: 'string', length: 255)]
+    private string $command, $input = [], #[ORM\Column(name: 'queue', type: 'string', length: 255)]
+    private string $queue = Daemon::DEFAULT_QUEUE_NAME)
     {
-        $this->command            = $command;
         $this->input              = InputParser::parseInput($input, false);
         $this->priority           = 1;
-        $this->queue              = $queue;
         $this->status             = self::STATUS_NEW;
         $this->createdAt          = new DateTime();
         $this->cancelledJobs      = new ArrayCollection();
@@ -543,7 +497,7 @@ class Job
             ->setFirstRetriedJob($this->getFirstRetriedJob() ?? $this);
 
         // If the retried Job had an execute after time...
-        if (null !== $this->getExecuteAfterTime()) {
+        if ($this->getExecuteAfterTime() instanceof \DateTimeInterface) {
             // ... set it in the retrying Job
             $retryJob->setExecuteAfterTime($this->getExecuteAfterTime());
         }
@@ -803,7 +757,7 @@ class Job
         // Is being retried.
         $retriedBy = $this->getRetriedBy();
         if ($this->isStatusRetried()) {
-            if (null === $retriedBy) {
+            if (!$retriedBy instanceof \SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job) {
                 throw new RuntimeException('This is a retried Job but the retrying Job is not set and this is not possible.');
             }
 
@@ -1012,15 +966,10 @@ class Job
      */
     public function isStatusFailed(): bool
     {
-        switch ($this->getStatus()) {
-            case self::STATUS_CANCELLED:
-            case self::STATUS_FAILED:
-            case self::STATUS_RETRY_FAILED:
-            case self::STATUS_ABORTED:
-                return true;
-            default:
-                return false;
-        }
+        return match ($this->getStatus()) {
+            self::STATUS_CANCELLED, self::STATUS_FAILED, self::STATUS_RETRY_FAILED, self::STATUS_ABORTED => true,
+            default => false,
+        };
     }
 
     /**
@@ -1028,18 +977,10 @@ class Job
      */
     public function isStatusFinished(): bool
     {
-        switch ($this->getStatus()) {
-            case self::STATUS_ABORTED:
-            case self::STATUS_CANCELLED:
-            case self::STATUS_FAILED:
-            case self::STATUS_RETRIED:
-            case self::STATUS_RETRY_FAILED:
-            case self::STATUS_RETRY_SUCCEEDED:
-            case self::STATUS_SUCCEEDED:
-                return true;
-            default:
-                return false;
-        }
+        return match ($this->getStatus()) {
+            self::STATUS_ABORTED, self::STATUS_CANCELLED, self::STATUS_FAILED, self::STATUS_RETRIED, self::STATUS_RETRY_FAILED, self::STATUS_RETRY_SUCCEEDED, self::STATUS_SUCCEEDED => true,
+            default => false,
+        };
     }
 
     /**
@@ -1047,13 +988,10 @@ class Job
      */
     public function isStatusSuccessful(): bool
     {
-        switch ($this->getStatus()) {
-            case self::STATUS_SUCCEEDED:
-            case self::STATUS_RETRY_SUCCEEDED:
-                return true;
-            default:
-                return false;
-        }
+        return match ($this->getStatus()) {
+            self::STATUS_SUCCEEDED, self::STATUS_RETRY_SUCCEEDED => true,
+            default => false,
+        };
     }
 
     /**
@@ -1061,13 +999,10 @@ class Job
      */
     public function isStatusWaiting(): bool
     {
-        switch ($this->getStatus()) {
-            case self::STATUS_NEW:
-            case self::STATUS_RETRIED:
-                return true;
-            default:
-                return false;
-        }
+        return match ($this->getStatus()) {
+            self::STATUS_NEW, self::STATUS_RETRIED => true,
+            default => false,
+        };
     }
 
     /**
@@ -1075,13 +1010,10 @@ class Job
      */
     public function isStatusWorking(): bool
     {
-        switch ($this->getStatus()) {
-            case self::STATUS_PENDING:
-            case self::STATUS_RUNNING:
-                return true;
-            default:
-                return false;
-        }
+        return match ($this->getStatus()) {
+            self::STATUS_PENDING, self::STATUS_RUNNING => true,
+            default => false,
+        };
     }
 
     /**
@@ -1089,7 +1021,7 @@ class Job
      */
     public function isTypeCancelling(): bool
     {
-        return false !== \strpos($this->getCommand(), 'mark-as-cancelled');
+        return str_contains($this->getCommand(), 'mark-as-cancelled');
     }
 
     /**
@@ -1099,16 +1031,10 @@ class Job
      */
     public function isTypeInternal(): bool
     {
-        switch ($this->getType()) {
-            case self::TYPE_CANCELLING:
-                return true;
-
-                break;
-
-            case self::TYPE_JOB:
-            default:
-                return false;
-        }
+        return match ($this->getType()) {
+            self::TYPE_CANCELLING => true,
+            default => false,
+        };
     }
 
     /**
@@ -1118,7 +1044,7 @@ class Job
      */
     public function isTypeRetrying(): bool
     {
-        return null !== $this->getRetryOf();
+        return $this->getRetryOf() instanceof \SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
     }
 
     /**
@@ -1128,7 +1054,7 @@ class Job
      */
     public function isTypeRetried(): bool
     {
-        return null !== $this->getRetriedBy();
+        return $this->getRetriedBy() instanceof \SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
     }
 
     /**
@@ -1279,9 +1205,7 @@ class Job
         return $this;
     }
 
-    /**
-     * @ORM\PreFlush
-     */
+    #[ORM\PreFlush]
     public function reorderInputs(): void
     {
         // Don't reorder the arguments as their order is relevant

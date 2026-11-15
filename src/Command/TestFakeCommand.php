@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Command;
 
+use Symfony\Component\Console\Attribute\AsCommand;
 use Exception;
 use InvalidArgumentException;
 use RuntimeException;
@@ -24,18 +25,15 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * A Fake command to use as fake Job.
  */
+#[AsCommand(name: 'queues:test:fake', description: '[INTERNAL] A Job to test the behaviors of SHQCommandsQueuesBundle. Returns randomly exceptions, and false or true results.')]
 final class TestFakeCommand extends Command
 {
-    /** @var string $defaultName */
-    public static $defaultName = 'queues:test:fake';
-
     /**
      * {@inheritdoc}
      */
     protected function configure(): void
     {
         $this
-            ->setDescription('[INTERNAL] A Job to test the behaviors of SHQCommandsQueuesBundle. Returns randomly exceptions, and false or true results.')
             ->addOption('id', null, InputOption::VALUE_REQUIRED, 'The ID of the Job.')
             ->addOption('trigger-error', 'te', InputOption::VALUE_NONE, 'If passed, triggers some errors to see how the queue deals with them.');
     }
@@ -77,7 +75,7 @@ final class TestFakeCommand extends Command
         if (0 !== \random_int(0, 10) % 2) {
             $output->writeln('Mmm, I think I will randomly return false!');
             // ... Randomly return false
-            return 1;
+            return Command::FAILURE;
         }
 
         // Emulate a duration to execute the command
@@ -90,6 +88,6 @@ final class TestFakeCommand extends Command
         // Ok, all gone well (fingers crossed? :P )
         $output->writeln('Hello! I just woke up! :) ... Finito.');
 
-        return 0;
+        return Command::SUCCESS;
     }
 }

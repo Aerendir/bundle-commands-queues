@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Entity;
 
+use SerendipityHQ\Bundle\CommandsQueuesBundle\Repository\DaemonRepository;
 use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -22,11 +23,10 @@ use SerendipityHQ\Bundle\CommandsQueuesBundle\Config\DaemonConfig;
 
 /**
  * Represents a Daemon.
- *
- * @ORM\Entity(repositoryClass="SerendipityHQ\Bundle\CommandsQueuesBundle\Repository\DaemonRepository")
- * @ORM\Table(name="queues_daemons")
  */
-class Daemon
+#[ORM\Table(name: 'queues_daemons')]
+#[ORM\Entity(repositoryClass: DaemonRepository::class)]
+class Daemon implements \Stringable
 {
     /** @var string */
     public const DEFAULT_DAEMON_NAME = 'default';
@@ -48,53 +48,25 @@ class Daemon
 
     /**
      * @var int
-     *
-     * @ORM\Column(name="id", type="integer")
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="IDENTITY")
      */
+    #[ORM\Column(name: 'id', type: 'integer')]
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'IDENTITY')]
     private $id;
 
-    /**
-     * @var DaemonConfig
-     *
-     * @ORM\Column(name="config", type="array")
-     */
-    private $config;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="host", type="string", length=255)
-     */
-    private $host;
-
-    /**
-     * @var int
-     *
-     * @ORM\Column(name="pid", type="integer")
-     */
-    private $pid;
-
-    /**
-     * @var \DateTimeInterface
-     *
-     * @ORM\Column(name="born_on", type="datetime")
-     */
-    private $bornOn;
+    #[ORM\Column(name: 'born_on', type: 'datetime')]
+    private \DateTime $bornOn;
 
     /**
      * @var \DateTimeInterface|null
-     *
-     * @ORM\Column(name="died_on", type="datetime", nullable=true)
      */
+    #[ORM\Column(name: 'died_on', type: 'datetime', nullable: true)]
     private $diedOn;
 
     /**
      * @var string|null
-     *
-     * @ORM\Column(name="mortis_causa", type="string", length=255, nullable=true)
      */
+    #[ORM\Column(name: 'mortis_causa', type: 'string', length: 255, nullable: true)]
     private $mortisCausa;
 
     /**
@@ -102,7 +74,7 @@ class Daemon
      *
      * @ ORM\OneToMany(targetEntity="SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job", mappedBy="processedBy")
      */
-    private $processedJobs;
+    private ArrayCollection $processedJobs;
 
     /**
      * Daemon constructor.
@@ -113,12 +85,12 @@ class Daemon
      *
      * @throws Exception
      */
-    public function __construct(string $host, int $pid, DaemonConfig $config)
+    public function __construct(#[ORM\Column(name: 'host', type: 'string', length: 255)]
+    private string $host, #[ORM\Column(name: 'pid', type: 'integer')]
+    private int $pid, #[ORM\Column(name: 'config', type: 'array')]
+    private DaemonConfig $config)
     {
         $this->bornOn        = new DateTime();
-        $this->config        = $config;
-        $this->host          = $host;
-        $this->pid           = $pid;
         $this->processedJobs = new ArrayCollection();
     }
 

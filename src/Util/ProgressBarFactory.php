@@ -45,9 +45,7 @@ final class ProgressBarFactory
     {
         ProgressBar::setPlaceholderFormatterDefinition(
             'memory_nr',
-            function (ProgressBar $bar, OutputInterface $output) {
-                return Helper::formatMemory(\memory_get_usage(false));
-            }
+            fn(ProgressBar $bar, OutputInterface $output): string => Helper::formatMemory(\memory_get_usage(false))
         );
         $progress = new ProgressBar($output, $howManyJobs);
         $progress->setFormat($format);

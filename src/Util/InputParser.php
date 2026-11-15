@@ -44,17 +44,13 @@ final class InputParser
     /** @var string */
     private const SHORTCUTS = 'shortcuts';
 
-    /** @var string|null $foundArgument */
-    private static $foundArgument;
+    private static ?string $foundArgument = null;
 
-    /** @var string|null $foundOption */
-    private static $foundOption;
+    private static ?string $foundOption = null;
 
-    /** @var string|null $foundShortcut */
-    private static $foundShortcut;
+    private static ?string $foundShortcut = null;
 
-    /** @var array|null $preparedInput */
-    private static $preparedInput;
+    private static ?array $preparedInput = null;
 
     /**
      * Ensures the $arguments is only a string or an array.
@@ -85,7 +81,7 @@ final class InputParser
             $input = \explode(' ', $input);
 
             // And remove leading and trailing spaces
-            $input     = \array_map('trim', $input);
+            $input     = \array_map(trim(...), $input);
             $wasString = true;
         }
 
@@ -155,9 +151,7 @@ final class InputParser
     public static function stringify(?array $input = [], bool $withCommand = false): ?string
     {
         $preparedInput    = '';
-        $stringifyClosure = static function ($value, $key): string {
-            return sprintf('%s=%s', $key, $value);
-        };
+        $stringifyClosure = (static fn($value, $key): string => sprintf('%s=%s', $key, $value));
 
         if (null === $input) {
             return null;
@@ -208,7 +202,7 @@ final class InputParser
      */
     public static function isOption(string $option): bool
     {
-        return 0 === \strpos($option, '--');
+        return str_starts_with($option, '--');
     }
 
     /**
@@ -218,7 +212,7 @@ final class InputParser
      */
     public static function isShortcut(string $shortcut): bool
     {
-        return false === self::isOption($shortcut) && 0 === \strpos($shortcut, '-');
+        return false === self::isOption($shortcut) && str_starts_with($shortcut, '-');
     }
 
     /**

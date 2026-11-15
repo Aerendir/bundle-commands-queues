@@ -13,10 +13,10 @@ declare(strict_types=1);
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Service;
 
+use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\OptimisticLockException;
-use Doctrine\ORM\ORMException;
 use RuntimeException;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Daemon;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
@@ -26,10 +26,10 @@ use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\InputParser;
 /**
  * Manages the commands_queues.
  */
-final class QueuesManager
+final readonly class QueuesManager
 {
     /** @var EntityManager */
-    private $entityManager;
+    private EntityManagerInterface $entityManager;
 
     /**
      * @param EntityManagerInterface $entityManager
@@ -137,6 +137,6 @@ final class QueuesManager
     public function schedule(Job $job): void
     {
         $this->entityManager->persist($job);
-        $this->entityManager->flush($job);
+        $this->entityManager->flush();
     }
 }

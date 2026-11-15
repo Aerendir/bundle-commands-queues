@@ -252,13 +252,9 @@ final class Configuration implements ConfigurationInterface
         ->end()
             ->validate()
             // Deeply validate the full config tree
-            ->ifTrue(function ($tree) {
-                return $this->validateConfiguration($tree);
-            })
+            ->ifTrue(fn($tree): bool => $this->validateConfiguration($tree))
             // Re-elaborate the tree removing unuseful values and preparing useful ones
-            ->then(function ($tree) {
-                return $this->prepareConfiguration($tree);
-            })
+            ->then(fn($tree): array => $this->prepareConfiguration($tree))
             ->end();
 
         return $treeBuilder;
@@ -311,7 +307,7 @@ final class Configuration implements ConfigurationInterface
             self::QUEUES             => $tree[self::QUEUES],
         ];
 
-        if (0 === (\is_array($returnConfig[self::DAEMONS]) || $returnConfig[self::DAEMONS] instanceof \Countable ? \count($returnConfig[self::DAEMONS]) : 0)) {
+        if (0 === (is_countable($returnConfig[self::DAEMONS]) ? \count($returnConfig[self::DAEMONS]) : 0)) {
             $returnConfig[self::DAEMONS][Daemon::DEFAULT_DAEMON_NAME] = [];
         }
 

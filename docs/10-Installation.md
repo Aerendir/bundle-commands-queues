@@ -10,7 +10,7 @@ Open a command console, go to your project directory and execute the
 following command to download the latest stable version of this bundle:
 
 ```console
-$ composer require serendipity_hq/commands-queues-bundle
+$ composer require serendipity_hq/bundle-commands-queues
 ```
 
 This command requires you to have Composer installed globally, as explained in the

@@ -13,11 +13,12 @@ declare(strict_types=1);
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Command;
 
-use Doctrine\Common\Persistence\Mapping\MappingException;
+use Symfony\Component\Console\Attribute\AsCommand;
+use Doctrine\ORM\Exception\ORMException;
+use Doctrine\Persistence\Mapping\MappingException;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\OptimisticLockException;
-use Doctrine\ORM\ORMException;
 use Doctrine\ORM\TransactionRequiredException;
 use Exception;
 use RuntimeException;
@@ -39,41 +40,28 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * Runs the daemon that listens for new Joobs to process.
  */
+#[AsCommand(name: 'queues:run', description: 'Start the daemon to continuously process the queue.')]
 final class RunCommand extends Command
 {
-    /** @var string */
-    protected static $defaultName = 'queues:run';
-
-    /** @var QueuesDaemon $daemon */
-    private $daemon;
-
     /** @var EntityManager $entityManager */
-    private $entityManager;
+    private readonly EntityManagerInterface $entityManager;
 
-    /** @var JobsMarker $jobsMarker */
-    private $jobsMarker;
+    private ?SerendipityHQStyle $ioWriter = null;
 
-    /** @var SerendipityHQStyle $ioWriter */
-    private $ioWriter;
-
-    /** @var OutputInterface $output */
-    private $output;
+    private ?OutputInterface $output = null;
 
     /**
      * @param QueuesDaemon           $daemon
      * @param EntityManagerInterface $entityManager
      * @param JobsMarker             $jobsMarker
      */
-    public function __construct(QueuesDaemon $daemon, EntityManagerInterface $entityManager, JobsMarker $jobsMarker)
+    public function __construct(private readonly QueuesDaemon $daemon, EntityManagerInterface $entityManager, private readonly JobsMarker $jobsMarker)
     {
         // This is to make static analysis pass
         if ( ! $entityManager instanceof EntityManager) {
             throw new RuntimeException('You need to pass an EntityManager instance.');
         }
-
-        $this->daemon        = $daemon;
         $this->entityManager = $entityManager;
-        $this->jobsMarker    = $jobsMarker;
 
         parent::__construct();
     }
@@ -84,7 +72,6 @@ final class RunCommand extends Command
     protected function configure(): void
     {
         $this
-            ->setDescription('Start the daemon to continuously process the queue.')
             ->setDefinition(
                 new InputDefinition([
                     new InputArgument('daemon', InputArgument::OPTIONAL, 'The Daemon to run.'),
@@ -123,13 +110,13 @@ final class RunCommand extends Command
         if (null !== $daemon && false === \is_string($daemon)) {
             $this->ioWriter->errorLineNoBg('The passed daemon is not valid.');
 
-            return 1;
+            return Command::FAILURE;
         }
 
         if (false === \is_bool($allowProd)) {
             $this->ioWriter->errorLineNoBg('The --allow-prod value is not valid.');
 
-            return 1;
+            return Command::FAILURE;
         }
 
         $this->daemon->initialize($daemon, $allowProd, $this->ioWriter, $output);
@@ -266,7 +253,7 @@ final class RunCommand extends Command
 
         $this->ioWriter->success('All done: Queue Daemon ended running. No more ScheduledJobs will be processed.');
 
-        return 0;
+        return Command::SUCCESS;
     }
 
     /**
@@ -348,7 +335,7 @@ final class RunCommand extends Command
 
         // Search the line with this command name: this indicates the process is still running
         foreach ($lines as $line) {
-            if (false !== \strpos($line, (string) $this->getName())) {
+            if (str_contains($line, (string) $this->getName())) {
                 return true;
             }
         }

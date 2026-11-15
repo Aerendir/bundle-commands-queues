@@ -20,6 +20,7 @@ use SerendipityHQ\Bundle\CommandsQueuesBundle\Command\TestFailingJobsCommand;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Command\TestFakeCommand;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Command\TestRandomJobsCommand;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Config\DaemonConfig;
+use SerendipityHQ\Bundle\CommandsQueuesBundle\Doctrine\DBAL\Types\ArrayType;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Service\JobsManager;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Service\QueuesDaemon;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\JobsMarker;
@@ -28,14 +29,27 @@ use Sonata\AdminBundle\SonataAdminBundle;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
+use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 
 /**
  * {@inheritdoc}
  */
-final class SHQCommandsQueuesExtension extends Extension
+final class SHQCommandsQueuesExtension extends Extension implements PrependExtensionInterface
 {
+    /**
+     * Registers the `array` Doctrine type the entities are mapped with, when doctrine/dbal (4+) does not provide it.
+     */
+    public function prepend(ContainerBuilder $container): void
+    {
+        if (\class_exists(\Doctrine\DBAL\Types\ArrayType::class) || false === $container->hasExtension('doctrine')) {
+            return;
+        }
+
+        $container->prependExtensionConfig('doctrine', ['dbal' => ['types' => [ArrayType::NAME => ArrayType::class]]]);
+    }
+
     /**
      * {@inheritdoc}
      *

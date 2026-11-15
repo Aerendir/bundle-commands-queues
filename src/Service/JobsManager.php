@@ -13,10 +13,11 @@ declare(strict_types=1);
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Service;
 
+use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\OptimisticLockException;
-use Doctrine\ORM\ORMException;
 use Doctrine\ORM\ORMInvalidArgumentException;
 use Doctrine\ORM\TransactionRequiredException;
 use Doctrine\ORM\UnitOfWork;
@@ -32,27 +33,19 @@ use Symfony\Component\Process\Process;
  */
 final class JobsManager
 {
-    /** @var EntityManager $entityManager */
-    private static $entityManager;
+    private static ?EntityManager $entityManager = null;
 
-    /** @var SerendipityHQStyle $ioWriter */
-    private static $ioWriter;
+    private static ?SerendipityHQStyle $ioWriter = null;
 
-    /** @var string $env */
-    private $env;
+    private ?string $env = null;
 
-    /** @var string $kernelProjectDir */
-    private $kernelProjectDir;
-
-    /** @var int $verbosity */
-    private $verbosity;
+    private ?int $verbosity = null;
 
     /**
      * @param string $kernelProjectDir
      */
-    public function __construct(string $kernelProjectDir)
+    public function __construct(private readonly string $kernelProjectDir)
     {
-        $this->kernelProjectDir = $kernelProjectDir;
     }
 
     /**
@@ -138,12 +131,12 @@ final class JobsManager
             ));
 
             // Print detached
-            if (false === empty($detached)) {
+            if ($detached !== []) {
                 self::$ioWriter->commentLineNoBg(sprintf('Detached: %s', \implode(', ', $detached)));
             }
 
             // Print not detached
-            if (false === empty($notDetached)) {
+            if ($notDetached !== []) {
                 self::$ioWriter->commentLineNoBg(sprintf('Not Detached: %s', \implode(', ', $notDetached)));
             }
         }
@@ -265,26 +258,13 @@ final class JobsManager
      */
     public static function guessJobEmState(Job $job): string
     {
-        switch (self::$entityManager->getUnitOfWork()->getEntityState($job)) {
-            case UnitOfWork::STATE_DETACHED:
-                $state = 'Detached';
-
-                break;
-            case UnitOfWork::STATE_NEW:
-                $state = 'New';
-
-                break;
-            case UnitOfWork::STATE_MANAGED:
-                $state = 'Managed';
-
-                break;
-            case UnitOfWork::STATE_REMOVED:
-                $state = 'Removed';
-
-                break;
-            default:
-                $state = 'Unknown';
-        }
+        $state = match (self::$entityManager->getUnitOfWork()->getEntityState($job)) {
+            UnitOfWork::STATE_DETACHED => 'Detached',
+            UnitOfWork::STATE_NEW => 'New',
+            UnitOfWork::STATE_MANAGED => 'Managed',
+            UnitOfWork::STATE_REMOVED => 'Removed',
+            default => 'Unknown',
+        };
 
         return $state;
     }
@@ -301,7 +281,7 @@ final class JobsManager
      */
     private static function calculateJobsTree(Job $job, array &$tree = []): array
     {
-        if (null !== $job->getChildDependencies() && 0 < $job->getChildDependencies()->count()) {
+        if ($job->getChildDependencies() instanceof Collection && 0 < $job->getChildDependencies()->count()) {
             /** @var Job $childDependency Detach child deps * */
             foreach ($job->getChildDependencies() as $childDependency) {
                 if (false === \in_array($childDependency->getId(), $tree, true)) {
@@ -314,7 +294,7 @@ final class JobsManager
             }
         }
 
-        if (null !== $job->getParentDependencies() && 0 < \count($job->getParentDependencies())) {
+        if ($job->getParentDependencies() instanceof Collection && 0 < \count($job->getParentDependencies())) {
             /** @var Job $parentDependency Detach parend deps * */
             foreach ($job->getParentDependencies() as $parentDependency) {
                 if (false === \in_array($parentDependency->getId(), $tree, true)) {
@@ -328,7 +308,7 @@ final class JobsManager
         }
 
         // Detach the cancelling Job if any
-        if (null !== $job->getCancelledBy() && false === \in_array($job->getCancelledBy()->getId(), $tree, true)) {
+        if ($job->getCancelledBy() instanceof Job && false === \in_array($job->getCancelledBy()->getId(), $tree, true)) {
             $tree[] = $job->getCancelledBy()->getId();
 
             // Visit the child
@@ -349,7 +329,7 @@ final class JobsManager
         }
 
         // Detach the retried Job
-        if (null !== $job->getRetryOf() && false === \in_array($job->getRetryOf()->getId(), $tree, true)) {
+        if ($job->getRetryOf() instanceof Job && false === \in_array($job->getRetryOf()->getId(), $tree, true)) {
             $tree[] = $job->getRetryOf()->getId();
 
             // Visit the child
@@ -357,7 +337,7 @@ final class JobsManager
         }
 
         // And the first retried one
-        if (null !== $job->getFirstRetriedJob() && false === \in_array($job->getFirstRetriedJob()->getId(), $tree, true)) {
+        if ($job->getFirstRetriedJob() instanceof Job && false === \in_array($job->getFirstRetriedJob()->getId(), $tree, true)) {
             $tree[] = $job->getFirstRetriedJob()->getId();
 
             // Visit the child
@@ -365,7 +345,7 @@ final class JobsManager
         }
 
         // The retrying one if any
-        if (null !== $job->getRetriedBy() && false === \in_array($job->getRetriedBy()->getId(), $tree, true)) {
+        if ($job->getRetriedBy() instanceof Job && false === \in_array($job->getRetriedBy()->getId(), $tree, true)) {
             $tree[] = $job->getRetriedBy()->getId();
 
             // Visit the child
@@ -374,7 +354,7 @@ final class JobsManager
 
         // And all the retrying Jobs
         /* @var Job $retryingDependency Detach retryingDeps **/
-        if (null !== $job->getRetryingJobs() && 0 < \count($job->getRetryingJobs())) {
+        if ($job->getRetryingJobs() instanceof Collection && 0 < \count($job->getRetryingJobs())) {
             foreach ($job->getRetryingJobs() as $retryingJob) {
                 if (false === \in_array($retryingJob->getId(), $tree, true)) {
                     // Add it to the tree
@@ -414,27 +394,13 @@ final class JobsManager
      */
     private function guessVerbosityLevel(): string
     {
-        switch ($this->verbosity) {
-            case OutputInterface::VERBOSITY_QUIET:
-                return '-q';
-
-                break;
-            case OutputInterface::VERBOSITY_VERBOSE:
-                return '-vv';
-
-                break;
-            case OutputInterface::VERBOSITY_VERY_VERBOSE:
-                return '-vv';
-
-                break;
-            case OutputInterface::VERBOSITY_DEBUG:
-                return '-vvv';
-
-                break;
-            case OutputInterface::VERBOSITY_NORMAL:
-            default:
-                // This WILL NEVER be reached as default
-                return '';
-        }
+        return match ($this->verbosity) {
+            OutputInterface::VERBOSITY_QUIET => '-q',
+            OutputInterface::VERBOSITY_VERBOSE => '-vv',
+            OutputInterface::VERBOSITY_VERY_VERBOSE => '-vv',
+            OutputInterface::VERBOSITY_DEBUG => '-vvv',
+            // This WILL NEVER be reached as default
+            default => '',
+        };
     }
 }

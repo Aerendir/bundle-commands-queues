@@ -13,14 +13,13 @@ declare(strict_types=1);
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Service;
 
+use Doctrine\ORM\Exception\ORMException;
+use Doctrine\Persistence\Mapping\MappingException;
 use Carbon\Carbon;
-use Countable;
 use DateTime;
-use Doctrine\Common\Persistence\Mapping\MappingException;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\OptimisticLockException;
-use Doctrine\ORM\ORMException;
 use Doctrine\ORM\ORMInvalidArgumentException;
 use Doctrine\ORM\TransactionRequiredException;
 use Exception;
@@ -61,50 +60,28 @@ final class QueuesDaemon
     private const GET_CLOSED_AT = 'getClosedAt';
 
     /** @var Daemon $me Is the Daemon object */
-    private $me;
+    private ?Daemon $me = null;
 
-    /** @var array $canSleep */
-    private $canSleep = [];
-
-    /** @var DaemonConfig $config */
-    private $config;
-
-    /** @var EntityManagerInterface $entityManager */
-    private $entityManager;
-
-    /** @var JobsManager $jobsManager */
-    private $jobsManager;
-
-    /** @var JobsMarker $processMarker Used to change the status of Jobs during their execution */
-    private $jobsMarker;
+    private array $canSleep = [];
 
     /** @var JobRepository $jobsRepo */
     private $jobsRepo;
 
-    /** @var SerendipityHQStyle $ioWriter */
-    private $ioWriter;
+    private ?SerendipityHQStyle $ioWriter = null;
 
     /**
      * @var bool If this is true, mustRun returns false and the Daemon dies.
      *           This will be true when a PCNTL SIGTERM signal is intercepted or when the max runtime execution
      *           is reached.
      */
-    private $mustDie = false;
+    private bool $mustDie = false;
 
-    /** @var bool $pcntlLoaded */
-    private $pcntlLoaded = false;
-
-    /** @var Profiler $profiler */
-    private $profiler;
+    private bool $pcntlLoaded = false;
 
     /** @var array $runningJobs Keeps track of the started jobs in the queue. */
-    private $runningJobs = [];
+    private array $runningJobs = [];
 
-    /** @var int $verbosity */
-    private $verbosity;
-
-    /** @var \Doctrine\ORM\Configuration */
-    private $configuration;
+    private ?int $verbosity = null;
 
     /**
      * @param DaemonConfig           $config
@@ -113,18 +90,11 @@ final class QueuesDaemon
      * @param JobsMarker             $jobsMarker
      * @param Profiler               $profiler
      */
-    public function __construct(DaemonConfig $config, EntityManagerInterface $entityManager, JobsManager $jobsManager, JobsMarker $jobsMarker, Profiler $profiler, \Doctrine\ORM\Configuration $configuration)
+    public function __construct(private readonly DaemonConfig $config, private readonly EntityManagerInterface $entityManager, private readonly JobsManager $jobsManager, private readonly JobsMarker $jobsMarker, private readonly Profiler $profiler, private readonly \Doctrine\ORM\Configuration $configuration)
     {
-        $this->config        = $config;
-        $this->entityManager = $entityManager;
-        $this->jobsManager   = $jobsManager;
-        $this->jobsMarker    = $jobsMarker;
-        $this->profiler      = $profiler;
-
         /** @var JobRepository $jobsRepo */
         $jobsRepo            = $this->entityManager->getRepository(Job::class);
         $this->jobsRepo      = $jobsRepo;
-        $this->configuration = $configuration;
     }
 
     /**
@@ -489,7 +459,7 @@ final class QueuesDaemon
             /** @var Process $checkingProcess */
             $checkingProcess = $runningJob[self::PROCESS];
 
-            if (null !== $progressBar) {
+            if ($progressBar instanceof ProgressBar) {
                 $progressBar->advance();
                 $this->ioWriter->writeln('');
             }
@@ -604,8 +574,7 @@ final class QueuesDaemon
         }
 
         return $this->getConfig()->getManagedEntitiesTreshold() < (
-            \is_array($this->entityManager->getUnitOfWork()->getIdentityMap()[Job::class]) ||
-            $this->entityManager->getUnitOfWork()->getIdentityMap()[Job::class] instanceof Countable
+            is_countable($this->entityManager->getUnitOfWork()->getIdentityMap()[Job::class])
                 ? \count($this->entityManager->getUnitOfWork()->getIdentityMap()[Job::class])
                 : 0
             );
@@ -863,7 +832,7 @@ final class QueuesDaemon
      *
      * @return bool|Job Returns false or the Job object
      */
-    private function handleChildsOfFailedJob(Job $job)
+    private function handleChildsOfFailedJob(Job $job): Job|false
     {
         if ($job->getChildDependencies()->count() > 0) {
             if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
@@ -1020,7 +989,7 @@ final class QueuesDaemon
             $stales[] = $job->getId();
 
             if ($this->ioWriter->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
-                if (null !== $progressBar) {
+                if ($progressBar instanceof ProgressBar) {
                     $progressBar->advance();
                 }
 

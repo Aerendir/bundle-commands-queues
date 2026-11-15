@@ -153,14 +153,14 @@ file that was distributed with this source code.
                 <code style="width:300px; overflow:hidden; white-space:nowrap;">{{ object.command }} <span class="text-muted">{{ object.input|commands_queues_render_input }}</span></code>
             </p>
             <p>
-                <b>{% trans %}Created On{% endtrans %}</b>: {% if object.createdAt %}{{ object.createdAt|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }}{% endif %}<br />
-                <b>{% trans %}Execute After{% endtrans %}</b>: {% if object.executeAfterTime %}{{ object.executeAfterTime|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }}{% endif %}<br />
-                <b>{% trans %}Started On{% endtrans %}</b>: {% if object.startedAt %}{{ object.startedAt|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }}{% endif %}<br />
-                <b>{% trans %}Closed On{% endtrans %}</b>: {% if object.closedAt %}{{ object.closedAt|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }}{% endif %}<br />
+                <b>{% trans %}Created On{% endtrans %}</b>: {% if object.createdAt %}{{ object.createdAt|date('l, j F Y, h:i A') }}{% endif %}<br />
+                <b>{% trans %}Execute After{% endtrans %}</b>: {% if object.executeAfterTime %}{{ object.executeAfterTime|date('l, j F Y, h:i A') }}{% endif %}<br />
+                <b>{% trans %}Started On{% endtrans %}</b>: {% if object.startedAt %}{{ object.startedAt|date('l, j F Y, h:i A') }}{% endif %}<br />
+                <b>{% trans %}Closed On{% endtrans %}</b>: {% if object.closedAt %}{{ object.closedAt|date('l, j F Y, h:i A') }}{% endif %}<br />
             </p>
             <p><small>
                     <b>{% trans %}Retry strategy{% endtrans %}: {{ object.retryStrategy.strategyName }}</b><br />
-                    {% if object.retryStrategy.canRetry %}Will be retried on: {{ object.retryStrategy.retryOn|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }}<br />{% endif %}
+                    {% if object.retryStrategy.canRetry %}Will be retried on: {{ object.retryStrategy.retryOn|date('l, j F Y, h:i A') }}<br />{% endif %}
                     <span class="text-muted">
                         {% trans %}Current attempt{% endtrans %}: {{ object.retryStrategy.attempts }}, {% trans %}Max attempts{% endtrans %}: {{ object.retryStrategy.maxAttempts }},
                         {% trans %}Increment by{% endtrans %}: {{ object.retryStrategy.incrementBy }} {{ object.retryStrategy.timeUnit }},

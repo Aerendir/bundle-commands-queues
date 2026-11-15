@@ -13,8 +13,9 @@ declare(strict_types=1);
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Command;
 
+use Symfony\Component\Console\Attribute\AsCommand;
+use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\OptimisticLockException;
-use Doctrine\ORM\ORMException;
 use Exception;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Service\QueuesManager;
@@ -28,24 +29,18 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * Creates some failing Jobs.
  */
+#[AsCommand(name: 'queues:test:failing-jobs', description: '[INTERNAL] Generates some linked failing Jobs.')]
 final class TestFailingJobsCommand extends Command
 {
     /** @var string */
     private const QUEUE_1 = 'queue_1';
 
-    /** @var string $defaultName */
-    protected static $defaultName = 'queues:test:failing-jobs';
-
-    /** @var QueuesManager $queuesManager */
-    private $queuesManager;
-
     /**
      * @param QueuesManager $queuesManager
      */
-    public function __construct(QueuesManager $queuesManager)
+    public function __construct(private readonly QueuesManager $queuesManager)
     {
         parent::__construct();
-        $this->queuesManager = $queuesManager;
     }
 
     /**
@@ -54,7 +49,6 @@ final class TestFailingJobsCommand extends Command
     protected function configure(): void
     {
         $this
-            ->setDescription('[INTERNAL] Generates some linked failing Jobs.')
             ->setDefinition(
                 new InputDefinition([
                     new InputOption('id', 'id', InputOption::VALUE_REQUIRED),
@@ -88,6 +82,6 @@ final class TestFailingJobsCommand extends Command
         $job2->addChildDependency($job3);
         $this->queuesManager->schedule($job3);
 
-        return 0;
+        return Command::SUCCESS;
     }
 }

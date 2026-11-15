@@ -45,20 +45,15 @@ final class Profiler
     /** @var float $lastOptimizationAt The last time the optimization were done */
     private $lastOptimizationAt;
 
-    /** @var int $lastMemoryUsage */
-    private $lastMemoryUsage;
+    private ?int $lastMemoryUsage = null;
 
-    /** @var int $lastMemoryUsageReal */
-    private $lastMemoryUsageReal;
+    private ?int $lastMemoryUsageReal = null;
 
-    /** @var int $lastUowSize */
-    private $lastUowSize;
+    private ?int $lastUowSize = null;
 
-    /** @var array $runningJobsLastCheckedAt */
-    private $runningJobsLastCheckedAt = [];
+    private array $runningJobsLastCheckedAt = [];
 
-    /** @var int $highestMemoryPeak */
-    private $highestMemoryPeak;
+    private ?int $highestMemoryPeak = null;
 
     /** @var int $highestMemoryPeak */
     private $highestMemoryPeakReal;
@@ -67,25 +62,21 @@ final class Profiler
     private $highestUowSize;
 
     /** @var int $iterations How many times Daemon::mustRun() was called in the "while(Daemon::mustRun())" */
-    private $iterations = 0;
+    private int $iterations = 0;
 
     /** @var int $maxRuntime After this amount of time the Daemon MUST die */
-    private $maxRuntime;
+    private ?int $maxRuntime = null;
 
-    /** @var bool $memprofEnabled */
-    private $memprofEnabled = false;
+    private bool $memprofEnabled = false;
 
     /** @var int $pid The PID of the Daemon to be used to mark the callgrindout file */
-    private $pid;
+    private ?int $pid = null;
 
-    /** @var array $profilingInfo */
-    private $profilingInfo = [];
+    private array $profilingInfo = [];
 
-    /** @var UnitOfWork $uow */
-    private static $uow;
+    private static ?UnitOfWork $uow = null;
 
-    /** @var SerendipityHQStyle $ioWriter */
-    private static $ioWriter;
+    private static ?SerendipityHQStyle $ioWriter = null;
 
     /**
      * @return string
@@ -194,7 +185,7 @@ final class Profiler
         $currentMemoryPeakReal  = \memory_get_peak_usage(true);
         // Subtract the daemon entity
         $currentUowSize        = self::$uow->size() - 1;
-        $currentHighestUowSize = $this->highestUowSize < $currentUowSize ? $currentUowSize : $this->highestUowSize;
+        $currentHighestUowSize = max($currentUowSize, $this->highestUowSize);
 
         $memoryDifference = $this->lastMemoryUsage - $currentMemoryUsage;
         $memoryDifference = 0 !== $memoryDifference ? \round($memoryDifference / $this->lastMemoryUsage * 100, 2) : 0;
@@ -275,7 +266,7 @@ final class Profiler
         $this->lastMemoryUsage       = $currentMemoryUsage;
         $this->lastMemoryUsageReal   = $currentMemoryUsageReal;
         $this->lastUowSize           = $currentUowSize;
-        $this->highestMemoryPeak     = $this->highestMemoryPeak     < $currentMemoryPeak ? $currentMemoryPeak : $this->highestMemoryPeak;
+        $this->highestMemoryPeak     = max($currentMemoryPeak, $this->highestMemoryPeak);
         $this->highestMemoryPeakReal = $this->highestMemoryPeakReal < $currentMemoryPeakReal ? $currentMemoryPeakReal : $this->highestMemoryPeakReal;
         $this->highestUowSize        = $currentHighestUowSize;
 

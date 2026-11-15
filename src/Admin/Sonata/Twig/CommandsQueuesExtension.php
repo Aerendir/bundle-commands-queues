@@ -28,15 +28,12 @@ final class CommandsQueuesExtension extends AbstractExtension
     private const OPTIONS = 'options';
     /** @var string */
     private const __ID = '--id';
-    /** @var UrlGeneratorInterface $generator */
-    private $generator;
 
     /**
      * @param UrlGeneratorInterface $generator
      */
-    public function __construct(UrlGeneratorInterface $generator)
+    public function __construct(private readonly UrlGeneratorInterface $generator)
     {
-        $this->generator = $generator;
     }
 
     /**
@@ -45,12 +42,8 @@ final class CommandsQueuesExtension extends AbstractExtension
     public function getFilters(): array
     {
         return [
-            new TwigFilter('commands_queues_get_id_option_value', function (Job $job): ?string {
-                return $this->getIdOptionValue($job);
-            }),
-            new TwigFilter('commands_queues_render_input', function (?array $input): ?string {
-                return $this->getRenderedInput($input);
-            }),
+            new TwigFilter('commands_queues_get_id_option_value', fn(Job $job): ?string => $this->getIdOptionValue($job)),
+            new TwigFilter('commands_queues_render_input', fn(?array $input): ?string => $this->getRenderedInput($input)),
         ];
     }
 
