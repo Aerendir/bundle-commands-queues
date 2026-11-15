@@ -16,8 +16,6 @@ namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Command;
 use Exception;
 use InvalidArgumentException;
 use RuntimeException;
-use function Safe\sleep;
-use function Safe\sprintf;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -85,7 +83,9 @@ final class TestFakeCommand extends Command
         // Emulate a duration to execute the command
         $rand = \random_int(0, 10);
         $output->writeln(sprintf("I'm so tired... I will sleep for %s seconds... Good bye, see you soon! :)", $rand));
-        sleep($rand);
+        if (false === \sleep($rand)) {
+            throw new RuntimeException('Impossible to sleep.');
+        }
 
         // Ok, all gone well (fingers crossed? :P )
         $output->writeln('Hello! I just woke up! :) ... Finito.');

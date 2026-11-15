@@ -21,8 +21,6 @@ use Doctrine\ORM\ORMInvalidArgumentException;
 use Doctrine\ORM\TransactionRequiredException;
 use Doctrine\ORM\UnitOfWork;
 use RuntimeException;
-use Safe\Exceptions\StringsException;
-use function Safe\sprintf;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\InputParser;
 use SerendipityHQ\Bundle\ConsoleStyles\Console\Style\SerendipityHQStyle;
@@ -86,7 +84,6 @@ final class JobsManager
      * @throws ORMInvalidArgumentException
      * @throws TransactionRequiredException
      * @throws ORMException
-     * @throws StringsException
      */
     public static function detach(Job $job): void
     {

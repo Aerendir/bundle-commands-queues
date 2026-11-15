@@ -14,7 +14,6 @@ declare(strict_types=1);
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\DependencyInjection;
 
 use Exception;
-use Safe\Exceptions\StringsException;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Command\InternalMarkAsCancelledCommand;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Command\RunCommand;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Command\TestFailingJobsCommand;
@@ -40,7 +39,6 @@ final class SHQCommandsQueuesExtension extends Extension
     /**
      * {@inheritdoc}
      *
-     * @throws StringsException
      * @throws Exception
      */
     public function load(array $configs, ContainerBuilder $container): void

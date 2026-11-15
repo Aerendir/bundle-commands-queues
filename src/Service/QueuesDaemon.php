@@ -25,13 +25,6 @@ use Doctrine\ORM\ORMInvalidArgumentException;
 use Doctrine\ORM\TransactionRequiredException;
 use Exception;
 use RuntimeException;
-use Safe\Exceptions\ArrayException;
-use Safe\Exceptions\PcntlException;
-use Safe\Exceptions\StringsException;
-use function Safe\getmypid;
-use function Safe\pcntl_signal_dispatch;
-use function Safe\sleep;
-use function Safe\sprintf;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Config\DaemonConfig;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\DependencyInjection\Configuration;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Daemon;
@@ -144,7 +137,6 @@ final class QueuesDaemon
      *
      * @throws OptimisticLockException
      * @throws Exception
-     * @throws StringsException
      */
     public function initialize(?string $daemon, bool $allowProd, SerendipityHQStyle $ioWriter, OutputInterface $output): void
     {
@@ -158,12 +150,17 @@ final class QueuesDaemon
         $this->config->initialize($daemon, $allowProd);
 
         // Save the Daemon to the Database
-        $hostname = \Safe\gethostname();
+        $hostname = \gethostname();
         if (false === \is_string($hostname)) {
             throw new RuntimeException('Impossible to get the host name.');
         }
 
-        $this->me = new Daemon($hostname, getmypid(), $this->config);
+        $pid = \getmypid();
+        if (false === $pid) {
+            throw new RuntimeException('Impossible to get the PID of the Daemon.');
+        }
+
+        $this->me = new Daemon($hostname, $pid, $this->config);
         $this->entityManager->persist($this->me);
         $this->entityManager->flush($this->me);
         $ioWriter->successLineNoBg(sprintf(
@@ -227,9 +224,6 @@ final class QueuesDaemon
      *
      * @param bool $hitIteration the iteration has to be hit only from the RunCommand
      *
-     * @throws StringsException
-     * @throws PcntlException
-     *
      * @return bool
      */
     public function isAlive(bool $hitIteration = false): bool
@@ -239,8 +233,8 @@ final class QueuesDaemon
             $this->profiler->hitIteration();
         }
 
-        if (true === $this->pcntlLoaded) {
-            pcntl_signal_dispatch();
+        if (true === $this->pcntlLoaded && false === \pcntl_signal_dispatch()) {
+            throw new RuntimeException('Impossible to dispatch the pending signals.');
         }
 
         // This is true if a SIGTERM or a SIGINT signal is received
@@ -265,9 +259,6 @@ final class QueuesDaemon
     /**
      * @param string $queueName
      *
-     * @throws PcntlException
-     * @throws StringsException
-     *
      * @return bool
      */
     public function canInitializeNewJobs(string $queueName): bool
@@ -283,7 +274,6 @@ final class QueuesDaemon
      *
      * @throws ORMException
      * @throws OptimisticLockException
-     * @throws StringsException
      * @throws Exception
      *
      * @return bool
@@ -484,7 +474,6 @@ final class QueuesDaemon
      * @param string           $queueName
      * @param ProgressBar|null $progressBar
      *
-     * @throws StringsException
      * @throws OptimisticLockException
      * @throws ORMInvalidArgumentException
      * @throws TransactionRequiredException
@@ -523,7 +512,6 @@ final class QueuesDaemon
     /**
      * @param array $runningJob
      *
-     * @throws StringsException
      * @throws OptimisticLockException
      * @throws ORMInvalidArgumentException
      * @throws TransactionRequiredException
@@ -636,7 +624,6 @@ final class QueuesDaemon
      *
      * @throws ORMException
      * @throws OptimisticLockException
-     * @throws StringsException
      * @throws TransactionRequiredException
      * @throws MappingException
      * @throws Exception
@@ -707,7 +694,6 @@ final class QueuesDaemon
      * @throws MappingException
      * @throws ORMException
      * @throws OptimisticLockException
-     * @throws StringsException
      */
     public function purgeExpiredJobs(string $queueName): void
     {
@@ -750,7 +736,9 @@ final class QueuesDaemon
      */
     public function sleep(): void
     {
-        sleep($this->getConfig()->getSleepFor());
+        if (false === \sleep($this->getConfig()->getSleepFor())) {
+            throw new RuntimeException('Impossible to put the Daemon in sleep.');
+        }
     }
 
     /**
@@ -822,8 +810,6 @@ final class QueuesDaemon
      * @param Process $process
      *
      * @throws OptimisticLockException
-     * @throws StringsException
-     * @throws ArrayException
      * @throws ORMException
      * @throws Exception
      */
@@ -873,7 +859,6 @@ final class QueuesDaemon
      * @param Job $job
      *
      * @throws OptimisticLockException
-     * @throws StringsException
      * @throws ORMException
      *
      * @return bool|Job Returns false or the Job object
@@ -974,9 +959,7 @@ final class QueuesDaemon
      * @param array  $info
      * @param string $retryReason
      *
-     * @throws ArrayException
      * @throws ORMException
-     * @throws StringsException
      *
      * @return bool
      */
@@ -1002,8 +985,6 @@ final class QueuesDaemon
      *
      * @throws OptimisticLockException
      * @throws NonUniqueResultException
-     * @throws StringsException
-     * @throws ArrayException
      * @throws ORMException
      * @throws Exception
      */
@@ -1070,9 +1051,7 @@ final class QueuesDaemon
      * @param array  $info
      * @param string $retryReason
      *
-     * @throws ArrayException
      * @throws ORMException
-     * @throws StringsException
      *
      * @return bool
      */

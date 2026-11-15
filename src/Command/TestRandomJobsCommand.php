@@ -16,9 +16,6 @@ namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Command;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
-use Safe\Exceptions\ArrayException;
-use Safe\Exceptions\StringsException;
-use function Safe\sprintf;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\JobsMarker;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\ProgressBarFactory;
@@ -75,8 +72,6 @@ final class TestRandomJobsCommand extends AbstractQueuesCommand
      * @param InputInterface  $input
      * @param OutputInterface $output
      *
-     * @throws ArrayException
-     * @throws StringsException
      * @throws Exception
      *
      * @return int

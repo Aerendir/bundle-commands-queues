@@ -13,10 +13,6 @@ declare(strict_types=1);
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\DependencyInjection;
 
-use Safe\Exceptions\ArrayException;
-use Safe\Exceptions\StringsException;
-use function Safe\ksort;
-use function Safe\sprintf;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Daemon;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
@@ -271,8 +267,6 @@ final class Configuration implements ConfigurationInterface
     /**
      * @param array $tree
      *
-     * @throws StringsException
-     *
      * @return bool
      */
     private function validateConfiguration(array $tree): bool
@@ -305,8 +299,6 @@ final class Configuration implements ConfigurationInterface
      * Prepares the definitive configuration.
      *
      * @param array $tree
-     *
-     * @throws ArrayException
      *
      * @return array
      */

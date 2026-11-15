@@ -21,8 +21,6 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\ORMException;
 use Doctrine\ORM\QueryBuilder;
 use RuntimeException;
-use Safe\Exceptions\StringsException;
-use function Safe\sprintf;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Service\JobsManager;
 use SerendipityHQ\Bundle\ConsoleStyles\Console\Style\SerendipityHQStyle;
@@ -84,7 +82,6 @@ final class JobRepository extends EntityRepository
      *
      * @param string $queueName
      *
-     * @throws StringsException
      * @throws ORMException
      *
      * @return Job|null

@@ -18,7 +18,6 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use RuntimeException;
-use Safe\Exceptions\StringsException;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Daemon;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Repository\JobRepository;
@@ -57,8 +56,6 @@ final class QueuesManager
      * @param Job  $job
      * @param bool $fullSearch If false, searches only not yet started jobs
      *
-     * @throws StringsException
-     *
      * @return bool
      */
     public function jobExists(Job $job, bool $fullSearch = false): bool
@@ -78,8 +75,6 @@ final class QueuesManager
      * @param Job  $job
      * @param bool $fullSearch If false, searches only not yet started jobs
      *
-     * @throws StringsException
-     *
      * @return array|null
      */
     public function findByJob(Job $job, bool $fullSearch = false): ?array
@@ -96,8 +91,6 @@ final class QueuesManager
      * @param array|string|null $input
      * @param string            $queue
      * @param bool              $fullSearch If false, searches only not yet started jobs
-     *
-     * @throws StringsException
      *
      * @return bool
      */
@@ -117,8 +110,6 @@ final class QueuesManager
      * @param array|string|null $input
      * @param string|null       $queue
      * @param bool              $fullSearch If false, searches only not yet started jobs
-     *
-     * @throws StringsException
      *
      * @return array|null
      */

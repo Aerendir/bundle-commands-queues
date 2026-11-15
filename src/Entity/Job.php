@@ -21,8 +21,6 @@ use Exception;
 use InvalidArgumentException;
 use LogicException;
 use RuntimeException;
-use Safe\Exceptions\StringsException;
-use function Safe\sprintf;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Command\InternalMarkAsCancelledCommand;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\InputParser;
 use SerendipityHQ\Component\ThenWhen\Strategy\LiveStrategy;
@@ -394,8 +392,6 @@ class Job
      *
      * @param string      $option
      * @param string|null $value
-     *
-     * @throws StringsException
      */
     public function addOption(string $option, ?string $value = null): self
     {
@@ -419,8 +415,6 @@ class Job
     /**
      * @param string      $option
      * @param string|null $value
-     *
-     * @throws StringsException
      */
     public function addShortcut(string $option, ?string $value = null): self
     {
@@ -443,8 +437,6 @@ class Job
 
     /**
      * @param Job $job
-     *
-     * @throws StringsException
      */
     public function addChildDependency(Job $job): self
     {
@@ -466,8 +458,6 @@ class Job
 
     /**
      * @param Job $job
-     *
-     * @throws StringsException
      */
     public function addParentDependency(Job $job): self
     {
@@ -494,7 +484,6 @@ class Job
     }
 
     /**
-     * @throws StringsException
      * @throws Exception
      *
      * @return Job
@@ -799,8 +788,6 @@ class Job
     /**
      * Checks if a Job can or cannot be detached.
      *
-     * @throws StringsException
-     *
      * @return bool
      */
     public function canBeDetached(): bool
@@ -894,8 +881,6 @@ class Job
     }
 
     /**
-     * @throws StringsException
-     *
      * @return bool
      */
     public function canRun(): bool
@@ -1301,11 +1286,11 @@ class Job
     {
         // Don't reorder the arguments as their order is relevant
         if (null !== $this->input && isset($this->input[self::OPTIONS]) && \is_array($this->input[self::OPTIONS])) {
-            \Safe\ksort($this->input[self::OPTIONS], SORT_NATURAL);
+            \ksort($this->input[self::OPTIONS], SORT_NATURAL);
         }
 
         if (null !== $this->input && isset($this->input[self::SHORTCUTS]) && \is_array($this->input[self::SHORTCUTS])) {
-            \Safe\ksort($this->input[self::SHORTCUTS], SORT_NATURAL);
+            \ksort($this->input[self::SHORTCUTS], SORT_NATURAL);
         }
     }
 

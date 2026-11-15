@@ -16,17 +16,6 @@ namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Util;
 use DateTime;
 use Doctrine\ORM\UnitOfWork;
 use RuntimeException;
-use function Safe\asort;
-use Safe\Exceptions\ArrayException;
-use Safe\Exceptions\FilesystemException;
-use Safe\Exceptions\StreamException;
-use Safe\Exceptions\StringsException;
-use function Safe\fclose;
-use function Safe\fopen;
-use function Safe\fwrite;
-use function Safe\mkdir;
-use function Safe\sprintf;
-use function Safe\stream_get_contents;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Service\JobsManager;
 use SerendipityHQ\Bundle\ConsoleStyles\Console\Style\SerendipityHQStyle;
@@ -99,8 +88,6 @@ final class Profiler
     private static $ioWriter;
 
     /**
-     * @throws ArrayException
-     *
      * @return string
      */
     public static function buildJobsList(): string
@@ -133,9 +120,6 @@ final class Profiler
 
     /**
      * @param string|null $where
-     *
-     * @throws ArrayException
-     * @throws StringsException
      */
     public static function printUnitOfWork(string $where = null): void
     {
@@ -197,10 +181,6 @@ final class Profiler
     }
 
     /**
-     * @throws FilesystemException
-     * @throws StreamException
-     * @throws StringsException
-     *
      * @return array
      *
      * @suppress PhanUndeclaredFunction
@@ -301,19 +281,33 @@ final class Profiler
 
         if (\function_exists('memprof_dump_callgrind') && $this->isMemprofEnabled()) {
             // Create the directory if it doesn't exist
-            if (false === \file_exists('app/logs/callgrind')) {
-                mkdir('app/logs/callgrind', 0777, true);
+            if (false === \file_exists('app/logs/callgrind') && false === \mkdir('app/logs/callgrind', 0777, true)) {
+                throw new RuntimeException('Impossible to create the directory app/logs/callgrind.');
             }
 
-            $callgrind = fopen(
-                sprintf(
-                    'app/logs/callgrind/callgrind.out.%s.%s.%s',
-                    (new DateTime())->format('Y-m-d'), $this->pid, $this->getCurrentIteration()
-                    // "w": writing only; "b": binary safe
-                ), 'wb');
+            $callgrindPath = sprintf(
+                'app/logs/callgrind/callgrind.out.%s.%s.%s',
+                (new DateTime())->format('Y-m-d'), $this->pid, $this->getCurrentIteration()
+            );
+            // "w": writing only; "b": binary safe
+            $callgrind = \fopen($callgrindPath, 'wb');
+            if (false === $callgrind) {
+                throw new RuntimeException(sprintf('Impossible to open the file %s.', $callgrindPath));
+            }
+
             \memprof_dump_callgrind($callgrind);
-            fwrite($callgrind, stream_get_contents($callgrind));
-            fclose($callgrind);
+            $contents = \stream_get_contents($callgrind);
+            if (false === $contents) {
+                throw new RuntimeException(sprintf('Impossible to read the file %s.', $callgrindPath));
+            }
+
+            if (false === \fwrite($callgrind, $contents)) {
+                throw new RuntimeException(sprintf('Impossible to write the file %s.', $callgrindPath));
+            }
+
+            if (false === \fclose($callgrind)) {
+                throw new RuntimeException(sprintf('Impossible to close the file %s.', $callgrindPath));
+            }
         }
 
         return $this->profilingInfo;

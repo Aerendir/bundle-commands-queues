@@ -15,8 +15,6 @@ namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Command;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
-use Safe\Exceptions\StringsException;
-use function Safe\sprintf;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Repository\JobRepository;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\JobsMarker;
@@ -79,8 +77,6 @@ final class InternalMarkAsCancelledCommand extends AbstractQueuesCommand
      * @param InputInterface  $input
      * @param OutputInterface $output
      *
-     * @throws StringsException
-     *
      * @return int
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -131,7 +127,6 @@ final class InternalMarkAsCancelledCommand extends AbstractQueuesCommand
      * @param string $cancellationReason
      * @param array  $alreadyCancelledJobs
      *
-     * @throws StringsException
      * @throws Exception
      *
      * @return int

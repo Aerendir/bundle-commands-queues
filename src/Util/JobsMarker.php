@@ -24,9 +24,6 @@ use InvalidArgumentException;
 use ReflectionClass;
 use ReflectionException;
 use RuntimeException;
-use Safe\Exceptions\ArrayException;
-use Safe\Exceptions\StringsException;
-use function Safe\sprintf;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Daemon;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
 use SerendipityHQ\Bundle\ConsoleStyles\Console\Style\SerendipityHQStyle;
@@ -176,9 +173,7 @@ final class JobsMarker
      * @param Job   $failedJob
      * @param array $info
      *
-     * @throws ArrayException
      * @throws ORMException
-     * @throws StringsException
      *
      * @return Job the created retry Job
      */
@@ -195,8 +190,6 @@ final class JobsMarker
      * @param array $info
      *
      * @throws ORMException
-     * @throws StringsException
-     * @throws ArrayException
      *
      * @return Job the created retry Job
      */
@@ -238,7 +231,6 @@ final class JobsMarker
      * @param array $info
      *
      * @throws ORMException
-     * @throws StringsException
      * @throws Exception
      *
      * @return Job
@@ -371,7 +363,6 @@ final class JobsMarker
      * @param array       $info
      * @param Daemon|null $daemon
      *
-     * @throws StringsException
      * @throws ReflectionException
      * @throws ORMException
      */
@@ -443,8 +434,6 @@ final class JobsMarker
 
     /**
      * @param Job $retryJob
-     *
-     * @throws StringsException
      */
     private function updateChildDependencies(Job $retryJob): void
     {

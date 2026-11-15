@@ -30,8 +30,7 @@
         "serendipity_hq/component-then-when": "^1.1",
         "symfony/console": "^4.4|^5.4",
         "symfony/framework-bundle": "^4.4|^5.4",
-        "symfony/process": "^4.4|^5.4",
-        "thecodingmachine/safe": "^1.0"
+        "symfony/process": "^4.4|^5.4"
     },
     "require-dev": {
         "ext-ast": "*",
@@ -42,7 +41,6 @@
         "phpstan/phpstan-phpunit": "1.0.0",
         "phpstan/phpstan-doctrine": "1.2.8",
         "phpstan/phpstan-symfony": "1.1.2",
-        "thecodingmachine/phpstan-safe-rule": "1.2.0",
         "rector/rector": "0.12.13"
     },
     "suggest":{

@@ -21,14 +21,6 @@ use Doctrine\ORM\ORMException;
 use Doctrine\ORM\TransactionRequiredException;
 use Exception;
 use RuntimeException;
-use Safe\Exceptions\ArrayException;
-use Safe\Exceptions\FilesystemException;
-use Safe\Exceptions\InfoException;
-use Safe\Exceptions\MiscException;
-use Safe\Exceptions\PcntlException;
-use Safe\Exceptions\StreamException;
-use Safe\Exceptions\StringsException;
-use function Safe\sprintf;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Daemon;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Repository\DaemonRepository;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Service\QueuesDaemon;
@@ -108,15 +100,8 @@ final class RunCommand extends Command
      *
      * @throws ORMException
      * @throws OptimisticLockException
-     * @throws StringsException
      * @throws MappingException
      * @throws TransactionRequiredException
-     * @throws ArrayException
-     * @throws FilesystemException
-     * @throws InfoException
-     * @throws MiscException
-     * @throws PcntlException
-     * @throws StreamException
      * @throws Exception
      *
      * @return int The status code of the command
@@ -288,7 +273,6 @@ final class RunCommand extends Command
      * Checks that the Damons in the database without a didedOn date are still alive (running).
      *
      * @throws OptimisticLockException
-     * @throws StringsException
      * @throws ORMException
      * @throws Exception
      */
@@ -355,8 +339,6 @@ final class RunCommand extends Command
      *
      * @param Daemon $daemon
      *
-     * @throws StringsException
-     *
      * @return bool
      */
     private function isDaemonStillRunning(Daemon $daemon): bool
@@ -379,7 +361,6 @@ final class RunCommand extends Command
      *
      * @throws ORMException
      * @throws OptimisticLockException
-     * @throws StringsException
      * @throws TransactionRequiredException
      */
     private function processRunningJobs(string $queueName): void

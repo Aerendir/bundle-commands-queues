@@ -13,8 +13,6 @@ declare(strict_types=1);
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Admin\Sonata\Twig;
 
-use Safe\Exceptions\StringsException;
-use function Safe\sprintf;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\InputParser;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -58,8 +56,6 @@ final class CommandsQueuesExtension extends AbstractExtension
 
     /**
      * @param Job $job
-     *
-     * @throws StringsException
      *
      * @return string|null
      */

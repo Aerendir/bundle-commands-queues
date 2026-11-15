@@ -14,9 +14,6 @@ declare(strict_types=1);
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Util;
 
 use InvalidArgumentException;
-use Safe\Exceptions\StringsException;
-use function Safe\ksort;
-use function Safe\sprintf;
 
 /**
  * An helper class to manage the input of a command.
@@ -68,8 +65,6 @@ final class InputParser
      *
      * @param array|string|null $input
      * @param bool              $hasCommand If the input contains also the command name or not
-     *
-     * @throws StringsException
      *
      * @return array
      * @suppress PhanTypeMismatchDimFetch

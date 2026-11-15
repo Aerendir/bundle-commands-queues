@@ -43,7 +43,6 @@ return static function (ContainerConfigurator $containerConfigurator): void {
     $containerConfigurator->import(SetList::PHP_72);
     $containerConfigurator->import(SetList::PHP_73);
     $containerConfigurator->import(SetList::UNWRAP_COMPAT);
-    $containerConfigurator->import(SetList::SAFE_07);
     $containerConfigurator->import(SetList::TYPE_DECLARATION);
 
     $parameters->set(Option::AUTO_IMPORT_NAMES, true);
