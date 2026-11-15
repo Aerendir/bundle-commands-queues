@@ -37,7 +37,6 @@
 [![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=Aerendir_bundle-commands-queues&metric=sqale_index)](https://sonarcloud.io/dashboard?id=Aerendir_bundle-commands-queues)
 [![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=Aerendir_bundle-commands-queues&metric=vulnerabilities)](https://sonarcloud.io/dashboard?id=Aerendir_bundle-commands-queues)
 
-[![Phan](https://github.com/Aerendir/bundle-commands-queues/workflows/Phan/badge.svg)](https://github.com/Aerendir/bundle-commands-queues/actions?query=branch%3Adev)
 [![PHPStan](https://github.com/Aerendir/bundle-commands-queues/workflows/PHPStan/badge.svg)](https://github.com/Aerendir/bundle-commands-queues/actions?query=branch%3Adev)
 [![PSalm](https://github.com/Aerendir/bundle-commands-queues/workflows/PSalm/badge.svg)](https://github.com/Aerendir/bundle-commands-queues/actions?query=branch%3Adev)
 [![PHPUnit](https://github.com/Aerendir/bundle-commands-queues/workflows/PHPunit/badge.svg)](https://github.com/Aerendir/bundle-commands-queues/actions?query=branch%3Adev)
