@@ -1,2 +1,626 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<files psalm-version="v4.15.0@a1b5e489e6fcebe40cb804793d964e99fc347820"/>
+<files psalm-version="7.6.0@4303c7dbbc23efaac3d988707b4acf4d5508a9cc">
+  <file src="src/Admin/Sonata/Entity/DaemonAdmin.php">
+    <MissingOverrideAttribute>
+      <code><![CDATA[protected function configureListFields(ListMapper $list): void]]></code>
+      <code><![CDATA[protected function configureRoutes(RouteCollectionInterface $collection): void]]></code>
+      <code><![CDATA[protected function generateBaseRoutePattern(bool $isChildAdmin = false): string]]></code>
+    </MissingOverrideAttribute>
+    <UnusedClass>
+      <code><![CDATA[DaemonAdmin]]></code>
+    </UnusedClass>
+  </file>
+  <file src="src/Admin/Sonata/Entity/JobAdmin.php">
+    <MissingOverrideAttribute>
+      <code><![CDATA[protected function configureDatagridFilters(DatagridMapper $filter): void]]></code>
+      <code><![CDATA[protected function configureDefaultSortValues(array &$sortValues): void]]></code>
+      <code><![CDATA[protected function configureListFields(ListMapper $list): void]]></code>
+      <code><![CDATA[protected function configureRoutes(RouteCollectionInterface $collection): void]]></code>
+      <code><![CDATA[protected function configureTabMenu(ItemInterface $menu, string $action, ?AdminInterface $childAdmin = null): void]]></code>
+      <code><![CDATA[protected function generateBaseRoutePattern(bool $isChildAdmin = false): string]]></code>
+      <code><![CDATA[public function getPerPageOptions(): array]]></code>
+    </MissingOverrideAttribute>
+    <UnusedClass>
+      <code><![CDATA[JobAdmin]]></code>
+    </UnusedClass>
+  </file>
+  <file src="src/Admin/Sonata/SHQAnsiTheme.php">
+    <MissingOverrideAttribute>
+      <code><![CDATA[public function asArray(): array]]></code>
+    </MissingOverrideAttribute>
+    <UnusedClass>
+      <code><![CDATA[SHQAnsiTheme]]></code>
+    </UnusedClass>
+  </file>
+  <file src="src/Admin/Sonata/Twig/CommandsQueuesExtension.php">
+    <MissingOverrideAttribute>
+      <code><![CDATA[public function getFilters(): array]]></code>
+    </MissingOverrideAttribute>
+    <UnusedClass>
+      <code><![CDATA[CommandsQueuesExtension]]></code>
+    </UnusedClass>
+  </file>
+  <file src="src/Command/AbstractQueuesCommand.php">
+    <DeprecatedClass>
+      <code><![CDATA[?SerendipityHQStyle]]></code>
+      <code><![CDATA[SerendipityHQStyle]]></code>
+      <code><![CDATA[new SerendipityHQStyle($input, $output)]]></code>
+    </DeprecatedClass>
+    <InvalidNullableReturnType>
+      <code><![CDATA[SerendipityHQStyle]]></code>
+    </InvalidNullableReturnType>
+    <MissingOverrideAttribute>
+      <code><![CDATA[protected function execute(InputInterface $input, OutputInterface $output): int]]></code>
+    </MissingOverrideAttribute>
+    <NullableReturnStatement>
+      <code><![CDATA[$this->ioWriter]]></code>
+    </NullableReturnStatement>
+  </file>
+  <file src="src/Command/InternalMarkAsCancelledCommand.php">
+    <DeprecatedMethod>
+      <code><![CDATA[error]]></code>
+      <code><![CDATA[error]]></code>
+      <code><![CDATA[error]]></code>
+    </DeprecatedMethod>
+    <MissingOverrideAttribute>
+      <code><![CDATA[protected function configure(): void]]></code>
+      <code><![CDATA[protected function execute(InputInterface $input, OutputInterface $output): int]]></code>
+    </MissingOverrideAttribute>
+    <NullArgument>
+      <code><![CDATA[$failedJob]]></code>
+    </NullArgument>
+    <PossiblyUnusedMethod>
+      <code><![CDATA[__construct]]></code>
+    </PossiblyUnusedMethod>
+    <UnnecessaryVarAnnotation>
+      <code><![CDATA[JobRepository]]></code>
+    </UnnecessaryVarAnnotation>
+    <UnusedReturnValue>
+      <code><![CDATA[int]]></code>
+    </UnusedReturnValue>
+  </file>
+  <file src="src/Command/RunCommand.php">
+    <DeprecatedClass>
+      <code><![CDATA[?SerendipityHQStyle]]></code>
+      <code><![CDATA[new SerendipityHQStyle($input, $output)]]></code>
+    </DeprecatedClass>
+    <DeprecatedMethod>
+      <code><![CDATA[info]]></code>
+      <code><![CDATA[note]]></code>
+      <code><![CDATA[success]]></code>
+      <code><![CDATA[success]]></code>
+      <code><![CDATA[table]]></code>
+      <code><![CDATA[writeln]]></code>
+    </DeprecatedMethod>
+    <MissingOverrideAttribute>
+      <code><![CDATA[protected function configure(): void]]></code>
+      <code><![CDATA[protected function execute(InputInterface $input, OutputInterface $output): int]]></code>
+    </MissingOverrideAttribute>
+    <PossiblyNullArgument>
+      <code><![CDATA[$this->output]]></code>
+    </PossiblyNullArgument>
+    <PossiblyNullReference>
+      <code><![CDATA[getVerbosity]]></code>
+      <code><![CDATA[getVerbosity]]></code>
+    </PossiblyNullReference>
+    <PossiblyUnusedMethod>
+      <code><![CDATA[__construct]]></code>
+    </PossiblyUnusedMethod>
+    <RedundantCondition>
+      <code><![CDATA[\is_bool($allowProd)]]></code>
+      <code><![CDATA[\is_string($daemon)]]></code>
+    </RedundantCondition>
+    <TypeDoesNotContainType>
+      <code><![CDATA[false === \is_bool($allowProd)]]></code>
+      <code><![CDATA[null !== $daemon && false === \is_string($daemon)]]></code>
+    </TypeDoesNotContainType>
+  </file>
+  <file src="src/Command/TestFailingJobsCommand.php">
+    <MissingOverrideAttribute>
+      <code><![CDATA[protected function configure(): void]]></code>
+      <code><![CDATA[protected function execute(InputInterface $input, OutputInterface $output): int]]></code>
+    </MissingOverrideAttribute>
+    <PossiblyUnusedMethod>
+      <code><![CDATA[__construct]]></code>
+    </PossiblyUnusedMethod>
+  </file>
+  <file src="src/Command/TestFakeCommand.php">
+    <MissingOverrideAttribute>
+      <code><![CDATA[protected function configure(): void]]></code>
+      <code><![CDATA[protected function execute(InputInterface $input, OutputInterface $output): int]]></code>
+    </MissingOverrideAttribute>
+    <TypeDoesNotContainNull>
+      <code><![CDATA[null === $input->getOption('trigger-error')]]></code>
+    </TypeDoesNotContainNull>
+    <TypeDoesNotContainType>
+      <code><![CDATA[false === \sleep($rand)]]></code>
+    </TypeDoesNotContainType>
+  </file>
+  <file src="src/Command/TestRandomJobsCommand.php">
+    <DeprecatedMethod>
+      <code><![CDATA[error]]></code>
+      <code><![CDATA[error]]></code>
+      <code><![CDATA[error]]></code>
+      <code><![CDATA[info]]></code>
+      <code><![CDATA[success]]></code>
+      <code><![CDATA[title]]></code>
+      <code><![CDATA[write]]></code>
+    </DeprecatedMethod>
+    <MissingOverrideAttribute>
+      <code><![CDATA[protected function configure(): void]]></code>
+      <code><![CDATA[protected function execute(InputInterface $input, OutputInterface $output): int]]></code>
+    </MissingOverrideAttribute>
+    <PossiblyUnusedMethod>
+      <code><![CDATA[__construct]]></code>
+    </PossiblyUnusedMethod>
+    <RedundantCondition>
+      <code><![CDATA[\is_bool($noFutureJobs)]]></code>
+      <code><![CDATA[is_countable($this->queues)]]></code>
+      <code><![CDATA[null !== $howManyJobs]]></code>
+      <code><![CDATA[null !== $noFutureJobs]]></code>
+    </RedundantCondition>
+    <TypeDoesNotContainType>
+      <code><![CDATA[0]]></code>
+      <code><![CDATA[null !== $noFutureJobs && false === \is_bool($noFutureJobs)]]></code>
+    </TypeDoesNotContainType>
+    <UnevaluatedCode>
+      <code><![CDATA[break;]]></code>
+      <code><![CDATA[break;]]></code>
+      <code><![CDATA[break;]]></code>
+      <code><![CDATA[break;]]></code>
+      <code><![CDATA[break;]]></code>
+      <code><![CDATA[break;]]></code>
+    </UnevaluatedCode>
+  </file>
+  <file src="src/Config/DaemonConfig.php">
+    <InvalidNullableReturnType>
+      <code><![CDATA[string]]></code>
+    </InvalidNullableReturnType>
+    <NullableReturnStatement>
+      <code><![CDATA[$this->name]]></code>
+    </NullableReturnStatement>
+    <PossiblyUnusedMethod>
+      <code><![CDATA[__construct]]></code>
+      <code><![CDATA[getName]]></code>
+    </PossiblyUnusedMethod>
+    <RedundantCondition>
+      <code><![CDATA[is_countable($this->daemons)]]></code>
+    </RedundantCondition>
+    <TypeDoesNotContainType>
+      <code><![CDATA[0]]></code>
+    </TypeDoesNotContainType>
+    <UnusedProperty>
+      <code><![CDATA[$name]]></code>
+    </UnusedProperty>
+  </file>
+  <file src="src/DependencyInjection/Configuration.php">
+    <MissingClosureParamType>
+      <code><![CDATA[$tree]]></code>
+      <code><![CDATA[$tree]]></code>
+    </MissingClosureParamType>
+    <MissingOverrideAttribute>
+      <code><![CDATA[public function getConfigTreeBuilder(): TreeBuilder]]></code>
+    </MissingOverrideAttribute>
+    <PossibleRawObjectIteration>
+      <code><![CDATA[$returnConfig[self::DAEMONS]]]></code>
+    </PossibleRawObjectIteration>
+    <PossiblyFalseOperand>
+      <code><![CDATA[json_encode(self::getSupportedDrivers())]]></code>
+    </PossiblyFalseOperand>
+    <PossiblyNullReference>
+      <code><![CDATA[integerNode]]></code>
+    </PossiblyNullReference>
+    <PossiblyUndefinedMethod>
+      <code><![CDATA[$returnConfig[self::DAEMONS]]]></code>
+      <code><![CDATA[$returnConfig[self::DAEMONS]]]></code>
+      <code><![CDATA[$returnConfig[self::DAEMONS]]]></code>
+      <code><![CDATA[$returnConfig[self::DAEMONS]]]></code>
+    </PossiblyUndefinedMethod>
+    <UndefinedInterfaceMethod>
+      <code><![CDATA[integerNode]]></code>
+    </UndefinedInterfaceMethod>
+  </file>
+  <file src="src/DependencyInjection/SHQCommandsQueuesExtension.php">
+    <MissingOverrideAttribute>
+      <code><![CDATA[public function load(array $configs, ContainerBuilder $container): void]]></code>
+      <code><![CDATA[public function prepend(ContainerBuilder $container): void]]></code>
+    </MissingOverrideAttribute>
+  </file>
+  <file src="src/Doctrine/DBAL/Types/ArrayType.php">
+    <MissingOverrideAttribute>
+      <code><![CDATA[public function convertToDatabaseValue(mixed $value, AbstractPlatform $platform): ?string]]></code>
+      <code><![CDATA[public function convertToPHPValue(mixed $value, AbstractPlatform $platform): mixed]]></code>
+      <code><![CDATA[public function getSQLDeclaration(array $column, AbstractPlatform $platform): string]]></code>
+    </MissingOverrideAttribute>
+    <PossiblyUnusedMethod>
+      <code><![CDATA[getName]]></code>
+    </PossiblyUnusedMethod>
+  </file>
+  <file src="src/Entity/Daemon.php">
+    <ClassMustBeFinal>
+      <code><![CDATA[Daemon]]></code>
+    </ClassMustBeFinal>
+    <LessSpecificReturnStatement>
+      <code><![CDATA[$this->diedOn]]></code>
+    </LessSpecificReturnStatement>
+    <MismatchingDocblockPropertyType>
+      <code><![CDATA[Collection]]></code>
+    </MismatchingDocblockPropertyType>
+    <MissingOverrideAttribute>
+      <code><![CDATA[public function __toString(): string]]></code>
+    </MissingOverrideAttribute>
+    <MoreSpecificReturnType>
+      <code><![CDATA[\DateTime|\DateTimeImmutable|null]]></code>
+    </MoreSpecificReturnType>
+    <PossiblyUnusedMethod>
+      <code><![CDATA[getConfig]]></code>
+      <code><![CDATA[getProcessedJobs]]></code>
+    </PossiblyUnusedMethod>
+    <PropertyNotSetInConstructor>
+      <code><![CDATA[$id]]></code>
+    </PropertyNotSetInConstructor>
+    <UnusedProperty>
+      <code><![CDATA[$config]]></code>
+      <code><![CDATA[$processedJobs]]></code>
+    </UnusedProperty>
+  </file>
+  <file src="src/Entity/Job.php">
+    <ClassMustBeFinal>
+      <code><![CDATA[Job]]></code>
+    </ClassMustBeFinal>
+    <InvalidNullableReturnType>
+      <code><![CDATA[string]]></code>
+      <code><![CDATA[string]]></code>
+      <code><![CDATA[string]]></code>
+    </InvalidNullableReturnType>
+    <LessSpecificReturnStatement>
+      <code><![CDATA[$this->closedAt]]></code>
+      <code><![CDATA[$this->startedAt]]></code>
+    </LessSpecificReturnStatement>
+    <MissingOverrideAttribute>
+      <code><![CDATA[public function __toString(): string]]></code>
+    </MissingOverrideAttribute>
+    <MoreSpecificReturnType>
+      <code><![CDATA[\DateTime|\DateTimeImmutable|null]]></code>
+      <code><![CDATA[\DateTime|\DateTimeImmutable|null]]></code>
+    </MoreSpecificReturnType>
+    <NullableReturnStatement>
+      <code><![CDATA[$this->cannotBeDetachedBecause]]></code>
+      <code><![CDATA[$this->cannotBeRemovedBecause]]></code>
+      <code><![CDATA[$this->cannotRunBecause]]></code>
+    </NullableReturnStatement>
+    <PossiblyInvalidPropertyAssignmentValue>
+      <code><![CDATA[$executeAfter]]></code>
+    </PossiblyInvalidPropertyAssignmentValue>
+    <PossiblyNullArgument>
+      <code><![CDATA[$this->getExecuteAfterTime()]]></code>
+    </PossiblyNullArgument>
+    <PossiblyNullArrayAccess>
+      <code><![CDATA[$this->input[self::OPTIONS]]]></code>
+      <code><![CDATA[$this->input[self::SHORTCUTS]]]></code>
+    </PossiblyNullArrayAccess>
+    <PossiblyNullArrayAssignment>
+      <code><![CDATA[$this->input['arguments']]]></code>
+      <code><![CDATA[$this->input[self::OPTIONS]]]></code>
+      <code><![CDATA[$this->input[self::SHORTCUTS]]]></code>
+    </PossiblyNullArrayAssignment>
+    <PossiblyUnusedMethod>
+      <code><![CDATA[addArgument]]></code>
+      <code><![CDATA[addShortcut]]></code>
+      <code><![CDATA[createCancelChildsJob]]></code>
+      <code><![CDATA[getCancellationReason]]></code>
+      <code><![CDATA[getClosedAt]]></code>
+      <code><![CDATA[getCreatedAt]]></code>
+      <code><![CDATA[getDebug]]></code>
+      <code><![CDATA[getExitCode]]></code>
+      <code><![CDATA[getOutput]]></code>
+      <code><![CDATA[getProcessedBy]]></code>
+      <code><![CDATA[getStartedAt]]></code>
+      <code><![CDATA[getType]]></code>
+      <code><![CDATA[hasChildDependencies]]></code>
+      <code><![CDATA[hasParentDependencies]]></code>
+      <code><![CDATA[isStatusAborted]]></code>
+      <code><![CDATA[isStatusCancelled]]></code>
+      <code><![CDATA[isStatusFailed]]></code>
+      <code><![CDATA[isStatusNew]]></code>
+      <code><![CDATA[isStatusPending]]></code>
+      <code><![CDATA[isStatusRunning]]></code>
+      <code><![CDATA[isStatusSuccessful]]></code>
+      <code><![CDATA[isStatusWaiting]]></code>
+      <code><![CDATA[isTypeInternal]]></code>
+      <code><![CDATA[makeAwareOfJob]]></code>
+      <code><![CDATA[removeCancelledBy]]></code>
+      <code><![CDATA[removeCancelledJob]]></code>
+    </PossiblyUnusedMethod>
+    <PropertyNotSetInConstructor>
+      <code><![CDATA[$cancellationReason]]></code>
+      <code><![CDATA[$id]]></code>
+      <code><![CDATA[$processedBy]]></code>
+    </PropertyNotSetInConstructor>
+    <UnevaluatedCode>
+      <code><![CDATA[break;]]></code>
+      <code><![CDATA[break;]]></code>
+      <code><![CDATA[break;]]></code>
+      <code><![CDATA[break;]]></code>
+    </UnevaluatedCode>
+  </file>
+  <file src="src/Repository/DaemonRepository.php">
+    <MissingTemplateParam>
+      <code><![CDATA[DaemonRepository]]></code>
+    </MissingTemplateParam>
+  </file>
+  <file src="src/Repository/JobRepository.php">
+    <DeprecatedClass>
+      <code><![CDATA[?SerendipityHQStyle]]></code>
+      <code><![CDATA[SerendipityHQStyle]]></code>
+    </DeprecatedClass>
+    <DeprecatedConstant>
+      <code><![CDATA[Types::DATETIME_MUTABLE]]></code>
+    </DeprecatedConstant>
+    <MissingTemplateParam>
+      <code><![CDATA[JobRepository]]></code>
+    </MissingTemplateParam>
+    <PossiblyNullReference>
+      <code><![CDATA[getVerbosity]]></code>
+      <code><![CDATA[getVerbosity]]></code>
+    </PossiblyNullReference>
+    <PossiblyUnusedMethod>
+      <code><![CDATA[findBySearch]]></code>
+    </PossiblyUnusedMethod>
+  </file>
+  <file src="src/SHQCommandsQueuesBundle.php">
+    <UnusedClass>
+      <code><![CDATA[SHQCommandsQueuesBundle]]></code>
+    </UnusedClass>
+  </file>
+  <file src="src/Service/JobsManager.php">
+    <DeprecatedClass>
+      <code><![CDATA[?SerendipityHQStyle]]></code>
+      <code><![CDATA[SerendipityHQStyle]]></code>
+    </DeprecatedClass>
+    <DeprecatedMethod>
+      <code><![CDATA[getInput]]></code>
+    </DeprecatedMethod>
+    <DocblockTypeContradiction>
+      <code><![CDATA['Unknown']]></code>
+    </DocblockTypeContradiction>
+    <PossiblyNullArgument>
+      <code><![CDATA[$job->getCancelledBy()]]></code>
+      <code><![CDATA[$job->getFirstRetriedJob()]]></code>
+      <code><![CDATA[$job->getRetriedBy()]]></code>
+      <code><![CDATA[$job->getRetryOf()]]></code>
+    </PossiblyNullArgument>
+    <PossiblyNullReference>
+      <code><![CDATA[find]]></code>
+      <code><![CDATA[find]]></code>
+      <code><![CDATA[getId]]></code>
+      <code><![CDATA[getId]]></code>
+      <code><![CDATA[getId]]></code>
+      <code><![CDATA[getId]]></code>
+      <code><![CDATA[getId]]></code>
+      <code><![CDATA[getId]]></code>
+      <code><![CDATA[getId]]></code>
+      <code><![CDATA[getId]]></code>
+      <code><![CDATA[getUnitOfWork]]></code>
+      <code><![CDATA[getVerbosity]]></code>
+      <code><![CDATA[getVerbosity]]></code>
+      <code><![CDATA[getVerbosity]]></code>
+      <code><![CDATA[getVerbosity]]></code>
+      <code><![CDATA[remove]]></code>
+    </PossiblyNullReference>
+    <PossiblyUnusedMethod>
+      <code><![CDATA[__construct]]></code>
+    </PossiblyUnusedMethod>
+    <UnnecessaryVarAnnotation>
+      <code><![CDATA[Job|null]]></code>
+    </UnnecessaryVarAnnotation>
+  </file>
+  <file src="src/Service/QueuesDaemon.php">
+    <ArgumentTypeCoercion>
+      <code><![CDATA[$job]]></code>
+    </ArgumentTypeCoercion>
+    <DeprecatedClass>
+      <code><![CDATA[?SerendipityHQStyle]]></code>
+      <code><![CDATA[SerendipityHQStyle]]></code>
+    </DeprecatedClass>
+    <DeprecatedMethod>
+      <code><![CDATA[getInput]]></code>
+      <code><![CDATA[note]]></code>
+      <code><![CDATA[success]]></code>
+      <code><![CDATA[title]]></code>
+      <code><![CDATA[warning]]></code>
+      <code><![CDATA[warning]]></code>
+      <code><![CDATA[warning]]></code>
+      <code><![CDATA[writeln]]></code>
+      <code><![CDATA[writeln]]></code>
+    </DeprecatedMethod>
+    <InvalidNullableReturnType>
+      <code><![CDATA[Daemon]]></code>
+    </InvalidNullableReturnType>
+    <InvalidOperand>
+      <code><![CDATA[\random_int(500, 1000) * 1E3]]></code>
+    </InvalidOperand>
+    <MismatchingDocblockReturnType>
+      <code><![CDATA[bool|Job]]></code>
+    </MismatchingDocblockReturnType>
+    <MissingClosureParamType>
+      <code><![CDATA[$signo]]></code>
+    </MissingClosureParamType>
+    <NullableReturnStatement>
+      <code><![CDATA[$this->me]]></code>
+    </NullableReturnStatement>
+    <PossiblyNullArgument>
+      <code><![CDATA[$checkingProcess->getPid()]]></code>
+      <code><![CDATA[$job->getInput()[self::OPTIONS][self::__ID]]]></code>
+      <code><![CDATA[$process->getPid()]]></code>
+      <code><![CDATA[$this->me]]></code>
+      <code><![CDATA[$this->me]]></code>
+    </PossiblyNullArgument>
+    <PossiblyNullArrayAccess>
+      <code><![CDATA[$job->getInput()[self::OPTIONS]]]></code>
+      <code><![CDATA[$job->getInput()[self::OPTIONS][self::__ID]]]></code>
+    </PossiblyNullArrayAccess>
+    <PossiblyNullReference>
+      <code><![CDATA[errorLineNoBg]]></code>
+      <code><![CDATA[errorLineNoBg]]></code>
+      <code><![CDATA[getInput]]></code>
+      <code><![CDATA[getVerbosity]]></code>
+      <code><![CDATA[getVerbosity]]></code>
+      <code><![CDATA[getVerbosity]]></code>
+      <code><![CDATA[getVerbosity]]></code>
+      <code><![CDATA[getVerbosity]]></code>
+      <code><![CDATA[getVerbosity]]></code>
+      <code><![CDATA[getVerbosity]]></code>
+      <code><![CDATA[infoLineNoBg]]></code>
+      <code><![CDATA[infoLineNoBg]]></code>
+      <code><![CDATA[infoLineNoBg]]></code>
+      <code><![CDATA[note]]></code>
+      <code><![CDATA[requiescatInPace]]></code>
+      <code><![CDATA[successLineNoBg]]></code>
+      <code><![CDATA[successLineNoBg]]></code>
+      <code><![CDATA[warning]]></code>
+      <code><![CDATA[warning]]></code>
+      <code><![CDATA[warningLineNoBg]]></code>
+      <code><![CDATA[warningLineNoBg]]></code>
+      <code><![CDATA[writeln]]></code>
+    </PossiblyNullReference>
+    <PossiblyUnusedMethod>
+      <code><![CDATA[__construct]]></code>
+    </PossiblyUnusedMethod>
+    <RedundantFunctionCall>
+      <code><![CDATA[sprintf]]></code>
+      <code><![CDATA[sprintf]]></code>
+    </RedundantFunctionCall>
+    <TypeDoesNotContainType>
+      <code><![CDATA[false === \sleep($this->getConfig()->getSleepFor())]]></code>
+    </TypeDoesNotContainType>
+    <UnnecessaryVarAnnotation>
+      <code><![CDATA[JobRepository]]></code>
+    </UnnecessaryVarAnnotation>
+    <UnusedReturnValue>
+      <code><![CDATA[bool]]></code>
+    </UnusedReturnValue>
+  </file>
+  <file src="src/Service/QueuesManager.php">
+    <PossiblyUnusedMethod>
+      <code><![CDATA[__construct]]></code>
+      <code><![CDATA[exists]]></code>
+      <code><![CDATA[find]]></code>
+      <code><![CDATA[findByJob]]></code>
+      <code><![CDATA[jobExists]]></code>
+    </PossiblyUnusedMethod>
+    <RiskyTruthyFalsyComparison>
+      <code><![CDATA[empty($exists)]]></code>
+    </RiskyTruthyFalsyComparison>
+  </file>
+  <file src="src/Util/InputParser.php">
+    <InvalidNullableReturnType>
+      <code><![CDATA[array]]></code>
+    </InvalidNullableReturnType>
+    <MissingClosureParamType>
+      <code><![CDATA[$key]]></code>
+      <code><![CDATA[$value]]></code>
+    </MissingClosureParamType>
+    <NullableReturnStatement>
+      <code><![CDATA[self::$preparedInput]]></code>
+    </NullableReturnStatement>
+    <PossiblyNullArgument>
+      <code><![CDATA[self::$preparedInput]]></code>
+      <code><![CDATA[self::$preparedInput]]></code>
+    </PossiblyNullArgument>
+    <PossiblyNullArrayAssignment>
+      <code><![CDATA[self::$preparedInput[self::ARGUMENTS]]]></code>
+      <code><![CDATA[self::$preparedInput[self::OPTIONS]]]></code>
+      <code><![CDATA[self::$preparedInput[self::OPTIONS]]]></code>
+      <code><![CDATA[self::$preparedInput[self::SHORTCUTS]]]></code>
+      <code><![CDATA[self::$preparedInput[self::SHORTCUTS]]]></code>
+    </PossiblyNullArrayAssignment>
+    <PossiblyNullArrayOffset>
+      <code><![CDATA[$input]]></code>
+      <code><![CDATA[$input]]></code>
+      <code><![CDATA[$input]]></code>
+    </PossiblyNullArrayOffset>
+    <RedundantConditionGivenDocblockType>
+      <code><![CDATA[null !== $key]]></code>
+    </RedundantConditionGivenDocblockType>
+  </file>
+  <file src="src/Util/JobsMarker.php">
+    <DeprecatedClass>
+      <code><![CDATA[?SerendipityHQStyle]]></code>
+      <code><![CDATA[SerendipityHQStyle]]></code>
+    </DeprecatedClass>
+    <DeprecatedMethod>
+      <code><![CDATA[error]]></code>
+    </DeprecatedMethod>
+    <PossiblyNullReference>
+      <code><![CDATA[error]]></code>
+      <code><![CDATA[getVerbosity]]></code>
+      <code><![CDATA[getVerbosity]]></code>
+    </PossiblyNullReference>
+    <PossiblyUnusedMethod>
+      <code><![CDATA[__construct]]></code>
+    </PossiblyUnusedMethod>
+  </file>
+  <file src="src/Util/Profiler.php">
+    <DeprecatedClass>
+      <code><![CDATA[?SerendipityHQStyle]]></code>
+      <code><![CDATA[SerendipityHQStyle]]></code>
+    </DeprecatedClass>
+    <DeprecatedMethod>
+      <code><![CDATA[table]]></code>
+    </DeprecatedMethod>
+    <InvalidOperand>
+      <code><![CDATA[$memoryDifference / $this->lastMemoryUsage * 100]]></code>
+      <code><![CDATA[$memoryDifferenceReal / $this->lastMemoryUsageReal * 100]]></code>
+      <code><![CDATA[$memoryPeakDifference / $this->highestMemoryPeak * 100]]></code>
+      <code><![CDATA[$memoryPeakDifferenceReal / $this->highestMemoryPeakReal * 100]]></code>
+      <code><![CDATA[$uowHighestSizeDifference / $this->highestUowSize * 100]]></code>
+      <code><![CDATA[$uowSizeDifference / $this->lastUowSize * 100]]></code>
+      <code><![CDATA[\abs($memoryDifference)]]></code>
+      <code><![CDATA[\abs($memoryDifferenceReal)]]></code>
+      <code><![CDATA[\abs($memoryPeakDifference)]]></code>
+      <code><![CDATA[\abs($memoryPeakDifferenceReal)]]></code>
+      <code><![CDATA[\abs($uowHighestSizeDifference)]]></code>
+      <code><![CDATA[\abs($uowSizeDifference)]]></code>
+    </InvalidOperand>
+    <MissingConstructor>
+      <code><![CDATA[$aliveDaemonsLastCheckedAt]]></code>
+      <code><![CDATA[$highestMemoryPeakReal]]></code>
+      <code><![CDATA[$highestUowSize]]></code>
+      <code><![CDATA[$lastMicrotime]]></code>
+      <code><![CDATA[$lastOptimizationAt]]></code>
+      <code><![CDATA[$startTime]]></code>
+    </MissingConstructor>
+    <PossiblyNullArgument>
+      <code><![CDATA[$this->highestMemoryPeak]]></code>
+      <code><![CDATA[$this->lastMemoryUsage]]></code>
+      <code><![CDATA[$this->lastMemoryUsageReal]]></code>
+      <code><![CDATA[$this->pid]]></code>
+    </PossiblyNullArgument>
+    <PossiblyNullReference>
+      <code><![CDATA[getIdentityMap]]></code>
+      <code><![CDATA[getIdentityMap]]></code>
+      <code><![CDATA[getIdentityMap]]></code>
+      <code><![CDATA[getVerbosity]]></code>
+      <code><![CDATA[size]]></code>
+      <code><![CDATA[size]]></code>
+      <code><![CDATA[table]]></code>
+    </PossiblyNullReference>
+    <PossiblyUnusedMethod>
+      <code><![CDATA[getLastOptimizationAt]]></code>
+      <code><![CDATA[runningJobsJustChecked]]></code>
+    </PossiblyUnusedMethod>
+    <PossiblyUnusedReturnValue>
+      <code><![CDATA[array]]></code>
+    </PossiblyUnusedReturnValue>
+  </file>
+  <file src="src/Util/ProgressBarFactory.php">
+    <InvalidScalarArgument>
+      <code><![CDATA[fn (ProgressBar $bar, OutputInterface $output): string => Helper::formatMemory(\memory_get_usage(false))]]></code>
+    </InvalidScalarArgument>
+    <UnusedClosureParam>
+      <code><![CDATA[$bar]]></code>
+      <code><![CDATA[$output]]></code>
+    </UnusedClosureParam>
+  </file>
+</files>

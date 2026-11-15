@@ -13,20 +13,18 @@ declare(strict_types=1);
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Entity;
 
-use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use Exception;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Config\DaemonConfig;
+use SerendipityHQ\Bundle\CommandsQueuesBundle\Repository\DaemonRepository;
 
 /**
  * Represents a Daemon.
- *
- * @ORM\Entity(repositoryClass="SerendipityHQ\Bundle\CommandsQueuesBundle\Repository\DaemonRepository")
- * @ORM\Table(name="queues_daemons")
  */
-class Daemon
+#[ORM\Table(name: 'queues_daemons')]
+#[ORM\Entity(repositoryClass: DaemonRepository::class)]
+class Daemon implements \Stringable
 {
     /** @var string */
     public const DEFAULT_DAEMON_NAME = 'default';
@@ -46,55 +44,21 @@ class Daemon
      * @var string */
     public const MORTIS_STRAGGLER = 'straggler';
 
-    /**
-     * @var int
-     *
-     * @ORM\Column(name="id", type="integer")
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="IDENTITY")
-     */
+    /** @var int */
+    #[ORM\Column(name: 'id', type: 'integer')]
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'IDENTITY')]
     private $id;
 
-    /**
-     * @var DaemonConfig
-     *
-     * @ORM\Column(name="config", type="array")
-     */
-    private $config;
+    #[ORM\Column(name: 'born_on', type: 'datetime')]
+    private \DateTime $bornOn;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="host", type="string", length=255)
-     */
-    private $host;
-
-    /**
-     * @var int
-     *
-     * @ORM\Column(name="pid", type="integer")
-     */
-    private $pid;
-
-    /**
-     * @var \DateTimeInterface
-     *
-     * @ORM\Column(name="born_on", type="datetime")
-     */
-    private $bornOn;
-
-    /**
-     * @var \DateTimeInterface|null
-     *
-     * @ORM\Column(name="died_on", type="datetime", nullable=true)
-     */
+    /** @var \DateTimeInterface|null */
+    #[ORM\Column(name: 'died_on', type: 'datetime', nullable: true)]
     private $diedOn;
 
-    /**
-     * @var string|null
-     *
-     * @ORM\Column(name="mortis_causa", type="string", length=255, nullable=true)
-     */
+    /** @var string|null */
+    #[ORM\Column(name: 'mortis_causa', type: 'string', length: 255, nullable: true)]
     private $mortisCausa;
 
     /**
@@ -102,29 +66,28 @@ class Daemon
      *
      * @ ORM\OneToMany(targetEntity="SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job", mappedBy="processedBy")
      */
-    private $processedJobs;
+    private ArrayCollection $processedJobs;
 
     /**
      * Daemon constructor.
-     *
-     * @param string       $host
-     * @param int          $pid
-     * @param DaemonConfig $config
-     *
-     * @throws Exception
      */
-    public function __construct(string $host, int $pid, DaemonConfig $config)
+    public function __construct(#[ORM\Column(name: 'host', type: 'string', length: 255)]
+        private string $host, #[ORM\Column(name: 'pid', type: 'integer')]
+        private int $pid, #[ORM\Column(name: 'config', type: 'array')]
+        private DaemonConfig $config)
     {
-        $this->bornOn        = new DateTime();
-        $this->config        = $config;
-        $this->host          = $host;
-        $this->pid           = $pid;
+        $this->bornOn        = new \DateTime();
         $this->processedJobs = new ArrayCollection();
     }
 
     /**
-     * @return int
+     * This is required to solve cascade persisting issues.
      */
+    public function __toString(): string
+    {
+        return (string) $this->id;
+    }
+
     public function getId(): int
     {
         return $this->id;
@@ -138,9 +101,6 @@ class Daemon
         return $this->bornOn;
     }
 
-    /**
-     * @return DaemonConfig
-     */
     public function getConfig(): DaemonConfig
     {
         return $this->config;
@@ -154,33 +114,21 @@ class Daemon
         return $this->diedOn;
     }
 
-    /**
-     * @return string|null
-     */
     public function getMortisCausa(): ?string
     {
         return $this->mortisCausa;
     }
 
-    /**
-     * @return string
-     */
     public function getHost(): string
     {
         return $this->host;
     }
 
-    /**
-     * @return int
-     */
     public function getPid(): int
     {
         return $this->pid;
     }
 
-    /**
-     * @return Collection
-     */
     public function getProcessedJobs(): Collection
     {
         return $this->processedJobs;
@@ -190,24 +138,10 @@ class Daemon
      * Sets the date on which the daemon died.
      *
      * Requiescat In Pace (I'm Resting In Pace).
-     *
-     * @param string $mortisCausa
-     *
-     * @throws Exception
      */
     public function requiescatInPace(string $mortisCausa = self::MORTIS_SIGNAL): void
     {
-        $this->diedOn      = new DateTime();
+        $this->diedOn      = new \DateTime();
         $this->mortisCausa = $mortisCausa;
-    }
-
-    /**
-     * This is required to solve cascade persisting issues.
-     *
-     * @return string
-     */
-    public function __toString(): string
-    {
-        return (string) $this->id;
     }
 }

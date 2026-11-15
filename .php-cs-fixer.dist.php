@@ -15,17 +15,12 @@ $rector = PhpCsFixer\Finder::create()
     ->in(__DIR__)->depth('== 0')->files()->name(['rector.php'])
     ->getIterator();
 
-$phan = PhpCsFixer\Finder::create()
-    ->in(__DIR__ . '/.phan')
-    ->getIterator();
-
 $finder = PhpCsFixer\Finder::create()
     ->in([
         __DIR__.'/src',
         __DIR__.'/tests',
     ])
-    ->append($rector)
-    ->append($phan);
+    ->append($rector);
 
 $config = new PhpCsFixer\Config();
 return $config

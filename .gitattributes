@@ -1,10 +1,8 @@
 /.github                export-ignore
-/.phan                  export-ignore
 /bin                    export-ignore
 /tests                  export-ignore
 /var                    export-ignore
 /vendor-bin             export-ignore
-/.baseline-phan.php     export-ignore
 /.baseline-phpstan.neon export-ignore
 /.baseline-psalm.xml    export-ignore
 /.editorconfig          export-ignore

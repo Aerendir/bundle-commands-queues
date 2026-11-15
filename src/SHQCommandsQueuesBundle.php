@@ -15,9 +15,6 @@ namespace SerendipityHQ\Bundle\CommandsQueuesBundle;
 
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
-/**
- * {@inheritdoc}
- */
 final class SHQCommandsQueuesBundle extends Bundle
 {
 }

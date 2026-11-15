@@ -34,20 +34,11 @@ final class ProgressBarFactory
     /** @var string */
     public const FORMAT_PROCESS_STALE_JOBS   = '<info-nobg>[>] Processing job <success-nobg>%current%</success-nobg>/%max% (%percent%%)</info-nobg><comment-nobg> %elapsed:6s%/%estimated:-6s%  (%memory_nr:6s% of %memory:6s%)</comment-nobg>';
 
-    /**
-     * @param string          $format
-     * @param OutputInterface $output
-     * @param int             $howManyJobs
-     *
-     * @return ProgressBar
-     */
     public static function createProgressBar(string $format, OutputInterface $output, int $howManyJobs = 0): ProgressBar
     {
         ProgressBar::setPlaceholderFormatterDefinition(
             'memory_nr',
-            function (ProgressBar $bar, OutputInterface $output) {
-                return Helper::formatMemory(\memory_get_usage(false));
-            }
+            fn (ProgressBar $bar, OutputInterface $output): string => Helper::formatMemory(\memory_get_usage(false))
         );
         $progress = new ProgressBar($output, $howManyJobs);
         $progress->setFormat($format);

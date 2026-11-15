@@ -6,7 +6,6 @@ includes:
     - vendor/phpstan/phpstan-phpunit/rules.neon
     - vendor/phpstan/phpstan-symfony/extension.neon
     - vendor/phpstan/phpstan-symfony/rules.neon
-    - vendor/thecodingmachine/phpstan-safe-rule/phpstan-safe-rule.neon
 
 parameters:
     level: max
@@ -30,7 +29,7 @@ parameters:
     ignoreErrors:
         -
             message: '#Function memprof_dump_callgrind not found.#'
-            path: %currentWorkingDirectory%/src/Util/Profiler
+            path: %currentWorkingDirectory%/src/Util/Profiler.php
         -
             message: '#Function memprof_enable not found.#'
-            path: %currentWorkingDirectory%/src/Util/Profiler
+            path: %currentWorkingDirectory%/src/Util/Profiler.php

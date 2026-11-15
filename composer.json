@@ -2,7 +2,12 @@
     "name": "serendipity_hq/bundle-commands-queues",
     "description": "Manage queues of commands and processes them in your Symfony app.",
     "type": "symfony-bundle",
-    "keywords": ["cronjob", "cronjobs", "queues", "threading"],
+    "keywords": [
+        "cronjob",
+        "cronjobs",
+        "queues",
+        "threading"
+    ],
     "homepage": "https://github.com/Aerendir/bundle-commands-queues",
     "license": "MIT",
     "support": {
@@ -16,37 +21,42 @@
         }
     ],
     "require": {
-        "php": "^7.4|^8.0",
-        "ext-json": "*",
+        "php": "^8.2",
         "ext-pcntl": "*",
-        "doctrine/common": "^2.5 || ^3.0",
-        "doctrine/doctrine-bundle": "^1.7 || ^2.0",
-        "doctrine/orm": "^2.6.3",
-        "nesbot/carbon": "^2.0",
-        "pagerfanta/pagerfanta": "^2.0",
-        "sensio/framework-extra-bundle": "^5.1 || ^6.0",
-        "sensiolabs/ansi-to-html": "^1.1",
-        "serendipity_hq/component-console-styles": "dev-dev",
-        "serendipity_hq/component-then-when": "^1.1",
-        "symfony/console": "^4.4|^5.4",
-        "symfony/framework-bundle": "^4.4|^5.4",
-        "symfony/process": "^4.4|^5.4",
-        "thecodingmachine/safe": "^1.0"
+        "doctrine/collections": "^2.2",
+        "doctrine/dbal": "^3.8.2 || ^4.0",
+        "doctrine/doctrine-bundle": "^2.14 || ^3.0",
+        "doctrine/orm": "^3.3",
+        "doctrine/persistence": "^3.3.1 || ^4.0",
+        "nesbot/carbon": "^2.72 || ^3.0",
+        "sensiolabs/ansi-to-html": "^1.2 || ^2.0",
+        "serendipity_hq/component-console-styles": "^1.2",
+        "serendipity_hq/component-then-when": "^2.0.4",
+        "symfony/config": "^6.4 || ^7.4 || ^8.0",
+        "symfony/console": "^6.4 || ^7.4 || ^8.0",
+        "symfony/dependency-injection": "^6.4 || ^7.4 || ^8.0",
+        "symfony/framework-bundle": "^6.4 || ^7.4 || ^8.0",
+        "symfony/http-kernel": "^6.4 || ^7.4 || ^8.0",
+        "symfony/process": "^6.4 || ^7.4 || ^8.0"
     },
     "require-dev": {
-        "ext-ast": "*",
         "bamarni/composer-bin-plugin": "^1.4",
+        "phpstan/phpstan": "2.3.5",
+        "phpstan/phpstan-doctrine": "2.1.2",
+        "phpstan/phpstan-phpunit": "2.1.2",
+        "phpstan/phpstan-symfony": "2.1.1",
+        "rector/rector": "2.8.5",
         "roave/security-advisories": "dev-master",
-        "symfony/var-dumper": "^4.4|^5.4",
-        "phpstan/phpstan": "1.4.3",
-        "phpstan/phpstan-phpunit": "1.0.0",
-        "phpstan/phpstan-doctrine": "1.2.8",
-        "phpstan/phpstan-symfony": "1.1.2",
-        "thecodingmachine/phpstan-safe-rule": "1.2.0",
-        "rector/rector": "0.12.13"
+        "serendipity_hq/rector-config": "1.1.23",
+        "sonata-project/admin-bundle": "^4.43",
+        "sonata-project/doctrine-orm-admin-bundle": "^4.20",
+        "symfony/routing": "^6.4 || ^7.4 || ^8.0",
+        "symfony/var-dumper": "^6.4 || ^7.4 || ^8.0",
+        "twig/twig": "^3.15"
     },
-    "suggest":{
-        "sonata-project/admin-bundle": "Allows to view what's going on with your queues and commands jobs using automatic integration with SonataAdminBundle."
+    "suggest": {
+        "sonata-project/admin-bundle": "Allows to view what's going on with your queues and commands jobs using automatic integration with SonataAdminBundle.",
+        "sonata-project/doctrine-orm-admin-bundle": "Required, together with sonata-project/admin-bundle, by the SonataAdminBundle integration."
     },
     "autoload": {
         "psr-4": {
@@ -61,14 +71,18 @@
     "config": {
         "sort-packages": true,
         "allow-plugins": {
-            "composer/package-versions-deprecated": true,
-            "bamarni/composer-bin-plugin": true
+            "bamarni/composer-bin-plugin": true,
+            "symfony/flex": true
         }
     },
     "scripts": {
         "bin": "echo 'bin not installed'",
-        "post-install-cmd": ["@composer bin all install --ansi"],
-        "post-update-cmd": ["@composer bin all update --ansi"]
+        "post-install-cmd": [
+            "@composer bin all install --ansi"
+        ],
+        "post-update-cmd": [
+            "@composer bin all update --ansi"
+        ]
     },
     "extra": {
         "bamarni-bin": {

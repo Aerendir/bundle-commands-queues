@@ -27,32 +27,13 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 abstract class AbstractQueuesCommand extends Command
 {
-    /** @var EntityManagerInterface $entityManager */
-    private $entityManager;
+    private ?SerendipityHQStyle $ioWriter = null;
 
-    /** @var SerendipityHQStyle */
-    private $ioWriter;
-
-    /** @var JobsMarker $jobsMarker */
-    private $jobsMarker;
-
-    /**
-     * @param EntityManagerInterface $entityManager
-     * @param JobsMarker             $doNotUseJobsMarker
-     */
-    public function __construct(EntityManagerInterface $entityManager, JobsMarker $doNotUseJobsMarker)
+    public function __construct(private readonly EntityManagerInterface $entityManager, private readonly JobsMarker $jobsMarker)
     {
         parent::__construct();
-        $this->entityManager = $entityManager;
-        $this->jobsMarker    = $doNotUseJobsMarker;
     }
 
-    /**
-     * @param InputInterface  $input
-     * @param OutputInterface $output
-     *
-     * @return int
-     */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         // Create the Input/Output writer
@@ -61,28 +42,19 @@ abstract class AbstractQueuesCommand extends Command
 
         Profiler::setDependencies($this->getIoWriter(), $this->getEntityManager()->getUnitOfWork());
 
-        return 0;
+        return Command::SUCCESS;
     }
 
-    /**
-     * @return EntityManagerInterface
-     */
     final protected function getEntityManager(): EntityManagerInterface
     {
         return $this->entityManager;
     }
 
-    /**
-     * @return JobsMarker
-     */
     final protected function getJobsMarker(): JobsMarker
     {
         return $this->jobsMarker;
     }
 
-    /**
-     * @return SerendipityHQStyle
-     */
     final protected function getIoWriter(): SerendipityHQStyle
     {
         return $this->ioWriter;

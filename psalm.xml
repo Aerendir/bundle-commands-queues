@@ -1,13 +1,12 @@
 <?xml version="1.0"?>
 <psalm
-    phpVersion="7.4"
+    phpVersion="8.2"
     cacheDirectory="./var/cache/psalm"
     checkForThrowsDocblock="true"
     hideExternalErrors="true"
     ignoreInternalFunctionNullReturn="false"
     ignoreInternalFunctionFalseReturn="false"
     strictBinaryOperands="true"
-    totallyTyped="true"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns="https://getpsalm.org/schema/config"
     xsi:schemaLocation="vendor-bin/phpunit/vendor/vimeo/psalm/config.xsd"

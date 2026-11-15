@@ -12,7 +12,7 @@ file that was distributed with this source code.
 {% extends base_template %}
 
 {% block title %}
-    {{ "job_title_show"|trans({'%name%': admin.toString(object)|truncate(15) }, 'shq_commands_queues') }}
+    {{ "job_title_show"|trans({'%name%': admin.toString(object)|u.truncate(15, '...') }, 'shq_commands_queues') }}
 {% endblock %}
 
 {% block navbar_title %}
@@ -20,13 +20,13 @@ file that was distributed with this source code.
 {% endblock %}
 
 {%- block actions -%}
-    {% include 'SonataAdminBundle:CRUD:action_buttons.html.twig' %}
+    {% include '@SonataAdmin/CRUD/action_buttons.html.twig' %}
 {%- endblock -%}
 
 {% block tab_menu %}
     {{ knp_menu_render(admin.sidemenu(action), {
         'currentClass' : 'active',
-        'template': sonata_admin.adminPool.getTemplate('tab_menu_template')
+        'template': get_global_template('tab_menu_template')
     }, 'twig') }}
 {% endblock %}
 
@@ -62,9 +62,9 @@ file that was distributed with this source code.
     </div>
     <div class="row">
         <div class="col-lg-4">
-            <p>{% trans %}Created On{% endtrans %}: {% if object.createdAt %}{{ object.createdAt|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }}{% endif %}</p>
-            <p>{% trans %}Started On{% endtrans %}: {% if object.startedAt %}{{ object.startedAt|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }}{% endif %}</p>
-            <p>{% trans %}Closed On{% endtrans %}: {% if object.closedAt %}{{ object.closedAt|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }}{% endif %}</p>
+            <p>{% trans %}Created On{% endtrans %}: {% if object.createdAt %}{{ object.createdAt|date('l, j F Y, h:i A') }}{% endif %}</p>
+            <p>{% trans %}Started On{% endtrans %}: {% if object.startedAt %}{{ object.startedAt|date('l, j F Y, h:i A') }}{% endif %}</p>
+            <p>{% trans %}Closed On{% endtrans %}: {% if object.closedAt %}{{ object.closedAt|date('l, j F Y, h:i A') }}{% endif %}</p>
             <p>{% trans %}Exit code{% endtrans %}: {{ object.exitCode }}</p>
 
             {% if object.isTypeRetrying %}
@@ -133,7 +133,7 @@ file that was distributed with this source code.
     <div class="row">
         <div class="col-lg-12">
             <h2>Debug</h2>
-            {% import 'SHQCommandsQueuesBundle:Admin:print_debug.html.twig' as m %}
+            {% import '@SHQCommandsQueues/Admin/print_debug.html.twig' as m %}
             <pre>{{ m.print_debug(object.debug) }}</pre>
         </div>
     </div>

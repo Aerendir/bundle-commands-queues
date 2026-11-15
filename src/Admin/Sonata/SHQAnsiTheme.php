@@ -15,14 +15,8 @@ namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Admin\Sonata;
 
 use SensioLabs\AnsiConverter\Theme\Theme;
 
-/**
- * {@inheritdoc}
- */
 final class SHQAnsiTheme extends Theme
 {
-    /**
-     * {@inheritdoc}
-     */
     public function asArray(): array
     {
         return [
