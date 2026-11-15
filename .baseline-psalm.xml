@@ -41,6 +41,11 @@
     </UnusedClass>
   </file>
   <file src="src/Command/AbstractQueuesCommand.php">
+    <DeprecatedClass>
+      <code><![CDATA[?SerendipityHQStyle]]></code>
+      <code><![CDATA[SerendipityHQStyle]]></code>
+      <code><![CDATA[new SerendipityHQStyle($input, $output)]]></code>
+    </DeprecatedClass>
     <InvalidNullableReturnType>
       <code><![CDATA[SerendipityHQStyle]]></code>
     </InvalidNullableReturnType>
@@ -75,6 +80,10 @@
     </UnusedReturnValue>
   </file>
   <file src="src/Command/RunCommand.php">
+    <DeprecatedClass>
+      <code><![CDATA[?SerendipityHQStyle]]></code>
+      <code><![CDATA[new SerendipityHQStyle($input, $output)]]></code>
+    </DeprecatedClass>
     <DeprecatedMethod>
       <code><![CDATA[info]]></code>
       <code><![CDATA[note]]></code>
@@ -341,6 +350,10 @@
     </MissingTemplateParam>
   </file>
   <file src="src/Repository/JobRepository.php">
+    <DeprecatedClass>
+      <code><![CDATA[?SerendipityHQStyle]]></code>
+      <code><![CDATA[SerendipityHQStyle]]></code>
+    </DeprecatedClass>
     <DeprecatedConstant>
       <code><![CDATA[Types::DATETIME_MUTABLE]]></code>
     </DeprecatedConstant>
@@ -361,6 +374,10 @@
     </UnusedClass>
   </file>
   <file src="src/Service/JobsManager.php">
+    <DeprecatedClass>
+      <code><![CDATA[?SerendipityHQStyle]]></code>
+      <code><![CDATA[SerendipityHQStyle]]></code>
+    </DeprecatedClass>
     <DeprecatedMethod>
       <code><![CDATA[getInput]]></code>
     </DeprecatedMethod>
@@ -402,6 +419,10 @@
     <ArgumentTypeCoercion>
       <code><![CDATA[$job]]></code>
     </ArgumentTypeCoercion>
+    <DeprecatedClass>
+      <code><![CDATA[?SerendipityHQStyle]]></code>
+      <code><![CDATA[SerendipityHQStyle]]></code>
+    </DeprecatedClass>
     <DeprecatedMethod>
       <code><![CDATA[getInput]]></code>
       <code><![CDATA[note]]></code>
@@ -524,6 +545,10 @@
     </RedundantConditionGivenDocblockType>
   </file>
   <file src="src/Util/JobsMarker.php">
+    <DeprecatedClass>
+      <code><![CDATA[?SerendipityHQStyle]]></code>
+      <code><![CDATA[SerendipityHQStyle]]></code>
+    </DeprecatedClass>
     <DeprecatedMethod>
       <code><![CDATA[error]]></code>
     </DeprecatedMethod>
@@ -537,6 +562,10 @@
     </PossiblyUnusedMethod>
   </file>
   <file src="src/Util/Profiler.php">
+    <DeprecatedClass>
+      <code><![CDATA[?SerendipityHQStyle]]></code>
+      <code><![CDATA[SerendipityHQStyle]]></code>
+    </DeprecatedClass>
     <DeprecatedMethod>
       <code><![CDATA[table]]></code>
     </DeprecatedMethod>
