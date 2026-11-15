@@ -1,0 +1,43 @@
+name: Rector
+
+on: [ push ]
+
+# Cancels all previous workflow runs for the same branch that have not yet completed.
+concurrency:
+    # The concurrency group contains the workflow name and the branch name.
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
+jobs:
+    rector:
+        runs-on: ${{ matrix.os }}
+        strategy:
+            fail-fast: false
+            matrix:
+                os: [ ubuntu-latest ]
+                php: [ '8.2' ]
+
+        steps:
+            -   name: Checkout
+                uses: actions/checkout@v7
+
+            -   name: Setup PHP
+                uses: shivammathur/setup-php@2.37.2
+                with:
+                    php-version: ${{ matrix.php }}
+                    coverage: none # disable xdebug, pcov
+                    extensions: ast, pcntl
+
+            -   name: Install Composer deps
+                uses: ramsey/composer-install@v4
+                with:
+                    composer-options: --no-scripts
+
+            -   name: Install Composer bin PHPUnit
+                uses: ramsey/composer-install@v4
+                with:
+                    working-directory: './vendor-bin/phpunit'
+
+            -   name: Run Rector
+                run: |
+                    ./vendor/bin/rector process --dry-run

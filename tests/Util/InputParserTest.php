@@ -16,9 +16,6 @@ namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Tests\Util;
 use PHPUnit\Framework\TestCase;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\InputParser;
 
-/**
- * {@inheritdoc}
- */
 final class InputParserTest extends TestCase
 {
     public function testIsArgument(): void
@@ -83,12 +80,12 @@ final class InputParserTest extends TestCase
             'command' => 'command:name',
             'first_argument', 'alphabetical_argument', '1',
             'options' => [
-                    '--option-without-equal' => 'option-value-without-equal',
-                    '--option-with-equal'    => 'option-value-with-equal',
-                    '--option-boolean'       => null,
-                ],
+                '--option-without-equal' => 'option-value-without-equal',
+                '--option-with-equal'    => 'option-value-with-equal',
+                '--option-boolean'       => null,
+            ],
             '-sbool'     => null,
-                    '-s' => 'shortcut-value',
+            '-s'         => 'shortcut-value',
         ];
 
         $result = InputParser::parseInput($test, false);
@@ -106,25 +103,22 @@ final class InputParserTest extends TestCase
         self::assertEquals($expected, $result);
     }
 
-    /**
-     * @return array
-     */
     private function getExpected(): array
     {
         return [
             'command'   => 'command:name',
             'arguments' => [
-                    'first_argument', 'alphabetical_argument', '1',
-                ],
+                'first_argument', 'alphabetical_argument', '1',
+            ],
             'options' => [
-                    '--option-without-equal' => 'option-value-without-equal',
-                    '--option-with-equal'    => 'option-value-with-equal',
-                    '--option-boolean'       => null,
-                ],
+                '--option-without-equal' => 'option-value-without-equal',
+                '--option-with-equal'    => 'option-value-with-equal',
+                '--option-boolean'       => null,
+            ],
             'shortcuts' => [
-                    '-sbool' => null,
-                    '-s'     => 'shortcut-value',
-                ],
+                '-sbool' => null,
+                '-s'     => 'shortcut-value',
+            ],
         ];
     }
 }

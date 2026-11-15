@@ -22,37 +22,23 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 final class ProgressBarFactory
 {
-    /**
-     * @var string
-     */
-    const FORMAT_CREATE_JOBS          = '<success-nobg>%current%</success-nobg>/%max% [%bar%] %percent:3s%% %elapsed:6s%/%estimated:-6s% (%memory_nr:6s% of %memory:6s%)';
-    /**
-     * @var string
-     */
-    const FORMAT_INITIALIZING_JOBS    = '<info-nobg>[>] Job <success-nobg>%current%</success-nobg>/%max% initialized (%percent:3s%% )</info-nobg><comment-nobg> %elapsed:6s%/%estimated:-6s% (%memory_nr:6s% of %memory:6s%)</comment-nobg>';
-    /**
-     * @var string
-     */
-    const FORMAT_PROCESS_RUNNING_JOBS = '<info-nobg>[>] Processing job <success-nobg>%current%</success-nobg>/%max% (%percent:3s%% )</info-nobg><comment-nobg> %elapsed:6s%/%estimated:-6s% (%memory_nr:6s% of %memory:6s%)</comment-nobg>';
-    /**
-     * @var string
-     */
-    const FORMAT_PROCESS_STALE_JOBS   = '<info-nobg>[>] Processing job <success-nobg>%current%</success-nobg>/%max% (%percent%%)</info-nobg><comment-nobg> %elapsed:6s%/%estimated:-6s%  (%memory_nr:6s% of %memory:6s%)</comment-nobg>';
+    /** @var string */
+    public const FORMAT_CREATE_JOBS          = '<success-nobg>%current%</success-nobg>/%max% [%bar%] %percent:3s%% %elapsed:6s%/%estimated:-6s% (%memory_nr:6s% of %memory:6s%)';
 
-    /**
-     * @param string          $format
-     * @param OutputInterface $output
-     * @param int             $howManyJobs
-     *
-     * @return ProgressBar
-     */
+    /** @var string */
+    public const FORMAT_INITIALIZING_JOBS    = '<info-nobg>[>] Job <success-nobg>%current%</success-nobg>/%max% initialized (%percent:3s%% )</info-nobg><comment-nobg> %elapsed:6s%/%estimated:-6s% (%memory_nr:6s% of %memory:6s%)</comment-nobg>';
+
+    /** @var string */
+    public const FORMAT_PROCESS_RUNNING_JOBS = '<info-nobg>[>] Processing job <success-nobg>%current%</success-nobg>/%max% (%percent:3s%% )</info-nobg><comment-nobg> %elapsed:6s%/%estimated:-6s% (%memory_nr:6s% of %memory:6s%)</comment-nobg>';
+
+    /** @var string */
+    public const FORMAT_PROCESS_STALE_JOBS   = '<info-nobg>[>] Processing job <success-nobg>%current%</success-nobg>/%max% (%percent%%)</info-nobg><comment-nobg> %elapsed:6s%/%estimated:-6s%  (%memory_nr:6s% of %memory:6s%)</comment-nobg>';
+
     public static function createProgressBar(string $format, OutputInterface $output, int $howManyJobs = 0): ProgressBar
     {
         ProgressBar::setPlaceholderFormatterDefinition(
             'memory_nr',
-            function (ProgressBar $bar, OutputInterface $output) {
-                return Helper::formatMemory(\memory_get_usage(false));
-            }
+            fn (ProgressBar $bar, OutputInterface $output): string => Helper::formatMemory(\memory_get_usage(false))
         );
         $progress = new ProgressBar($output, $howManyJobs);
         $progress->setFormat($format);

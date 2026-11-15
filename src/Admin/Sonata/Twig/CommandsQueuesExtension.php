@@ -13,60 +13,32 @@ declare(strict_types=1);
 
 namespace SerendipityHQ\Bundle\CommandsQueuesBundle\Admin\Sonata\Twig;
 
-use Safe\Exceptions\StringsException;
-use function Safe\sprintf;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Entity\Job;
 use SerendipityHQ\Bundle\CommandsQueuesBundle\Util\InputParser;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 
-/**
- * {@inheritdoc}
- */
 final class CommandsQueuesExtension extends AbstractExtension
 {
-    /**
-     * @var string
-     */
+    /** @var string */
     private const OPTIONS = 'options';
-    /**
-     * @var string
-     */
-    private const __ID = '--id';
-    /** @var UrlGeneratorInterface $generator */
-    private $generator;
 
-    /**
-     * @param UrlGeneratorInterface $generator
-     */
-    public function __construct(UrlGeneratorInterface $generator)
+    /** @var string */
+    private const __ID = '--id';
+
+    public function __construct(private readonly UrlGeneratorInterface $generator)
     {
-        $this->generator = $generator;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getFilters(): array
     {
         return [
-            new TwigFilter('commands_queues_get_id_option_value', function (Job $job): ?string {
-                return $this->getIdOptionValue($job);
-            }),
-            new TwigFilter('commands_queues_render_input', function (?array $input): ?string {
-                return $this->getRenderedInput($input);
-            }),
+            new TwigFilter('commands_queues_get_id_option_value', fn (Job $job): ?string => $this->getIdOptionValue($job)),
+            new TwigFilter('commands_queues_render_input', fn (?array $input): ?string => $this->getRenderedInput($input)),
         ];
     }
 
-    /**
-     * @param Job $job
-     *
-     * @throws StringsException
-     *
-     * @return string|null
-     */
     public function getIdOptionValue(Job $job): ?string
     {
         $input = $job->getInput();
@@ -79,19 +51,11 @@ final class CommandsQueuesExtension extends AbstractExtension
         return null;
     }
 
-    /**
-     * @param array|null $input
-     *
-     * @return string|null
-     */
     public function getRenderedInput(?array $input): ?string
     {
         return InputParser::stringify($input);
     }
 
-    /**
-     * @return string
-     */
     public function getName(): string
     {
         return 'commands_queues';

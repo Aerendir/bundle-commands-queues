@@ -12,7 +12,7 @@ file that was distributed with this source code.
 {% extends base_template %}
 
 {% block title %}
-    {{ "daemon_title_show"|trans({'%name%': admin.toString(object)|truncate(15) }, 'shq_commands_queues') }}
+    {{ "daemon_title_show"|trans({'%name%': admin.toString(object)|u.truncate(15, '...') }, 'shq_commands_queues') }}
 {% endblock %}
 
 {% block navbar_title %}
@@ -20,13 +20,13 @@ file that was distributed with this source code.
 {% endblock %}
 
 {%- block actions -%}
-    {% include 'SonataAdminBundle:CRUD:action_buttons.html.twig' %}
+    {% include '@SonataAdmin/CRUD/action_buttons.html.twig' %}
 {%- endblock -%}
 
 {% block tab_menu %}
     {{ knp_menu_render(admin.sidemenu(action), {
         'currentClass' : 'active',
-        'template': sonata_admin.adminPool.getTemplate('tab_menu_template')
+        'template': get_global_template('tab_menu_template')
     }, 'twig') }}
 {% endblock %}
 
@@ -42,7 +42,7 @@ file that was distributed with this source code.
     <div class="row">
         <div class="col-lg-12">
             <p><strong>#{{ object.id }}</strong> <span class="label label-{{ status }}">{{ statusLabel }}</span> <code>{{ object.pid }}@{{ object.host }}</code></p>
-            <p>{% trans %}Born On{% endtrans %}: {{ object.bornOn|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }} {% if object.diedOn %} - {% trans %}Died On{% endtrans %}: {{ object.diedOn|localizeddate("none", "none", locale, null, "cccc, d MMMM Y', ' hh:mm aaa") }}{% endif %}</p>
+            <p>{% trans %}Born On{% endtrans %}: {{ object.bornOn|date('l, j F Y, h:i A') }} {% if object.diedOn %} - {% trans %}Died On{% endtrans %}: {{ object.diedOn|date('l, j F Y, h:i A') }}{% endif %}</p>
         </div>
     </div>
     <div class="row">

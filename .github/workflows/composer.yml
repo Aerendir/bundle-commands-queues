@@ -1,6 +1,12 @@
 name: Composer
 
-on: [ push, pull_request ]
+on: [ push ]
+
+# Cancels all previous workflow runs for the same branch that have not yet completed.
+concurrency:
+    # The concurrency group contains the workflow name and the branch name.
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
 
 jobs:
     composer:
@@ -9,34 +15,24 @@ jobs:
             fail-fast: false
             matrix:
                 os: [ ubuntu-latest ]
-                php: [ '7.3', '7.4', '8.0' ]
+                php: [ '8.2', '8.3', '8.4', '8.5' ]
 
         steps:
             -   name: Checkout
-                uses: actions/checkout@v2
+                uses: actions/checkout@v7
 
             -   name: Setup PHP
-                uses: shivammathur/setup-php@v2
+                uses: shivammathur/setup-php@2.37.2
                 with:
                     php-version: ${{ matrix.php }}
                     coverage: none # disable xdebug, pcov
+                    extensions: ast, pcntl
                     tools: symfony
-                    extensions: ast, json, pcntl
-
-            -   name: Get Composer Cache Directory
-                id: composer-cache
-                run: |
-                    echo "::set-output name=dir::$(composer config cache-files-dir)"
-
-            -   name: Cache Composer's dependencies
-                uses: actions/cache@v2
-                with:
-                    path: ${{ steps.composer-cache.outputs.dir }}
-                    key: php-composer-dependencies-cache
 
             -   name: Install Composer deps
-                run: |
-                    composer update --no-interaction
+                uses: ramsey/composer-install@v4
+                with:
+                    composer-options: --no-scripts
 
             -   name: Run Composer
                 run: |
